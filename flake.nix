@@ -13,6 +13,9 @@
     clan-core.url = "git+https://git.clan.lol/clan/clan-core";
     clan-core.inputs.nixpkgs.follows = "nixpkgs";
     clan-core.inputs.flake-parts.follows = "flake-parts";
+
+    stockholm.url = "git+https://cgit.lassul.us/stockholm";
+    stockholm.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs@{ flake-parts, ... }:

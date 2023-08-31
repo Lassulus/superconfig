@@ -200,6 +200,22 @@
         "type": "github"
       }
     },
+    "nix-writers": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1677612737,
+        "narHash": "sha256-UaCKZ4PbMZU6UZH7XNFcjRtd5jheswl66rjZDBfQgp8=",
+        "ref": "refs/heads/master",
+        "rev": "66a1f6833464bbb121b6d94247ad769f277351f8",
+        "revCount": 39,
+        "type": "git",
+        "url": "https://cgit.krebsco.de/nix-writers"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://cgit.krebsco.de/nix-writers"
+      }
+    },
     "nixlib": {
       "locked": {
         "lastModified": 1689469483,
@@ -368,7 +384,8 @@
         "clan-core": "clan-core",
         "flake-parts": "flake-parts",
         "nixpkgs": "nixpkgs",
-        "nixvim": "nixvim"
+        "nixvim": "nixvim",
+        "stockholm": "stockholm"
       }
     },
     "sops-nix": {
@@ -393,6 +410,27 @@
         "owner": "Mic92",
         "repo": "sops-nix",
         "type": "github"
+      }
+    },
+    "stockholm": {
+      "inputs": {
+        "nix-writers": "nix-writers",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1693496837,
+        "narHash": "sha256-HN0I8T8MXzOE4jt0eDosZUcog9Ep0iiTJEkKERG+Fvw=",
+        "ref": "refs/heads/master",
+        "rev": "9bc7ad4afe727660f05c037386d0a00f5625801a",
+        "revCount": 11756,
+        "type": "git",
+        "url": "https://cgit.lassul.us/stockholm"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://cgit.lassul.us/stockholm"
       }
     },
     "systems": {
