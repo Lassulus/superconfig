@@ -3,7 +3,7 @@
   perSystem = { system, lib, pkgs, ... }: let
     langs = [
       # "agda"
-      "bash"
+      # "bash" # throws an error
       "c"
       "c-sharp"
       "cpp"
