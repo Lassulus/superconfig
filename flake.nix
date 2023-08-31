@@ -9,6 +9,10 @@
 
     astro-nvim.url = "github:AstroNvim/AstroNvim";
     astro-nvim.flake = false;
+
+    clan-core.url = "git+https://git.clan.lol/clan/clan-core";
+    clan-core.inputs.nixpkgs.follows = "nixpkgs";
+    clan-core.inputs.flake-parts.follows = "flake-parts";
   };
 
   outputs = inputs@{ flake-parts, ... }:
