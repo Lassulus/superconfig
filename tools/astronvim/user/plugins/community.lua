@@ -23,7 +23,7 @@ return {
  {
   "jackMort/ChatGPT.nvim",
   opts = {
-   api_key_cmd = "rbw get openai-api-key",
+   api_key_cmd = "pass show www/openai.com/api_key",
   },
  },
 }
