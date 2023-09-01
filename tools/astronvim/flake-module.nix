@@ -104,7 +104,7 @@
       '';
     };
   in {
-    packages.asvim = pkgs.writeShellScriptBin "asvim" ''
+    packages.vim = pkgs.writeShellScriptBin "vim" ''
       set -efux
       unset VIMINIT
       export PATH=$PATH:${pkgs.buildEnv {
