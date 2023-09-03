@@ -87,22 +87,6 @@
         ln -s ${pkgs.tree-sitter.builtGrammars."tree-sitter-${name}"}/parser $out/parser/${name}.so
       '') langs}
     '';
-    # https://github.com/kmarius/jsregexp
-    jsregexp = pkgs.stdenv.mkDerivation {
-      name = "jsregexp";
-      src = pkgs.fetchFromGitHub {
-        owner = "kmarius";
-        repo = "jsregexp";
-        rev = "1f4fa8ff9570501230d88133537776869d333f12";
-        sha256 = "sha256-vE2N1VKaEBeJ8IHuP+n0MwIzmkpgh/Ak50nWJUVqfgM=";
-      };
-      buildInputs = [ pkgs.luajit ];
-      installPhase = ''
-        runHook preInstall
-        install -m755 -D jsregexp.so $out/lib/jsregexp.so
-        runHook postInstall
-      '';
-    };
   in {
     packages.vim = pkgs.writeShellScriptBin "vim" ''
       set -efux
@@ -113,17 +97,12 @@
       }}/bin
       export NVIM_APPNAME=${vim_appname}
       mkdir -p $HOME/.config $HOME/.data/
-      nvim --headless -c 'quitall'
-
       ln -sfT ${nvim_config} "$HOME"/.config/${vim_appname}
+      nvim --headless -c 'quitall'
       if [[ -d $HOME/.data/lvim/lazy/telescope-fzf-native.nvim ]]; then
         mkdir -p "$HOME/.data/lvim/lazy/telescope-fzf-native.nvim/build"
         ln -sf "${pkgs.vimPlugins.telescope-fzf-native-nvim}/build/libfzf.so" "$HOME/.data/lvim/lazy/telescope-fzf-native.nvim/build/libfzf.so"
       fi
-      if [[ -d $HOME/.data/lvim/lazy/LuaSnip/deps/jsregexp ]]; then
-        ln -sf "${jsregexp}/lib/jsregexp.so" "$HOME/.data/lvim/lazy/LuaSnip/deps/jsregexp/jsregexp.so"
-      fi
-
       exec nvim "$@"
     '';
   };
