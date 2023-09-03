@@ -24,6 +24,8 @@
       imports = [
         ./tools/nvim.nix
         ./tools/astronvim/flake-module.nix
+
+        ./tools/zsh.nix
       ];
     };
 }
