@@ -1,0 +1,83 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>The_Playlist Voting!</title>
+<style>
+#good {
+    display: block;
+  width: 100%;
+  border: none;
+  background-color: #04AA6D;
+  padding: 14px;
+  margin: 14px 0 0 0;
+  height: 100px;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: center;
+}
+#bad {
+    display: block;
+  width: 100%;
+  border: none;
+  background-color: red;
+  padding: 14px;
+    height: 100px;
+
+  margin: 14px 0 0 0;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: center;
+}
+</style>
+
+</head>
+
+<body>
+  <div id=votenote></div>
+  <button id=good type="button"> GUT </button>
+
+  <button id=bad type="button"> SCHLECHT </button>
+  <center>
+    Currently Running: <br/><div>
+      <b id=current></b>
+    </div>
+    <div id=vote>
+    </div>
+    <audio controls autoplay="autoplay">
+      <source src="https://radio.lassul.us/radio.ogg" type="audio/ogg">
+      Your browser does not support the audio element.
+    </audio>
+  </center>
+
+  <script>
+    document.getElementById("good").onclick=async ()=>{
+      let result = await fetch("https://radio.lassul.us/good", {"method": "POST"})
+      document.getElementById("vote").textContent =  "Dieses Lied findest du gut"
+    };
+    document.getElementById("bad").onclick=async ()=>{
+      let result = await fetch("https://radio.lassul.us/skip", {"method": "POST"})
+      document.getElementById("vote").textContent =  "Dieses Lied findest du schlecht"
+      document.getElementById("bad").disabled = true
+      window.setTimeout(function(){
+        document.getElementById("bad").disabled = false
+      }, 100000)
+
+    };
+
+    async function current() {
+      let result = await fetch("https://radio.lassul.us/current", {"method": "GET"})
+      let data = await result.json()
+      document.getElementById("current").textContent = data.name
+    }
+    window.onload = function() {
+      window.setInterval('current()', 10000)
+      current()
+    }
+
+  </script>
+</body>
+</html>

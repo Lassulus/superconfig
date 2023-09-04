@@ -1,0 +1,16 @@
+scan() -> { "ssid": "xxx", "signal": 14, "crypto": "wpa2", "flags": "some flags i dont get", "bssid": "42:23:13:37:fe:fe" }
+  -> scan_hook:
+    is_known_wifi_hook -> { "ssid": "xxx", ..., "psk" "mypassword", priority = 1014, "method": "connect" }
+    is_open -> { "ssid": "xxx", ..., priority = 914, "method": "connect" }
+    has_wps -> { "ssid": "xxx", ..., priority = 256, "method": "wps" }
+  -> sort by priority
+  -> foreach (wifi: (method == connect" => connect wifi; method == "wps => run cracks/wps { "ssid": "xxx", "priority": 256, "method": "wps", ... }))
+
+  if ping_internet => busy_loop
+  else
+    if ping_gateway => { "ssid": "xxx" } -> prison_break_hooks:
+      hotsplots -> { "sssid": "xxx" }
+      
+    if ping_internet => busy_loop
+      
+  

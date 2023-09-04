@@ -1,0 +1,4 @@
+{
+  adminUser = "bla";
+  adminPassword = "blub";
+}
