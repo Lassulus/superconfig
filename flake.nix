@@ -16,9 +16,12 @@
 
     stockholm.url = "git+https://cgit.lassul.us/stockholm";
     stockholm.inputs.nixpkgs.follows = "nixpkgs";
+
+    disko.url = "github:nix-community/disko";
+    disko.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ flake-parts, ... }:
+  outputs = inputs@{ flake-parts, nixpkgs, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
       imports = [
@@ -27,5 +30,12 @@
 
         ./tools/zsh.nix
       ];
+      flake.nixosConfigurations.aergia = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs.self = { inherit inputs; };
+        modules = [
+          ./nixos/machines/aergia/physical.nix
+        ];
+      };
     };
 }
