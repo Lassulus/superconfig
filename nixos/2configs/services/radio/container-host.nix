@@ -1,5 +1,8 @@
-{ config, pkgs, ... }:
+{ self, config, pkgs, ... }:
 {
+  imports = [
+    self.inputs.stockholm.nixosModules.htgen
+  ];
   krebs.sync-containers3.containers.radio = {
     sshKey = "${config.krebs.secret.directory}/radio.sync.key";
   };

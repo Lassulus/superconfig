@@ -1,12 +1,15 @@
-{ config, lib, pkgs, ... }: let
+{ self, config, lib, pkgs, ... }: let
 
-  to = concatStringsSep "," [
+  to = lib.concatStringsSep "," [
     "lass@green.r"
   ];
 
-  mails = import <secrets/mails.nix>;
+  mails = import "${config.krebs.secret.directory}/mails.nix"; # todo make this pure somehow
 
 in {
+  imports = [
+    self.inputs.stockholm.nixosModules.exim-smarthost
+  ];
   environment.systemPackages = [ pkgs.review-mail-queue ];
 
   krebs.exim-smarthost = {

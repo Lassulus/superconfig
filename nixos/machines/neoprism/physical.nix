@@ -1,10 +1,11 @@
-{ config, lib, pkgs, ... }:
+{ self, modulesPath, config, lib, ... }:
 
 {
 
   imports = [
     ./config.nix
-    <nixpkgs/nixos/modules/installer/scan/not-detected.nix>
+    (modulesPath + "/installer/scan/not-detected.nix")
+    self.inputs.disko.nixosModules.disko
   ];
 
   disko.devices = import ./disk.nix;

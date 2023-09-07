@@ -98,7 +98,7 @@ in {
     "radio" = {};
   };
 
-  krebs.per-user.${name}.packages = with pkgs; [
+  users.users.${name}.packages = with pkgs; [
     good_track
     skip_track
     print_current

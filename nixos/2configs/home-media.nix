@@ -1,11 +1,11 @@
-{ pkgs, ... }:
+{ self, pkgs, ... }:
 {
   imports = [
     ./mpv.nix
   ];
   users.users.media = {
     isNormalUser = true;
-    uid = genid_uint31 "media";
+    uid = self.inputs.stockholm.lib.genid_uint31 "media";
     extraGroups = [ "video" "audio" "pipewire" ];
     packages = [
       (pkgs.writers.writeDashBin "mpv" ''

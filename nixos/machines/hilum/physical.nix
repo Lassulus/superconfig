@@ -1,9 +1,10 @@
-{ config, lib, pkgs, ... }:
+{ self, modulesPath, config, lib, pkgs, ... }:
 
 {
   imports = [
     ./config.nix
-    <nixpkgs/nixos/modules/installer/scan/not-detected.nix>
+    (modulesPath + "/installer/scan/not-detected.nix")
+    self.inputs.disko.nixosModules.disko
     {
       # nice hack to carry around state passed impurely at the beginning
       options.mainDisk = let

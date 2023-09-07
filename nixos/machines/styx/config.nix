@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   imports = [
@@ -30,7 +30,7 @@
   networking.firewall.interfaces.int0.allowedTCPPorts = [ config.services.smokeping.port ];
   networking.firewall.interfaces.retiolum.allowedTCPPorts = [ config.services.smokeping.port ];
   networking.firewall.interfaces.wiregrill.allowedTCPPorts = [ config.services.smokeping.port ];
-  krebs.power-action.enable = mkForce false;
+  krebs.power-action.enable = lib.mkForce false;
 
   environment.systemPackages = with pkgs; [
     wol

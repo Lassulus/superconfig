@@ -2,22 +2,21 @@
 
 {
   imports = [
-    <stockholm/lass>
-
-    <stockholm/lass/2configs/retiolum.nix>
-    <stockholm/lass/2configs/exim-retiolum.nix>
-    <stockholm/lass/2configs/baseX.nix>
-    <stockholm/lass/2configs/pipewire.nix>
-    <stockholm/lass/2configs/browsers.nix>
-    <stockholm/lass/2configs/programs.nix>
-    <stockholm/lass/2configs/network-manager.nix>
-    <stockholm/lass/2configs/syncthing.nix>
-    <stockholm/lass/2configs/sync/sync.nix>
-    <stockholm/lass/2configs/steam.nix>
-    <stockholm/lass/2configs/wine.nix>
-    <stockholm/lass/2configs/fetchWallpaper.nix>
-    <stockholm/lass/2configs/pass.nix>
-    <stockholm/lass/2configs/mail.nix>
+    ../../.
+    ../../2configs/retiolum.nix
+    ../../2configs/exim-retiolum.nix
+    ../../2configs/baseX.nix
+    ../../2configs/pipewire.nix
+    ../../2configs/browsers.nix
+    ../../2configs/programs.nix
+    ../../2configs/network-manager.nix
+    ../../2configs/syncthing.nix
+    ../../2configs/sync/sync.nix
+    ../../2configs/steam.nix
+    ../../2configs/wine.nix
+    ../../2configs/fetchWallpaper.nix
+    ../../2configs/pass.nix
+    ../../2configs/mail.nix
   ];
 
   krebs.build.host = config.krebs.hosts.xerxes;

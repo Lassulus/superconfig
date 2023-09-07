@@ -1,9 +1,11 @@
-{ config, lib, pkgs, ... }:
+{ self, config, pkgs, ... }:
 {
   imports = [
-    <stockholm/lass>
-    <stockholm/lass/2configs>
-    <stockholm/lass/2configs/retiolum.nix>
+    ../../.
+    ../../2configs
+    ../../2configs/retiolum.nix
+
+    self.inputs.stockholm.nixosModules.exim-smarthost
   ];
 
   krebs.build.host = config.krebs.hosts.ubik;

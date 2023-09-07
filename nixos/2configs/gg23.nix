@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 {
   # ipv6 from vodafone is really really flaky
   boot.kernel.sysctl."net.ipv6.conf.et0.disable_ipv6" = 1;
@@ -55,7 +55,7 @@
     { predicate = "-o int0"; target = "ACCEPT"; }
     { predicate = "-p ipv6-icmp"; target = "ACCEPT"; v4 = false; }
   ];
-  krebs.iptables.tables.nat.PREROUTING.rules = mkBefore [
+  krebs.iptables.tables.nat.PREROUTING.rules = lib.mkBefore [
     { v6 = false; predicate = "-s 10.42.0.0/24"; target = "ACCEPT"; }
   ];
   krebs.iptables.tables.nat.POSTROUTING.rules = [

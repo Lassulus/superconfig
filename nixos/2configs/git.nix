@@ -1,8 +1,11 @@
-{ config, lib, pkgs, ... }:
+{ self, config, lib, pkgs, ... }:
 
 let
-
+  git = self.inputs.stockholm.lib.git;
   out = {
+    imports = [
+      self.inputs.stockholm.nixosModules.git
+    ];
     services.nginx.enable = true;
     krebs.git = {
       enable = true;
@@ -31,11 +34,11 @@ let
 
   repos =
     public-repos //
-    optionalAttrs config.krebs.build.host.secure restricted-repos;
+    lib.optionalAttrs config.krebs.build.host.secure restricted-repos;
 
-  rules = concatMap make-rules (attrValues repos);
+  rules = lib.concatMap make-rules (lib.attrValues repos);
 
-  public-repos = mapAttrs make-public-repo {
+  public-repos = lib.mapAttrs make-public-repo {
     Reaktor = {
       cgit.desc = "Reaktor IRC bot";
       cgit.section = "software";
@@ -119,17 +122,14 @@ let
       cgit.desc = "krebs xmonad modules";
       cgit.section = "configuration";
     };
-  } // mapAttrs make-public-repo-silent {
   };
 
-  restricted-repos = mapAttrs make-restricted-repo (
-    {
-      brain = {
-        collaborators = with config.krebs.users; [ tv makefu ];
-        announce = true;
-      };
+  restricted-repos = lib.mapAttrs make-restricted-repo {
+    brain = {
+      collaborators = with config.krebs.users; [ tv makefu ];
+      announce = true;
     };
-  );
+  };
 
   make-public-repo = name: { cgit ? {}, collaborators ? [], ... }: {
     inherit cgit collaborators name;
@@ -159,7 +159,7 @@ let
     public = false;
     hooks = {
       post-receive = ''
-        ${optionalString announce (pkgs.git-hooks.irc-announce {
+        ${lib.optionalString announce (pkgs.gystem.build.etct-hooks.irc-announce {
           # TODO make nick = config.krebs.build.host.name the default
           nick = config.krebs.build.host.name;
           channel = "#xxx";
@@ -179,23 +179,23 @@ let
   make-rules =
     with git // config.krebs.users;
     repo:
-      singleton {
+      lib.singleton {
         user = [ lass lass-green ];
         repo = [ repo ];
         perm = push "refs/*" [ non-fast-forward create delete merge ];
       } ++
-      optional (length (repo.admins or []) > 0) {
+      lib.optional (lib.length (repo.admins or []) > 0) {
         user = repo.admins;
         repo = [ repo ];
         perm = push "refs/*" [ non-fast-forward create delete merge ];
       } ++
-      optional (length (repo.collaborators or []) > 0) {
+      lib.optional (lib.length (repo.collaborators or []) > 0) {
         user = repo.collaborators;
         repo = [ repo ];
         perm = fetch;
       } ++
-      optional repo.public {
-        user = attrValues config.krebs.users;
+      lib.optional repo.public {
+        user = lib.attrValues config.krebs.users;
         repo = [ repo ];
         perm = fetch;
       };

@@ -125,7 +125,7 @@ let
     let g:fzf_layout = { 'down': '~15%' }
   '';
 
-  extra-runtimepath = lib.concatMapStringsSep "," (pkg: "${pkg.rtp}") [
+  extra-runtimepath = lib.concatMapStringsSep "," (pkg: "${pkg.outPath}") [
     pkgs.vimPlugins.copilot-vim
     pkgs.vimPlugins.undotree
     pkgs.vimPlugins.fzf-vim

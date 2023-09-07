@@ -1,9 +1,9 @@
-{ config, lib, pkgs, ... }:
-
-{
+{ self, config, lib, pkgs, ... }: let
+  slib = self.inputs.stockholm.lib;
+in {
   imports = [
     ./backup.nix
-    ../../
+    ../../.
     ../../2configs/retiolum.nix
     ../../2configs/libvirt.nix
     ../../2configs/websites/lassulus.nix
@@ -27,35 +27,35 @@
     }
     { # TODO make new hfos.nix out of this vv
       users.users.riot = {
-        uid = genid_uint31 "riot";
+        uid = slib.genid_uint31 "riot";
         isNormalUser = true;
         extraGroups = [ "libvirtd" ];
         openssh.authorizedKeys.keys = [
           "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC6o6sdTu/CX1LW2Ff5bNDqGEAGwAsjf0iIe5DCdC7YikCct+7x4LTXxY+nDlPMeGcOF88X9/qFwdyh+9E4g0nUAZaeL14Uc14QDqDt/aiKjIXXTepxE/i4JD9YbTqStAnA/HYAExU15yqgUdj2dnHu7OZcGxk0ZR1OY18yclXq7Rq0Fd3pN3lPP1T4QHM9w66r83yJdFV9szvu5ral3/QuxQnCNohTkR6LoJ4Ny2RbMPTRtb+jPbTQYTWUWwV69mB8ot5nRTP4MRM9pu7vnoPF4I2S5DvSnx4C5zdKzsb7zmIvD4AmptZLrXj4UXUf00Xf7Js5W100Ne2yhYyhq+35 riot@lagrange"
         ];
       };
-      krebs.iptables.tables.filter.FORWARD.rules = mkBefore [
+      krebs.iptables.tables.filter.FORWARD.rules = lib.mkBefore [
         { v6 = false; predicate = "--destination 95.216.1.130"; target = "ACCEPT"; }
         { v6 = false; predicate = "--source 95.216.1.130"; target = "ACCEPT"; }
       ];
     }
     {
       users.users.tv = {
-        uid = genid_uint31 "tv";
+        uid = slib.genid_uint31 "tv";
         isNormalUser = true;
         openssh.authorizedKeys.keys = [
           config.krebs.users.tv.pubkey
         ];
       };
       users.users.makefu = {
-        uid = genid_uint31 "makefu";
+        uid = slib.genid_uint31 "makefu";
         isNormalUser = true;
         openssh.authorizedKeys.keys = [
           config.krebs.users.makefu.pubkey
         ];
       };
       users.extraUsers.dritter = {
-        uid = genid_uint31 "dritter";
+        uid = slib.genid_uint31 "dritter";
         isNormalUser = true;
         extraGroups = [
           "download"
@@ -72,7 +72,7 @@
         ];
       };
       users.users.hellrazor = {
-        uid = genid_uint31 "hellrazor";
+        uid = slib.genid_uint31 "hellrazor";
         isNormalUser = true;
         extraGroups = [
           "download"
@@ -115,12 +115,11 @@
     ../../2configs/paste.nix
     ../../2configs/syncthing.nix
     ../../2configs/reaktor-coders.nix
-    ../../2configs/ciko.nix
     ../../2configs/container-networking.nix
     ../../2configs/fysiirc.nix
     ../../2configs/bgt-bot
     ../../2configs/matrix.nix
-    <stockholm/krebs/2configs/mastodon-proxy.nix>
+    (self.inputs.stockholm + "/krebs/2configs/mastodon-proxy.nix")
     {
       services.tor = {
         enable = true;
@@ -142,9 +141,9 @@
         '';
       };
     }
-    /2configs/minecraft.nix
-    /2configs/codimd.nix
-    /2configs/go.nix
+    ../../2configs/minecraft.nix
+    ../../2configs/codimd.nix
+    ../../2configs/go.nix
     {
       lass.nichtparasoup.enable = true;
       services.nginx = {
@@ -162,11 +161,11 @@
       imports = [
         ../../2configs/wiregrill.nix
       ];
-      krebs.iptables.tables.nat.PREROUTING.rules = mkOrder 999 [
+      krebs.iptables.tables.nat.PREROUTING.rules = lib.mkOrder 999 [
         { v6 = false; predicate = "-s 10.244.0.0/16"; target = "ACCEPT"; }
         { v4 = false; predicate = "-s 42:1::/32"; target = "ACCEPT"; }
       ];
-      krebs.iptables.tables.filter.FORWARD.rules = mkBefore [
+      krebs.iptables.tables.filter.FORWARD.rules = lib.mkBefore [
         { predicate = "-i wiregrill -o retiolum"; target = "ACCEPT"; }
         { predicate = "-i retiolum -o wiregrill"; target = "ACCEPT"; }
       ];
@@ -242,7 +241,7 @@
           name = "download";
           home = "/var/download";
           useDefaultShell = true;
-          uid = genid "download";
+          uid = slib.genid "download";
           isSystemUser = true;
           openssh.authorizedKeys.keys = with config.krebs.users; [
             lass.pubkey

@@ -1,15 +1,15 @@
-{ config, pkgs, ... }:
+{ self, config, lib, pkgs, ... }:
 
 {
   imports = [
-    ../../
+    ../../.
 
     ../../2configs/retiolum.nix
     ../../2configs/pipewire.nix
     {
       # bubsy config
       users.users.bubsy = {
-        uid = genid "bubsy";
+        uid = self.inputs.stockholm.lib.genid "bubsy";
         home = "/home/bubsy";
         group = "users";
         createHome = true;
@@ -23,7 +23,7 @@
         isNormalUser = true;
       };
       networking.networkmanager.enable = true;
-      networking.wireless.enable = mkForce false;
+      networking.wireless.enable = lib.mkForce false;
       # programs.chromium = {
       #   enable = true;
       #   extensions = [

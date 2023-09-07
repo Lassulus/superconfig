@@ -1,12 +1,11 @@
-{ config, pkgs, lib, ... }:
+{ self, config, pkgs, lib, ... }:
 
 let
 
-  inherit (import <stockholm/lib>)
-    genid
+  inherit (self.inputs.stockholm.lib)
     genid_uint31
   ;
-  inherit (import <stockholm/lass/2configs/websites/util.nix> {inherit lib pkgs;})
+  inherit (import ./util.nix {inherit lib pkgs;})
     servePage
     serveOwncloud
     serveWordpress;
@@ -23,6 +22,8 @@ let
 
 in {
   imports = [
+    self.inputs.stockholm.nixosModules.acl
+    self.inputs.stockholm.nixosModules.on-failure
     ./default.nix
     ./sqlBackup.nix
     (servePage [ "aldonasiech.com" "www.aldonasiech.com" ])
@@ -101,7 +102,7 @@ in {
     path = "/run/nextcloud.pw";
     owner.name = "nextcloud";
     group-name = "nextcloud";
-    source-path = toString <secrets> + "/nextcloud_pw";
+    source-path = "${config.krebs.secret.directory}/nextcloud_pw";
   };
   services.nextcloud = {
     enable = true;
@@ -412,7 +413,7 @@ in {
   services.restic.backups.domsen = {
     initialize = true;
     repository = "/backups/domsen";
-    passwordFile = toString <secrets> + "/domsen_backup_pw";
+    passwordFile = "${config.krebs.secret.directory}/domsen_backup_pw";
     timerConfig = { OnCalendar = "00:05"; RandomizedDelaySec = "5h"; };
     paths = [
       "/home/domsen/Mail"

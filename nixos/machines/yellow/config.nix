@@ -3,10 +3,10 @@
   torrentport = 56709; # port forwarded in airvpn webinterface
 in {
   imports = [
-    <stockholm/lass>
-    <stockholm/lass/2configs>
-    <stockholm/lass/2configs/retiolum.nix>
-    <stockholm/lass/2configs/services/flix>
+    ../../.
+    ../../2configs
+    ../../2configs/retiolum.nix
+    ../../2configs/services/flix
   ];
 
   krebs.build.host = config.krebs.hosts.yellow;

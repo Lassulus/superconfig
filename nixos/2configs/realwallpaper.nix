@@ -1,12 +1,8 @@
-{ config, lib, pkgs, ... }:
-
-let
-  hostname = config.krebs.build.host.name;
-  inherit (lib)
-    nameValuePair
-  ;
-
-in {
+{ self, config, lib, pkgs, ... }:
+{
+  imports = [
+    self.inputs.stockholm.nixosModules.realwallpaper
+  ];
   krebs.realwallpaper.enable = true;
 
   system.activationScripts.wallpaper-chmod = ''

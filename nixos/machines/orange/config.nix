@@ -1,11 +1,11 @@
 { config, lib, pkgs, ... }:
 {
   imports = [
-    <stockholm/lass>
-    <stockholm/lass/2configs>
-    <stockholm/lass/2configs/retiolum.nix>
-    <stockholm/lass/2configs/mumble-reminder.nix>
-    <stockholm/lass/2configs/services/git>
+    ../../.
+    ../../2configs
+    ../../2configs/retiolum.nix
+    ../../2configs/mumble-reminder.nix
+    ../../2configs/services/git
   ];
 
   krebs.build.host = config.krebs.hosts.orange;

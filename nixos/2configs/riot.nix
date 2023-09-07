@@ -1,9 +1,12 @@
-{ config, lib, pkgs, ... }: let
+{ self, config, lib, pkgs, ... }: let
   domains = [
     "hackerfleet.eu"
     "hackerfleet.de"
   ];
 in {
+  imports = [
+    self.inputs.stockholm.nixosModules.exim-smarthost
+  ];
   containers.riot = {
     config = {
       environment.systemPackages = [

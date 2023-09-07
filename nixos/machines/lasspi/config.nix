@@ -3,9 +3,9 @@ let
 in
 {
   imports = [
-    <stockholm/lass>
-    <stockholm/lass/2configs>
-    <stockholm/lass/2configs/retiolum.nix>
+    ../../.
+    ../../2configs
+    ../../2configs/retiolum.nix
   ];
 
   krebs.build.host = config.krebs.hosts.lasspi;

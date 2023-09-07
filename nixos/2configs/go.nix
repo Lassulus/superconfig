@@ -1,5 +1,9 @@
-{ config, lib, pkgs, ... }:
+{ self, ... }:
 {
+  imports = [
+    self.inputs.stockholm.nixosModules.go
+    self.inputs.stockholm.nixosModules.htgen
+  ];
   krebs.go = {
     enable = true;
   };

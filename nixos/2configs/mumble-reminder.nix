@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }: let
+{ self, config, lib, pkgs, ... }: let
   write_to_irc = chan: pkgs.writeDash "write_to_irc" ''
     ${pkgs.curl}/bin/curl -fsSv --unix-socket '${lib.removePrefix "unix:" config.krebs.reaktor2.mumble-reminder.API.listen}' http://z/ \
       -H content-type:application/json \
@@ -60,6 +60,9 @@
   };
 
 in {
+  imports = [
+    self.inputs.stockholm.nixosModules.reaktor2
+  ];
   krebs.reaktor2.mumble-reminder = {
     hostname = "irc.hackint.org";
     nick = "lassulus__";

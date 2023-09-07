@@ -1,10 +1,13 @@
-{ config, lib, pkgs, ... }:
+{ self, pkgs, ... }:
 let
 
   bot_port = "7654";
   irc_channel = "#binaergewitter";
 in
 {
+  imports = [
+    self.inputs.stockholm.nixosModules.reaktor2
+  ];
   krebs.reaktor2.bgt-announce = {
     hostname = "irc.libera.chat";
     port = "6697";

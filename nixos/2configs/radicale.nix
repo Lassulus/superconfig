@@ -1,4 +1,4 @@
-{ ... }:
+{ config, ... }:
 
 {
   services.radicale = {
@@ -8,7 +8,7 @@
       hosts = 0.0.0.0:5555
       [auth]
       type = htpasswd
-      htpasswd_filename = ${<secrets/radicale.htpasswd>}
+      htpasswd_filename = ${config.krebs.secret.directory}/radicale.htpasswd
       htpasswd_encryption = plain
     '';
   };

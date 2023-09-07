@@ -1,7 +1,7 @@
-{ config, pkgs, ... }:
+{ self, config, pkgs, ... }:
 {
   imports = [
-    <stockholm/krebs/2configs/hw/x220.nix>
+    (self.inputs.stockholm + "/krebs/2configs/hw/x220.nix")
   ];
 
   boot = {

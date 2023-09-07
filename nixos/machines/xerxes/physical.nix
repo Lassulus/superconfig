@@ -1,8 +1,8 @@
-{ pkgs, lib, ... }:
+{ modulesPath, pkgs, lib, ... }:
 {
   imports = [
     ./config.nix
-    <nixpkgs/nixos/modules/installer/scan/not-detected.nix>
+    (modulesPath + "/installer/scan/not-detected.nix")
   ];
 
   boot.loader.grub = {

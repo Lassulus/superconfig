@@ -1,29 +1,29 @@
-{ config, lib, pkgs, ... }:
+{ self, config, lib, pkgs, ... }:
 
 {
   imports = [
-    <stockholm/lass>
-    <stockholm/lass/2configs/retiolum.nix>
-    <stockholm/lass/2configs/mail/internet-gateway.nix>
-    <stockholm/lass/2configs/binary-cache/server.nix>
-    <stockholm/lass/2configs/matrix.nix>
-    <stockholm/lass/2configs/gsm-wiki.nix>
+    ../../.
+    ../../2configs/retiolum.nix
+    ../../2configs/mail/internet-gateway.nix
+    ../../2configs/binary-cache/server.nix
+    ../../2configs/matrix.nix
+    ../../2configs/gsm-wiki.nix
 
     # sync-containers
-    <stockholm/lass/2configs/consul.nix>
-    <stockholm/lass/2configs/services/flix/container-host.nix>
-    <stockholm/lass/2configs/services/radio/container-host.nix>
-    <stockholm/lass/2configs/ubik-host.nix>
-    <stockholm/lass/2configs/orange-host.nix>
-    <stockholm/krebs/2configs/hotdog-host.nix>
+    ../../2configs/consul.nix
+    ../../2configs/services/flix/container-host.nix
+    ../../2configs/services/radio/container-host.nix
+    ../../2configs/ubik-host.nix
+    ../../2configs/orange-host.nix
+    (self.inputs.stockholm + "/krebs/2configs/hotdog-host.nix")
 
     # other containers
-    <stockholm/lass/2configs/riot.nix>
+    ../../2configs/riot.nix
 
     # proxying of services
-    <stockholm/lass/2configs/services/radio/proxy.nix>
-    <stockholm/lass/2configs/services/flix/proxy.nix>
-    <stockholm/lass/2configs/services/coms/proxy.nix>
+    ../../2configs/services/radio/proxy.nix
+    ../../2configs/services/flix/proxy.nix
+    ../../2configs/services/coms/proxy.nix
   ];
 
   krebs.build.host = config.krebs.hosts.neoprism;

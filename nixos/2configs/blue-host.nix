@@ -8,13 +8,13 @@ let
     "prism"
     "littleT"
   ];
-  remote_hosts = filter (h: h != config.networking.hostName) all_hosts;
+  remote_hosts = lib.filter (h: h != config.networking.hostName) all_hosts;
 
 in {
   imports = [
     <stockholm/lass/2configs/container-networking.nix>
     { #hack for already defined
-      systemd.services."container@blue".reloadIfChanged = mkForce false;
+      systemd.services."container@blue".reloadIfChanged = lib.mkForce false;
       systemd.services."container@blue".preStart = ''
         ${pkgs.mount}/bin/mount | ${pkgs.gnugrep}/bin/grep -q '^encfs on /var/lib/containers/blue'
       '';

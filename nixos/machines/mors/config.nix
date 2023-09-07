@@ -2,7 +2,7 @@
 
 {
   imports = [
-    ../../
+    ../../.
 
     ../../2configs/mouse.nix
     ../../2configs/retiolum.nix
@@ -14,12 +14,10 @@
     ../../2configs/browsers.nix
     ../../2configs/games.nix
     ../../2configs/pass.nix
-    ../../2configs/elster.nix
     ../../2configs/steam.nix
     ../../2configs/wine.nix
     ../../2configs/fetchWallpaper.nix
     ../../2configs/mail.nix
-    ../../2configs/logf.nix
     ../../2configs/syncthing.nix
     ../../2configs/sync/sync.nix
     ../../2configs/sync/decsync.nix
@@ -121,10 +119,6 @@
         "virtual"
       ];
     };
-  };
-
-  krebs.repo-sync.timerConfig = {
-    OnCalendar = "00:37";
   };
 
   nixpkgs.config.android_sdk.accept_license = true;

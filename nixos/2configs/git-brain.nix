@@ -1,10 +1,10 @@
-{ config, lib, pkgs, ... }:
+{ self, config, lib, pkgs, ... }:
 let
-
+  git = self.inputs.stockholm.lib.git;
   repos = krebs-repos;
-  rules = concatMap krebs-rules (attrValues krebs-repos);
+  rules = lib.concatMap krebs-rules (lib.attrValues krebs-repos);
 
-  krebs-repos = mapAttrs make-krebs-repo {
+  krebs-repos = lib.mapAttrs make-krebs-repo {
     brain = { };
   };
 
@@ -31,20 +31,23 @@ let
     set-owners repo [ config.krebs.users.lass ] ++ set-ro-access repo krebsminister;
 
   set-ro-access = with git; repo: user:
-      singleton {
-        inherit user;
-        repo = [ repo ];
-        perm = fetch;
-      };
+    lib.singleton {
+      inherit user;
+      repo = [ repo ];
+      perm = fetch;
+    };
 
   set-owners = with git;repo: user:
-      singleton {
-        inherit user;
-        repo = [ repo ];
-        perm = push "refs/*" [ non-fast-forward create delete merge ];
-      };
+    lib.singleton {
+      inherit user;
+      repo = [ repo ];
+      perm = push "refs/*" [ non-fast-forward create delete merge ];
+    };
 
 in {
+  imports = [
+    self.inputs.stockholm.nixosModules.git
+  ];
   krebs.git = {
     enable = true;
     cgit = {

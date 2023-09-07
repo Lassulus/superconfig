@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   services.nginx.virtualHosts.cyberlocker = {
@@ -104,7 +104,7 @@
   krebs.htgen.paste-form = {
     port = 7770;
     script = /* sh */ ''
-      export PATH=${makeBinPath [
+      export PATH=${lib.makeBinPath [
         pkgs.curl
         pkgs.gnused
       ]}:$PATH

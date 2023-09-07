@@ -1,11 +1,9 @@
-{ config, lib, pkgs, ... }:
+{ self, modulesPath, lib, ... }:
 {
   imports = [
     ./config.nix
-    #<stockholm/lass/2configs/hw/x220.nix>
-    #<stockholm/lass/2configs/boot/universal.nix>
-    <nixpkgs/nixos/modules/installer/scan/not-detected.nix>
-    <stockholm/krebs/2configs/hw/x220.nix>
+    (modulesPath + "/installer/scan/not-detected.nix")
+    (self.inputs.stockholm + "/krebs/2configs/hw/x220.nix")
   ];
 
   boot.loader.grub.enable = true;

@@ -1,8 +1,9 @@
+{ self, ... }:
 {
   #TODO reinstall with correct layout and use lass/hw/x220
   imports = [
     ./config.nix
-    <stockholm/krebs/2configs/hw/x220.nix>
+    (self.inputs.stockholm + "/krebs/2configs/hw/x220.nix")
   ];
 
   boot = {

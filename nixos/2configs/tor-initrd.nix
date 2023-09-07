@@ -11,12 +11,12 @@
       config.krebs.users.lass-mors.pubkey
       config.krebs.users.lass-green.pubkey
     ];
-    hostKeys = [ <secrets/initrd/ssh.ed25519_key> ];
+    hostKeys = [ "${config.krebs.secret.directory}/ssh.ed25519_key" ];
   };
   boot.initrd.availableKernelModules = [ "e1000e" ];
 
   boot.initrd.secrets = {
-    "/etc/tor/onion/bootup" = ${config.krebs.secret.directory}/initrd;
+    "/etc/tor/onion/bootup" = "${config.krebs.secret.directory}/initrd";
   };
 
   boot.initrd.extraUtilsCommands = ''

@@ -1,12 +1,11 @@
 { config, lib, pkgs, ... }:
 {
   imports = [
-    <stockholm/lass>
-    <stockholm/lass/2configs>
-    <stockholm/lass/2configs/retiolum.nix>
-
-    <stockholm/lass/2configs/syncthing.nix>
-    <stockholm/lass/2configs/services/radio>
+    ../../.
+    ../../2configs
+    ../../2configs/retiolum.nix
+    ../../2configs/syncthing.nix
+    ../../2configs/services/radio
   ];
 
   krebs.build.host = config.krebs.hosts.radio;
