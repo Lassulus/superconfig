@@ -31,12 +31,12 @@
 
         ./tools/zsh.nix
       ];
-      flake.nixosConfigurations.aergia = nixpkgs.lib.nixosSystem {
+      flake.nixosConfigurations = nixpkgs.lib.mapAttrs (machineName: _: nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs.self = { inherit inputs; };
         modules = [
-          ./nixos/machines/aergia/physical.nix
+          ./nixos/machines/${machineName}/physical.nix
         ];
-      };
+      }) (builtins.readDir ./nixos/machines);
     };
 }
