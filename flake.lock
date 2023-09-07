@@ -3,11 +3,11 @@
     "astro-nvim": {
       "flake": false,
       "locked": {
-        "lastModified": 1693570730,
-        "narHash": "sha256-MJ1K8SL9K784PeI/4tKHzp+cACDrhQ89W9ZlONdXWsA=",
+        "lastModified": 1694014051,
+        "narHash": "sha256-8EEvIud5iaCWxOIkfQqOTnPUF66MwHS4sFI5yn2T6Yc=",
         "owner": "AstroNvim",
         "repo": "AstroNvim",
-        "rev": "b1a158eb3d8abda33cc28f3e9ca730530880e71b",
+        "rev": "dad0bec1fef2833561d04ea446a544fbfde92539",
         "type": "github"
       },
       "original": {
@@ -54,11 +54,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1693785939,
-        "narHash": "sha256-HxXW5EUksYt3vM3uvc97FSgIf5+94oZ9h4z29tSNmvI=",
+        "lastModified": 1694079891,
+        "narHash": "sha256-CvJnn1d7++ELkqrSwJsmbAkW9v+FTmx/t5fT82mfb64=",
         "ref": "refs/heads/main",
-        "rev": "655e2e7f48e091735650824b5f46c4d4cc598bf5",
-        "revCount": 573,
+        "rev": "80e75fc502e969987cfc92ea8e185c9aa6393d0a",
+        "revCount": 602,
         "type": "git",
         "url": "https://git.clan.lol/clan/clan-core"
       },
@@ -95,11 +95,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1693791515,
-        "narHash": "sha256-1HXhqNCd1nyxhUvhLuH8pb+wxBm5DNgxhRbBnERdAr8=",
+        "lastModified": 1694069327,
+        "narHash": "sha256-Si2otUNjCe8kY5nsV7tILi4PsI0odBFrdSu8cCjn/eQ=",
         "owner": "nix-community",
         "repo": "disko",
-        "rev": "1c38664f59f95ac6ddef77a418df85ee662036d2",
+        "rev": "7bee8de8e6755506c70323b864a884f9624cc23a",
         "type": "github"
       },
       "original": {
@@ -275,11 +275,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1693663421,
-        "narHash": "sha256-ImMIlWE/idjcZAfxKK8sQA7A1Gi/O58u5/CJA+mxvl8=",
+        "lastModified": 1693844670,
+        "narHash": "sha256-t69F2nBB8DNQUWHD809oJZJVE+23XBrth4QZuVd6IE0=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "e56990880811a451abd32515698c712788be5720",
+        "rev": "3c15feef7770eb5500a4b8792623e2d6f598c9c1",
         "type": "github"
       },
       "original": {
@@ -333,11 +333,11 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1693816174,
-        "narHash": "sha256-3eTMht1XEm9gUvO80ybyFBk2XihywqlCYjw2hcwC/Zg=",
+        "lastModified": 1693862861,
+        "narHash": "sha256-+ynDsujluFf187KZvyBZ1C/BTty3TtKWuzuvpQ7sy/Q=",
         "owner": "nix-community",
         "repo": "nixvim",
-        "rev": "b4767aa252aaf4208636de53d26d4ae754ebafe6",
+        "rev": "b7611f74a9b1107e09925664f652b141926b0b92",
         "type": "github"
       },
       "original": {
@@ -441,17 +441,14 @@
         ]
       },
       "locked": {
-        "lastModified": 1693852611,
-        "narHash": "sha256-CVpM1rNJKeoVgVNzid4IneEVfAP5Xrp2T2id4ulZCUA=",
-        "ref": "refs/heads/master",
-        "rev": "5e215d87e53f97e73247c0d415a416cade9f9328",
-        "revCount": 11869,
-        "type": "git",
-        "url": "https://cgit.lassul.us/stockholm"
+        "lastModified": 1694081142,
+        "narHash": "sha256-fZLvITAKOriGqkgpaIyQdJyGiKOwYWyDqFcVlJ07Rok=",
+        "path": "/home/lass/sync/stockholm",
+        "type": "path"
       },
       "original": {
-        "type": "git",
-        "url": "https://cgit.lassul.us/stockholm"
+        "path": "/home/lass/sync/stockholm",
+        "type": "path"
       }
     },
     "systems": {
