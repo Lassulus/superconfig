@@ -28,6 +28,7 @@
     self.inputs.stockholm.nixosModules.ssl
     self.inputs.stockholm.nixosModules.systemd
     self.inputs.stockholm.nixosModules.xresources
+    self.inputs.stockholm.nixosModules.ssh
     {
       users.extraUsers.mainUser.passwordFile = "${config.krebs.secret.directory}/passwordFile";
       users.extraUsers.root.passwordFile = "${config.krebs.secret.directory}/passwordFile";
