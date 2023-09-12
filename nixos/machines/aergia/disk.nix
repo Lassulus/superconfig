@@ -8,38 +8,29 @@
       type = "disk";
       device = "/dev/nvme0n1";
       content = {
-        type = "table";
-        format = "gpt";
-        partitions = [
-          {
-            name = "boot";
-            start = "0";
-            end = "1M";
-            part-type = "primary";
-            flags = ["bios_grub"];
-          }
-          {
-            name = "ESP";
-            start = "1MiB";
-            end = "1GiB";
-            fs-type = "fat32";
-            bootable = true;
+        type = "gpt";
+        partitions = {
+          grub = {
+            size = "1M";
+            type = "EF02";
+          };
+          ESP = {
+            size = "1G";
+            type = "EF00";
             content = {
               type = "filesystem";
               format = "vfat";
               mountpoint = "/boot";
             };
-          }
-          {
-            name = "root";
-            start = "1GiB";
-            end = "100%";
+          };
+          root = {
+            size = "100%";
             content = {
               type = "luks";
               name = "aergia1";
               content = {
                 type = "btrfs";
-                extraArgs = "-f"; # Override existing partition
+                extraArgs = [ "-f" ]; # Override existing partition
                 subvolumes = {
                   # Subvolume name is different from mountpoint
                   "/rootfs" = {
@@ -57,8 +48,8 @@
                 };
               };
             };
-          }
-        ];
+          };
+        };
       };
     };
   };
