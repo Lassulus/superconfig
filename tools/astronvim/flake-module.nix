@@ -2,43 +2,6 @@
 {
   perSystem = { system, lib, pkgs, ... }: let
     vim_appname = "lassvim";
-    langs = [
-      # "agda"
-      # "bash" # throws an error
-      "c"
-      "c-sharp"
-      "cpp"
-      "css"
-      "elm"
-      "elisp"
-      #"fluent"
-      "go"
-      "hcl"
-      "haskell"
-      "html"
-      "janet-simple"
-      "java"
-      "javascript"
-      "jsdoc"
-      "json"
-      "julia"
-      "ocaml"
-      "pgn"
-      "php"
-      "python"
-      "ruby"
-      "rust"
-      "scala"
-      # "swift"
-      "typescript"
-      "yaml"
-      "nix"
-      "lua"
-      "markdown-inline"
-      "perl"
-      "make"
-      "toml"
-    ];
     nvim_deps = with pkgs; [
       nodejs # copilot
       neovim
@@ -83,9 +46,9 @@
       ln -s ${inputs.astro-nvim}/lua/* $out/lua
       ln -s ${./user} $out/lua/user
 
-      ${lib.concatMapStringsSep "\n" (name: ''
-        ln -s ${pkgs.tree-sitter.builtGrammars."tree-sitter-${name}"}/parser $out/parser/${name}.so
-      '') langs}
+      ${lib.concatMapStringsSep "\n" (grammar: ''
+        ln -s $(readlink -f ${grammar}/parser/*.so) $out/parser/${lib.last (builtins.split "-" grammar.name)}.so
+      '') pkgs.vimPlugins.nvim-treesitter.withAllGrammars.dependencies}
     '';
   in {
     packages.vim = pkgs.writeShellScriptBin "vim" ''
