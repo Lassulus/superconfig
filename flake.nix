@@ -22,7 +22,7 @@
     disko.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ flake-parts, nixpkgs, ... }:
+  outputs = inputs@{ flake-parts, nixpkgs, clan-core, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
       imports = [
@@ -36,7 +36,10 @@
         specialArgs.self = { inherit inputs; };
         modules = [
           ./nixos/machines/${machineName}/physical.nix
+          clan-core.nixosModules.clanCore
           {
+            clanCore.machineName = machineName;
+            clanCore.secretStore = "password-store";
             krebs.secret.directory = "/etc/secrets";
           }
         ];
