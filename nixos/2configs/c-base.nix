@@ -44,7 +44,7 @@ in {
       # register-dns
       # block-outside-dns
       script-security 2
-      auth-user-pass ${config.krebs.secret.directory}/cbase.txt>}
+      auth-user-pass ${config.krebs.secret.directory}/cbase.txt
       #auth-user-pass
       key-direction 1
       <tls-auth>
