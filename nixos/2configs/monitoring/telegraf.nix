@@ -152,6 +152,8 @@ in
       ];
     }
   ];
+  networking.firewall.allowedTCPPorts = [ 9273 ];
+
   # avoid logging sudo use
   security.sudo.configFile = ''
     Defaults:telegraf !syslog,!pam_session
