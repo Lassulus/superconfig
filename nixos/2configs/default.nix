@@ -195,6 +195,10 @@
   };
 
   services.openssh.enable = true;
+  services.openssh.hostKeys = [{
+    path = "${config.clan.password-store.targetDirectory}/ssh.id_ed25519";
+    type = "ed25519";
+  }];
 
   services.journald.extraConfig = ''
     SystemMaxUse=1G
