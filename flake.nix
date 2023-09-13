@@ -36,6 +36,9 @@
         specialArgs.self = { inherit inputs; };
         modules = [
           ./nixos/machines/${machineName}/physical.nix
+          {
+            krebs.secret.directory = "/etc/secrets";
+          }
         ];
       }) (builtins.readDir ./nixos/machines);
     };

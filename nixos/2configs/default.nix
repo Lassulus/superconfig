@@ -87,7 +87,6 @@
     enable = true;
     build.user = config.krebs.users.lass;
     ssl.trustIntermediate = true;
-    secret.directory = "/var/src/secrets";
   };
 
   nix.useSandbox = true;
