@@ -4,7 +4,6 @@
     ./binary-cache/client.nix
     ./gc.nix
     ./mc.nix
-    ./vim.nix
     ./zsh.nix
     ./htop.nix
     ./wiregrill.nix
