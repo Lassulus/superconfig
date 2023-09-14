@@ -3,11 +3,11 @@
     "astro-nvim": {
       "flake": false,
       "locked": {
-        "lastModified": 1694613736,
-        "narHash": "sha256-Std3XXjcZ5q/dg0ns+OO5KPgJ+digXC6m20Fq3WeVuQ=",
+        "lastModified": 1694637169,
+        "narHash": "sha256-YUIvUcWHcDF8pSudh67bTk4asCcHImPpyCuY3Z2z2gg=",
         "owner": "AstroNvim",
         "repo": "AstroNvim",
-        "rev": "4f89ac59fdd5acb6e2c8f461bcc25a23eb54a9dd",
+        "rev": "6d5750bb4fbefeb816bf6d9d088df72dfefb9724",
         "type": "github"
       },
       "original": {
@@ -54,11 +54,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1694629100,
-        "narHash": "sha256-UGtbqdPAXBs1foXmK1I+cn5lKsncPu+zuGCY/HD1DAQ=",
+        "lastModified": 1694706310,
+        "narHash": "sha256-9NJGSOBhXLeB7mlSGk7qEl5wz6ZTvqY9I09SH577fmo=",
         "ref": "refs/heads/pass-secrets",
-        "rev": "f4d74f3298088b06aa43ca40cc0b761c79160679",
-        "revCount": 637,
+        "rev": "cf6a855dd7b096ef810568683519fd2d24e06b34",
+        "revCount": 665,
         "type": "git",
         "url": "file:/home/lass/src/clan/clan-core"
       },
@@ -95,11 +95,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1694511987,
-        "narHash": "sha256-AKaZBeOxiofmp6j01EPdh6UKtU3ECELpm/crgL4KKVw=",
+        "lastModified": 1694703991,
+        "narHash": "sha256-KDIvH53jjKVn+TobkOf6hHd6Ka4ZQcpT5DtMxv7n46s=",
         "ref": "refs/heads/images",
-        "rev": "24f3fb0961dd9b68dd79735f5088502e8d603f10",
-        "revCount": 636,
+        "rev": "d0597d5a9cede1248e9dc1c8edbe8524a3fbf519",
+        "revCount": 637,
         "type": "git",
         "url": "file:/home/lass/src/disko/"
       },
@@ -441,11 +441,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1694441441,
-        "narHash": "sha256-jtsaITHYRn+ibtOQKH4tU+9avKWqGEK8WX9XAMDxVu4=",
+        "lastModified": 1694686725,
+        "narHash": "sha256-wLAqQDA5Yz9jtt4q2kguA/6ZzZCqh13LexuPUdgzm7M=",
         "ref": "refs/heads/master",
-        "rev": "5370e0485788224126861e076110ac705013d2de",
-        "revCount": 11880,
+        "rev": "4820fc27cdc44a12b57d52c5fb7a932407d765a1",
+        "revCount": 11885,
         "type": "git",
         "url": "https://cgit.lassul.us/stockholm"
       },
