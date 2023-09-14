@@ -1,5 +1,4 @@
 { self, modulesPath, config, lib, ... }:
-
 {
 
   imports = [
@@ -14,10 +13,6 @@
   boot.loader.grub.enable = true;
   boot.loader.grub.version = 2;
   boot.loader.grub.efiSupport = true;
-  boot.loader.grub.devices = [
-    config.disko.devices.disk."/dev/nvme0n1".device
-    config.disko.devices.disk."/dev/nvme1n1".device
-  ];
   boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "nvme" "sd_mod" ];
   boot.kernelModules = [ "kvm-amd" ];
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
