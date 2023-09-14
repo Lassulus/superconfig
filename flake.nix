@@ -22,7 +22,7 @@
     disko.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ flake-parts, nixpkgs, clan-core, ... }:
+  outputs = inputs@{ self, flake-parts, nixpkgs, clan-core, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
       imports = [
@@ -33,7 +33,7 @@
       ];
       flake.nixosConfigurations = nixpkgs.lib.mapAttrs (machineName: _: nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs.self = { inherit inputs; };
+        specialArgs.self = self;
         modules = [
           ./nixos/machines/${machineName}/physical.nix
           clan-core.nixosModules.clanCore

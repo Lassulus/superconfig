@@ -101,6 +101,8 @@
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [
+    self.packages.${pkgs.system}.vim
+
   #stockholm
     deploy
     git
