@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ self, config, pkgs, lib, ... }:
 
 let
   name = "radio";
@@ -77,6 +77,8 @@ in {
   imports = [
     ./news.nix
     ./weather.nix
+    self.inputs.stockholm.nixosModules.acl
+    self.inputs.stockholm.nixosModules.reaktor2
   ];
 
   users.users = {
@@ -91,19 +93,17 @@ in {
       openssh.authorizedKeys.keys = with config.krebs.users; [
         lass.pubkey
       ];
+      packages = [
+        good_track
+        skip_track
+        print_current
+      ];
     };
   };
 
   users.groups = {
     "radio" = {};
   };
-
-  users.users.${name}.packages = with pkgs; [
-    good_track
-    skip_track
-    print_current
-  ];
-
 
   systemd.services.radio_watcher = {
     wantedBy = [ "multi-user.target" ];

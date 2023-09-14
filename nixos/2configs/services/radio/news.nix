@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ self, pkgs, ... }:
 let
 
   tts = pkgs.writers.writeBashBin "tts" ''
@@ -95,6 +95,9 @@ in
       '';
     };
   };
+  imports = [
+    self.inputs.stockholm.nixosModules.htgen
+  ];
   krebs.htgen.news = {
     port = 7999;
     user = {
