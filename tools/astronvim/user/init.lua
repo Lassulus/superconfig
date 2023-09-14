@@ -42,7 +42,7 @@ return {
     },
   },
   -- Set colorscheme to use
-  colorscheme = "gruvbox",
+  colorscheme = "quiet",
   -- Diagnostics configuration (for vim.diagnostics.config({...})) when diagnostics are on
   diagnostics = {
     virtual_text = true,
