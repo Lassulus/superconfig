@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 {
   users.groups.download.members = [ "transmission" ];
   services.transmission = {
@@ -141,7 +141,7 @@
       addSSL = true;
       locations."/" = {
         proxyWebsockets = true;
-        proxyPass = "http://localhost:9091";
+        proxyPass = "http://128.0.0.1:9091";
       };
     };
     virtualHosts."radar.r" = {

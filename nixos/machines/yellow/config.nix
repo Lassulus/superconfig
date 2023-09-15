@@ -1,5 +1,4 @@
-{ config, lib, pkgs, ... }: let
-  vpnPort = 1637;
+{ config, pkgs, ... }: let
   torrentport = 56709; # port forwarded in airvpn webinterface
 in {
   imports = [
@@ -9,6 +8,7 @@ in {
     ../../2configs/services/flix
   ];
 
+  services.transmission.settings.peer-port = torrentport;
   krebs.build.host = config.krebs.hosts.yellow;
 
   krebs.sync-containers3.inContainer = {
@@ -19,27 +19,39 @@ in {
   networking.useHostResolvConf = false;
   networking.useNetworkd = true;
 
-  networking.wg-quick.interfaces.airvpn.configFile = "/var/src/secrets/airvpn.conf";
-  services.transmission.settings.peer-port = torrentport;
-
-  # only allow traffic through openvpn
-  krebs.iptables = {
-    enable = true;
-    tables.filter.INPUT.rules = [
-      { predicate = "-i airvpn -p tcp --dport ${toString torrentport}"; target = "ACCEPT"; }
-      { predicate = "-i airvpn -p udp --dport ${toString torrentport}"; target = "ACCEPT"; }
+  systemd.services.transmission-netns = {
+    wantedBy = [ "multi-user.target" ];
+    path = [
+      pkgs.iproute2
+      pkgs.wireguard-tools
     ];
-    tables.filter.OUTPUT = {
-      policy = "DROP";
-      rules = [
-        { predicate = "-o lo"; target = "ACCEPT"; }
-        { predicate = "-p udp --dport ${toString vpnPort}"; target = "ACCEPT"; }
-        { predicate = "-o airvpn"; target = "ACCEPT"; }
-        { predicate = "-o retiolum"; target = "ACCEPT"; }
-        { v6 = false; predicate = "-d 1.1.1.1/32"; target = "ACCEPT"; }
-        { v6 = false; predicate = "-d 1.0.0.1/32"; target = "ACCEPT"; }
-        { v6 = false; predicate = "-o eth0 -d 10.233.2.0/24"; target = "ACCEPT"; }
-      ];
+    script = ''
+      set -efux
+      ip netns delete transmission || :
+      ip netns add transmission
+      ip -n transmission link set lo up
+      ip link add airvpn type wireguard
+      ip link set airvpn netns transmission
+      ip -n transmission addr add 10.176.43.231/32 dev airvpn
+      ip -n transmission addr add fd7d:76ee:e68f:a993:41b3:846b:d271:30d8/128 dev airvpn
+      ip netns exec transmission wg syncconf airvpn <(wg-quick strip /etc/secrets/airvpn.conf)
+      ip -n transmission link set airvpn up
+      ip -n transmission route add default dev airvpn
+      ip link add t1 type veth peer name t2
+      ip link set t1 netns transmission
+      ip addr add 128.0.0.2/30 dev t2
+      ip link set t2 up
+      ip -n transmission addr add 128.0.0.1/30 dev t1
+      ip -n transmission link set t1 up
+    '';
+    serviceConfig = {
+      RemainAfterExit = true;
+      Type = "oneshot";
     };
+  };
+
+  systemd.services.transmission = {
+    after = [ "transmission-netns.service" ];
+    serviceConfig.NetworkNamespacePath = "/var/run/netns/transmission";
   };
 }
