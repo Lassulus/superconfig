@@ -82,7 +82,6 @@ rec {
   serveOwncloud = domains:
     let
       domain = head domains;
-      legacy_nixpkgs = import (builtins.fetchTarball "https://github.com/nixos/nixpkgs/archive/22.05.tar.gz") {};
     in {
       services.nginx.virtualHosts."${domain}" = {
         enableACME = true;
@@ -175,7 +174,6 @@ rec {
       services.phpfpm.pools."${domain}" = {
         user = "nginx";
         group = "nginx";
-        phpPackage = legacy_nixpkgs.php74;
         extraConfig = ''
           listen = /srv/http/${domain}/phpfpm.pool
           pm = dynamic
