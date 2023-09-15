@@ -119,6 +119,13 @@ in {
     enableACME = true;
     forceSSL = true;
   };
+  services.nginx.virtualHosts."weirdweekender.de" = {
+    enableACME = true;
+    forceSSL = true;
+    locations."/".extraConfig = ''
+      return 301 https://weirdwednesday.de/weirdweekender/;
+    '';
+  };
 
   # MAIL STUFF
   # TODO: make into its own module
