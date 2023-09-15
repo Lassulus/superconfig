@@ -32,6 +32,7 @@
       ];
     };
     virtualHosts."yellow.r" = {
+      serverAlias = [ "flix.r" ];
       default = true;
       enableACME = true;
       addSSL = true;
