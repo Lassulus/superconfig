@@ -8,6 +8,7 @@
     ../../2configs/binary-cache/server.nix
     ../../2configs/matrix.nix
     ../../2configs/gsm-wiki.nix
+    ../../2configs/monitoring/telegraf.nix
 
     # sync-containers
     ../../2configs/consul.nix
