@@ -40,7 +40,11 @@ in
   systemd.services.hedgedoc-backup = {
     startAt = "daily";
     serviceConfig = {
-      ExecStart = ''${pkgs.sqlite}/bin/sqlite3 /var/lib/hedgedoc/db.hedgedoc.sqlite ".backup /var/backup/hedgedoc/backup.sq3"'';
+      ExecStart = pkgs.writers.writeDash "pad-backup" ''
+        until ${pkgs.sqlite}/bin/sqlite3 /var/lib/hedgedoc/db.hedgedoc.sqlite ".backup /var/backup/hedgedoc/backup.sq3"; do
+          sleep 1
+        done
+      '';
       Type = "oneshot";
     };
   };
