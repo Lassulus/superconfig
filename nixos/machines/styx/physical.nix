@@ -1,9 +1,9 @@
-{ nixosModules, config, lib, pkgs, ... }:
+{ modulesPath, lib, ... }:
 
 {
   imports = [
     ./config.nix
-    (nixosModules + "installer/scan/not-detected.nix")
+    (modulesPath + "/installer/scan/not-detected.nix")
   ];
 
   boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "usbhid" "sd_mod" ];
