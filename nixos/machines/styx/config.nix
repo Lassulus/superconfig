@@ -51,9 +51,6 @@
     '')
   ];
 
-  users.users.mainUser.openssh.authorizedKeys.keys = [
-    config.krebs.users.lass-android.pubkey
-  ];
   # http://10.42.0.1:8081/smokeping.fcgi
   services.smokeping = {
     enable = true;
