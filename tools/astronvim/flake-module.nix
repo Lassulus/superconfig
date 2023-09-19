@@ -59,12 +59,12 @@
         paths = nvim_deps;
       }}/bin
       export NVIM_APPNAME=${vim_appname}
-      mkdir -p $HOME/.config $HOME/.data/
+      mkdir -p $HOME/.config $HOME/.local/share/
       ln -sfT ${nvim_config} "$HOME"/.config/${vim_appname}
       nvim --headless -c 'quitall'
-      if [[ -d $HOME/.data/lvim/lazy/telescope-fzf-native.nvim ]]; then
-        mkdir -p "$HOME/.data/lvim/lazy/telescope-fzf-native.nvim/build"
-        ln -sf "${pkgs.vimPlugins.telescope-fzf-native-nvim}/build/libfzf.so" "$HOME/.data/lvim/lazy/telescope-fzf-native.nvim/build/libfzf.so"
+      if [[ -d $HOME/.local/share/lassvim/lazy/telescope-fzf-native.nvim ]]; then
+        mkdir -p "$HOME/.local/share/lassvim/vim/lazy/telescope-fzf-native.nvim/build"
+        ln -sf "${pkgs.vimPlugins.telescope-fzf-native-nvim}/build/libfzf.so" "$HOME/.local/share/lassvim/lazy/telescope-fzf-native.nvim/build/libfzf.so"
       fi
       exec nvim "$@"
     '';
