@@ -18,11 +18,29 @@
     # stockholm.url = "path:/home/lass/sync/stockholm";
     stockholm.inputs.nixpkgs.follows = "nixpkgs";
 
-    disko.url = "github:nix-community/disko";
+    # disko.url = "github:nix-community/disko/images";
+    disko.url = "git+file:/home/lass/src/disko/";
     disko.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs@{ self, flake-parts, nixpkgs, clan-core, ... }:
+  let
+    clan = clan-core.lib.buildClan {
+      directory = self;
+      specialArgs.self = self;
+      machines = nixpkgs.lib.mapAttrs (machineName: _: {
+
+        imports = [
+          ./nixos/machines/${machineName}/physical.nix
+          {
+            clanCore.machineName = machineName;
+            clanCore.secretStore = "password-store";
+            krebs.secret.directory = "/etc/secrets";
+          }
+        ];
+      }) (builtins.readDir ./nixos/machines);
+    };
+  in
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
       imports = [
@@ -31,18 +49,7 @@
 
         ./tools/zsh.nix
       ];
-      flake.nixosConfigurations = nixpkgs.lib.mapAttrs (machineName: _: nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs.self = self;
-        modules = [
-          ./nixos/machines/${machineName}/physical.nix
-          clan-core.nixosModules.clanCore
-          {
-            clanCore.machineName = machineName;
-            clanCore.secretStore = "password-store";
-            krebs.secret.directory = "/etc/secrets";
-          }
-        ];
-      }) (builtins.readDir ./nixos/machines);
+      flake.nixosConfigurations = clan.nixosConfigurations;
+      flake.clanInternals = clan.clanInternals;
     };
 }
