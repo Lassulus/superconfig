@@ -2,9 +2,12 @@
 
 let
   dl_subs = pkgs.writers.writeDashBin "dl_subs" ''
+    set -efu
     filename=$1
+    cd "$(dirname "$filename")"
+    filename=$(basename "$filename")
     ${pkgs.subdl}/bin/subdl --output='/tmp/{m}.{M}.sub' "$filename" 1>&2
-    echo "/tmp/$(basename "$filename").sub"
+    echo "/tmp/$filename.sub"
   '';
 
   autosub = pkgs.writeText "autosub.lua" ''
