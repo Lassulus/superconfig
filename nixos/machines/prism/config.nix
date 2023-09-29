@@ -1,6 +1,8 @@
 { self, config, lib, pkgs, ... }: let
   slib = self.inputs.stockholm.lib;
 in {
+
+  system.stateVersion = "23.05";
   imports = [
     ./backup.nix
     ../../.
