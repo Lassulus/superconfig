@@ -120,6 +120,7 @@ in {
     forceSSL = true;
   };
   services.nginx.virtualHosts."weirdweekender.de" = {
+    serverAliases = [ "www.weirdweekender.de" ];
     enableACME = true;
     forceSSL = true;
     locations."/".extraConfig = ''
