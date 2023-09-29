@@ -1,8 +1,4 @@
-{config, pkgs, lib, ...}: let
-
-  unstable-pkgs = import <nixpkgs-unstable> {};
-
-in {
+{
   # symlink the zigbee controller
   services.udev.extraRules = ''
     SUBSYSTEM=="tty", ATTRS{idVendor}=="0451", ATTRS{idProduct}=="16a8", SYMLINK+="cc2531", MODE="0660", GROUP="dialout"
@@ -14,7 +10,6 @@ in {
 
   services.zigbee2mqtt = {
     enable = true;
-    package = unstable-pkgs.zigbee2mqtt;
     settings = {
       homeassistant = true;
       frontend.port = 1337;
@@ -34,11 +29,7 @@ in {
       advanced = {
         pan_id = 4222;
       };
-      devices = let
-        set_device = id: name:
-          lib.nameValuePair id {
-          };
-      in {
+      devices = {
         # lights https://www.zigbee2mqtt.io/devices/9290022166.html#philips-9290022166
         "0x0017880106ed3bd8".friendly_name = "l_bett";
         "0x0017880108327622".friendly_name = "l_essen";
