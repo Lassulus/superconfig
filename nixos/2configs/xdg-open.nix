@@ -1,8 +1,4 @@
-{ config, pkgs, lib, ... }: let
-
-  xdg-open-wrapper = pkgs.writeDashBin "xdg-open" ''
-     exec ${xdg-open}/bin/xdg-open "$@" >> /tmp/xdg-debug.log 2>&1
-  '';
+{ pkgs, ... }: let
 
   xdg-open = pkgs.writeBashBin "xdg-open" ''
     set -xe
@@ -52,16 +48,12 @@
       inode/directory)
         alacritty --execute mc "$FILE" ;;
       *)
+        echo $TERM >> /tmp/xdg.debug
         # open dmenu and ask for program to open with
-        runner=$(print -rC1 -- ''${(ko)commands} | dmenu)
+        runner=$({ IFS=:; ls -H $PATH; } | sort | dmenu)
         exec $runner "$FILE";;
     esac
   '';
 in {
-  environment.systemPackages = [ xdg-open-wrapper ];
-
-  security.sudo.extraConfig = ''
-    cr ALL=(lass) NOPASSWD: ${xdg-open}/bin/xdg-open *
-    ff ALL=(lass) NOPASSWD: ${xdg-open}/bin/xdg-open *
-  '';
+  environment.systemPackages = [ xdg-open ];
 }
