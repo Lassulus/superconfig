@@ -2,6 +2,13 @@
 {
   # ipv6 from vodafone is really really flaky
   boot.kernel.sysctl."net.ipv6.conf.et0.disable_ipv6" = 1;
+  # vodafone router drifts out of time
+  services.timesyncd.servers = [
+    "0.pool.ntp.org"
+    "1.pool.ntp.org"
+    "2.pool.ntp.org"
+    "3.pool.ntp.org"
+  ];
   systemd.network.networks."50-et0" = {
     matchConfig.Name = "et0";
     DHCP = "ipv4";
