@@ -53,5 +53,13 @@
       ];
       flake.nixosConfigurations = clan.nixosConfigurations;
       flake.clanInternals = clan.clanInternals;
+      perSystem = { config, pkgs, system, ... }: {
+        devShells.default = pkgs.mkShell {
+          packages = [
+            clan-core.packages.${system}.clan-cli
+            pkgs.qemu_kvm
+          ];
+        };
+      };
     };
 }
