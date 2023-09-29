@@ -11,15 +11,17 @@
     astro-nvim.flake = false;
 
     clan-core.url = "git+https://git.clan.lol/clan/clan-core";
+    # clan-core.url = "git+file:/home/lass/src/clan/clan-core";
     clan-core.inputs.nixpkgs.follows = "nixpkgs";
     clan-core.inputs.flake-parts.follows = "flake-parts";
+    clan-core.inputs.disko.follows = "disko";
 
     stockholm.url = "git+https://cgit.lassul.us/stockholm";
     # stockholm.url = "path:/home/lass/sync/stockholm";
     stockholm.inputs.nixpkgs.follows = "nixpkgs";
 
-    # disko.url = "github:nix-community/disko/images";
-    disko.url = "git+file:/home/lass/src/disko/";
+    disko.url = "github:nix-community/disko";
+    # disko.url = "git+file:/home/lass/src/disko/";
     disko.inputs.nixpkgs.follows = "nixpkgs";
   };
 
