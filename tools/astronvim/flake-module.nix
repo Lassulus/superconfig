@@ -63,7 +63,7 @@
       ln -sfT ${nvim_config} "$HOME"/.config/${vim_appname}
       nvim --headless -c 'quitall'
       if [[ -d $HOME/.local/share/lassvim/lazy/telescope-fzf-native.nvim ]]; then
-        mkdir -p "$HOME/.local/share/lassvim/vim/lazy/telescope-fzf-native.nvim/build"
+        mkdir -p "$HOME/.local/share/lassvim/lazy/telescope-fzf-native.nvim/build"
         ln -sf "${pkgs.vimPlugins.telescope-fzf-native-nvim}/build/libfzf.so" "$HOME/.local/share/lassvim/lazy/telescope-fzf-native.nvim/build/libfzf.so"
       fi
       exec nvim "$@"
