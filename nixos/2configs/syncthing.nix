@@ -16,6 +16,18 @@ in {
     settings.devices = mk_peers used_peers;
   };
 
+  clanCore.secrets.syncthing = {
+    secrets."syncthing.key" = { };
+    secrets."syncthing.cert" = { };
+    facts."syncthing.pub" = { };
+    generator = ''
+      ${pkgs.syncthing}/bin/syncthing generate --config "$secrets"
+      mv "$secrets"/key.pem "$secrets"/syncthing.cert
+      mv "$secrets"/cert.pem "$secrets"/syncthing.key
+      cat "$secrets"/config.xml | ${pkgs.gnugrep}/bin/grep -oP '(?<=<device id=")[^"]+' > "$facts"/syncthing.pub
+    '';
+  };
+
   boot.kernel.sysctl."fs.inotify.max_user_watches" = 524288;
   krebs.iptables.tables.filter.INPUT.rules = [
     { predicate = "-p tcp --dport 22000"; target = "ACCEPT";}

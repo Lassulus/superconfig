@@ -32,6 +32,29 @@
     {
       users.extraUsers.mainUser.passwordFile = "${config.krebs.secret.directory}/passwordFile";
       users.extraUsers.root.passwordFile = "${config.krebs.secret.directory}/passwordFile";
+      clanCore.secrets.password = {
+        secrets.password = { };
+        secrets.passwordHash = { };
+        generator = ''
+          ${pkgs.xkcdpass}/bin/xkcdpass -n 4 -d - > $secrets/password
+          cat $secrets/password | ${pkgs.mkpasswd}/bin/mkpasswd -s -m sha-512 > $secrets/passwordHash
+        '';
+      };
+    }
+    {
+      services.openssh.enable = true;
+      services.openssh.hostKeys = [{
+        path = "${config.krebs.secret.directory}/ssh.id_ed25519";
+        type = "ed25519";
+      }];
+      clanCore.secrets.ssh = {
+        secrets."ssh.id_ed25519" = { };
+        facts."ssh.id_ed25519.pub" = { };
+        generator = ''
+          ${pkgs.openssh}/bin/ssh-keygen -t ed25519 -N "" -f $secrets/ssh.id_ed25519
+          mv $secrets/ssh.id_ed25519.pub $facts/ssh.id_ed25519.pub
+        '';
+      };
     }
     {
       users.extraUsers = {
@@ -193,12 +216,6 @@
       fi
     '';
   };
-
-  services.openssh.enable = true;
-  services.openssh.hostKeys = [{
-    path = "${config.clan.password-store.targetDirectory}/ssh.id_ed25519";
-    type = "ed25519";
-  }];
 
   services.journald.extraConfig = ''
     SystemMaxUse=1G

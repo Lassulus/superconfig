@@ -31,6 +31,20 @@
     privkey_ed25519 = "${config.krebs.secret.directory}/retiolum.ed25519_key.priv";
   };
 
+  clanCore.secrets.retiolum = {
+    secrets."retiolum.rsa_key.priv" = { };
+    secrets."retiolum.ed25519_key.priv" = { };
+    facts."retiolum.rsa_key.pub" = { };
+    facts."retiolum.ed25519_key.pub" = { };
+    generator = ''
+      ${pkgs.tinc_pre}/bin/tinc --config "$secrets" generate-keys 4096 >/dev/null
+      mv "$secrets"/rsa_key.priv "$secrets"/retiolum.rsa_key.priv
+      mv "$secrets"/ed25519_key.priv "$secrets"/retiolum.ed25519_key.priv
+      mv "$secrets"/rsa_key.pub "$facts"/retiolum.rsa_key.pub
+      mv "$secrets"/ed25519_key.pub "$facts"/retiolum.ed25519_key.pub
+    '';
+  };
+
   systemd.network.networks.retiolum = {
     matchConfig.Name = "retiolum";
     address = [
