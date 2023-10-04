@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs,  ... }:
 {
   services.tor = {
     enable = true;
@@ -12,6 +12,16 @@
     };
     controlSocket.enable = true;
     client.enable = true;
+  };
+
+  clanCore.secrets.tor-ssh = {
+    secrets."ssh-tor.priv" = { };
+    secrets."tor-hostname" = { };
+    generator = ''
+      ${pkgs.mkp224o}/bin/mkp224o-donna lass -n 1 -d . -q -O addr
+      mv "$(cat addr)"/hs_ed25519_secret_key "$secrets"/ssh-tor.priv
+      mv addr "$secrets"/tor-hostname
+    '';
   };
 }
 
