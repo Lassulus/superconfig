@@ -23,6 +23,8 @@
     disko.url = "github:nix-community/disko";
     # disko.url = "git+file:/home/lass/src/disko/";
     disko.inputs.nixpkgs.follows = "nixpkgs";
+
+    nixos-hardware.url = "github:nixos/nixos-hardware";
   };
 
   outputs = inputs@{ self, flake-parts, nixpkgs, clan-core, ... }:
