@@ -1,11 +1,7 @@
-{ config, lib, pkgs, ... }:
+{ pkgs, ... }:
 {
   imports = [
-    ./pyscript
     ./zigbee.nix
-    ./rooms/bett.nix
-    ./rooms/essen.nix
-    ./rooms/nass.nix
   ];
 
   krebs.iptables.tables.filter.INPUT.rules = [
