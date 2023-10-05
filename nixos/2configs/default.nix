@@ -30,8 +30,8 @@
     self.inputs.stockholm.nixosModules.ssh
     self.inputs.stockholm.nixosModules.sync-containers3
     {
-      users.extraUsers.mainUser.passwordFile = "${config.krebs.secret.directory}/passwordFile";
-      users.extraUsers.root.passwordFile = "${config.krebs.secret.directory}/passwordFile";
+      users.extraUsers.mainUser.passwordFile = "${config.krebs.secret.directory}/passwordHash";
+      users.extraUsers.root.passwordFile = "${config.krebs.secret.directory}/passwordHash";
       clanCore.secrets.password = {
         secrets.password = { };
         secrets.passwordHash = { };
