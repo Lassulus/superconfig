@@ -8,7 +8,7 @@
   ];
 
   networking.hostId = "deadbeef";
-  # boot.loader.efi.canTouchEfiVariables = true;
+
   boot.loader.grub = {
     enable = true;
     device = "/dev/nvme0n1";
@@ -17,4 +17,11 @@
   };
 
   hardware.opengl.enable = true;
+
+  boot.initrd.availableKernelModules = [
+    "nvme"
+    "thunderbolt"
+    "xhci_pci"
+    "usbhid"
+  ];
 }

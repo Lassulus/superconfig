@@ -24,7 +24,7 @@ in {
       ${pkgs.syncthing}/bin/syncthing generate --config "$secrets"
       mv "$secrets"/key.pem "$secrets"/syncthing.key
       mv "$secrets"/cert.pem "$secrets"/syncthing.cert
-      cat "$secrets"/config.xml | ${pkgs.gnugrep}/bin/grep -oP '(?<=<device id=")[^"]+' > "$facts"/syncthing.pub
+      cat "$secrets"/config.xml | ${pkgs.gnugrep}/bin/grep -oP '(?<=<device id=")[^"]+' | uniq > "$facts"/syncthing.pub
     '';
   };
 
