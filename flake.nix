@@ -67,7 +67,6 @@
         devShells.default = pkgs.mkShell {
           packages = [
             clan-core.packages.${system}.clan-cli
-            pkgs.qemu_kvm
           ];
         };
       };
