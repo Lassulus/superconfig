@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ self, config, pkgs, ... }:
 
 {
   imports = [
@@ -112,13 +112,13 @@
 
   krebs.build.host = config.krebs.hosts.aergia;
 
-  environment.systemPackages = with pkgs; [
-    brain
-    bank
-    l-gen-secrets
-    generate-secrets
-    nixpkgs-review
-    pipenv
+  environment.systemPackages = [
+    pkgs.brain
+    pkgs.bank
+    pkgs.l-gen-secrets
+    pkgs.generate-secrets
+    pkgs.nixpkgs-review
+    pkgs.pipenv
   ];
 
   programs.adb.enable = true;
