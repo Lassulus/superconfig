@@ -159,7 +159,7 @@ let
     public = false;
     hooks = {
       post-receive = ''
-        ${lib.optionalString announce (pkgs.gystem.build.etct-hooks.irc-announce {
+        ${lib.optionalString announce (pkgs.git-hooks.irc-announce {
           # TODO make nick = config.krebs.build.host.name the default
           nick = config.krebs.build.host.name;
           channel = "#xxx";
@@ -180,7 +180,7 @@ let
     with git // config.krebs.users;
     repo:
       lib.singleton {
-        user = [ lass lass-green ];
+        user = [ lass ];
         repo = [ repo ];
         perm = push "refs/*" [ non-fast-forward create delete merge ];
       } ++
