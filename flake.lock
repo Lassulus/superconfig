@@ -56,11 +56,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1696455053,
-        "narHash": "sha256-KYTF/p+OVFy0oyIhip55vj19R5q0HXe+pEWd9VHTEFY=",
+        "lastModified": 1696531012,
+        "narHash": "sha256-WXE0j1VWB7vVxg+/U3miFqy09y1SEeyZA7CkpcqCTC8=",
         "ref": "refs/heads/main",
-        "rev": "d90becfd8013e5abc645a8a95db08445c1cb8e5c",
-        "revCount": 1003,
+        "rev": "cc47206fd67b1bc477c2a729b2b9a89f3931e04b",
+        "revCount": 1017,
         "type": "git",
         "url": "https://git.clan.lol/clan/clan-core"
       },
@@ -329,11 +329,11 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1696423583,
-        "narHash": "sha256-smU/jAx6j8ZJk5DalO2uDw+sZz40oXIQpBufClZeNnY=",
+        "lastModified": 1696533984,
+        "narHash": "sha256-4B7UpA9L8t57RYg801HopuEiipQJKzkEcLgPUaOB5Uw=",
         "owner": "nix-community",
         "repo": "nixvim",
-        "rev": "73f21c063dac16340c60d99a143dd3c7c07a1e70",
+        "rev": "a0c35acab596530208034aef2e254cf32179268b",
         "type": "github"
       },
       "original": {
@@ -438,11 +438,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1695759296,
-        "narHash": "sha256-JDmlrwkJhs+9ub9x7vR8qstBgM9osAzUfGqn7ohtYgg=",
+        "lastModified": 1696534240,
+        "narHash": "sha256-oYHQGlcYKHkSEoq7O05S23/s45vuEtPT05ZT2WF+MJc=",
         "ref": "refs/heads/master",
-        "rev": "0215fbddccf206801d94f52518cbfec91ccc3cc5",
-        "revCount": 11890,
+        "rev": "84818541d5db5a1c129c29506a6eca8e8faf6522",
+        "revCount": 11894,
         "type": "git",
         "url": "https://cgit.lassul.us/stockholm"
       },
