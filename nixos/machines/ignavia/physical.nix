@@ -1,8 +1,9 @@
-{ self, ... }:
+{ self, modulesPath, ... }:
 {
   imports = [
     ./config.nix
     ../../2configs/antimicrox
+    (modulesPath + "/installer/scan/not-detected.nix")
     ./disk.nix
     self.inputs.nixos-hardware.nixosModules.framework-13th-gen-intel
   ];
