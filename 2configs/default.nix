@@ -61,8 +61,6 @@
         root = {
           openssh.authorizedKeys.keys = [
             config.krebs.users.lass.pubkey
-            config.krebs.users.lass-blue.pubkey
-            config.krebs.users.lass-green.pubkey
           ];
         };
         mainUser = {
@@ -82,8 +80,6 @@
           ];
           openssh.authorizedKeys.keys = [
             config.krebs.users.lass.pubkey
-            config.krebs.users.lass-blue.pubkey
-            config.krebs.users.lass-green.pubkey
           ];
         };
       };
