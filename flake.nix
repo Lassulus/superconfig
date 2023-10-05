@@ -35,14 +35,22 @@
       machines = nixpkgs.lib.mapAttrs (machineName: _: {
 
         imports = [
-          ./nixos/machines/${machineName}/physical.nix
-          {
+          ./machines/${machineName}/physical.nix
+          ({ pkgs, ... }: {
             clanCore.machineName = machineName;
             clanCore.secretStore = "password-store";
             krebs.secret.directory = "/etc/secrets";
-          }
+            nixpkgs.config.packageOverrides = import ./5pkgs pkgs; # TODO move into packages
+            nixpkgs.overlays = [
+              self.inputs.stockholm.overlays.default
+              (import (self.inputs.stockholm.inputs.nix-writers + "/pkgs")) # TODO get rid of that overlay
+            ];
+          })
+          ./2configs
+          ./3modules
+          self.inputs.stockholm.nixosModules.krebs
         ];
-      }) (builtins.readDir ./nixos/machines);
+      }) (builtins.readDir ./machines);
     };
   in
     flake-parts.lib.mkFlake { inherit inputs; } {
