@@ -14,7 +14,7 @@
     repo = "u364341@u364341.your-storagebox.de:/./hetzner";
     encryption.mode = "none";
     compression = "auto,zstd";
-    startAt = "daily";
+    startAt = "*-*-* 01:00:00";
     # TODO: change backup key
     environment.BORG_RSH = "ssh -oPort=23 -i ${"${config.krebs.secret.directory}/borgbackup.ssh.id25519"}";
     preHook = ''
