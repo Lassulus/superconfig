@@ -50,14 +50,11 @@ with lib;
     in ''
       alias ${initscript}/bin/init;
     '';
-    locations."= /blue.pub".extraConfig = ''
-      alias ${pkgs.writeText "pub" config.krebs.users.lass-blue.pubkey};
-    '';
     locations."= /ssh.pub".extraConfig = ''
-      alias ${pkgs.writeText "pub" config.krebs.users.lass-yubikey.pubkey};
+      alias ${pkgs.writeText "pub" config.krebs.users.lass.pubkey};
     '';
     locations."= /gpg.pub".extraConfig = ''
-      alias ${pkgs.writeText "pub" config.krebs.users.lass-yubikey.pgp.pubkeys.default};
+      alias ${pkgs.writeText "pub" config.krebs.users.lass.pgp.pubkeys.default};
     '';
     locations."= /ip".extraConfig = ''
       return 200 '$remote_addr';
