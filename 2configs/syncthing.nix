@@ -1,10 +1,18 @@
-{ config, lib, pkgs, ... }: with lib;
+{ config, lib, pkgs, ... }:
 let
-  mk_peers = mapAttrs (n: v: { id = v.syncthing.id; });
 
-  all_peers = filterAttrs (n: v: v.syncthing.id != null) config.krebs.hosts;
-  used_peer_names = unique (filter isString (flatten (mapAttrsToList (n: v: v.devices) config.services.syncthing.folders)));
-  used_peers = filterAttrs (n: v: elem n used_peer_names) all_peers;
+  shares = {
+    "/home/lass/sync" = [ "mors" "xerxes" "green" "blue" "coaxmetal" "aergia" "ignavia" ];
+    "/home/lass/tmp/the_playlist" = [ "mors" "phone" "prism" "omo" "radio" ];
+    # "/home/lass/.weechat" = [ "green" "mors" ];
+    "/home/lass/decsync" = [ "mors" "blue" "green" "phone" "massulus" ];
+  };
+
+  mk_peers = lib.mapAttrs (n: v: { id = v.syncthing.id; });
+
+  all_peers = lib.filterAttrs (n: v: v.syncthing.id != null) config.krebs.hosts;
+  used_peer_names = lib.unique (lib.filter lib.isString (lib.flatten (lib.mapAttrsToList (n: v: v.devices) config.services.syncthing.folders)));
+  used_peers = lib.filterAttrs (n: v: lib.elem n used_peer_names) all_peers;
 in {
   services.syncthing = {
     enable = true;
@@ -14,6 +22,19 @@ in {
     cert = "${config.krebs.secret.directory}/syncthing.cert";
     # workaround for infinite recursion on unstable, remove in 23.11
     settings.devices = mk_peers used_peers;
+    settings.folders = lib.mapAttrs (share: devices: {
+      enable = lib.elem config.networking.hostName devices;
+      path = share;
+      ignorePerms = false;
+      versioning = {
+        type = "trashcan";
+        params = {
+          cleanoutDays = "30";
+        };
+      };
+      devices = devices;
+    }) shares;
+    user = "lass";
   };
 
   clanCore.secrets.syncthing = {
@@ -29,11 +50,8 @@ in {
   };
 
   boot.kernel.sysctl."fs.inotify.max_user_watches" = 524288;
-  krebs.iptables.tables.filter.INPUT.rules = [
-    { predicate = "-p tcp --dport 22000"; target = "ACCEPT";}
-    { predicate = "-p udp --dport 21027"; target = "ACCEPT";}
-  ];
-  system.activationScripts.syncthing-home = mkDefault ''
-    ${pkgs.coreutils}/bin/chmod a+x /home/lass
-  '';
+  networking.firewall = {
+    allowedTCPPorts = [ 22000 ];
+    allowedUDPPorts = [ 21027 ];
+  };
 }
