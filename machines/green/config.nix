@@ -7,8 +7,6 @@
     ../../2configs/mail.nix
 
     ../../2configs/syncthing.nix
-    ../../2configs/sync/sync.nix
-    ../../2configs/sync/decsync.nix
 
     ../../2configs/weechat.nix
     ../../2configs/bitlbee.nix
@@ -49,8 +47,6 @@
   ];
 
   users.users.mainUser.openssh.authorizedKeys.keys = [
-    config.krebs.users.lass-android.pubkey
-    config.krebs.users.lass-tablet.pubkey
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKgpZwye6yavIs3gUIYvSi70spDa0apL2yHR0ASW74z8" # weechat ssh tunnel
   ];
 

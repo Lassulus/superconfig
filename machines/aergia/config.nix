@@ -10,7 +10,6 @@
     ../../2configs/programs.nix
     ../../2configs/network-manager.nix
     ../../2configs/syncthing.nix
-    ../../2configs/sync/sync.nix
     ../../2configs/games.nix
     ../../2configs/steam.nix
     ../../2configs/wine.nix

@@ -17,10 +17,6 @@
     ../../2configs/fetchWallpaper.nix
     ../../2configs/mail.nix
     ../../2configs/syncthing.nix
-    ../../2configs/sync/sync.nix
-    ../../2configs/sync/decsync.nix
-    ../../2configs/sync/weechat.nix
-    ../../2configs/sync/the_playlist.nix
     ../../2configs/br.nix
     ../../2configs/ableton.nix
     ../../2configs/dunst.nix
