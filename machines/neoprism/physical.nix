@@ -40,12 +40,12 @@
     #     "fe80::1"
     #   ];
     # };
-    networks.eth0 = {
+    networks.enp = {
       #bridge = [ "ext-br" ];
       matchConfig.Name = "enp35s0";
        address = [
          "95.217.192.59/26"
-         "2a01:4f9:4a:4f1a::1/64"
+         "2a01:4f9:4a:4f1a::2/64"
        ];
        gateway = [
          "95.217.192.1"
