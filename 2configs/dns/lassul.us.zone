@@ -1,0 +1,58 @@
+@ 3600 IN SOA lassul.us. ns1.lassul.us. 2023101214 7200 3600 86400 3600
+
+;;@ 3600 IN NS ns1
+@ 3600 IN NS ns1
+@ 3600 IN NS oxygen.ns.hetzner.com.
+@ 3600 IN NS hydrogen.ns.hetzner.com.
+@ 3600 IN NS helium.ns.hetzner.de.
+
+$TTL 600
+
+;; NS Records
+he IN NS oxygen.ns.hetzner.com.
+he IN NS hydrogen.ns.hetzner.com.
+he IN NS helium.ns.hetzner.de.
+
+@ IN A 95.216.1.150
+@ IN AAAA 2a01:4f9:2a:1e9::1
+prism IN A 95.216.1.150
+4.prism IN A 95.216.1.150
+prism IN AAAA 2a01:4f9:2a:1e9::1
+6.prism IN AAAA 2a01:4f9:2a:1e9::1
+neoprism IN A 95.217.192.59
+4.neoprism IN A 95.217.192.59
+neoprism IN AAAA 2a01:4f9:4a:4f1a::2
+6.neoprism IN AAAA 2a01:4f9:4a:4f1a::2
+
+* IN CNAME www
+
+ns1 IN CNAME neoprism
+www IN CNAME prism
+cache IN CNAME prism
+cgit IN CNAME prism
+pad IN CNAME prism
+codi IN CNAME prism
+go IN CNAME prism
+lol IN CNAME prism
+matrix IN CNAME prism
+paste IN CNAME prism
+radio IN CNAME prism
+jitsi IN CNAME prism
+streaming IN CNAME prism
+flix IN CNAME prism
+flex IN CNAME prism
+flux IN CNAME prism
+testing IN CNAME prism
+schrott IN CNAME prism
+
+;; Mail
+@ IN MX 3 mail
+mail IN A 95.216.1.150
+mail IN AAAA 2a01:4f9:2a:1e9::1
+imap IN A 95.216.1.150
+imap IN AAAA 2a01:4f9:2a:1e9::1
+smtp._tls IN TXT "v=TLSRPTv1;rua=mailto:postmaster@lassul.us"
+;
+default._domainkey IN TXT "k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDUv3DMndFellqu208feABEzT/PskOfTSdJCOF/HELBR0PHnbBeRoeHEm9XAcOe/Mz2t/ysgZ6JFXeFxCtoM5fG20brUMRzsVRxb9Ur5cEvOYuuRrbChYcKa+fopu8pYrlrqXD3miHISoy6ErukIYCRpXWUJHi1TlNQhLWFYqAaywIDAQAB"
+_dmarc IN TXT "v=DMARC1; p=none; adkim=r; aspf=r; rua=mailto:postmaster@lassul.us; ruf=mailto:postmaster@lassul.us; pct=100"
+@ IN TXT "v=spf1 mx -al"
