@@ -1,4 +1,4 @@
-{ self, config, lib, pkgs, ... }:
+{ self, pkgs, ... }:
 {
   environment.systemPackages = with pkgs; [
     yubikey-personalization
