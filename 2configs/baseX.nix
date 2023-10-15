@@ -1,7 +1,5 @@
 { self, config, lib, pkgs, ... }:
-let
-  user = config.krebs.build.user;
-in {
+{
   imports = [
     ./alacritty.nix
     ./mpv.nix
