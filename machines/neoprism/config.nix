@@ -24,6 +24,9 @@
     ../../2configs/services/radio/proxy.nix
     ../../2configs/services/flix/proxy.nix
     ../../2configs/services/coms/proxy.nix
+
+    # dns
+    ../../2configs/dns/knot.nix
   ];
 
   krebs.build.host = config.krebs.hosts.neoprism;
