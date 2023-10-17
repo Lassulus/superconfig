@@ -70,6 +70,10 @@ in
       sslCertPath = "/var/lib/acme/${domain}/cert.pem";
       sslKeyPath = "/var/lib/acme/${domain}/key.pem";
       dhParamPath = config.security.dhparams.params.hedgedoc.path;
+
     };
+
+    # https://github.com/settings/applications/2352617
+    environmentFile = config.clanCore.secretsUploadDirectory + "/hedgedoc.env";
   };
 }
