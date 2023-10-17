@@ -28,10 +28,6 @@ in
     params.hedgedoc = { };
   };
 
-  systemd.services.hedgedoc.environment = {
-    CMD_COOKIE_POLICY = "none";
-    CMD_CSP_ALLOW_FRAMING = "true";
-  };
 
   services.borgbackup.jobs.hetzner.paths = [
     "/var/backup"
@@ -49,6 +45,11 @@ in
     };
   };
 
+  systemd.services.hedgedoc.environment = {
+    CMD_COOKIE_POLICY = "none";
+    CMD_CSP_ALLOW_FRAMING = "true";
+  };
+
   services.hedgedoc = {
     enable = true;
     configuration.allowOrigin = [ domain ];
@@ -61,6 +62,7 @@ in
       port = 3091;
       domain = domain;
       allowFreeURL = true;
+      defaultPermission = "freely";
 
       useSSL = true;
       protocolUseSSL = true;
