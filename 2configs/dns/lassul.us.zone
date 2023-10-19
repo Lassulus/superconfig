@@ -24,9 +24,12 @@ neoprism IN A 95.217.192.59
 neoprism IN AAAA 2a01:4f9:4a:4f1a::2
 6.neoprism IN AAAA 2a01:4f9:4a:4f1a::2
 
+;; GLUE
+ns1 IN A 95.217.192.59
+ns1 IN AAAA 2a01:4f9:4a:4f1a::2
+
 * IN CNAME www
 
-ns1 IN CNAME neoprism
 www IN CNAME prism
 cache IN CNAME prism
 cgit IN CNAME prism

@@ -117,25 +117,28 @@ in
       }];
 
       policy = [{
-        id = "default";
+        id = "rsa2k";
         algorithm = "RSASHA256";
         ksk-size = 4096;
         zsk-size = 2048;
+        nsec3 = true;
       }];
 
-
-      template = [
-      ];
       zone = [
         {
           domain = "lassul.us";
           file = "${./lassul.us.zone}";
           notify = [ "hetzner_ip4_1" "hetzner_ip4_2" "hetzner_ip4_3" "hetzner_ip6_1" "hetzner_ip6_2" "hetzner_ip6_3" ];
           acl = [ "hetzner_ip4_1" "hetzner_ip4_2" "hetzner_ip4_3" "hetzner_ip6_1" "hetzner_ip6_2" "hetzner_ip6_3" ];
+          dnssec-signing = true;
+          dnssec-policy = "rsa2k";
         }
       ];
     };
   };
+
+  # disable to enable auto key generation
+  systemd.services.knot.serviceConfig.SystemCallFilter = lib.mkForce [];
 
   networking.firewall.allowedTCPPorts = [ 53 ];
   networking.firewall.allowedUDPPorts = [ 53 ];
