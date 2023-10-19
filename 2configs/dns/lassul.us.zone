@@ -6,6 +6,7 @@
 @ 3600 IN NS hydrogen.ns.hetzner.com.
 @ 3600 IN NS helium.ns.hetzner.de.
 
+
 $TTL 600
 
 ;; NS Records
@@ -47,6 +48,7 @@ flex IN CNAME prism
 flux IN CNAME prism
 testing IN CNAME prism
 schrott IN CNAME prism
+mergebot IN CNAME neoprism
 
 ;; Mail
 @ IN MX 3 mail
