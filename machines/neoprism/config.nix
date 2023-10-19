@@ -27,6 +27,9 @@
 
     # dns
     ../../2configs/dns/knot.nix
+
+    # debug stuff
+    ../../2configs/websites/mergebot.lassul.us.nix
   ];
 
   krebs.build.host = config.krebs.hosts.neoprism;
