@@ -136,4 +136,45 @@
 
   boot.cleanTmpDir = true;
   programs.noisetorch.enable = true;
+
+  # wayland stuff
+  environment.systemPackages = [
+    pkgs.rofi-wayland
+    pkgs.wtype
+    pkgs.otpmenu
+    pkgs.qtile
+    pkgs.swaylock
+    pkgs.copyq
+    (pkgs.writers.writeDashBin "pass_menu" ''
+      set -efux
+      password=$(
+        (cd $HOME/.password-store; find -type f -name '*.gpg') |
+          sed -e 's/\.gpg$//' |
+          rofi -dmenu -p 'Password: ' |
+          xargs -I{} pass show {} |
+          tr -d '\n'
+      )
+      echo -n "$password" | ${pkgs.wtype}/bin/wtype -d 10 -s 400 -
+    '')
+    (pkgs.writeTextFile {
+      name = "configure-gtk";
+      destination = "/bin/configure-gtk";
+      executable = true;
+      text = let
+        schema = pkgs.gsettings-desktop-schemas;
+        datadir = "${schema}/share/gsettings-schemas/${schema.name}";
+      in ''
+        export XDG_DATA_DIRS=${datadir}:$XDG_DATA_DIRS
+        gnome_schema=org.gnome.desktop.interface
+        gsettings set $gnome_schema gtk-theme 'Dracula'
+      '';
+    })
+  ];
+
+  security.pam.services.swaylock.text = ''
+    # PAM configuration file for the swaylock screen locker. By default, it includes
+    # the 'login' configuration file (see /etc/pam.d/login)
+    auth include login
+  '';
+
 }
