@@ -1,4 +1,4 @@
-{ config, pkgs, ... }: let
+{ config, pkgs, lib, ... }: let
   torrentport = 56709; # port forwarded in airvpn webinterface
 in {
   imports = [
@@ -51,6 +51,11 @@ in {
 
   systemd.services.transmission = {
     after = [ "transmission-netns.service" ];
-    serviceConfig.NetworkNamespacePath = "/var/run/netns/transmission";
+    serviceConfig = {
+      NetworkNamespacePath = "/var/run/netns/transmission";
+      # https://github.com/NixOS/nixpkgs/issues/258793
+      RootDirectoryStartOnly = lib.mkForce false;
+      RootDirectory = lib.mkForce "";
+    };
   };
 }
