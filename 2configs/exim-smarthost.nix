@@ -25,6 +25,7 @@ in {
     ];
     relay_from_hosts = map (host: host.nets.retiolum.ip6.addr) [
       config.krebs.hosts.aergia
+      config.krebs.hosts.ignavia
       config.krebs.hosts.blue
       config.krebs.hosts.coaxmetal
       config.krebs.hosts.green
