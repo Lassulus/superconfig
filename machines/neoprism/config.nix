@@ -23,7 +23,7 @@
     # proxying of services
     ../../2configs/services/radio/proxy.nix
     ../../2configs/services/flix/proxy.nix
-    ../../2configs/services/coms/proxy.nix
+    ../../2configs/services/coms/jitsi.nix
 
     # dns
     ../../2configs/dns/knot.nix
