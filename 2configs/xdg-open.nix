@@ -47,6 +47,8 @@
         zathura "$FILE" ;;
       inode/directory)
         alacritty --execute mc "$FILE" ;;
+      video/*)
+        mpv "$FILE" ;;
       *)
         echo $TERM >> /tmp/xdg.debug
         # open dmenu and ask for program to open with
