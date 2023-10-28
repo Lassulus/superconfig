@@ -1,17 +1,16 @@
 { self, config, lib, pkgs, ... }:
 {
   imports = [
-    ./alacritty.nix
-    ./mpv.nix
-    ./power-action.nix
-    ./urxvt.nix
-    ./xdg-open.nix
-    ./yubikey.nix
-    ./pipewire.nix
-    ./tmux.nix
-    ./xmonad.nix
-    ./themes.nix
-    ./fonts.nix
+    ../../alacritty.nix
+    ../../mpv.nix
+    ../../power-action.nix
+    ../../xdg-open.nix
+    ../../yubikey.nix
+    ../../pipewire.nix
+    ../../tmux.nix
+    ../../xmonad.nix
+    ../../themes.nix
+    ../../fonts.nix
     {
       users.users.mainUser.packages = [
         pkgs.sshuttle

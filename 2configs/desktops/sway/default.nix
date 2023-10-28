@@ -4,63 +4,8 @@
 
 in {
   imports = [
-    ../alacritty.nix
-    ../mpv.nix
-    ../power-action.nix
-    ../urxvt.nix
-    ../xdg-open.nix
-    ../yubikey.nix
-    ../tmux.nix
-    ../themes.nix
-    ../fonts.nix
-    # ./pipewire.nix
-    # ./tty-share.nix
-    {
-      users.users.mainUser.packages = [
-        pkgs.sshuttle
-      ];
-      security.sudo.extraConfig = ''
-        lass ALL= (root) NOPASSWD:SETENV: ${pkgs.sshuttle}/bin/.sshuttle-wrapped
-      '';
-    }
+    ../lib/wayland.nix
   ];
-  users.users.mainUser.extraGroups = [ "audio" "pipewire" "video" "input" ];
-
-  services.clipmenu.enable = true;
-
-  services.udev.extraRules = ''
-    SUBSYSTEM=="backlight", ACTION=="add", \
-    RUN+="${pkgs.coreutils}/bin/chgrp video /sys/class/backlight/%k/brightness", \
-    RUN+="${pkgs.coreutils}/bin/chmod g+w /sys/class/backlight/%k/brightness"
-  '';
-
-  nixpkgs.config.packageOverrides = super: {
-    dmenu = pkgs.writeDashBin "dmenu" ''
-      unset TERM
-      ${pkgs.fzfmenu}/bin/fzfmenu "$@"
-    '';
-  };
-
-  environment.systemPackages = [
-    (pkgs.writers.writeDashBin "dmenu-wl" ''
-      unset TERM
-      ${pkgs.fzfmenu}/bin/fzfmenu "$@"
-    '')
-    pkgs.ydotool
-    pkgs.wl-clipboard
-    pkgs.fzfmenu
-    pkgs.glib
-    pkgs.dracula-theme
-    pkgs.gnome3.adwaita-icon-theme
-  ];
-
-  services.dbus.enable = true;
-  xdg.portal = {
-    enable = true;
-    wlr.enable = true;
-    # gtk portal needed to make gtk apps happy
-    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-  };
   programs.sway = {
     enable = true;
     wrapperFeatures.gtk = true;

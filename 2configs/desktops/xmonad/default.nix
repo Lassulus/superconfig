@@ -1,6 +1,9 @@
 { config, lib, pkgs, ... }:
 
 {
+  imports = [
+    ../lib/x11.nix
+  ];
   services.xserver.windowManager.xmonad = {
     enable = true;
     extraPackages = hs: [
