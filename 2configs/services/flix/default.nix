@@ -242,6 +242,7 @@
       { predicate = "-p tcp --dport 8920"; target = "ACCEPT"; } # jellyfin
       { predicate = "-p udp --dport 1900"; target = "ACCEPT"; } # jellyfin
       { predicate = "-p udp --dport 7359"; target = "ACCEPT"; } # jellyfin
+      { predicate = "-p tcp --dport 5055"; target = "ACCEPT"; } # jellyseerr
       { predicate = "-p tcp --dport 9696"; target = "ACCEPT"; } # prowlarr
       { predicate = "-p tcp --dport 8989"; target = "ACCEPT"; } # sonarr
       { predicate = "-p tcp --dport 7878"; target = "ACCEPT"; } # radarr
@@ -290,6 +291,11 @@
   services.jellyfin = {
     enable = true;
     group = "download";
+  };
+
+  # request managment
+  services.jellyseerr = {
+    enable = true;
   };
 
   # movies
