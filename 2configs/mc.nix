@@ -189,17 +189,20 @@ let
 
     [mc.ext.ini]
     Version=4.0
-      # gitfs changeset
-      regex/^\[git\]
-        Open=%cd %p/changesetfs://
-        View=%cd %p/patchsetfs://
+
+    ## do all through xdg-open ##
+    [all]
+    Regex=\.*
+    Open=/run/current-system/sw/bin/xdg-open %f
+    View=/run/current-system/sw/bin/xdg-open %f
+    Edit=/run/current-system/sw/bin/xdg-open %f
 
     ######### Default #########
 
     # Default target for anything not described above
     [Default]
-    Open=xdg-open
-    View=xdg-open
+    Open=/run/current-system/sw/bin/xdg-open %f
+    View=/run/current-system/sw/bin/xdg-open %f
   '';
 
 in {
@@ -213,7 +216,7 @@ in {
               "/sfs.ini".text = "";
           }};
           export TERM=xterm-256color
-          exec ${pkgs.mc}/bin/mc -S yadt256 "$@"
+          exec ${pkgs.mc}/bin/mc -S nicedark "$@"
         '')
         pkgs.mc
       ];
