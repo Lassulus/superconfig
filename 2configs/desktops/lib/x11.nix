@@ -8,7 +8,6 @@
     ../../yubikey.nix
     ../../pipewire.nix
     ../../tmux.nix
-    ../../xmonad.nix
     ../../themes.nix
     ../../fonts.nix
     {
