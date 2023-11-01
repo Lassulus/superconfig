@@ -19,7 +19,6 @@
     self.inputs.stockholm.nixosModules.exim
     self.inputs.stockholm.nixosModules.exim-retiolum
     self.inputs.stockholm.nixosModules.tinc
-    self.inputs.stockholm.nixosModules.fetchWallpaper
     self.inputs.stockholm.nixosModules.iptables
     self.inputs.stockholm.nixosModules.power-action
     self.inputs.stockholm.nixosModules.setuid
