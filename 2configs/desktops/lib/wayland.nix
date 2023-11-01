@@ -34,6 +34,9 @@
     pkgs.glib
     pkgs.dracula-theme
     pkgs.gnome3.adwaita-icon-theme
+    pkgs.zathura
+    pkgs.sxiv
+    pkgs.otpmenu
     (pkgs.writers.writeDashBin "pass_menu" ''
       set -efu
       password=$(
