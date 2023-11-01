@@ -46,7 +46,7 @@
           xargs -I{} pass show {} |
           tr -d '\n'
       )
-      echo -n "$password" | ${pkgs.wtype}/bin/wtype -d 10 -s 400 -
+      printf %s "$password" | ${pkgs.wtype}/bin/wtype -d 10 -s 400 -
     '')
   ];
 
