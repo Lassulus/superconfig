@@ -31,6 +31,7 @@
   outputs = inputs@{ self, flake-parts, nixpkgs, clan-core, ... }:
   let
     clan = clan-core.lib.buildClan {
+      clanName = "superconfig";
       directory = self;
       specialArgs.self = self;
       machines = nixpkgs.lib.mapAttrs (machineName: _: {
