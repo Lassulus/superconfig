@@ -38,10 +38,11 @@
 
         imports = [
           ./machines/${machineName}/physical.nix
-          ({ pkgs, ... }: {
+          ({ config, pkgs, ... }: {
             clanCore.machineName = machineName;
             clanCore.secretStore = "password-store";
-            krebs.secret.directory = "/etc/secrets";
+            clanCore.secretsUploadDirectory = "/etc/secrets";
+            krebs.secret.directory = config.clanCore.secretsUploadDirectory;
             nixpkgs.config.packageOverrides = import ./5pkgs pkgs; # TODO move into packages
             nixpkgs.overlays = [
               self.inputs.stockholm.overlays.default
