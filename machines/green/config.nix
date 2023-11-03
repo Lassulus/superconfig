@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, ... }:
 {
   imports = [
     ../../2configs
@@ -19,6 +19,8 @@
 
     ../../2configs/atuin-server.nix
   ];
+
+  clanCore.secretsUploadDirectory = lib.mkForce "/var/state/secrets";
 
   krebs.build.host = config.krebs.hosts.green;
 
