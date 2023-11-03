@@ -44,7 +44,7 @@ in {
     };
   };
 
-  config = {
+  config = lib.mkIf cfg.enable {
     systemd.timers.fetchWallpaper = {
       description = "fetch wallpaper timer";
       wantedBy = [ "timers.target" ];
