@@ -23,41 +23,63 @@
   ];
   users.users.mainUser.extraGroups = [ "audio" "pipewire" "video" "input" ];
 
+  xdg.portal.enable = true;
+  xdg.portal.wlr.enable = true;
+  fonts.enableDefaultPackages = true;
+
   security.polkit.enable = true;
   security.pam.services.swaylock = { };
 
-  environment.systemPackages = [
-    pkgs.ydotool
-    pkgs.wl-clipboard
-    pkgs.rofi
-    pkgs.swaylock
-    pkgs.glib
-    pkgs.dracula-theme
-    pkgs.gnome3.adwaita-icon-theme
-    pkgs.zathura
-    pkgs.sxiv
-    pkgs.otpmenu
-    (pkgs.writers.writeDashBin "pass_menu" ''
-      set -efu
-      password=$(
-        (cd $HOME/.password-store; find -type f -name '*.gpg') |
-          sed -e 's/\.gpg$//' |
-          rofi -dmenu -p 'Password: ' |
-          xargs -I{} pass show {} |
-          tr -d '\n'
-      )
-      printf %s "$password" | ${pkgs.wtype}/bin/wtype -d 10 -s 400 -
-    '')
+  programs.dconf.enable = lib.mkDefault true;
+  programs.xwayland.enable = lib.mkDefault true;
+
+  environment.sessionVariables = {
+    MOZ_ENABLE_WAYLAND = "1";
+    XDG_SESSION_TYPE = "wayland";
+    SDL_VIDEODRIVER = "wayland";
+    QT_QPA_PLATFORM = "wayland";
+    QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
+    _JAVA_AWT_WM_NONREPARENTING = "1";
+  };
+
+  programs.wshowkeys.enable = true;
+
+  environment.systemPackages = with pkgs; [
+    qtile
+    swaylock-effects # lockscreen
+    pavucontrol
+    swayidle
+    rofi-wayland
+    rofi-rbw
+    gnome.eog
+    libnotify
+    mako # notifications
+    kanshi # auto-configure display outputs
+    wdisplays # buggy with qtile?
+    wlr-randr
+    wl-clipboard
+    wev
+    blueberry
+    grim # screenshots
+    wtype
+
+    pavucontrol
+    evince
+    libnotify
+    pamixer
+    gnome.file-roller
+    xdg-utils
+    # polkit agent
+    polkit_gnome
+
+    # gtk3 themes
+    gsettings-desktop-schemas
   ];
 
-  services.dbus.enable = true;
-  xdg.portal = {
-    enable = true;
-    wlr.enable = true;
-    # gtk portal needed to make gtk apps happy
-    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-  };
-  fonts.enableDefaultPackages = true;
-  programs.dconf.enable = lib.mkDefault true;
+  environment.pathsToLink = [
+    "/libexec" # for polkit
+    "/share/gsettings-schemas" # for XDG_DATA_DIRS
+  ];
 
+  qt.platformTheme = "qt5ct";
 }

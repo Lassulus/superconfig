@@ -4,7 +4,7 @@ import json
 import os
 from typing import Callable
 
-from libqtile import bar, layout, widget, extension
+from libqtile import bar, layout, widget, extension, hook
 from libqtile.config import Click, Drag, Group, Key, Match, Screen, ScratchPad, DropDown
 from libqtile.lazy import lazy
 from libqtile.utils import guess_terminal
@@ -109,6 +109,13 @@ keys = [
     Key([], "XF86AudioLowerVolume", lazy.spawn("pactl set-sink-volume @DEFAULT_SINK@ -5%")),
     Key([], "XF86MonBrightnessUp", lazy.spawn("xbacklight -inc 10")),
     Key([], "XF86MonBrightnessDown", lazy.spawn("xbacklight -dec 10")),
+
+    Key(["control", "mod1"], "F1", lazy.core.change_vt(1), desc="Switch to VT 1"),
+    Key(["control", "mod1"], "F2", lazy.core.change_vt(2), desc="Switch to VT 2"),
+    Key(["control", "mod1"], "F3", lazy.core.change_vt(3), desc="Switch to VT 3"),
+    Key(["control", "mod1"], "F4", lazy.core.change_vt(4), desc="Switch to VT 4"),
+    Key(["control", "mod1"], "F5", lazy.core.change_vt(5), desc="Switch to VT 5"),
+    Key(["control", "mod1"], "F6", lazy.core.change_vt(6), desc="Switch to VT 6"),
 ]
 
 layouts = [
@@ -219,6 +226,18 @@ auto_minimize = True
 wl_input_rules = {
     "type:keyboard": InputConfig(kb_options="ctrl:nocaps", kb_layout="us", kb_variant="altgr-intl"),
 }
+
+@hook.subscribe.startup
+def autostart():
+    subprocess.run(
+        [
+            "systemctl",
+            "--user",
+            "import-environment",
+            "XDG_SESSION_PATH",
+            "WAYLAND_DISPLAY",
+        ]
+    )
 
 # XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
 # string besides java UI toolkits; you can see several discussions on the
