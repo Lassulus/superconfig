@@ -58,12 +58,12 @@
     };
   };
 
-  usershadow = let {
+  usershadow = let
     deps = [
       "pwstore-fast"
       "bytestring"
     ];
-    body = pkgs.writeHaskellPackage "passwords" {
+    in pkgs.writeHaskellPackage "passwords" {
       ghc-options = [
         "-rtsopts"
         "-Wall"
@@ -143,6 +143,5 @@
         '';
       };
     };
-  };
 
 in out
