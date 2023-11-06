@@ -10,7 +10,7 @@
     ../../tmux.nix
     ../../themes.nix
     ../../fonts.nix
-    # ./pipewire.nix
+    # ../pipewire.nix
     # ./tty-share.nix
     {
       users.users.mainUser.packages = [
@@ -74,6 +74,17 @@
 
     # gtk3 themes
     gsettings-desktop-schemas
+    (pkgs.writers.writeDashBin "pass_menu" ''
+      set -efux
+      password=$(
+        (cd $HOME/.password-store; find -type f -name '*.gpg') |
+          sed -e 's/\.gpg$//' |
+          rofi -dmenu -p 'Password: ' |
+          xargs -I{} pass show {} |
+          tr -d '\n'
+      )
+      echo -n "$password" | ${pkgs.wtype}/bin/wtype -d 10 -s 400 -
+    '')
   ];
 
   environment.pathsToLink = [
