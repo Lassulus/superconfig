@@ -27,6 +27,11 @@
     after = [ "graphical-session-pre.target" ];
   };
 
+  environment.systemPackages = [
+    pkgs.qtile
+    pkgs.copyq
+  ];
+
   systemd.user.services.qtile =
     let
       pyEnv = pkgs.python3.withPackages (_p: [
