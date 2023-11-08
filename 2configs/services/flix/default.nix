@@ -163,50 +163,13 @@
     };
   };
 
-  services.samba = {
-    enable = true;
-    enableNmbd = false;
-    extraConfig = ''
-      workgroup = WORKGROUP
-      server string = ${config.networking.hostName}
-      # only allow retiolum addresses
-      hosts allow = 42::/16 10.243.0.0/16 10.244.0.0/16
-
-      # Use sendfile() for performance gain
-      use sendfile = true
-
-      # No NetBIOS is needed
-      disable netbios = true
-
-      # Only mangle non-valid NTFS names, don't care about DOS support
-      mangled names = illegal
-
-      # Performance optimizations
-      socket options = TCP_NODELAY IPTOS_LOWDELAY SO_RCVBUF=65536 SO_SNDBUF=65536
-
-      # Disable all printing
-      load printers = false
-      disable spoolss = true
-      printcap name = /dev/null
-
-      map to guest = Bad User
-      max log size = 50
-      dns proxy = no
-      security = user
-
-      [global]
-      syslog only = yes
-    '';
-    shares.public = {
-      comment = "Warez";
-      path = "/var/download";
-      public = "yes";
-      "only guest" = "yes";
-      "create mask" = "0644";
-      "directory mask" = "2777";
-      writable = "no";
-      printable = "no";
-    };
+  services.ksmbd.enable = true;
+  services.ksmbd.shares.public = {
+    path = "/var/download";
+    "read only" = true;
+    browseable = "yes";
+    "guest ok" = "yes";
+    comment = "Warez.";
   };
 
   systemd.services.bruellwuerfel =
@@ -248,21 +211,7 @@
       { predicate = "-p tcp --dport 7878"; target = "ACCEPT"; } # radarr
       { predicate = "-p tcp --dport 6767"; target = "ACCEPT"; } # bazarr
 
-      # smbd
-      { predicate = "-i retiolum -p tcp --dport 445"; target = "ACCEPT"; }
-      { predicate = "-i retiolum -p tcp --dport 111"; target = "ACCEPT"; }
-      { predicate = "-i retiolum -p udp --dport 111"; target = "ACCEPT"; }
-      { predicate = "-i retiolum -p tcp --dport 2049"; target = "ACCEPT"; }
-      { predicate = "-i retiolum -p udp --dport 2049"; target = "ACCEPT"; }
-      { predicate = "-i retiolum -p tcp --dport 4000:4002"; target = "ACCEPT"; }
-      { predicate = "-i retiolum -p udp --dport 4000:4002"; target = "ACCEPT"; }
-      { predicate = "-i wiregrill -p tcp --dport 445"; target = "ACCEPT"; }
-      { predicate = "-i wiregrill -p tcp --dport 111"; target = "ACCEPT"; }
-      { predicate = "-i wiregrill -p udp --dport 111"; target = "ACCEPT"; }
-      { predicate = "-i wiregrill -p tcp --dport 2049"; target = "ACCEPT"; }
-      { predicate = "-i wiregrill -p udp --dport 2049"; target = "ACCEPT"; }
-      { predicate = "-i wiregrill -p tcp --dport 4000:4002"; target = "ACCEPT"; }
-      { predicate = "-i wiregrill -p udp --dport 4000:4002"; target = "ACCEPT"; }
+      { predicate = "-i retiolum -p tcp --dport 445"; target = "ACCEPT"; } # ksmb
     ];
   };
 
