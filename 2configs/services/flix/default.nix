@@ -208,10 +208,6 @@
       printable = "no";
     };
   };
-  services.ksmbd.extraConfig = ''
-    bind interfaces only = yes
-    interfaces = retiolum
-  '';
 
   systemd.services.bruellwuerfel =
   let
