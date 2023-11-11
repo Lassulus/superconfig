@@ -27,6 +27,7 @@ in {
     script = ''
       set -efux
       ip netns delete transmission || :
+      ip link del t2 || :
       ip netns add transmission
       ip -n transmission link set lo up
       ip link add airvpn type wireguard
