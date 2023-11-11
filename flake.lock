@@ -3,11 +3,11 @@
     "astro-nvim": {
       "flake": false,
       "locked": {
-        "lastModified": 1699036395,
-        "narHash": "sha256-b8fRxvehTD5nrygFp7180IQHpRmCm6t/E6RJ2nSO3m4=",
+        "lastModified": 1699528269,
+        "narHash": "sha256-cC1isyscpvNQ07n/Eb6rlfvuQ/K+7mCjdGJq4m/PUHk=",
         "owner": "AstroNvim",
         "repo": "AstroNvim",
-        "rev": "c699c7ace37093b5e73206c67fc394a5e1b5f58c",
+        "rev": "59d657c223038359b2b5e230805abca8d919280d",
         "type": "github"
       },
       "original": {
@@ -52,15 +52,16 @@
         "nixpkgs": [
           "nixpkgs"
         ],
+        "nixpkgs-for-deal": "nixpkgs-for-deal",
         "sops-nix": "sops-nix",
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1699107227,
-        "narHash": "sha256-UeOkGUMF4ufjcPraPIBoB/L2xRwu7qxx+mS4q4nCBoQ=",
+        "lastModified": 1699713055,
+        "narHash": "sha256-7c2KIrvjbP/f/N29Mf7xlgoUwT77jZhbowBCyIrSnvY=",
         "ref": "refs/heads/main",
-        "rev": "1cd7fed34ddeba5f4a1288a09161aea9ffc2544b",
-        "revCount": 1178,
+        "rev": "3a2c407ae064186bedc118f2b96848ca30614f77",
+        "revCount": 1227,
         "type": "git",
         "url": "https://git.clan.lol/clan/clan-core"
       },
@@ -76,11 +77,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1699099781,
-        "narHash": "sha256-2WAs839yL6xmIPBLNVwbft46BDh0/RAjq1bAKNRqeR4=",
+        "lastModified": 1699715655,
+        "narHash": "sha256-RP5BUKG3mZDjQmzFcE+HxYVVghrBRTqqbjFuyJ+bbJA=",
         "owner": "nix-community",
         "repo": "disko",
-        "rev": "548962c50b8afad7b8c820c1d6e21dc8394d6e65",
+        "rev": "4fec5f515c687cc2454452a2eaa634bcecc18f3a",
         "type": "github"
       },
       "original": {
@@ -256,11 +257,11 @@
     },
     "nixos-hardware": {
       "locked": {
-        "lastModified": 1699159446,
-        "narHash": "sha256-cL63IjsbPl2otS7R4kdXbVOJOXYMpGw5KGZoWgdCuCM=",
+        "lastModified": 1699701045,
+        "narHash": "sha256-mDzUXK7jNO/utInWpSWEX1NgEEunVIpJg+LyPsDTfy0=",
         "owner": "nixos",
         "repo": "nixos-hardware",
-        "rev": "627bc9b88256379578885a7028c9e791c29fb581",
+        "rev": "b689465d0c5d88e158e7d76094fca08cc0223aad",
         "type": "github"
       },
       "original": {
@@ -281,6 +282,22 @@
       "original": {
         "owner": "NixOS",
         "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-for-deal": {
+      "locked": {
+        "lastModified": 1699470058,
+        "narHash": "sha256-//c1SEENoNFEDtp8x5lokNxsU9lZjyNkEf5k3OJADTs=",
+        "owner": "Luis-Hebendanz",
+        "repo": "nixpkgs",
+        "rev": "842a157b727ad9712d41a80d1e1564e4e6bbe697",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Luis-Hebendanz",
+        "ref": "fix_python_deal",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -329,11 +346,11 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1699136867,
-        "narHash": "sha256-PhL/EMcOd7UcNfwhbzmBxWKoPHFcBHZNrrEZY9l5KCk=",
+        "lastModified": 1699308475,
+        "narHash": "sha256-sFHOFiE+GV1JkwDmHi0LLJLSRyggdIK1Yra02oj2eZg=",
         "owner": "nix-community",
         "repo": "nixvim",
-        "rev": "1e91231e863c8681edd8d1c887e9677142e43bfd",
+        "rev": "6b93c8fa6db999320d53f13e0ebd555e33f86577",
         "type": "github"
       },
       "original": {
@@ -438,11 +455,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1699033437,
-        "narHash": "sha256-4ShJkN8QPPfQhIBSXUpHjtOjYwXEum2xIsz5azGEQfI=",
+        "lastModified": 1699561284,
+        "narHash": "sha256-mt+wNbxwRS0VteQi/phJ8LUYlmbKauhXOtyhRk55qy0=",
         "ref": "refs/heads/master",
-        "rev": "8a62119217a92691e80fb0991b223694419373d4",
-        "revCount": 11915,
+        "rev": "015ef28416289059a66b1df043a186256384cc7b",
+        "revCount": 11917,
         "type": "git",
         "url": "https://cgit.lassul.us/stockholm"
       },
