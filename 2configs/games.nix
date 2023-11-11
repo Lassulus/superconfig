@@ -70,10 +70,10 @@ in {
         # steam-run
         # scummvm
         # dolphinEmu
-        doom1
-        doom2
+        # doom1
+        # doom2
         # protontricks
-        vdoom1
+        # vdoom1
         # vdoom2
         # vdoomserver
         retroarchBare
