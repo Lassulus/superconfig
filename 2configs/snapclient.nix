@@ -7,6 +7,7 @@
     serviceConfig = {
       DynamicUser = true;
       Group = "pipewire";
+      Restart = "on-failure";
     };
   };
 }
