@@ -3,8 +3,9 @@
   krebs.sync-containers3.containers.yellow = {
     sshKey = "${config.krebs.secret.directory}/yellow.sync.key";
     startCommand = ''
-      until /run/wrappers/bin/ping -c1 github.com; do sleep 1; done
-      ${pkgs.nixos-rebuild}/bin/nixos-rebuild --flake github:lassulus/superconfig#yellow switch
+      export PATH=$PATH:${pkgs.git}/bin
+      until ${pkgs.dig.host}/bin/host github.com; do sleep 1; done
+      ${pkgs.nixos-rebuild}/bin/nixos-rebuild --refresh --flake github:lassulus/superconfig#yellow switch
     '';
   };
   containers.yellow.bindMounts."/var/lib" = {
