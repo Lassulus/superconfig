@@ -6,7 +6,7 @@ let
     filename=$1
     cd "$(dirname "$filename")"
     filename=$(basename "$filename")
-    ${pkgs.subdl}/bin/subdl --download=best-rating --output='/tmp/{m}.{M}.sub' "$filename" 1>&2
+    ${pkgs.subdl}/bin/subdl --download=best-rating --existing=overwrite --output='/tmp/{m}.{M}.sub' "$filename" 1>&2
     echo "/tmp/$filename.sub"
   '';
 
