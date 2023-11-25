@@ -6,14 +6,12 @@ let
     filename=$1
     cd "$(dirname "$filename")"
     filename=$(basename "$filename")
-    ${pkgs.subdl}/bin/subdl --output='/tmp/{m}.{M}.sub' "$filename" 1>&2
+    ${pkgs.subdl}/bin/subdl --download=best-rating --output='/tmp/{m}.{M}.sub' "$filename" 1>&2
     echo "/tmp/$filename.sub"
   '';
 
   autosub = pkgs.writeText "autosub.lua" ''
-    -- Requires Subliminal version 1.0 or newer
-    -- Make sure to specify your system's Subliminal location below:
-    local utils = require 'mp.utils'
+    utils = require 'mp.utils'
 
     -- Log function: log to both terminal and mpv OSD (On-Screen Display)
     function log(string, secs)
@@ -34,27 +32,6 @@ let
         else
             log('Subtitles failed downloading')
         end
-    end
-
-    -- Control function: only download if necessary
-    function control_download()
-        duration = tonumber(mp.get_property('duration'))
-        if duration < 900 then
-            mp.msg.warn('Video is less than 15 minutes\n', '=> NOT downloading any subtitles')
-            return
-        end
-        -- There does not seem to be any documentation for the 'sub' property,
-        -- but it works on both internally encoded as well as external subtitle files!
-        -- -> sub = '1' when subtitles are present
-        -- -> sub = 'no' when subtitles are not present
-        -- -> sub = 'auto' when called before the 'file-loaded' event is triggered
-        sub = mp.get_property('sub')
-        if sub == '1' then
-            mp.msg.warn('Sub track is already present\n', '=> NOT downloading other subtitles')
-            return
-        end
-        mp.msg.warn('No sub track was detected\n', '=> Proceeding to download subtitles:')
-        download()
     end
 
     mp.add_key_binding('S', "download_subs", download)
