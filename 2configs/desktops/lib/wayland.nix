@@ -74,6 +74,7 @@
 
     # gtk3 themes
     gsettings-desktop-schemas
+    pkgs.otpmenu
     (pkgs.writers.writeDashBin "pass_menu" ''
       set -efux
       password=$(
