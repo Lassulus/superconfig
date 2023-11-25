@@ -147,6 +147,9 @@ in {
   };
 
   nixpkgs.config.packageOverrides = opkgs: {
+    liquidsoap = opkgs.liquidsoap.override {
+      runtimePackages = with opkgs; [ bubblewrap curl ffmpeg yt-dlp ];
+    };
     icecast = opkgs.icecast.overrideAttrs (old: rec {
       version = "2.5-beta3";
 
