@@ -5,11 +5,6 @@ settings.protocol.youtube_dl.path.set("yt-dlp")
 
 ## functions
 
-def stringify_attrs(attrs) =
-  let json.stringify out = (attrs : [(string * string)] as json.object)
-  out
-end
-
 def filter_music(req) =
   filename = request.filename(req)
   if string.match(pattern = '.*/\\.graveyard/.*', filename) then
@@ -63,50 +58,41 @@ end
 
 interactive.harbor(port = port)
 
-def current(~protocol, ~headers, ~data, uri) =
-  http.response(content_type = "application/json", data = stringify_attrs(
-    !last_metadata
-  ))
+def current(request, response) =
+  response.data(metadata.json.stringify(last_metadata()))
 end
-harbor.http.register("/current", port = port, current)
+harbor.http.register(port = port, "/current", current)
 
-def skip(~protocol, ~headers, ~data, uri) =
+def skip(request, response) =
   tracks.skip()
-  http.response(content_type = "application/json", data = stringify_attrs(
-    !last_metadata
-  ))
+  response.data(metadata.json.stringify(last_metadata()))
 end
-harbor.http.register("/skip", method = "POST", port = port, skip)
+harbor.http.register(method = "POST", port = port, "/skip", skip)
 
-def all_tracks(~protocol, ~headers, ~data, uri) =
-  http.response(content_type = "application/json", data = json.stringify(
-    all_music.remaining_files()
-  ))
+def all_tracks(request, response) =
+  response.data(json.stringify(all_music.remaining_files()))
 end
-harbor.http.register("/all_tracks", port = port, all_tracks)
+harbor.http.register(port = port, "/all_tracks", all_tracks)
 
-def wish_track(~protocol, ~headers, ~data, uri) =
-  # disallow process:
-  if string.match(pattern = '^process:', data) then
-    http.response(code = 400)
+def wish_track(req, response) =
+  if string.match(pattern = '^process:', req.body()) then
+    response.status_code(400)
   else
     # TODO report errors back
-    wish = request.create(data)
+    wish = request.create(req.body())
     wishlist.push(wish)
-    http.response(content_type = "application/json", data = "ok")
+    response.data("ok")
   end
 end
-harbor.http.register("/wish", method = "POST", port = port, wish_track)
+harbor.http.register(method = "POST", port = port, "/wish", wish_track)
 
-def wish_tracklist(~protocol, ~headers, ~data, uri) =
-  http.response(content_type = "application/json", data = json.stringify(
-    queue_contents(wishlist.queue())
-  ))
+def wish_tracklist(request, response) =
+  response.data(json.stringify(queue_contents(wishlist.queue())))
 end
-harbor.http.register("/wish", port = port, wish_tracklist)
+harbor.http.register(port = port, "/wish", wish_tracklist)
 
-def newsshow(~protocol, ~headers, ~data, uri) =
+def newsshow(req, response) =
   news.push(request.create("http://c.r/news.ogg"))
-  http.response(content_type = "application/json", data = "ok")
+  response.data("ok")
 end
-harbor.http.register("/newsshow", method = "POST", port = port, newsshow)
+harbor.http.register(method = "POST", port = port, "/newsshow", newsshow)
