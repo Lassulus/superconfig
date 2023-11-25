@@ -5,6 +5,11 @@
   ];
   krebs.sync-containers3.containers.radio = {
     sshKey = "${config.krebs.secret.directory}/radio.sync.key";
+    startCommand = ''
+      export PATH=$PATH:${pkgs.git}/bin
+      until ${pkgs.dig.host}/bin/host github.com; do sleep 1; done
+      ${pkgs.nixos-rebuild}/bin/nixos-rebuild --refresh --flake github:lassulus/superconfig#radio switch
+    '';
   };
   containers.radio = {
     bindMounts."/var/music" = {
