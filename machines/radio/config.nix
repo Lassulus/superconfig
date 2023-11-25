@@ -7,6 +7,8 @@
     ../../2configs/services/radio
   ];
 
+  clanCore.secretsUploadDirectory = lib.mkForce "/var/state/secrets";
+
   krebs.build.host = config.krebs.hosts.radio;
 
   security.acme = {
