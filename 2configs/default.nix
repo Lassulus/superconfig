@@ -242,7 +242,7 @@
           { predicate = "-p tcp --dport 22"; target = "ACCEPT"; }
         ])
         (lib.mkOrder 1000 [
-          { predicate = "-i retiolum -p udp --dport 60000:61000"; target = "ACCEPT"; }
+          { predicate = "-p udp --dport 60000:61000"; target = "ACCEPT"; } # mosh
           { predicate = "-i retiolum -p udp -m udp --dport 53"; target = "ACCEPT"; }
           { predicate = "-i retiolum -p tcp --dport 19999"; target = "ACCEPT"; }
         ])
