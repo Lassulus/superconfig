@@ -263,9 +263,10 @@
     10.42.0.1 styx.gg23
   '';
 
-  nix.extraOptions = ''
-    experimental-features = nix-command flakes
-  '';
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   # use 24:00 time format, the default got sneakily changed around 20.03
   i18n.defaultLocale = lib.mkDefault "C.UTF-8";
