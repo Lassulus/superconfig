@@ -3,6 +3,9 @@ log.stdout.set(true)
 # use yt-dlp
 settings.protocol.youtube_dl.path.set("yt-dlp")
 
+# add filenames to metadata
+settings.encoder.metadata.export.set(list.append(settings.encoder.metadata.export(), [ "filename" ]))
+
 ## functions
 
 def filter_music(req) =
