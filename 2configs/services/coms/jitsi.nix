@@ -9,25 +9,32 @@
       analytics.disabled = true;
       startAudioOnly = true;
       channelLastN = 4;
-      # constraints.video.height = {
-      #   ideal = 720;
-      #   max = 1080;
-      #   min = 240;
-      # };
+      stunServers = [
+        # - https://www.kuketz-blog.de/jitsi-meet-server-einstellungen-fuer-einen-datenschutzfreundlichen-betrieb/
+        { urls = "turn:turn.matrix.org:3478?transport=udp"; }
+        { urls = "turn:turn.matrix.org:3478?transport=tcp"; }
+      ];
+      constraints.video.height = {
+        ideal = 720;
+        max = 1080;
+        min = 240;
+      };
       remoteVideoMenu.disabled = false;
       breakoutRooms.hideAddRoomButton = false;
-      maxFullResolutionParticipants = -1;
+      maxFullResolutionParticipants = 1;
     };
     interfaceConfig = {
       SHOW_JITSI_WATERMARK = false;
       SHOW_WATERMARK_FOR_GUESTS = false;
       GENERATE_ROOMNAMES_ON_WELCOME_PAGE = false;
+      DISABLE_PRESENCE_STATUS = true;
     };
   };
 
   services.jitsi-videobridge = {
-    config = {
-      ep-connection-status.first-transfer-timeout = "5 seconds";
+    config.videobridge = {
+      cc.assumed-bandwidth-limit = "1000 Mbps";
+      entity-expiration.timeout = "10 minutes";
     };
   };
 
