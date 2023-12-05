@@ -41,7 +41,7 @@
     #     "fe80::1"
     #   ];
     # };
-    networks.enp = {
+    networks."01-enp" = {
       #bridge = [ "ext-br" ];
       matchConfig.Name = "enp35s0";
        address = [
