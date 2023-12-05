@@ -101,6 +101,7 @@ keys = [
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
     Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
     Key([mod], "F1", lazy.group["scratchpad"].dropdown_toggle("term")),
+    Key([mod], "i", lazy.spawn("screenshot")),
     Key([mod], "p", lazy.spawn("pass_menu")),
     Key([mod, "shift"], "p", lazy.spawn("otpmenu")),
     Key([mod], "v", goto_workspace, desc="Switch to group"),
