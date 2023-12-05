@@ -1,4 +1,4 @@
-{ self, modulesPath, config, lib, ... }:
+{ self, modulesPath, config, lib, pkgs, ... }:
 {
 
   imports = [
@@ -9,6 +9,7 @@
 
   disko.devices = import ./disk.nix;
   networking.hostId = "9c0a74ac";
+  boot.kernelPackages = pkgs.zfs.latestCompatibleLinuxPackages;
 
   boot.loader.grub.enable = true;
   boot.loader.grub.version = 2;
