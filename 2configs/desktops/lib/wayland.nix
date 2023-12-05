@@ -25,6 +25,7 @@
 
   xdg.portal.enable = true;
   xdg.portal.wlr.enable = true;
+  xdg.portal.config.common.default = "*"; # get old behavior back
   fonts.enableDefaultPackages = true;
 
   security.polkit.enable = true;
