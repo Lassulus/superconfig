@@ -35,7 +35,7 @@
       clanCore.secrets.password = {
         secrets.password = { };
         secrets.passwordHash = { };
-        generator = ''
+        generator.script = ''
           ${pkgs.xkcdpass}/bin/xkcdpass -n 4 -d - > $secrets/password
           cat $secrets/password | ${pkgs.mkpasswd}/bin/mkpasswd -s -m sha-512 > $secrets/passwordHash
         '';
@@ -50,7 +50,7 @@
       clanCore.secrets.ssh = {
         secrets."ssh.id_ed25519" = { };
         facts."ssh.id_ed25519.pub" = { };
-        generator = ''
+        generator.script = ''
           ${pkgs.openssh}/bin/ssh-keygen -t ed25519 -N "" -f $secrets/ssh.id_ed25519
           mv $secrets/ssh.id_ed25519.pub $facts/ssh.id_ed25519.pub
         '';

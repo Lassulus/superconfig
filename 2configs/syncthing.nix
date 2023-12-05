@@ -41,7 +41,7 @@ in {
     secrets."syncthing.key" = { };
     secrets."syncthing.cert" = { };
     facts."syncthing.pub" = { };
-    generator = ''
+    generator.script = ''
       ${pkgs.syncthing}/bin/syncthing generate --config "$secrets"
       mv "$secrets"/key.pem "$secrets"/syncthing.key
       mv "$secrets"/cert.pem "$secrets"/syncthing.cert
