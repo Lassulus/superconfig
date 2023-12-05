@@ -4,12 +4,9 @@ let
   cfg = config.lass.fetchWallpaper;
 
   fetchWallpaperScript = pkgs.writers.writeDash "fetchWallpaper" ''
-    set -euf
+    set -eufx
 
-    mkdir -p ${cfg.stateDir}
-    chmod o+rx ${cfg.stateDir}
-    cd ${cfg.stateDir}
-    (curl -s -o wallpaper.tmp -z wallpaper.tmp ${lib.escapeShellArg cfg.url} && cp wallpaper.tmp wallpaper) || :
+    curl -v -s -o wallpaper.tmp -z wallpaper.tmp ${lib.escapeShellArg cfg.url} && cp wallpaper.tmp wallpaper
     feh --no-fehbg --bg-scale wallpaper
   '';
 
@@ -24,10 +21,6 @@ in {
       default = {
         OnCalendar = "*:00,10,20,30,40,50";
       };
-    };
-    stateDir = lib.mkOption {
-      type = lib.types.str;
-      default = "/var/lib/wallpaper";
     };
     display = lib.mkOption {
       type = lib.types.str;
@@ -69,12 +62,18 @@ in {
       serviceConfig = {
         Type = "simple";
         ExecStart = fetchWallpaperScript;
-        User = "fetchWallpaper";
-        StateDirectory = true;
+        StateDirectory = "wallpaper";
         StateDirectoryMode = "0755";
+        WorkingDirectory = "/var/lib/wallpaper";
       };
 
       unitConfig = cfg.unitConfig;
     };
+
+    users.users.wallpaper = {
+      isSystemUser = true;
+      group = "wallpaper";
+    };
+    users.groups.wallpaper = {};
   };
 }
