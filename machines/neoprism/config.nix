@@ -30,6 +30,9 @@
 
     # debug stuff
     ../../2configs/websites/mergebot.lassul.us.nix
+
+    # changedetection
+    ../../2configs/changedetection.nix
   ];
 
   krebs.build.host = config.krebs.hosts.neoprism;
