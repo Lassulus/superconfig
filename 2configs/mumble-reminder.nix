@@ -28,6 +28,8 @@
     Stachelschweine
     Kurzschwanzkängurus
     Waschbären
+    Kurzschwanzwiesel
+    Buschochsen
   '';
   systemPlugin = {
     plugin = "system";
