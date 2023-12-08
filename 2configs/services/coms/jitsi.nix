@@ -38,6 +38,27 @@
     };
   };
 
+  services.prosody.extraConfig = ''
+    Component "event_sync.meet.mydomain.com" "event_sync_component"
+        muc_component = "conference.meet.mydomain.com"
+        breakout_component = "breakout.meet.mydomain.com"
+
+        api_prefix = "https://jitsi-presence.numtide.com"
+
+        --- The following are all optional
+        api_timeout = 3  -- timeout if API does not respond within 3s
+        api_retry_count = 1  -- retry up to 1 times
+        api_retry_delay = 5  -- wait 5s between retries
+
+        -- change retry rules so we also retry if endpoint returns HTTP 408
+        api_should_retry_for_code = function (code)
+            return code >= 500 or code == 408
+        end
+
+        -- Optionally include total_dominant_speaker_time (milliseconds) in payload for occupant-left and room-destroyed
+        include_speaker_stats = true
+  '';
+
   krebs.iptables.tables.filter.INPUT.rules = [
     { predicate = "-p tcp --dport 4443"; target = "ACCEPT"; }
     { predicate = "-p udp --dport 10000"; target = "ACCEPT"; }
