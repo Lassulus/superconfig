@@ -2,11 +2,12 @@
   description = "lassulus superconfig";
 
   inputs = {
+    # nixpkgs.url = "github:lassulus/nixpkgs/jitsi-upgrade";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     # nixpkgs.url = "git+file:/home/lass/src/nixpkgs";
 
-    nixvim.url = "github:nix-community/nixvim";
-    nixvim.inputs.nixpkgs.follows = "nixpkgs";
+    # nixvim.url = "github:nix-community/nixvim";
+    # nixvim.inputs.nixpkgs.follows = "nixpkgs";
 
     astro-nvim.url = "github:AstroNvim/AstroNvim";
     astro-nvim.flake = false;
@@ -17,8 +18,9 @@
     clan-core.inputs.flake-parts.follows = "flake-parts";
     clan-core.inputs.disko.follows = "disko";
 
-    stockholm.url = "git+https://cgit.lassul.us/stockholm";
+    # stockholm.url = "git+https://cgit.lassul.us/stockholm";
     # stockholm.url = "path:/home/lass/sync/stockholm";
+    stockholm.url = "github:krebs/stockholm";
     stockholm.inputs.nixpkgs.follows = "nixpkgs";
 
     disko.url = "github:nix-community/disko";
