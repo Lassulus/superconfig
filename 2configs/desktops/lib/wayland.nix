@@ -63,6 +63,8 @@
     blueberry
     grim # screenshots
     wtype
+    zathura
+    nsxiv
 
     pavucontrol
     evince
