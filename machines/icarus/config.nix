@@ -61,90 +61,90 @@
       # };
 
       # - metrics
-      services.telegraf = {
-        enable = true;
-        extraConfig = {
-          inputs = {
-            cpu = {};
-            mem = {};
-            net = {
-              ignore_protocol_stats = true;
-            };
-            exec = {
-              command = pkgs.writers.writePython3 "get_bat_stats" {} /* python */ ''
-                import json
-                import os
+      # services.telegraf = {
+      #   enable = true;
+      #   extraConfig = {
+      #     inputs = {
+      #       cpu = {};
+      #       mem = {};
+      #       net = {
+      #         ignore_protocol_stats = true;
+      #       };
+      #       exec = {
+      #         command = pkgs.writers.writePython3 "get_bat_stats" {} /* python */ ''
+      #           import json
+      #           import os
 
 
-                values_to_fetch = [
-                    "capacity",
-                    "energy_now",
-                    "energy_full",
-                    "energy_full_design",
-                    "charge_now",
-                    "charge_full",
-                    "charge_full_design",
-                ]
+      #           values_to_fetch = [
+      #               "capacity",
+      #               "energy_now",
+      #               "energy_full",
+      #               "energy_full_design",
+      #               "charge_now",
+      #               "charge_full",
+      #               "charge_full_design",
+      #           ]
 
-                result = {}
-                for sup in os.listdir('/sys/class/power_supply'):
-                    with open('/sys/class/power_supply/{}/type'.format(sup)) as f:
-                        if f.read().strip() != "Battery":
-                            continue
-                    for val in values_to_fetch:
-                        try:
-                            with open('/sys/class/power_supply/{}/{}'.format(sup, val)) as f:
-                                key = '{}_{}'.format(sup, val)
-                                try:
-                                    result[key] = int(f.read().strip())
-                                except ValueError:
-                                    result[key] = f.read().strip()
-                        except:  # noqa
-                            pass
+      #           result = {}
+      #           for sup in os.listdir('/sys/class/power_supply'):
+      #               with open('/sys/class/power_supply/{}/type'.format(sup)) as f:
+      #                   if f.read().strip() != "Battery":
+      #                       continue
+      #               for val in values_to_fetch:
+      #                   try:
+      #                       with open('/sys/class/power_supply/{}/{}'.format(sup, val)) as f:
+      #                           key = '{}_{}'.format(sup, val)
+      #                           try:
+      #                               result[key] = int(f.read().strip())
+      #                           except ValueError:
+      #                               result[key] = f.read().strip()
+      #                   except:  # noqa
+      #                       pass
 
-                print(json.dumps(result))
-              '';
-              data_format = "json";
-              name_suffix = "_bat";
-              interval = "10s";
-            };
-          };
-          outputs = {
-            influxdb = { database = "telegraf"; urls = [ "http://localhost:8086" ]; };
-          };
-        };
-      };
+      #           print(json.dumps(result))
+      #         '';
+      #         data_format = "json";
+      #         name_suffix = "_bat";
+      #         interval = "10s";
+      #       };
+      #     };
+      #     outputs = {
+      #       influxdb = { database = "telegraf"; urls = [ "http://localhost:8086" ]; };
+      #     };
+      #   };
+      # };
 
-      # --- server ---
+      # # --- server ---
 
-      # - metrics
-      services.influxdb = {
-        enable = true;
-        extraConfig = {
-          opentsdb = [{
-            enabled = true;
-            bind-address = ":4242";
-            database = "opentsdb";
-            retention-policy = "";
+      # # - metrics
+      # services.influxdb = {
+      #   enable = true;
+      #   extraConfig = {
+      #     opentsdb = [{
+      #       enabled = true;
+      #       bind-address = ":4242";
+      #       database = "opentsdb";
+      #       retention-policy = "";
 
-            batch-size = 1000;
-            batch-pending = 5;
-            batch-timeout = "1s";
-          }];
-        };
-      };
+      #       batch-size = 1000;
+      #       batch-pending = 5;
+      #       batch-timeout = "1s";
+      #     }];
+      #   };
+      # };
 
-      # - logs
-      services.graylog = {
-        enable = true;
-        passwordSecret = "AmjUYosI6hXKyI1MLEusupZy7srxQxZOowpHSmvF0ekMoi19go5qmnqd3po4VcQahdR1AKZ3Yk9tP6nLUbgmzLwQFodIc5g8";
-        rootPasswordSha2 = "cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90"; # testing
-        elasticsearchHosts = [ "http://localhost:9200" ];
-      };
+      # # - logs
+      # services.graylog = {
+      #   enable = true;
+      #   passwordSecret = "AmjUYosI6hXKyI1MLEusupZy7srxQxZOowpHSmvF0ekMoi19go5qmnqd3po4VcQahdR1AKZ3Yk9tP6nLUbgmzLwQFodIc5g8";
+      #   rootPasswordSha2 = "cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90"; # testing
+      #   elasticsearchHosts = [ "http://localhost:9200" ];
+      # };
 
-      services.elasticsearch = {
-        enable = true;
-      };
+      # services.elasticsearch = {
+      #   enable = true;
+      # };
       # services.loki = {
       #   enable = true;
       #   configuration = {
