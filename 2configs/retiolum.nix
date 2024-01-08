@@ -2,29 +2,20 @@
 
 {
 
-  krebs.iptables = {
-    tables = {
-      filter.INPUT.rules = let
-        tincport = toString config.krebs.build.host.nets.retiolum.tinc.port;
-      in [
-        { predicate = "-p tcp --dport ${tincport}"; target = "ACCEPT"; }
-        { predicate = "-p udp --dport ${tincport}"; target = "ACCEPT"; }
-      ];
-    };
-  };
+  networking.firewall.allowedTCPPorts = [ 655 ];
+  networking.firewall.allowedUDPPorts = [ 655 ];
 
   krebs.tinc.retiolum = {
     enable = true;
     connectTo = [
+      "neoprism"
       "prism"
       "ni"
       "eve"
     ];
     extraConfig = ''
-      AutoConnect = no
-      ${lib.optionalString (config.krebs.build.host.nets.retiolum.via != null) ''
-        LocalDiscovery = no
-      ''}
+      AutoConnect = yes
+      LocalDiscovery = yes
     '';
     tincUp = lib.mkIf config.systemd.network.enable "";
     privkey = "${config.krebs.secret.directory}/retiolum.rsa_key.priv";
@@ -56,7 +47,6 @@
       RequiredForOnline = "no";
     };
     networkConfig = {
-      IgnoreCarrierLoss = "10s";
       LinkLocalAddressing = "no";
     };
   };
