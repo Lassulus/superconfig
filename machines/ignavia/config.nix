@@ -19,6 +19,8 @@
     ../../2configs/yellow-mounts/samba.nix
     ../../2configs/pass.nix
     ../../2configs/mail.nix
+    ../../2configs/print.nix
+    ../../2configs/br.nix
     # ../../2configs/bitcoin.nix
     ../../2configs/review.nix
     ../../2configs/dunst.nix
