@@ -55,6 +55,7 @@ if string.length(env["ICECAST_HOST"]) > 0 then
   output.icecast(host = env["ICECAST_HOST"], mount = '/radio.ogg', password = 'hackme', %vorbis(quality = 1), radio)
   output.icecast(host = env["ICECAST_HOST"], mount = '/radio.mp3', password = 'hackme', %mp3.vbr(), radio)
   output.icecast(host = env["ICECAST_HOST"], mount = '/radio.opus', password = 'hackme', %opus(bitrate = 128), radio)
+  output.icecast(host = env["ICECAST_HOST"], mount = '/radio.badge', password = 'hackme', send_icy_metadata = false, %mp3.cbr(bitrate = 64), radio)
 else
   output(fallible = true, buffer(radio))
 end

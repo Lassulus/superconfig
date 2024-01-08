@@ -176,6 +176,11 @@ in {
         <errorlog>-</errorlog>
         <loglevel>3</loglevel>
       </logging>
+      <mount type="normal">
+        <mount-name>/radio.badge</mount-name>
+        <queue-size>2048000</queue-size>
+        <burst-size>128000</burst-size>
+      </mount>
     '';
   };
 
