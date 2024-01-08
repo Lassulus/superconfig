@@ -19,7 +19,7 @@
 
     ../../2configs/atuin-server.nix
 
-    ../../2configs/zerotier.nix
+    ../../2configs/zerotier-ctrl.nix
   ];
 
   clanCore.secretsUploadDirectory = lib.mkForce "/var/state/secrets";
