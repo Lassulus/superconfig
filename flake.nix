@@ -44,6 +44,7 @@
             clanCore.machineName = machineName;
             clanCore.secretStore = "password-store";
             clanCore.secretsUploadDirectory = "/etc/secrets";
+            clanCore.secretsDirectory = pkgs.lib.mkForce config.clanCore.secretsUploadDirectory;
             krebs.secret.directory = config.clanCore.secretsUploadDirectory;
             nixpkgs.config.packageOverrides = import ./5pkgs pkgs; # TODO move into packages
             nixpkgs.overlays = [
