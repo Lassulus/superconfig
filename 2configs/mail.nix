@@ -226,9 +226,6 @@ let
     macro pager ,@3 "<enter-command> set pager_index_lines=7; macro pager ] ,@1 'Toggle indexbar<Enter>"
     macro pager ] ,@1 'Toggle indexbar
 
-    # urlview
-    macro pager \cb <pipe-entry>'${pkgs.urlview}/bin/urlview'<enter> 'Follow links with urlview'
-
     # sidebar
     set sidebar_divider_char = '│'
     set sidebar_delim_chars = "/"
