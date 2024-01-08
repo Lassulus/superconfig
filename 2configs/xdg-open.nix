@@ -34,9 +34,9 @@
       special/mailaddress)
         alacritty --execute vim "$FILE" ;;
       text/html)
-        firefox "$FILE" ;;
+        firefox-devedition "$FILE" ;;
       text/xml)
-        firefox "$FILE" ;;
+        firefox-devedition "$FILE" ;;
       text/*)
         alacritty --execute vim "$FILE" ;;
       image/*)

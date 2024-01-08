@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }: let
 
-  alacritty-cfg = extrVals: builtins.toJSON ({
+  alacritty-cfg = extrVals: pkgs.writers.writeTOML "alacritty.toml" ({
     font = let
       family = "Iosevka Term SS15";
     in {
@@ -28,7 +28,6 @@
       lines = 20;
     };
     env.WINIT_X11_SCALE_FACTOR = "1.0";
-    # window.opacity = 0;
     hints.enabled = [
       {
         regex = ''(mailto:|gemini:|gopher:|https:|http:|news:|file:|git:|ssh:|ftp:)[^\u0000-\u001F\u007F-\u009F<>"\s{-}\^⟨⟩`]+'';
@@ -47,8 +46,8 @@
     name = "alacritty";
     paths = [
       (pkgs.writeDashBin "alacritty" ''
-        # ${pkgs.alacritty}/bin/alacritty --config-file /var/theme/config/alacritty.yaml msg create-window "$@" ||
-        ${pkgs.alacritty}/bin/alacritty --config-file /var/theme/config/alacritty.yaml "$@"
+        # ${pkgs.alacritty}/bin/alacritty --config-file /var/theme/config/alacritty.toml msg create-window "$@" ||
+        ${pkgs.alacritty}/bin/alacritty --config-file /var/theme/config/alacritty.toml "$@"
       '')
       pkgs.alacritty
     ];
@@ -56,7 +55,7 @@
 
 in {
   environment.etc = {
-    "themes/light/alacritty.yaml".text = alacritty-cfg {
+    "themes/light/alacritty.toml".source = alacritty-cfg {
       colors = {
         # Default colors
         primary = {
@@ -92,40 +91,40 @@ in {
         };
       };
     };
-    "themes/dark/alacritty.yaml".text = alacritty-cfg {
+    "themes/dark/alacritty.toml".source = alacritty-cfg {
       colors = {
         # Default colors
         primary = {
-          background = "0x000000";
-          foreground = "0xffffff";
+          background = "#000000";
+          foreground = "#ffffff";
         };
         cursor = {
-          text = "0xF81CE5";
-          cursor = "0xffffff";
+          text = "#F81CE5";
+          cursor = "#ffffff";
         };
 
         # Normal colors
         normal = {
-          black = "0x000000";
-          red = "0xfe0100";
-          green = "0x33ff00";
-          yellow = "0xfeff00";
-          blue = "0x0066ff";
-          magenta = "0xcc00ff";
-          cyan = "0x00ffff";
-          white = "0xd0d0d0";
+          black = "#000000";
+          red = "#fe0100";
+          green = "#33ff00";
+          yellow = "#feff00";
+          blue = "#0066ff";
+          magenta = "#cc00ff";
+          cyan = "#00ffff";
+          white = "#d0d0d0";
         };
 
         # Bright colors
         bright = {
-          black = "0x808080";
-          red = "0xfe0100";
-          green = "0x33ff00";
-          yellow = "0xfeff00";
-          blue = "0x0066ff";
-          magenta = "0xcc00ff";
-          cyan = "0x00ffff";
-          white = "0xFFFFFF";
+          black = "#808080";
+          red = "#fe0100";
+          green = "#33ff00";
+          yellow = "#feff00";
+          blue = "#0066ff";
+          magenta = "#cc00ff";
+          cyan = "#00ffff";
+          white = "#FFFFFF";
         };
       };
     };
