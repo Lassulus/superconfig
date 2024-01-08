@@ -141,11 +141,4 @@
 
   boot.cleanTmpDir = true;
   programs.noisetorch.enable = true;
-
-
-  clan.networking.zerotier = {
-    networkId = "970db1b038cdf332";
-    controller.enable = true;
-    controller.public = true;
-  };
 }
