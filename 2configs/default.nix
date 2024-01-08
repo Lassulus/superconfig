@@ -11,6 +11,7 @@
     ./tor-ssh.nix
     ./networkd.nix
     ./pinned-registry.nix
+    ./zerotier.nix
     self.inputs.stockholm.nixosModules.users
     self.inputs.stockholm.nixosModules.hosts
     self.inputs.stockholm.nixosModules.kartei
