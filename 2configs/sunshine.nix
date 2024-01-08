@@ -17,10 +17,10 @@
 
   environment.systemPackages = [
     (pkgs.writers.writeDashBin "sun" ''
-      ${pkgs.sunshine}/bin/sunshine -1 ${pkgs.writeTextFile "sunshine.conf" ''
-        channels = 5 # allow 5 clients to connect
-        output_name = 1 # take external screen as default, maybe this breaks sometimes
+      ${pkgs.sunshine}/bin/sunshine -0 -1 ${pkgs.writeText "sunshine.conf" ''
+        channels = 5
+        output_name = 1
       ''} "$@"
-     '')
+    '')
   ];
 }
