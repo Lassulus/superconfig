@@ -48,6 +48,9 @@
 
     "d /var/state/git 0700 git nogroup -"
     "L+ /var/lib/git - - - - ../../var/state/git"
+
+    "d /var/state/zerotier-one 0700 root root -"
+    "L+ /var/lib/zerotier-one - - - - ../../var/state/zerotier-one"
   ];
 
   users.users.mainUser.openssh.authorizedKeys.keys = [
