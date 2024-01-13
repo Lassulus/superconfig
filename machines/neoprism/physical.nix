@@ -44,14 +44,14 @@
     networks."01-enp" = {
       #bridge = [ "ext-br" ];
       matchConfig.Name = "enp35s0";
-       address = [
-         "95.217.192.59/26"
-         "2a01:4f9:4a:4f1a::2/64"
-       ];
-       gateway = [
-         "95.217.192.1"
-         "fe80::1"
-       ];
+      address = [
+        "95.217.192.59/26"
+        "2a01:4f9:4a:4f1a::2/64"
+      ];
+      gateway = [
+        "95.217.192.1"
+        "fe80::1"
+      ];
     };
   };
 
