@@ -121,7 +121,12 @@ floatHooks = composeAll
 
 myKeyMap :: [([Char], X ())]
 myKeyMap =
-    [ ("M4-p", forkFile "${pkgs.pass}/bin/passmenu" [ "--type" ] Nothing)
+    [ ("M4-p", forkFile "${pkgs.writers.writeDash "passmenu-wrapped" ''
+        set -efux
+        export TERM=dumb
+        ${pkgs.pass}/bin/passmenu --type
+    ''}" [] Nothing)
+
     , ("M4-S-p", forkFile "${pkgs.otpmenu}/bin/otpmenu" [] Nothing)
     , ("M4-z", forkFile "${pkgs.unimenu}/bin/unimenu" [] Nothing)
 
