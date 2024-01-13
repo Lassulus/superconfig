@@ -1,5 +1,10 @@
 { config, pkgs, ... }:
 {
+  users.users.download = {
+    isSystemUser = true;
+    uid = 1001;
+    group = "download";
+  };
   users.groups.download.members = [ "transmission" ];
   services.transmission = {
     enable = true;
@@ -301,12 +306,14 @@
   # movies
   services.radarr = {
     enable = true;
+    user = "download";
     group = "download";
   };
 
   # shows
   services.sonarr = {
     enable = true;
+    user = "download";
     group = "download";
   };
 
@@ -318,6 +325,7 @@
   # subtitles
   services.bazarr = {
     enable = true;
+    user = "download";
     group = "download";
   };
 }
