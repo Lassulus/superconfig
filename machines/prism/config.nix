@@ -190,7 +190,6 @@ in {
         { predicate = "-p udp --dport 60000:61000"; target = "ACCEPT"; }
       ];
     }
-    ../../2configs/services/coms/jitsi.nix
     ../../2configs/services/coms/murmur.nix
     {
 
