@@ -21,9 +21,10 @@
     "amdgpu"
   ];
 
+  boot.initrd.kernelModules = [ "amdgpu" ];
+
   hardware.opengl.extraPackages = [ pkgs.amdvlk ];
-  environment.variables.VK_ICD_FILENAMES =
-    "/run/opengl-driver/share/vulkan/icd.d/amd_icd64.json";
+  hardware.opengl.extraPackages32 = [ pkgs.driversi686Linux.amdvlk ];
 
   boot.initrd.availableKernelModules = [ "nvme" "ehci_pci" "xhci_pci" "usb_storage" "sd_mod" "rtsx_pci_sdmmc" ];
   boot.kernelModules = [ "kvm-amd" ];
@@ -45,15 +46,4 @@
 
   services.logind.lidSwitch = "ignore";
   services.logind.lidSwitchDocked = "ignore";
-
-  # Mouse stuff
-  services.xserver.libinput.enable = lib.mkForce false;
-  services.xserver.synaptics.enable = true;
-
-  services.xserver.displayManager.sessionCommands = ''
-    xinput disable 'ETPS/2 Elantech Touchpad'
-    xinput set-prop 'ETPS/2 Elantech TrackPoint' 'Evdev Wheel Emulation' 1
-    xinput set-prop 'ETPS/2 Elantech TrackPoint' 'Evdev Wheel Emulation Button' 2
-    xinput set-prop 'ETPS/2 Elantech TrackPoint' 'Evdev Wheel Emulation Axes' 6 7 4 5
-  '';
 }
