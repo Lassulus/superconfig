@@ -24,10 +24,24 @@
     # ../../2configs/bitcoin.nix
     ../../2configs/review.nix
     ../../2configs/dunst.nix
+    ../../2configs/yggdrasil.nix
+    ../../2configs/container-tests.nix
     ../../2configs/sunshine.nix
     # ../../2configs/print.nix
     # ../../2configs/br.nix
     # ../../2configs/c-base.nix
+    { # clan backups playground
+      imports = [
+        self.inputs.clan-core.clanModules.borgbackup
+      ];
+      clanCore.state.teststate = {
+        folders = [ "/home/lass/sync" ];
+      };
+      clan.borgbackup = {
+        enable = true;
+        destinations.mors.repo = "borg@mors.r:.";
+      };
+    }
   ];
 
   system.stateVersion = "23.11";
@@ -57,5 +71,19 @@
   boot.cleanTmpDir = true;
   programs.noisetorch.enable = true;
 
+  environment.systemPackages = [
+    pkgs.gh
+    pkgs.bank
+  ];
+
+  krebs.hosts.styx.nets.retiolum.tinc.extraConfig = "Address = 10.42.0.1 655";
+
+  virtualisation.podman.enable = true;
+
+  hardware.keyboard.qmk.enable = true;
+
+  users.users.mainUser.extraGroups = [ "wireshark" ];
+  programs.wireshark.enable = true;
+  programs.wireshark.package = pkgs.wireshark-qt;
 
 }
