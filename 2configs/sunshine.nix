@@ -17,9 +17,10 @@
 
   environment.systemPackages = [
     (pkgs.writers.writeDashBin "sun" ''
-      ${pkgs.sunshine}/bin/sunshine -0 -1 ${pkgs.writeText "sunshine.conf" ''
-        channels = 5
-        output_name = 1
+      ${pkgs.sunshine}/bin/sunshine --creds sun sun
+      ${pkgs.sunshine}/bin/sunshine -0 ${pkgs.writeText "sunshine.conf" ''
+        channels = 15
+        address_family = both
       ''} "$@"
     '')
   ];
