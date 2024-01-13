@@ -92,7 +92,7 @@ in {
           ${animals}
         '
         ${write_to_irc "#nixos"} "Es ist Mittwoch meine $(echo "$animals" | grep -v '^$' | shuf -n1 )!"
-        ${write_to_irc "#nixos"} "kommt auf mumble://lassul.us"
+        ${write_to_irc "#nixos"} "kommt auf https://jitsi.lassul.us/nixos"
       '';
     };
   };
@@ -105,7 +105,7 @@ in {
           ${animals}
         '
         ${write_to_irc "#krebs"} "Es ist Mittwoch meine $(echo "$animals" | grep -v '^$' | shuf -n1 )!"
-        ${write_to_irc "#krebs"} "$(cat /var/lib/reaktor2-mumble-reminder/users | ${pkgs.findutils}/bin/xargs echo) : mumble?"
+        ${write_to_irc "#krebs"} "$(cat /var/lib/reaktor2-mumble-reminder/users | ${pkgs.findutils}/bin/xargs echo) : jitsi?"
       '';
     };
   };
