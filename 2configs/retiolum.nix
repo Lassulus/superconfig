@@ -27,8 +27,12 @@
     secrets."retiolum.ed25519_key.priv" = { };
     facts."retiolum.rsa_key.pub" = { };
     facts."retiolum.ed25519_key.pub" = { };
+    generator.path = with pkgs; [
+      coreutils
+      tinc_pre
+    ];
     generator.script = ''
-      ${pkgs.tinc_pre}/bin/tinc --config "$secrets" generate-keys 4096 >/dev/null
+      tinc --config "$secrets" generate-keys 4096 >/dev/null
       mv "$secrets"/rsa_key.priv "$secrets"/retiolum.rsa_key.priv
       mv "$secrets"/ed25519_key.priv "$secrets"/retiolum.ed25519_key.priv
       mv "$secrets"/rsa_key.pub "$facts"/retiolum.rsa_key.pub
