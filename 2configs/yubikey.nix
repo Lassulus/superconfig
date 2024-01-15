@@ -4,6 +4,9 @@
     yubikey-personalization
     yubikey-manager
     pinentry-curses pinentry-qt
+    # fix polkit rules
+    # https://github.com/NixOS/nixpkgs/issues/280826
+    pcscliteWithPolkit.out
   ];
 
   services.udev.packages = with pkgs; [ yubikey-personalization ];
@@ -29,7 +32,7 @@
   '';
   systemd.user.services.gpg-agent.serviceConfig.ExecStartPost = pkgs.writers.writeDash "init_gpg" ''
     ${pkgs.gnupg}/bin/gpg --import ${self.inputs.stockholm.outPath + "/kartei/lass/pgp/yubikey.pgp"} >/dev/null
-    echo -e '5\ny\n' | gpg --command-fd 0 --expert --edit-key DBCD757846069B392EA9401D6657BE8A8D1EE807 trust >/dev/null || :
+    echo -e '5\ny\n' | ${pkgs.gnupg}/bin/gpg --command-fd 0 --expert --edit-key DBCD757846069B392EA9401D6657BE8A8D1EE807 trust >/dev/null || :
   '';
 
   security.polkit.extraConfig = ''
