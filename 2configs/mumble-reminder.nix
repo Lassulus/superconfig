@@ -106,6 +106,7 @@ in {
         '
         ${write_to_irc "#krebs"} "Es ist Mittwoch meine $(echo "$animals" | grep -v '^$' | shuf -n1 )!"
         ${write_to_irc "#krebs"} "$(cat /var/lib/reaktor2-mumble-reminder/users | ${pkgs.findutils}/bin/xargs echo) : jitsi?"
+        ${write_to_irc "#krebs"} "https://jitsi.lassul.us/nixos"
       '';
     };
   };
