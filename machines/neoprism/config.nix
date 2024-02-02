@@ -9,7 +9,8 @@
     # ../../2configs/matrix.nix
     ../../2configs/gsm-wiki.nix
     ../../2configs/monitoring/telegraf.nix
-    ../../nginx.nix
+    ../../2configs/pair-programming.nix
+    ../../2configs/nginx.nix
 
     # sync-containers
     ../../2configs/consul.nix
