@@ -57,6 +57,9 @@ in {
       # https://github.com/NixOS/nixpkgs/issues/258793
       RootDirectoryStartOnly = lib.mkForce false;
       RootDirectory = lib.mkForce "";
+      CPUSchedulingPolicy = "idle";
+      IOSchedulingClass = "idle";
+      IOSchedulingPriority = 7;
     };
   };
 }
