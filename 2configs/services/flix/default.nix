@@ -224,6 +224,7 @@
     };
   in {
     wantedBy = [ "multi-user.target" ];
+    after = [ "network-online.target" ];
     environment = {
       IRC_CHANNEL = "#flix";
       IRC_NICK = "bruelli";
