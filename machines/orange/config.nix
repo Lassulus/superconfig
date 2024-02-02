@@ -5,6 +5,7 @@
     ../../2configs/retiolum.nix
     ../../2configs/mumble-reminder.nix
     ../../2configs/services/git
+    ../../2configs/nginx.nix
   ];
 
   krebs.build.host = config.krebs.hosts.orange;
