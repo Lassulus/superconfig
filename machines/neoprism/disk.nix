@@ -55,9 +55,19 @@
       mountpoint = "/";
       rootFsOptions = {
       };
-      datasets.reserved = {
-        type = "zfs_fs";
-        options.refreservation = "1G";
+      datasets = {
+        reserved = {
+          type = "zfs_fs";
+          options.refreservation = "1G";
+        };
+        pairprogramming = {
+          type = "zfs_fs";
+          mountpoint = "/home/pairprogramming";
+          options = {
+            canmount = "noauto";
+          };
+
+        };
       };
     };
     tank = {
