@@ -11,6 +11,6 @@
       nat.OUTPUT.rules = [
         { predicate = "-o lo -p tcp -m tcp --dport 45621"; target = "REDIRECT --to-ports 22"; }
       ];
-    }:
+    };
   };
 }
