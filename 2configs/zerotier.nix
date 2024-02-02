@@ -8,11 +8,9 @@ let
   }) (builtins.readDir ../machines);
 
   filteredHosts = lib.filterAttrs (name: host: host.ip != null) hosts;
-
 in
 {
-  clan.networking.zerotier.networkId = "7c31a21e86f9a75c";
-
+  services.zerotierone.joinNetworks = [ "7c31a21e86f9a75c" ];
   services.zerotierone.localConf.settings = {
     interfacePrefixBlacklist = [ "ygg" "mesh" "retiolum" "wiregrill" ];
     physical = {
