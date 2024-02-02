@@ -3,6 +3,7 @@
   services.changedetection-io = {
     enable = true;
     behindProxy = true;
+    port = 5055;
   };
 
   services.nginx.virtualHosts."cdio.lassul.us" = {
