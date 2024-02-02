@@ -28,6 +28,10 @@
     disko.inputs.nixpkgs.follows = "nixpkgs";
 
     nixos-hardware.url = "github:nixos/nixos-hardware";
+
+    nether.url = "github:lassulus/nether";
+    nether.inputs.nixpkgs.follows = "nixpkgs";
+    nether.inputs.clan-core.follows = "clan-core";
   };
 
   outputs = inputs@{ self, flake-parts, nixpkgs, clan-core, ... }:
