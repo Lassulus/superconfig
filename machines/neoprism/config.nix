@@ -2,7 +2,7 @@
 
 {
   imports = [
-    ../../2configs/ssh-redirect.nis
+    ../../2configs/ssh-redirect.nix
     ../../2configs/retiolum.nix
     ../../2configs/mail/internet-gateway.nix
     ../../2configs/binary-cache/server.nix
