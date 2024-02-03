@@ -1,7 +1,6 @@
 _:
 {
   imports = [
-    ./dnsmasq.nix
     ./drbd.nix
     ./folderPerms.nix
     ./klem.nix
