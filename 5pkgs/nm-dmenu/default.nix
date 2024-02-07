@@ -1,6 +1,6 @@
 { pkgs, lib, ... }:
 
-pkgs.writeDashBin "nm-dmenu" ''
+pkgs.writers.writeDashBin "nm-dmenu" ''
   export PATH=$PATH:${lib.makeBinPath [
     pkgs.dmenu
     pkgs.networkmanagerapplet

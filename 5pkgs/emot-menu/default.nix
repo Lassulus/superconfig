@@ -1,4 +1,4 @@
-{ coreutils, dmenu, gnused, writeDashBin, writeText, xdotool }: let
+{ coreutils, dmenu, gnused, writers, writeText, xdotool }: let
 
   emoticons = writeText "emoticons" ''
 ¯\(°_o)/¯ | dunno lol shrug dlol
@@ -24,7 +24,7 @@
   '';
 
 in
-writeDashBin "emoticons" ''
+writers.writeDashBin "emoticons" ''
   set -efu
 
   data=$(${coreutils}/bin/cat ${emoticons})

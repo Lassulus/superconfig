@@ -10,6 +10,6 @@ let
     rev = "c6dcd0d";
     sha256 = "10xy20bjdnd5bjv2hf6v5y5wi0mc9555awxkjqf57rk6ngc5w6ss";
   };
-in pkgs.writeDashBin "nichtparasoup" ''
+in pkgs.writers.writeDashBin "nichtparasoup" ''
   ${py}/bin/python ${src}/nichtparasoup.py "$@"
 ''

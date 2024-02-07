@@ -1,6 +1,6 @@
-{ writeDashBin, coreutils, pass, hledger, diffutils }:
+{ writers, coreutils, pass, hledger, diffutils }:
 
-writeDashBin "bank" ''
+writers.writeDashBin "bank" ''
   tmp=$(mktemp)
   ${pass}/bin/pass show hledger > $tmp
   ${hledger}/bin/hledger --file=$tmp "$@"

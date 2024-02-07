@@ -1,0 +1,20 @@
+#!/usr/bin/env nix-shell
+#!nix-shell -i bash -p dnsmasq
+
+set -efux
+
+tmpdir=$(mktemp -d)
+trap 'rm -rf "$tmpdir"' EXIT
+
+cat > "$tmpdir"/dnsmasq.conf <<EOF
+interface=vm0
+dhcp-leasefile=$tmpdir/dnsmasq.leases
+port=0
+
+dhcp-range=10.102.0.100,10.102.0.150,24h
+
+# DNS
+dhcp-option=option:dns-server,10.102.0.1
+EOF
+
+sudo dnsmasq -k -C "$tmpdir"/dnsmasq.conf

@@ -50,7 +50,6 @@
             clanCore.secretsUploadDirectory = "/etc/secrets";
             clanCore.secretsDirectory = pkgs.lib.mkForce config.clanCore.secretsUploadDirectory;
             krebs.secret.directory = config.clanCore.secretsUploadDirectory;
-            nixpkgs.config.packageOverrides = import ./5pkgs pkgs; # TODO move into packages
             nixpkgs.overlays = [
               self.inputs.stockholm.overlays.default
               (import (self.inputs.stockholm.inputs.nix-writers + "/pkgs")) # TODO get rid of that overlay
@@ -73,7 +72,8 @@
       ];
       flake.nixosConfigurations = clan.nixosConfigurations;
       flake.clanInternals = clan.clanInternals;
-      perSystem = { config, pkgs, system, ... }: {
+      perSystem = { config, lib, pkgs, system, ... }: {
+        packages = lib.mapAttrs (name: v_: pkgs.callPackage ./5pkgs/${name} {}) (builtins.readDir ./5pkgs);
         devShells.default = pkgs.mkShell {
           packages = [
             clan-core.packages.${system}.clan-cli
