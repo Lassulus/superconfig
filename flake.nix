@@ -49,6 +49,7 @@
             clanCore.secretStore = "password-store";
             clanCore.secretsUploadDirectory = "/etc/secrets";
             clanCore.secretsDirectory = pkgs.lib.mkForce config.clanCore.secretsUploadDirectory;
+            clan.networking.targetHost = "root@${machineName}";
             krebs.secret.directory = config.clanCore.secretsUploadDirectory;
             nixpkgs.overlays = [
               self.inputs.stockholm.overlays.default
