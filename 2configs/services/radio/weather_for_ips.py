@@ -40,7 +40,7 @@ if len(ips) > 5:
                     )
             except:  # noqa E722
                 pass
-    
+
 else:
     for ip in fileinput.input():
         if "80.147.140.51" in ip:
