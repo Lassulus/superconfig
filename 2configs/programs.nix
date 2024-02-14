@@ -8,7 +8,6 @@
     gnupg1compat
     htop
     i3lock
-    l-gen-secrets
     mosh
     pass
     pavucontrol

@@ -126,7 +126,6 @@
     self.packages.${pkgs.system}.vim
 
   #stockholm
-    deploy
     git
     git-absorb
     git-preview
@@ -148,7 +147,7 @@
     tcpdump
     mosh
     eternal-terminal
-    sshify
+    self.packages.${pkgs.system}.sshify
 
   #stuff for dl
     aria2
@@ -167,7 +166,7 @@
       printf '\a'
     '')
     usbutils
-    logify
+    self.packages.${pkgs.system}.logify
     goify
 
   #unpack stuff

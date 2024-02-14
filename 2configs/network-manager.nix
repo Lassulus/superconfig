@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ self, pkgs, lib, ... }:
 {
   networking.wireless.enable = lib.mkForce false;
 
@@ -20,6 +20,6 @@
     ];
   };
   environment.systemPackages = [
-    pkgs.nm-dmenu
+    self.packages.${pkgs.system}.nm-dmenu
   ];
 }

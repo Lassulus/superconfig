@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ self, pkgs, lib, ... }:
 {
   imports = [
     ../../alacritty.nix
@@ -77,7 +77,7 @@
 
     # gtk3 themes
     gsettings-desktop-schemas
-    pkgs.otpmenu
+    self.packages.${pkgs.system}.otpmenu
     (pkgs.writers.writeDashBin "pass_menu" ''
       set -efux
       password=$(
