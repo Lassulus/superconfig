@@ -5,7 +5,7 @@
     startCommand = ''
       export PATH=$PATH:${pkgs.git}/bin
       until ${pkgs.dig.host}/bin/host github.com; do sleep 1; done
-      ${pkgs.nixos-rebuild}/bin/nixos-rebuild --refresh --flake github:lassulus/superconfig#yellow switch
+      ${pkgs.nixos-rebuild}/bin/nixos-rebuild --refresh --flake github:lassulus/superconfig#yellow switch --no-write-lock-file
     '';
   };
   containers.yellow.bindMounts."/var/lib" = {
