@@ -18,7 +18,7 @@
     ../../2configs/services/radio/container-host.nix
     ../../2configs/ubik-host.nix
     ../../2configs/orange-host.nix
-    (self.inputs.stockholm + "/krebs/2configs/hotdog-host.nix")
+    ../../2configs/hotdog-host.nix
 
     # other containers
     ../../2configs/riot.nix
