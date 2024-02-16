@@ -18,7 +18,7 @@
     mkdir -p $HOME/.gnupg
     ${pkgs.coreutils}/bin/ln -sf ${pkgs.writeText "scdaemon.conf" ''
       disable-ccid
-      pcsc-driver ${pkgs.pcsclite.out}/lib/libpcsclite.so.1
+      pcsc-driver ${pkgs.pcsclite.lib}/lib/libpcsclite.so.1
       card-timeout 1
 
       # Always try to use yubikey as the first reader
