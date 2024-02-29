@@ -1,4 +1,4 @@
-{ self, config, pkgs, ... }:
+{ self, config, lib, pkgs, ... }:
 
 {
   imports = [
@@ -73,7 +73,8 @@
 
   environment.systemPackages = [
     pkgs.gh
-    pkgs.bank
+    self.packages.${pkgs.system}.bank
+    self.packages.${pkgs.system}.mycelium
   ];
 
   krebs.hosts.styx.nets.retiolum.tinc.extraConfig = "Address = 10.42.0.1 655";
