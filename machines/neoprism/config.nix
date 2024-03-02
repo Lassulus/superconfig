@@ -11,6 +11,7 @@
     ../../2configs/monitoring/telegraf.nix
     ../../2configs/pair-programming.nix
     ../../2configs/nginx.nix
+    ../../2configs/shadowsocks.nix
 
     # sync-containers
     ../../2configs/consul.nix
