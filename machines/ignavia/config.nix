@@ -30,6 +30,7 @@
     # ../../2configs/print.nix
     # ../../2configs/br.nix
     # ../../2configs/c-base.nix
+    ../../2configs/mycelium.nix
     { # clan backups playground
       imports = [
         self.inputs.clan-core.clanModules.borgbackup
