@@ -18,9 +18,9 @@
     clan-core.inputs.flake-parts.follows = "flake-parts";
     clan-core.inputs.disko.follows = "disko";
 
-    # stockholm.url = "git+https://cgit.lassul.us/stockholm";
+    stockholm.url = "git+https://cgit.lassul.us/stockholm";
     # stockholm.url = "path:/home/lass/sync/stockholm";
-    stockholm.url = "github:krebs/stockholm";
+    # stockholm.url = "github:krebs/stockholm";
     stockholm.inputs.nixpkgs.follows = "nixpkgs";
 
     disko.url = "github:nix-community/disko";
@@ -29,9 +29,12 @@
 
     nixos-hardware.url = "github:nixos/nixos-hardware";
 
-    nether.url = "github:lassulus/nether";
+    nether.url = "github:krebs/nether";
     nether.inputs.nixpkgs.follows = "nixpkgs";
     nether.inputs.clan-core.follows = "clan-core";
+
+    spora.url = "github:krebs/spora";
+    spora.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs@{ self, flake-parts, nixpkgs, clan-core, ... }:
