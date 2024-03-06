@@ -27,6 +27,7 @@
     ../../2configs/yggdrasil.nix
     ../../2configs/container-tests.nix
     ../../2configs/sunshine.nix
+    ../../2configs/spora.nix
     # ../../2configs/print.nix
     # ../../2configs/br.nix
     # ../../2configs/c-base.nix
