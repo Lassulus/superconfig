@@ -32,11 +32,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1709451828,
-        "narHash": "sha256-GYkovhfH3mZut+4qjN7gdnA0dYkNxpjFYHp7FFj8VAU=",
+        "lastModified": 1709717738,
+        "narHash": "sha256-C6bcZjrfvtzDd2bYsZgLLzAT3d/ViHP9mTIFazsGotY=",
         "ref": "refs/heads/main",
-        "rev": "da34bd71999bfe99f8aeb9129e25783955285b05",
-        "revCount": 2139,
+        "rev": "dcf7f2f733da3c17a4655c50b6380ca9b20fb6a9",
+        "revCount": 2183,
         "type": "git",
         "url": "https://git.clan.lol/clan/clan-core"
       },
@@ -52,11 +52,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1709439398,
-        "narHash": "sha256-MW0zp3ta7SvdpjvhVCbtP20ewRwQZX2vRFn14gTc4Kg=",
+        "lastModified": 1709682352,
+        "narHash": "sha256-71S/64RbyADT6FUVJq4WLiNbmcxFvgMsSihf/C2Hgno=",
         "owner": "nix-community",
         "repo": "disko",
-        "rev": "1f76b318aa11170c8ca8c225a9b4c458a5fcbb57",
+        "rev": "ad5e8bd14df2e6bdb836582577dc163318617738",
         "type": "github"
       },
       "original": {
@@ -94,13 +94,13 @@
       "locked": {
         "lastModified": 1709175178,
         "narHash": "sha256-t3soMFueNSuODEksnLn2B2eiXViPyeptiI919t1r7ks=",
-        "owner": "lassulus",
+        "owner": "krebs",
         "repo": "nether",
         "rev": "0fdc0b015615ccc43defc42d0f330796960b9e15",
         "type": "github"
       },
       "original": {
-        "owner": "lassulus",
+        "owner": "krebs",
         "repo": "nether",
         "type": "github"
       }
@@ -175,11 +175,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1709237383,
-        "narHash": "sha256-cy6ArO4k5qTx+l5o+0mL9f5fa86tYUX3ozE1S+Txlds=",
+        "lastModified": 1709479366,
+        "narHash": "sha256-n6F0n8UV6lnTZbYPl1A9q1BS0p4hduAv1mGAP17CVd0=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "1536926ef5621b09bba54035ae2bb6d806d72ac8",
+        "rev": "b8697e57f10292a6165a20f03d2f42920dfaf973",
         "type": "github"
       },
       "original": {
@@ -216,6 +216,7 @@
         "nether": "nether",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
+        "spora": "spora",
         "stockholm": "stockholm"
       }
     },
@@ -240,6 +241,26 @@
       "original": {
         "owner": "Mic92",
         "repo": "sops-nix",
+        "type": "github"
+      }
+    },
+    "spora": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1709704325,
+        "narHash": "sha256-dqWn2FTgUXtyW4s7SJoxUE07kfViYEUqGFvH4WRXTNY=",
+        "owner": "krebs",
+        "repo": "spora",
+        "rev": "de2cf1ee813d089f56d0921fcb48680bd3656fdb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "krebs",
+        "repo": "spora",
         "type": "github"
       }
     },
