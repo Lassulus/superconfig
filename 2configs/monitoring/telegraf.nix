@@ -14,7 +14,7 @@ let
   '';
 
   zfsChecks = lib.optional
-    (lib.any (fs: fs == "zfs") config.boot.supportedFilesystems)
+    (lib.any (fs: fs == "zfs") (lib.attrNames config.boot.supportedFilesystems))
     (pkgs.writeScript "zpool-health" ''
       #!${pkgs.gawk}/bin/awk -f
       BEGIN {
@@ -107,7 +107,7 @@ in
               files = [ "/var/log/telegraf/*" ];
             }
           ]
-          ++ lib.optional (lib.any (fs: fs == "ext4") config.boot.supportedFilesystems) {
+          ++ lib.optional (lib.any (fs: fs == "ext4") (lib.attrNames config.boot.supportedFilesystems)) {
             name_override = "ext4_errors";
             files = [ "/sys/fs/ext4/*/errors_count" ];
             data_format = "value";
