@@ -164,6 +164,10 @@
       locations."/" = {
         proxyWebsockets = true;
         proxyPass = "http://localhost:8989";
+        # sonar.r now has forced authentication
+        extraConfig = ''
+          proxy_set_header Authorization "Basic a3JlYnM6YWlkc2JhbGxz";
+        '';
       };
     };
   };
