@@ -270,6 +270,12 @@
       { predicate = "-i wiregrill -p tcp --dport 4000:4002"; target = "ACCEPT"; }
       { predicate = "-i wiregrill -p udp --dport 4000:4002"; target = "ACCEPT"; }
     ];
+
+    tables.nat.PREROUTING.rules = [
+      # transmission rpc port
+      { predicate = "-i retiolum -p tcp --dport 9091"; target = "DNAT --to-destination fdb4:3310:947::2"; v4 = false; }
+    ];
+    tables.filter.FORWARD.policy = "ACCEPT"; # we need this so we can forward into the the transmission network namespace
   };
 
   systemd.services.flix-index = {

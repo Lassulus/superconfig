@@ -17,6 +17,12 @@ in {
 
   networking.useHostResolvConf = false;
   networking.useNetworkd = true;
+  # we need to set a namserver here that can be also be reached from the transmission network namespace
+  environment.etc."resolv.conf".text = ''
+    options edns0
+    nameserver 9.9.9.9
+  '';
+  services.resolved.enable = lib.mkForce false;
 
   systemd.services.transmission-netns = {
     wantedBy = [ "multi-user.target" ];
@@ -37,18 +43,26 @@ in {
       ip netns exec transmission wg syncconf airvpn <(wg-quick strip /etc/secrets/airvpn.conf)
       ip -n transmission link set airvpn up
       ip -n transmission route add default dev airvpn
+      ip -6 -n transmission route add default dev airvpn
       ip link add t1 type veth peer name t2
       ip link set t1 netns transmission
+
       ip addr add 128.0.0.2/30 dev t2
+      ip addr add fdb4:3310:947::1/64 dev t2
       ip link set t2 up
       ip -n transmission addr add 128.0.0.1/30 dev t1
+      ip -n transmission addr add fdb4:3310:947::2/64 dev t1
       ip -n transmission link set t1 up
+      ip -n transmission route add 42:0:ce16::3110/16 via fdb4:3310:947::1 dev t1
     '';
     serviceConfig = {
       RemainAfterExit = true;
       Type = "oneshot";
     };
   };
+
+  # so we can forward traffic from the transmission network namespace
+  boot.kernel.sysctl."net.ipv6.conf.all.forwarding" = 1;
 
   systemd.services.transmission = {
     after = [ "transmission-netns.service" ];
