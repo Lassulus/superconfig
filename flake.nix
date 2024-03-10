@@ -18,9 +18,9 @@
     clan-core.inputs.flake-parts.follows = "flake-parts";
     clan-core.inputs.disko.follows = "disko";
 
-    stockholm.url = "git+https://cgit.lassul.us/stockholm";
+    # stockholm.url = "git+https://cgit.lassul.us/stockholm";
     # stockholm.url = "path:/home/lass/sync/stockholm";
-    # stockholm.url = "github:krebs/stockholm";
+    stockholm.url = "github:krebs/stockholm";
     stockholm.inputs.nixpkgs.follows = "nixpkgs";
 
     disko.url = "github:nix-community/disko";
