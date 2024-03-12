@@ -226,7 +226,7 @@
     enable = true;
     tables = {
       filter.INPUT.policy = "DROP";
-      filter.FORWARD.policy = "DROP";
+      filter.FORWARD.policy = lib.mkDefault "DROP";
       filter.INPUT.rules = lib.mkMerge [
         (lib.mkBefore [
           { predicate = "-m conntrack --ctstate RELATED,ESTABLISHED"; target = "ACCEPT"; }
