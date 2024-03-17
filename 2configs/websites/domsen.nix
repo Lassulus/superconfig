@@ -97,6 +97,15 @@ in {
     file_uploads = on
   '';
 
+  clanCore.secrets.nextcloud = {
+    secrets."nextcloud_pw" = { };
+    generator.script = ''
+      cat > "$secrets"/nexcloud_pw;
+    '';
+    generator.prompt = ''
+      enter initial admin password for nextcloud
+    '';
+  };
   systemd.services.nextcloud-setup.after = [ "secret-nextcloud_pw.service" ];
   krebs.secret.files.nextcloud_pw = {
     path = "/run/nextcloud.pw";
