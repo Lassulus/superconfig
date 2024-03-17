@@ -18,4 +18,9 @@
       fastcgi_send_timeout 500;
     '';
   };
+  systemd.tmpfiles.settings."cgit"."/tmp/cgit".d = {
+    mode = "0755";
+    user = "fcgiwrap";
+    group = "fcgiwrap";
+  };
 }
