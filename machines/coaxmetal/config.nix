@@ -62,6 +62,7 @@
     }
   ];
 
+  system.stateVersion = "24.05";
   krebs.build.host = config.krebs.hosts.coaxmetal;
 
   programs.adb.enable = true;
