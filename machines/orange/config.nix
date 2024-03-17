@@ -9,6 +9,7 @@
   ];
 
   krebs.build.host = config.krebs.hosts.orange;
+  system.stateVersion = "24.05";
 
   services.nginx.enable = true;
   networking.firewall.allowedTCPPorts = [ 80 443 ];
