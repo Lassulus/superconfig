@@ -39,7 +39,6 @@
         folders = [ "/home/lass/sync" ];
       };
       clan.borgbackup = {
-        enable = true;
         destinations.mors.repo = "borg@mors.r:.";
       };
     }
