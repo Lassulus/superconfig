@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ self, config, lib, pkgs, ... }:
 
 with lib;
 
@@ -154,7 +154,7 @@ with lib;
       restartIfChanged = true;
       serviceConfig = {
         Restart = "always";
-        ExecStart = "${pkgs.nichtparasoup}/bin/nichtparasoup -c ${pkgs.writeText "config.ini" config.lass.nichtparasoup.config}";
+        ExecStart = "${self.packages.${pkgs.system}.nichtparasoup}/bin/nichtparasoup -c ${pkgs.writeText "config.ini" config.lass.nichtparasoup.config}";
       };
     };
   };
