@@ -17,15 +17,11 @@
       isReadOnly = false;
     };
   };
-  krebs.iptables.tables.filter.INPUT.rules = [
-    { predicate = "-p tcp --dport 8000"; target = "ACCEPT"; }
-  ];
-  krebs.htgen.radio-redirect = {
-    port = 8000;
-    scriptFile = pkgs.writers.writeDash "redir" ''
-      printf 'HTTP/1.1 301 Moved Permanently\r\n'
-      printf "Location: http://radio.lassul.us''${Request_URI}\r\n"
-      printf '\r\n'
+  clanCore.secrets.radio-container = {
+    secrets."radio.sync.key" = { };
+    generator.script = ";";
+    generator.prompt = ''
+      copy or reference the secret key from the container into here, so we can actually start/sync the container
     '';
   };
 }

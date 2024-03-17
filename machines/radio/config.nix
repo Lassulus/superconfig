@@ -18,6 +18,16 @@
 
   krebs.sync-containers3.inContainer = {
     enable = true;
-    pubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOvPKdbVwMEFCDMyNAzR8NdVjTbQL2G+03Xomxn6KKFt";
+    pubkey = builtins.readFile ./facts/radio.sync.pub;
+  };
+
+  clanCore.secrets.radio-container = {
+    secrets."radio.sync.key" = { };
+    facts."radio.sync.pub" = { };
+    generator.path = with pkgs; [ coreutils openssh ];
+    generator.script = ''
+      ssh-keygen -t ed25519 -N "" -f "$secrets"/radio.sync.key
+      mv "$secrets"/radio.sync.key "$facts"/radio.sync.pub
+    '';
   };
 }
