@@ -10,7 +10,7 @@
     facts."mycelium_pubkey" = { };
     generator = { 
       path = [
-        self.packages.${pkgs.system}.mycelium
+        pkgs.mycelium
         pkgs.coreutils
         pkgs.jq
       ];
