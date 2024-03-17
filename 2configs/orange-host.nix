@@ -21,4 +21,11 @@
       proxyPass = "http://orange.r";
     };
   };
+  clanCore.secrets.orange-container = {
+    secrets."orange.sync.key" = { };
+    generator.script = ";";
+    generator.prompt = ''
+      copy or reference the secret key from the container into here, so we can actually start/sync the container
+    '';
+  };
 }

@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 {
   imports = [
     ../../2configs
@@ -19,6 +19,15 @@
 
   krebs.sync-containers3.inContainer = {
     enable = true;
-    pubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFQWzKuXrwQopBc1mzb2VpljmwAs7Y8bRl9a8hBXLC+l";
+    pubkey = builtins.readFile ./facts/orange.sync.pub;
+  };
+  clanCore.secrets.orange-container = {
+    secrets."orange.sync.key" = { };
+    facts."orange.sync.pub" = { };
+    generator.path = with pkgs; [ coreutils openssh ];
+    generator.script = ''
+      ssh-keygen -t ed25519 -N "" -f "$secrets"/orange.sync.key
+      mv "$secrets"/orange.sync.key "$facts"/orange.sync.pub
+    '';
   };
 }
