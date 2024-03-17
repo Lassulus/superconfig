@@ -1,6 +1,14 @@
-{ config, lib, pkgs, ... }:
-
+{ config, pkgs, ... }:
 {
+  clanCore.secrets.mysql = {
+    secrets."mysql_rootPassword" = { };
+    generator.script = ''
+      cat > "$secrets"/mysql_rootPassword
+    '';
+    generator.prompt = ''
+      enter mysql root password
+    '';
+  };
   krebs.secret.files.mysql_rootPassword = {
     path = "${config.services.mysql.dataDir}/mysql_rootPassword";
     owner.name = "mysql";
