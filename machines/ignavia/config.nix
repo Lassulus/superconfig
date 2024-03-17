@@ -57,7 +57,7 @@
   };
   hardware.pulseaudio.package = pkgs.pulseaudioFull;
 
-  nix.trustedUsers = [ "root" "lass" ];
+  nix.settings.trusted-users = [ "root" "lass" ];
 
   services.tor = {
     enable = true;
@@ -69,13 +69,13 @@
     "aarch64-linux"
   ];
 
-  boot.cleanTmpDir = true;
+  boot.tmp.cleanOnBoot = true;
   programs.noisetorch.enable = true;
 
   environment.systemPackages = [
     pkgs.gh
     self.packages.${pkgs.system}.bank
-    self.packages.${pkgs.system}.mycelium
+    pkgs.mycelium
   ];
 
   krebs.hosts.styx.nets.retiolum.tinc.extraConfig = "Address = 10.42.0.1 655";
