@@ -58,7 +58,6 @@
     ssh.startAgent = false;
     gnupg.agent = {
       enable = true;
-      pinentryFlavor = "qt";
       enableSSHSupport = true;
     };
   };
