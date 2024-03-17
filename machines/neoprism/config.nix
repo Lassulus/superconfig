@@ -42,4 +42,5 @@
   ];
 
   krebs.build.host = config.krebs.hosts.neoprism;
+  system.stateVersion = "24.05";
 }

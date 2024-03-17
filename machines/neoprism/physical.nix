@@ -12,7 +12,6 @@
   boot.kernelPackages = pkgs.zfs.latestCompatibleLinuxPackages;
 
   boot.loader.grub.enable = true;
-  boot.loader.grub.version = 2;
   boot.loader.grub.efiSupport = true;
   boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "nvme" "sd_mod" ];
   boot.kernelModules = [ "kvm-amd" ];
