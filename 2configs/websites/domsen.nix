@@ -108,10 +108,8 @@ in {
     enable = true;
     hostName = "o.xanf.org";
     package = pkgs.nextcloud27;
-    config = {
-      adminpassFile = "/run/nextcloud.pw";
-      overwriteProtocol = "https";
-    };
+    settings.overwriteProtocol = "https";
+    config.adminpassFile = "/run/nextcloud.pw";
     https = true;
   };
   services.nginx.virtualHosts."o.xanf.org" = {
