@@ -26,6 +26,7 @@
             "#c-base"
             "#afra"
             "#tvl"
+            "#tvix-dev"
             "#eloop"
             "#systemdultras"
             "#rc3"
