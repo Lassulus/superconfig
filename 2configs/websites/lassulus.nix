@@ -1,11 +1,11 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, ... }:
 {
   imports = [
     ./default.nix
   ];
 
   security.acme = {
-    email = "acme@lassul.us";
+    defaults.email = "acme@lassul.us";
     acceptTerms = true;
     certs."lassul.us" = {
       group = "lasscert";
