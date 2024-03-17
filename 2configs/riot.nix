@@ -34,6 +34,7 @@ in {
         '';
         unitConfig.X-StopOnRemoval = false;
       };
+      system.stateVersion = config.system.nixos.release;
     };
     autoStart = true;
     enableTun = true;
