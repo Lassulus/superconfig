@@ -22,6 +22,20 @@ in mkIf (hasAttr "wiregrill" config.krebs.build.host.nets) {
     { predicate = "-i wiregrill -o eth0"; target = "ACCEPT"; }
     { predicate = "-o wiregrill -m conntrack --ctstate RELATED,ESTABLISHED"; target = "ACCEPT"; }
   ]);
+
+  clanCore.secrets.wiregrill = {
+    secrets."wiregrill.key" = { };
+    facts."wiregrill.pub" = { };
+    generator.path = with pkgs; [
+      coreutils
+      wireguard-tools
+    ];
+    generator.script = ''
+      wg genkey > "$secrets"/wiregrill.key
+      cat "$secrets"/wiregrill.key | wg pubkey > "$facts"/wiregrill.pub
+    '';
+  };
+
   systemd.network.networks.wiregrill = {
     matchConfig.Name = "wiregrill";
     address =
