@@ -10,6 +10,7 @@
   clanCore.secretsUploadDirectory = lib.mkForce "/var/state/secrets";
 
   krebs.build.host = config.krebs.hosts.radio;
+  system.stateVersion = "24.05";
 
   security.acme = {
     acceptTerms = true;
