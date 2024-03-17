@@ -73,6 +73,7 @@
         ./tools/astronvim/flake-module.nix
 
         ./tools/zsh.nix
+        ./tools/get-spora-hosts.nix
       ];
       flake.nixosConfigurations = clan.nixosConfigurations;
       flake.clanInternals = clan.clanInternals;
