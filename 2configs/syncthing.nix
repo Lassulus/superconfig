@@ -11,7 +11,7 @@ let
   mk_peers = lib.mapAttrs (n: v: { id = v.syncthing.id; });
 
   all_peers = lib.filterAttrs (n: v: v.syncthing.id != null) config.krebs.hosts;
-  used_peer_names = lib.unique (lib.filter lib.isString (lib.flatten (lib.mapAttrsToList (n: v: v.devices) config.services.syncthing.folders)));
+  used_peer_names = lib.unique (lib.filter lib.isString (lib.flatten (lib.mapAttrsToList (n: v: v.devices) config.services.syncthing.settings.folders)));
   used_peers = lib.filterAttrs (n: v: lib.elem n used_peer_names) all_peers;
 in {
   services.syncthing = {

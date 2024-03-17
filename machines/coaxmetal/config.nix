@@ -66,7 +66,7 @@
 
   programs.adb.enable = true;
 
-  nix.trustedUsers = [ "root" "lass" ];
+  nix.settings.trusted-users = [ "root" "lass" ];
 
   services.tor = {
     enable = true;

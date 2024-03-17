@@ -346,7 +346,7 @@ in {
       '';
     };
   };
-  services.syncthing.declarative.folders."/home/lass/tmp/the_playlist" = {
+  services.syncthing.settings.folders."/home/lass/tmp/the_playlist" = {
     path = lib.mkForce "/var/music/the_playlist";
     devices = [ "mors" "phone" "prism" "omo" "radio" ];
   };

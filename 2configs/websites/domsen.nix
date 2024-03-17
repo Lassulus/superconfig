@@ -461,7 +461,7 @@ in {
     ];
   };
 
-  services.syncthing.declarative.folders = {
+  services.syncthing.settings.folders = {
     domsen-backups = {
       path = "/backups/domsen";
       devices = [ "domsen-backup" ];

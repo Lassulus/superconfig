@@ -112,7 +112,7 @@
     ssl.trustIntermediate = true;
   };
 
-  nix.useSandbox = true;
+  nix.settings.sandbox = true;
 
   users.mutableUsers = false;
 
