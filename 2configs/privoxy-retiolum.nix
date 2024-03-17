@@ -1,14 +1,13 @@
-{ config, lib, ... }:
+{ config, ... }:
 
 let
   r_ip = config.krebs.build.host.nets.retiolum.ip4.addr;
-
 in {
   imports = [
     ./privoxy.nix
   ];
 
-  services.privoxy.listenAddress = "${r_ip}:8118";
+  services.privoxy.settings.listen-address = "${r_ip}:8118";
 
   krebs.iptables = {
     tables = {
