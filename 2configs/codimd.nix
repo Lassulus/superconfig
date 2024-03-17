@@ -76,4 +76,16 @@ in
     # https://github.com/settings/applications/2352617
     environmentFile = config.clanCore.secretsUploadDirectory + "/hedgedoc.env";
   };
+
+  clanCore.secrets.hedgedoc-github-auth = {
+    secrets."hedgedoc.env" = { };
+    generator.script = ''
+      cat > "$secrets"/hedgedoc.env
+    '';
+    generator.prompt = ''
+      goto https://github.com/settings/applications/2352617 and paste the data in the following format:
+      GITHUB_CLIENT_ID=...
+      GITHUB_CLIENT_SECRET=...
+    '';
+  };
 }
