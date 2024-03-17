@@ -82,33 +82,7 @@ in {
         openssh.authorizedKeys.keys = [ "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDQFaYOWRUvHP6I37q9Dd4PJOq8FNQqAeJZ8pLx0G62uC450kbPGcG80rHHvXmk7HqQP6biJmMg48bOsvXAScPot2Qhp1Qc35CuUqVhLiTvUAsi8l/iJjhjZ23yRGDCAmW5+JIOzIvECkcbMnG7YoYAQ9trNGHe9qwGzQGhpt3QVClE23WtE3PVKRLQx1VbiabSnAm6tXVd2zpUoSdpWt8Gpi2taM4XXJ5+l744MNxFHvDapN5xqpYzwrA34Ii13jNLWcGbtgxESpR+VjnamdWByrkBsW4X5/xn2K1I1FrujaM/DBHV1QMaDKst9V8+uL5X7aYNt0OUBu2eyZdg6aujY2BYovB9uRyR1JIuSbA/a54MM96yN9WirMUufJF/YZrV0L631t9EW8ORyWUo1GRzMuBHVHQlfApj7NCU/jEddUuTqKgwyRgTmMFMUI4M0tRULAB/7pBE1Vbcx9tg6RsKIk8VkskfbBJW9Y6Sx6YoFlxPdgMNIrBefqEjIV62piP7YLMlvfIDCJ7TNd9dLN86XGggZ/nD5zt6SL1o61vVnw9If8pHosppxADPJsJvcdN6fOe16/tFAeE0JRo0jTcyFVTBGfhpey+rFfuW8wtUyuO5WPUxkOn7xMHGMWHJAtWX2vwVIDtLxvqn48B4SmEOpPD6ii+vcpwqAex3ycqBUQ==" ];
       };
     }
-    {
-      services.nginx.virtualHosts."radio.lassul.us" = {
-        enableACME = true;
-        addSSL = true;
-        locations."/" = {
-          # recommendedProxySettings = true;
-          proxyWebsockets = true;
-          proxyPass = "http://radio.r";
-          extraConfig = ''
-            proxy_set_header Host radio.r;
-            # get source ip for weather reports
-            proxy_set_header user-agent "$http_user_agent; client-ip=$remote_addr";
-          '';
-        };
-      };
-      krebs.htgen.radio-redirect = {
-        port = 8000;
-        scriptFile = pkgs.writers.writeDash "redir" ''
-          printf 'HTTP/1.1 301 Moved Permanently\r\n'
-          printf "Location: http://radio.lassul.us''${Request_URI}\r\n"
-          printf '\r\n'
-        '';
-      };
-      krebs.iptables.tables.filter.INPUT.rules = [
-        { predicate = "-p tcp --dport 8000"; target = "ACCEPT"; }
-      ];
-    }
+    ../../2configs/services/radio/proxy.nix
     ../../2configs/exim-smarthost.nix
     ../../2configs/privoxy-retiolum.nix
     ../../2configs/binary-cache/server.nix

@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 {
   services.nginx.virtualHosts."radio.lassul.us" = {
     enableACME = true;
@@ -14,4 +14,13 @@
       '';
     };
   };
+  krebs.htgen.radio-redirect = {
+    port = 8000;
+    scriptFile = pkgs.writers.writeDash "redir" ''
+      printf 'HTTP/1.1 301 Moved Permanently\r\n'
+      printf "Location: http://radio.lassul.us''${Request_URI}\r\n"
+      printf '\r\n'
+    '';
+  };
+  networking.firewall.allowedTCPPorts = [ 8000 ];
 }
