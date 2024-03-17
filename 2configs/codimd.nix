@@ -52,8 +52,8 @@ in
 
   services.hedgedoc = {
     enable = true;
-    configuration.allowOrigin = [ domain ];
     settings = {
+      allowOrigin = [ domain ];
       db = {
         dialect = "sqlite";
         storage = "/var/lib/hedgedoc/db.hedgedoc.sqlite";
