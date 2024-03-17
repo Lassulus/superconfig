@@ -120,7 +120,7 @@ in {
     ../../2configs/container-networking.nix
     ../../2configs/fysiirc.nix
     ../../2configs/bgt-bot
-    ../../2configs/matrix.nix
+    ../../2configs/services/matrix/proxy.nix
     (self.inputs.stockholm + "/krebs/2configs/mastodon-proxy.nix")
     {
       services.tor = {

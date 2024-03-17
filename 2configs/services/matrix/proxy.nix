@@ -22,7 +22,7 @@
         forceSSL = true;
         enableACME = true;
         locations."/_matrix" = {
-          proxyPass = "http://orange.r:8008";
+          proxyPass = "http://neoprism.r:8008";
         };
       };
     };

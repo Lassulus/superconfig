@@ -6,13 +6,14 @@
     ../../2configs/retiolum.nix
     ../../2configs/mail/internet-gateway.nix
     ../../2configs/binary-cache/server.nix
-    # ../../2configs/matrix.nix
     ../../2configs/gsm-wiki.nix
     ../../2configs/monitoring/telegraf.nix
     ../../2configs/pair-programming.nix
     ../../2configs/nginx.nix
     ../../2configs/shadowsocks.nix
 
+    ../../2configs/services/matrix
+    ../../2configs/services/matrix/proxy.nix
     # sync-containers
     ../../2configs/consul.nix
     ../../2configs/services/flix/container-host.nix
