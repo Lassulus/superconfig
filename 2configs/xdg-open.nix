@@ -47,6 +47,10 @@
         zathura "$FILE" ;;
       inode/directory)
         alacritty --execute mc "$FILE" ;;
+      inode/symlink)
+        exec "$0" "$(realpath "$FILE")" ;;
+      audio/*)
+        mpv "$FILE" ;;
       video/*)
         mpv "$FILE" ;;
       *)
