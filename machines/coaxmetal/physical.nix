@@ -7,7 +7,6 @@
 
   networking.hostId = "e0c335ea";
   boot.zfs.requestEncryptionCredentials = true;
-  boot.zfs.enableUnstable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.grub = {
     enable = true;
