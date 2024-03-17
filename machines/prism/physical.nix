@@ -67,11 +67,10 @@
     MAILADDR root
   '';
 
-  nix.maxJobs = lib.mkDefault 8;
+  nix.settings.max-jobs = lib.mkDefault 8;
   powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
 
   boot.loader.grub.enable = true;
-  boot.loader.grub.version = 2;
   boot.loader.grub.devices = [ "/dev/sda" "/dev/sdb" ];
 
   # we don't pay for power there and this might solve a problem we observed at least once
