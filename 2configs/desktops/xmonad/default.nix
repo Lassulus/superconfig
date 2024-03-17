@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ self, config, lib, pkgs, ... }:
 
 {
   imports = [
@@ -127,7 +127,7 @@ myKeyMap =
         ${pkgs.pass}/bin/passmenu --type
     ''}" [] Nothing)
 
-    , ("M4-S-p", forkFile "${pkgs.otpmenu}/bin/otpmenu" [] Nothing)
+    , ("M4-S-p", forkFile "${self.packages.${pkgs.system}.otpmenu}/bin/otpmenu" [] Nothing)
     , ("M4-z", forkFile "${pkgs.unimenu}/bin/unimenu" [] Nothing)
 
     , ("M4-S-q", restart "xmonad" True)
