@@ -153,11 +153,10 @@ in {
         enable = true;
         resolveLocalQueries = false;
 
-        extraConfig= ''
-          bind-interfaces
-          interface=wiregrill
-          interface=retiolum
-        '';
+        settings = {
+          bind-interfaces = true;
+          interface = [ "wiregrill" "retiolum " ];
+        };
       };
     }
     {
