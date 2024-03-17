@@ -208,6 +208,33 @@ in {
       { domain = "beesmooth.ch"; }
     ];
   };
+  clanCore.secrets."ubikmedia.eu-dkim" = {
+    secrets."ubikmedia.eu.dkim.priv" = { };
+    facts."ubikmedia.eu.dkim.pub" = { };
+    generator.path = with pkgs; [ coreutils openssl ];
+    generator.script = ''
+      openssl genrsa -out "$secrets"/ubikmedia.eu.dkim.priv 2048
+      openssl rsa -in "$secrets"/ubikmedia.eu.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$facts"/ubikmedia.eu.dkim.pub
+    '';
+  };
+  clanCore.secrets."apanowicz.de-dkim" = {
+    secrets."apanowicz.de.dkim.priv" = { };
+    facts."apanowicz.de.dkim.pub" = { };
+    generator.path = with pkgs; [ coreutils openssl ];
+    generator.script = ''
+      openssl genrsa -out "$secrets"/apanowicz.de.dkim.priv 2048
+      openssl rsa -in "$secrets"/apanowicz.de.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$facts"/apanowicz.de.dkim.pub
+    '';
+  };
+  clanCore.secrets."beesmooth.ch-dkim" = {
+    secrets."beesmooth.ch.dkim.priv" = { };
+    facts."beesmooth.ch.dkim.pub" = { };
+    generator.path = with pkgs; [ coreutils openssl ];
+    generator.script = ''
+      openssl genrsa -out "$secrets"/beesmooth.ch.dkim.priv 2048
+      openssl rsa -in "$secrets"/beesmooth.ch.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$facts"/beesmooth.ch.dkim.pub
+    '';
+  };
   services.borgbackup.jobs.hetzner.paths = [
     "/home/xanf"
     "/home/domsen"
