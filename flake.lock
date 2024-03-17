@@ -251,11 +251,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1710658143,
-        "narHash": "sha256-ZLlwHtrsVw11HoTN4d0d6TkFdtFRi1alOgmrvLDlWmM=",
+        "lastModified": 1710660325,
+        "narHash": "sha256-nIV7jzfAgHJJMKApw7rnVlcMcX17Z9g/pha8/OeLooM=",
         "owner": "krebs",
         "repo": "spora",
-        "rev": "b12628fdcf2996485ed0c19a0594cf4f4239db25",
+        "rev": "347d2bbbcbe3a5aeeab96c72bc01b67f441a4dd0",
         "type": "github"
       },
       "original": {
@@ -272,11 +272,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1710030816,
-        "narHash": "sha256-vW60Fjvc2sEVuudkNK7FoYvXQS8eeHtGb0hpYf+suAk=",
+        "lastModified": 1710666940,
+        "narHash": "sha256-zNCIvyrQl5l40uqu8SUzm5L+So9/jy9H9zavgAVzUW4=",
         "owner": "krebs",
         "repo": "stockholm",
-        "rev": "b19e15e7d0e699a5d8f719b9a554814c2ece8a85",
+        "rev": "a89f923b1aa86a1fa6352d2dceb1bc8124a0ced7",
         "type": "github"
       },
       "original": {
