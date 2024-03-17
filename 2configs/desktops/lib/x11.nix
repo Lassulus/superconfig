@@ -74,7 +74,6 @@
     ponymix
     powertop
     rxvt-unicode
-    sshvnc
     sxiv
     nsxiv
     taskwarrior
@@ -83,7 +82,6 @@
     wirelesstools
     x11vnc
     xclip
-    xephyrify
     xorg.xmodmap
     xorg.xhost
     xdotool
