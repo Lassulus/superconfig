@@ -52,7 +52,6 @@ import XMonad.Layout.SimplestFloat (simplestFloat)
 import XMonad.Layout.StateFull
 import XMonad.ManageHook (composeAll)
 import XMonad.Prompt (autoComplete, font, height, searchPredicate, XPConfig)
-import XMonad.Prompt.Window (windowPromptGoto, windowPromptBringCopy)
 import XMonad.Util.EZConfig (additionalKeysP)
 import XMonad.Util.NamedWindows (getName)
 import XMonad.Util.Run (safeSpawn)
@@ -128,7 +127,6 @@ myKeyMap =
     ''}" [] Nothing)
 
     , ("M4-S-p", forkFile "${self.packages.${pkgs.system}.otpmenu}/bin/otpmenu" [] Nothing)
-    , ("M4-z", forkFile "${pkgs.unimenu}/bin/unimenu" [] Nothing)
 
     , ("M4-S-q", restart "xmonad" True)
 
@@ -158,17 +156,12 @@ myKeyMap =
     , ("M4-b", spawn "/run/current-system/sw/bin/klem")
 
     , ("M4-c", defaultCommands >>= runCommand)
-    -- , ("M4-v", spawn "${pkgs.pager}/bin/pager view")
-    -- , ("M4-S-v", spawn "${pkgs.pager}/bin/pager shift")
     , ("M4-v", withWorkspace autoXPConfig (windows . W.greedyView))
     , ("M4-S-v", withWorkspace autoXPConfig (windows . W.shift))
     , ("M4-C-v", withWorkspace autoXPConfig (windows . copy))
 
     , ("M4-m", withFocused minimizeWindow)
     , ("M4-S-m", withLastMinimized maximizeWindow)
-
-    , ("M4-q", windowPromptGoto infixAutoXPConfig)
-    , ("M4-C-q", windowPromptBringCopy infixAutoXPConfig)
 
     , ("M4-S-q", return ())
 
@@ -188,7 +181,6 @@ myKeyMap =
 
     , ("M4-<F1>", spawn "/run/current-system/sw/bin/gamepad_mouse_toggle")
     , ("M4-<F2>", windows copyToAll)
-    , ("M4-<F4>", spawn "${pkgs.nm-dmenu}/bin/nm-dmenu")
     , ("M4-<F5>", spawn "${pkgs.acpilight}/bin/xbacklight -set 1")
     , ("M4-<F6>", spawn "${pkgs.acpilight}/bin/xbacklight -set 10")
     , ("M4-<F7>", spawn "${pkgs.acpilight}/bin/xbacklight -set 33")
