@@ -42,4 +42,11 @@
       recommendedProxySettings = true;
     };
   };
+  clanCore.secrets.yellow-container = {
+    secrets."yellow.sync.key" = { };
+    generator.script = ";";
+    generator.prompt = ''
+      copy or reference the secret key from the container into here, so we can actually start/sync the container
+    '';
+  };
 }
