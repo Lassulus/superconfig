@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ self, config, pkgs, ... }:
 
 {
   imports = [
@@ -60,7 +60,7 @@
     {
       environment.systemPackages = [
         pkgs.ovh-zone
-        pkgs.bank
+        self.packages.${pkgs.system}.bank
         pkgs.adb-sync
         pkgs.transgui
       ];
@@ -76,18 +76,7 @@
   krebs.build.host = config.krebs.hosts.mors;
 
   environment.systemPackages = with pkgs; [
-    acronym
-    brain
-    cac-api
-    sshpass
-    get
-    hashPassword
-    urban
-    mk_sql_pair
-    remmina
-    transmission
-
-    macchanger
+    self.packages.${pkgs.system}.acronym
 
     dnsutils
     woeusb
