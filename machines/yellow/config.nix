@@ -12,7 +12,7 @@ in {
 
   krebs.sync-containers3.inContainer = {
     enable = true;
-    pubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN737BAP36KiZO97mPKTIUGJUcr97ps8zjfFag6cUiYL";
+    pubkey = builtins.readFile ./facts/yellow.sync.pub;
   };
 
   networking.useHostResolvConf = false;
@@ -75,5 +75,14 @@ in {
       IOSchedulingClass = "idle";
       IOSchedulingPriority = 7;
     };
+  };
+  clanCore.secrets.yellow-container = {
+    secrets."yellow.sync.key" = { };
+    facts."yellow.sync.pub" = { };
+    generator.path = with pkgs; [ coreutils openssh ];
+    generator.script = ''
+      ssh-keygen -t ed25519 -N "" -f "$secrets"/yellow.sync.key
+      mv "$secrets"/yellow.sync.key "$facts"/yellow.sync.pub
+    '';
   };
 }
