@@ -1,10 +1,15 @@
-{ config, pkgs, ... }:
+{ config, ... }:
 {
   services.matrix-synapse = {
     enable = true;
     settings = {
       server_name = "lassul.us";
       # registration_shared_secret = "yolo";
+      database = {
+        args.user = "matrix-synapse";
+        args.database = "matrix-synapse";
+        name = "psycopg2";
+      };
       turn_uris  = [
         "turn:turn.matrix.org?transport=udp"
         "turn:turn.matrix.org?transport=tcp"
@@ -38,11 +43,13 @@
   networking.firewall.interfaces.retiolum.allowedTCPPorts = [ 8008 ];
 
   services.postgresql.enable = true;
-  services.postgresql.initialScript = pkgs.writeText "synapse-init.sql" ''
-    CREATE ROLE "matrix-synapse" WITH LOGIN PASSWORD 'synapse';
-    CREATE DATABASE "matrix-synapse" WITH OWNER "matrix-synapse"
-      TEMPLATE template0
-      LC_COLLATE = "C"
-      LC_CTYPE = "C";
-  '';
+  services.postgresql = {
+    ensureDatabases = [ "matrix-synapse" ];
+    ensureUsers = [
+      {
+        name = "matrix-synapse";
+        ensureDBOwnership = true;
+      }
+    ];
+  };
 }
