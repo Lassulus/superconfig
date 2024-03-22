@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
   imports = [
     ./zigbee.nix
@@ -14,7 +14,15 @@
     { predicate = "-i wiregrill -p tcp --dport 8123"; target = "ACCEPT"; } # hass
   ];
 
-  # TODO add auto update
+  systemd.services.hass-update = {
+    startAt = "daily";
+    script = ''
+      ${pkgs.podman}/bin/podman pull ${config.virtualisation.oci-containers.containers.homeassistant.image}
+      ${pkgs.podman}/bin/podman stop homeassistant
+      ${pkgs.podman}/bin/podman start homeassistant
+    '';
+  };
+
   virtualisation.oci-containers = {
     backend = "podman";
     containers.homeassistant = {
