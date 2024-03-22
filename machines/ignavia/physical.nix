@@ -7,6 +7,9 @@
     self.inputs.nixos-hardware.nixosModules.framework-13th-gen-intel
   ];
 
+  # fprintd is currently broken
+  services.fprintd.enable = false;
+
   krebs.power-action.battery = "BAT1";
 
   networking.hostId = "deadbeef";
