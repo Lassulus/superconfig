@@ -42,7 +42,7 @@ if len(ips) > 5:
                 pass
 
 else:
-    for ip in fileinput.input():
+    for ip in ips:
         if "80.147.140.51" in ip:
             output.append(
                 'Weather report for c-base, space. '
