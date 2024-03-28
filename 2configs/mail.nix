@@ -175,7 +175,7 @@ let
     "<enter-command>unset wait_key<enter> \
     <shell-escape>${pkgs.writeDash "muchsync" ''
       set -efu
-      until ${pkgs.muchsync}/bin/muchsync -F lass@green.r; do
+      until ${pkgs.muchsync}/bin/muchsync -F lass@green.n; do
         sleep 1
       done
     ''}<enter>
