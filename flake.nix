@@ -33,6 +33,7 @@
     nether.inputs.nixpkgs.follows = "nixpkgs";
     nether.inputs.clan-core.follows = "clan-core";
 
+    # spora.url = "git+file:/home/lass/src/spora";
     spora.url = "github:krebs/spora";
     spora.inputs.nixpkgs.follows = "nixpkgs";
   };
@@ -69,7 +70,7 @@
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
       imports = [
-        ./tools/nvim.nix
+        # ./tools/nvim.nix
         ./tools/astronvim/flake-module.nix
         ./tools/zsh.nix
         ./tools/get-spora-hosts.nix
