@@ -35,9 +35,9 @@
     {
       users.extraUsers.mainUser.hashedPasswordFile = "${config.krebs.secret.directory}/passwordHash";
       users.extraUsers.root.hashedPasswordFile = "${config.krebs.secret.directory}/passwordHash";
-      clanCore.secrets.password = {
-        secrets.password = { };
-        secrets.passwordHash = { };
+      clanCore.facts.services.password = {
+        secret.password = { };
+        secret.passwordHash = { };
         generator.path = with pkgs; [ coreutils xkcdpass mkpasswd ];
         generator.script = ''
           xkcdpass -n 4 -d - > $secrets/password
@@ -48,12 +48,12 @@
     {
       services.openssh.enable = true;
       services.openssh.hostKeys = [{
-        path = "${config.krebs.secret.directory}/ssh.id_ed25519";
+        path = config.clanCore.facts.services.ssh.secret."ssh.id_ed25519".path;
         type = "ed25519";
       }];
-      clanCore.secrets.ssh = {
-        secrets."ssh.id_ed25519" = { };
-        facts."ssh.id_ed25519.pub" = { };
+      clanCore.facts.services.ssh = {
+        secret."ssh.id_ed25519" = { };
+        public."ssh.id_ed25519.pub" = { };
         generator.path = with pkgs; [ coreutils openssh ];
         generator.script = ''
           ssh-keygen -t ed25519 -N "" -f $secrets/ssh.id_ed25519
@@ -184,6 +184,7 @@
     ls = "ls --color";
     ip = "ip -color=auto";
     grep = "grep --color=auto";
+    nosleep = "systemd-inhibit --what=handle-lid-switch sleep infinity";
   };
 
   programs.bash = {

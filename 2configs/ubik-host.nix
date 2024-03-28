@@ -27,16 +27,16 @@
       '';
     };
   };
-  services.nginx.virtualHosts."mail.ubikmedia.eu" = {
-    enableACME = true;
-    forceSSL = true;
-    acmeFallbackHost = "ubik.r";
-    locations."/" = {
-      recommendedProxySettings = true;
-      proxyWebsockets = true;
-      proxyPass = "https://ubik.r";
-    };
-  };
+  # services.nginx.virtualHosts."mail.ubikmedia.eu" = {
+  #   enableACME = true;
+  #   forceSSL = true;
+  #   acmeFallbackHost = "ubik.r";
+  #   locations."/" = {
+  #     recommendedProxySettings = true;
+  #     proxyWebsockets = true;
+  #     proxyPass = "https://ubik.r";
+  #   };
+  # };
 
   services.nginx.virtualHosts."karlaskop.de" = {
     serverAliases = [ "www.karlaskop.de" ];
@@ -48,5 +48,14 @@
       proxyWebsockets = true;
       proxyPass = "https://prism.r";
     };
+  };
+  clanCore.facts.services.ubik-container = {
+    secret."ubik.sync.key" = { };
+    public."ubik.sync.pub" = { };
+    generator.path = with pkgs; [ coreutils openssh ];
+    generator.script = ''
+      ssh-keygen -t ed25519 -N "" -f "$secrets"/ubik.sync.key
+      mv "$secrets"/ubik.sync.key "$facts"/ubik.sync.pub
+    '';
   };
 }

@@ -14,9 +14,9 @@
     client.enable = true;
   };
 
-  clanCore.secrets.tor-ssh = {
-    secrets."ssh-tor.priv" = { };
-    secrets."tor-hostname" = { };
+  clanCore.facts.services.tor-ssh = {
+    secret."ssh-tor.priv" = { };
+    secret."tor-hostname" = { };
     generator.path = with pkgs; [
       coreutils
       mkp224o

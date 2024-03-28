@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 {
-  clanCore.secrets.mysql = {
-    secrets."mysql_rootPassword" = { };
+  clanCore.facts.services.mysql = {
+    secret."mysql_rootPassword" = { };
     generator.script = ''
       cat > "$secrets"/mysql_rootPassword
     '';

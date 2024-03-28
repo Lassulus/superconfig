@@ -37,10 +37,10 @@ in {
     user = "lass";
   };
 
-  clanCore.secrets.syncthing = {
-    secrets."syncthing.key" = { };
-    secrets."syncthing.cert" = { };
-    facts."syncthing.pub" = { };
+  clanCore.facts.services.syncthing = {
+    secret."syncthing.key" = { };
+    secret."syncthing.cert" = { };
+    public."syncthing.pub" = { };
     generator.path = with pkgs; [
       coreutils
       gnugrep

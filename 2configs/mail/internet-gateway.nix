@@ -9,9 +9,9 @@
     "nginx"
   ];
 
-  clanCore.secrets."lassul.us-dkim" = {
-    secrets."lassul.us.dkim.priv" = { };
-    facts."lassul.us.dkim.pub" = { };
+  clanCore.facts.services."lassul.us-dkim" = {
+    secret."lassul.us.dkim.priv" = { };
+    public."lassul.us.dkim.pub" = { };
     generator.path = with pkgs; [ coreutils openssl ];
     generator.script = ''
       openssl genrsa -out "$secrets"/lassul.us.dkim.priv 2048

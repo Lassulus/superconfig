@@ -76,9 +76,9 @@ in {
       IOSchedulingPriority = 7;
     };
   };
-  clanCore.secrets.yellow-container = {
-    secrets."yellow.sync.key" = { };
-    facts."yellow.sync.pub" = { };
+  clanCore.facts.services.yellow-container = {
+    secret."yellow.sync.key" = { };
+    public."yellow.sync.pub" = { };
     generator.path = with pkgs; [ coreutils openssh ];
     generator.script = ''
       ssh-keygen -t ed25519 -N "" -f "$secrets"/yellow.sync.key

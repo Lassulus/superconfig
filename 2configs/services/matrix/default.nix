@@ -1,10 +1,9 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 {
   services.matrix-synapse = {
     enable = true;
     settings = {
       server_name = "lassul.us";
-      # registration_shared_secret = "yolo";
       database = {
         args.user = "matrix-synapse";
         args.database = "matrix-synapse";
@@ -37,6 +36,25 @@
         }
       ];
     };
+    extraConfigFiles = [
+      "/var/lib/matrix-synapse/registration_shared_secret.yaml"
+    ];
+  };
+  systemd.services.matrix-synapse.serviceConfig.ExecStartPre = [
+    "+${pkgs.writeScript "copy_registration_shared_secret" ''
+      #!/bin/sh
+      cp ${config.clanCore.facts.services.matrix-synapse.secret.synapse-registration_shared_secret.path} /var/lib/matrix-synapse/registration_shared_secret.yaml
+      chown matrix-synapse:matrix-synapse /var/lib/matrix-synapse/registration_shared_secret.yaml
+      chmod 600 /var/lib/matrix-synapse/registration_shared_secret.yaml
+    ''}"
+  ];
+
+  clanCore.facts.services."matrix-synapse" = {
+    secret."synapse-registration_shared_secret" = { };
+    generator.path = with pkgs; [ coreutils pwgen ];
+    generator.script = ''
+      echo "registration_shared_secret: $(pwgen -s 32 1)" > "$secrets"/synapse-registration_shared_secret
+    '';
   };
 
   # TODO add other VPNs here as well

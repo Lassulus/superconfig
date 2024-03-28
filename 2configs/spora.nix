@@ -3,11 +3,18 @@
   imports = [
     self.inputs.spora.nixosModules.spora
   ];
-  services.mycelium.keyFile = config.clanCore.secrets.mycelium.secrets.mycelium_key.path;
-  clanCore.secrets.mycelium = {
-    secrets."mycelium_key" = { };
-    facts."mycelium_ip" = { };
-    facts."mycelium_pubkey" = { };
+  services.mycelium = {
+    enable = true;
+    keyFile = config.clanCore.facts.services.mycelium.secret.mycelium_key.path;
+    peers = [
+      # "quic://lassul.us:9651"
+    ];
+    package = self.packages.${pkgs.system}.mycelium;
+  };
+  clanCore.facts.services.mycelium = {
+    secret."mycelium_key" = { };
+    public."mycelium_ip" = { };
+    public."mycelium_pubkey" = { };
     generator = { 
       path = [
         pkgs.mycelium

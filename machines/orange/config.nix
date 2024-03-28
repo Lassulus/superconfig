@@ -22,9 +22,9 @@
     enable = true;
     pubkey = builtins.readFile ./facts/orange.sync.pub;
   };
-  clanCore.secrets.orange-container = {
-    secrets."orange.sync.key" = { };
-    facts."orange.sync.pub" = { };
+  clanCore.facts.services.orange-container = {
+    secret."orange.sync.key" = { };
+    public."orange.sync.pub" = { };
     generator.path = with pkgs; [ coreutils openssh ];
     generator.script = ''
       ssh-keygen -t ed25519 -N "" -f "$secrets"/orange.sync.key

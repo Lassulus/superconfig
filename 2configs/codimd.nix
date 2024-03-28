@@ -70,15 +70,14 @@ in
       sslCertPath = "/var/lib/acme/${domain}/cert.pem";
       sslKeyPath = "/var/lib/acme/${domain}/key.pem";
       dhParamPath = config.security.dhparams.params.hedgedoc.path;
-
     };
 
     # https://github.com/settings/applications/2352617
-    environmentFile = config.clanCore.secretsUploadDirectory + "/hedgedoc.env";
+    environmentFile = config.clanCore.facts.secretUploadDirectory + "/hedgedoc.env";
   };
 
-  clanCore.secrets.hedgedoc-github-auth = {
-    secrets."hedgedoc.env" = { };
+  clanCore.facts.services.hedgedoc-github-auth = {
+    secret."hedgedoc.env" = { };
     generator.script = ''
       cat > "$secrets"/hedgedoc.env
     '';

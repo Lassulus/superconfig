@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 {
   imports = [
     ../../2configs
@@ -20,13 +20,23 @@
     ../../2configs/atuin-server.nix
   ];
 
-  clanCore.secretsUploadDirectory = lib.mkForce "/var/state/secrets";
+  clanCore.facts.secretUploadDirectory = lib.mkForce "/var/state/secrets";
 
   krebs.build.host = config.krebs.hosts.green;
 
   krebs.sync-containers3.inContainer = {
     enable = true;
-    pubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFlUMf943qEQG64ob81p6dgoHq4jUjq7tSvmSdEOEU2y";
+    pubkey = config.clanCore.facts.services.green-container.public."green.sync.pub".value;
+  };
+
+  clanCore.facts.services.green-container = {
+    secret."green.sync.key" = { };
+    public."green.sync.pub" = { };
+    generator.path = with pkgs; [ coreutils openssh ];
+    generator.script = ''
+      ssh-keygen -t ed25519 -N "" -f "$secrets"/green.sync.key
+      mv "$secrets"/green.sync.key "$facts"/green.sync.pub
+    '';
   };
 
   systemd.tmpfiles.rules = [

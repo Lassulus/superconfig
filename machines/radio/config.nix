@@ -7,7 +7,7 @@
     ../../2configs/services/radio
   ];
 
-  clanCore.secretsUploadDirectory = lib.mkForce "/var/state/secrets";
+  clanCore.facts.secretUploadDirectory = lib.mkForce "/var/state/secrets";
 
   krebs.build.host = config.krebs.hosts.radio;
   system.stateVersion = "24.05";
@@ -22,9 +22,9 @@
     pubkey = builtins.readFile ./facts/radio.sync.pub;
   };
 
-  clanCore.secrets.radio-container = {
-    secrets."radio.sync.key" = { };
-    facts."radio.sync.pub" = { };
+  clanCore.facts.services.radio-container = {
+    secret."radio.sync.key" = { };
+    public."radio.sync.pub" = { };
     generator.path = with pkgs; [ coreutils openssh ];
     generator.script = ''
       ssh-keygen -t ed25519 -N "" -f "$secrets"/radio.sync.key

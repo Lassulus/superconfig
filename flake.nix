@@ -49,11 +49,11 @@
           ./machines/${machineName}/physical.nix
           ({ config, pkgs, ... }: {
             clanCore.machineName = machineName;
-            clanCore.secretStore = "password-store";
-            clanCore.secretsUploadDirectory = "/etc/secrets";
-            clanCore.secretsDirectory = pkgs.lib.mkForce config.clanCore.secretsUploadDirectory;
+            clanCore.facts.secretStore = "password-store";
+            clanCore.facts.secretUploadDirectory = "/etc/secrets";
+            clanCore.facts.secretDirectory = pkgs.lib.mkForce config.clanCore.facts.secretUploadDirectory;
             clan.networking.targetHost = "root@${machineName}";
-            krebs.secret.directory = config.clanCore.secretsUploadDirectory;
+            krebs.secret.directory = config.clanCore.facts.secretUploadDirectory;
             nixpkgs.overlays = [
               self.inputs.stockholm.overlays.default
               (import (self.inputs.stockholm.inputs.nix-writers + "/pkgs")) # TODO get rid of that overlay
@@ -71,7 +71,6 @@
       imports = [
         ./tools/nvim.nix
         ./tools/astronvim/flake-module.nix
-
         ./tools/zsh.nix
         ./tools/get-spora-hosts.nix
       ];

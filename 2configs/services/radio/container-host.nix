@@ -17,8 +17,8 @@
       isReadOnly = false;
     };
   };
-  clanCore.secrets.radio-container = {
-    secrets."radio.sync.key" = { };
+  clanCore.facts.services.radio-container = {
+    secret."radio.sync.key" = { };
     generator.script = ";";
     generator.prompt = ''
       copy or reference the secret key from the container into here, so we can actually start/sync the container

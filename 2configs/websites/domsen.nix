@@ -97,8 +97,8 @@ in {
     file_uploads = on
   '';
 
-  clanCore.secrets.nextcloud = {
-    secrets."nextcloud_pw" = { };
+  clanCore.facts.services.nextcloud = {
+    secret."nextcloud_pw" = { };
     generator.script = ''
       cat > "$secrets"/nexcloud_pw;
     '';
@@ -215,27 +215,27 @@ in {
       { domain = "beesmooth.ch"; }
     ];
   };
-  clanCore.secrets."ubikmedia.eu-dkim" = {
-    secrets."ubikmedia.eu.dkim.priv" = { };
-    facts."ubikmedia.eu.dkim.pub" = { };
+  clanCore.facts.services."ubikmedia.eu-dkim" = {
+    secret."ubikmedia.eu.dkim.priv" = { };
+    public."ubikmedia.eu.dkim.pub" = { };
     generator.path = with pkgs; [ coreutils openssl ];
     generator.script = ''
       openssl genrsa -out "$secrets"/ubikmedia.eu.dkim.priv 2048
       openssl rsa -in "$secrets"/ubikmedia.eu.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$facts"/ubikmedia.eu.dkim.pub
     '';
   };
-  clanCore.secrets."apanowicz.de-dkim" = {
-    secrets."apanowicz.de.dkim.priv" = { };
-    facts."apanowicz.de.dkim.pub" = { };
+  clanCore.facts.services."apanowicz.de-dkim" = {
+    secret."apanowicz.de.dkim.priv" = { };
+    public."apanowicz.de.dkim.pub" = { };
     generator.path = with pkgs; [ coreutils openssl ];
     generator.script = ''
       openssl genrsa -out "$secrets"/apanowicz.de.dkim.priv 2048
       openssl rsa -in "$secrets"/apanowicz.de.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$facts"/apanowicz.de.dkim.pub
     '';
   };
-  clanCore.secrets."beesmooth.ch-dkim" = {
-    secrets."beesmooth.ch.dkim.priv" = { };
-    facts."beesmooth.ch.dkim.pub" = { };
+  clanCore.facts.services."beesmooth.ch-dkim" = {
+    secret."beesmooth.ch.dkim.priv" = { };
+    public."beesmooth.ch.dkim.pub" = { };
     generator.path = with pkgs; [ coreutils openssl ];
     generator.script = ''
       openssl genrsa -out "$secrets"/beesmooth.ch.dkim.priv 2048

@@ -17,16 +17,15 @@
       AutoConnect = yes
       LocalDiscovery = yes
     '';
-    tincUp = lib.mkIf config.systemd.network.enable "";
-    privkey = "${config.krebs.secret.directory}/retiolum.rsa_key.priv";
-    privkey_ed25519 = "${config.krebs.secret.directory}/retiolum.ed25519_key.priv";
+    privkey = config.clanCore.facts.services.retiolum."retiolum.rsa_key.priv".path;
+    privkey_ed25519 = config.clanCore.facts.services.retiolum."retiolum.ed25519_key.priv".path;
   };
 
-  clanCore.secrets.retiolum = {
-    secrets."retiolum.rsa_key.priv" = { };
-    secrets."retiolum.ed25519_key.priv" = { };
-    facts."retiolum.rsa_key.pub" = { };
-    facts."retiolum.ed25519_key.pub" = { };
+  clanCore.facts.services.retiolum = {
+    secret."retiolum.rsa_key.priv" = { };
+    secret."retiolum.ed25519_key.priv" = { };
+    public."retiolum.rsa_key.pub" = { };
+    public."retiolum.ed25519_key.pub" = { };
     generator.path = with pkgs; [
       coreutils
       tinc_pre

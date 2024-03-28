@@ -1,11 +1,11 @@
 { config, pkgs, ... }: {
   services.shadowsocks = {
     enable = true;
-    passwordFile = config.clanCore.secrets.shadowsocks.secrets.shadowsocks_password.path;
+    passwordFile = config.clanCore.facts.services.shadowsocks.secret.shadowsocks_password.path;
   };
   networking.firewall.allowedTCPPorts = [ 8388 ];
-  clanCore.secrets.shadowsocks = {
-    secrets."shadowsocks_password" = { };
+  clanCore.facts.services.shadowsocks = {
+    secret."shadowsocks_password" = { };
     generator = { 
       prompt = "please enter your shadowsocks password";
       path = with pkgs; [

@@ -23,9 +23,9 @@ in mkIf (hasAttr "wiregrill" config.krebs.build.host.nets) {
     { predicate = "-o wiregrill -m conntrack --ctstate RELATED,ESTABLISHED"; target = "ACCEPT"; }
   ]);
 
-  clanCore.secrets.wiregrill = {
-    secrets."wiregrill.key" = { };
-    facts."wiregrill.pub" = { };
+  clanCore.facts.services.wiregrill = {
+    secret."wiregrill.key" = { };
+    public."wiregrill.pub" = { };
     generator.path = with pkgs; [
       coreutils
       wireguard-tools

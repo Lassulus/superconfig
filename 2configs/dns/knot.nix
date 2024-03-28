@@ -31,8 +31,8 @@ in
   #  algorithm: hmac-sha256
   #  secret: 00000000000000000000000000000000000000000000
   #nix-shell -p knot-dns --run 'keymgr -t my_name hmac-sha256'
-  # clanCore.secrets.knot = {
-  #   secrets."knot-keys.conf" = {};
+  # clanCore.facts.services.knot = {
+  #   secret."knot-keys.conf" = {};
   #   generator = ''
   #     ${pkgs.knot-dns}/bin/keymgr -t  hmac-sha256
   #   '';
