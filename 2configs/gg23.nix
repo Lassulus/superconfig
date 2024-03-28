@@ -1,7 +1,5 @@
 { config, lib, pkgs, ... }:
 {
-  # ipv6 from vodafone is really really flaky
-  boot.kernel.sysctl."net.ipv6.conf.et0.disable_ipv6" = 1;
   # vodafone router drifts out of time
   services.timesyncd.servers = [
     "0.pool.ntp.org"
@@ -11,7 +9,7 @@
   ];
   systemd.network.networks."50-et0" = {
     matchConfig.Name = "et0";
-    DHCP = "ipv4";
+    DHCP = "yes";
     # dhcpV4Config.UseDNS = false;
     # dhcpV6Config.UseDNS = false;
     linkConfig = {
@@ -45,10 +43,28 @@
       # DHCPPrefixDelegation = "yes";
     };
     dhcpServerStaticLeases = [
-      {
+      { # printer
         dhcpServerStaticLeaseConfig = {
           Address = "10.42.0.4";
           MACAddress = "3c:2a:f4:22:28:37";
+        };
+      }
+      { # firetv
+        dhcpServerStaticLeaseConfig = {
+          Address = "10.42.0.11";
+          MACAddress = "84:28:59:f0:d2:a8";
+        };
+      }
+      # {
+      #   dhcpServerStaticLeaseConfig = {
+      #     Address = "10.42.0.10";
+      #     MACAddress = "ea:4d:12:94:74:2a";
+      #   };
+      # }
+      {
+        dhcpServerStaticLeaseConfig = {
+          Address = "10.42.0.10";
+          MACAddress = "fe:fe:fe:fe:fe:fe";
         };
       }
     ];
@@ -83,7 +99,7 @@
       local=/gg23/
       domain=gg23
       expand-hosts
-      listen-address=10.42.0.1
+      listen-address=10.42.0.1,10.233.0.1
       interface=int0
     '';
   };
