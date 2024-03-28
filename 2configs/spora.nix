@@ -7,7 +7,8 @@
     enable = true;
     keyFile = config.clanCore.facts.services.mycelium.secret.mycelium_key.path;
     peers = [
-      # "quic://lassul.us:9651"
+      "quic://10.42.0.1:9651"
+      "tcp://10.42.0.1:9651"
     ];
     package = self.packages.${pkgs.system}.mycelium;
   };
