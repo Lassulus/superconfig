@@ -251,11 +251,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1711459067,
-        "narHash": "sha256-1RyYM/8BJLhzD3BtNhfRff+9Eh7fKmaifF5U3/1Ydow=",
+        "lastModified": 1711659381,
+        "narHash": "sha256-4Bt8T6PW7jnNTCIUMqX/BBka+fpaCv0e/DXua+ZGRDk=",
         "owner": "krebs",
         "repo": "spora",
-        "rev": "ebadfcc555ce3960f92395a1b1291b894bf10b41",
+        "rev": "8585d425f29e006e87e4d60b6fa6cf97033ce9a5",
         "type": "github"
       },
       "original": {
