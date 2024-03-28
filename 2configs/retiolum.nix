@@ -17,8 +17,8 @@
       AutoConnect = yes
       LocalDiscovery = yes
     '';
-    privkey = config.clanCore.facts.services.retiolum."retiolum.rsa_key.priv".path;
-    privkey_ed25519 = config.clanCore.facts.services.retiolum."retiolum.ed25519_key.priv".path;
+    privkey = config.clanCore.facts.services.retiolum.secret."retiolum.rsa_key.priv".path;
+    privkey_ed25519 = config.clanCore.facts.services.retiolum.secret."retiolum.ed25519_key.priv".path;
   };
 
   clanCore.facts.services.retiolum = {
