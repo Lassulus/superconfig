@@ -22,17 +22,6 @@
     '';
 
 in {
-  systemd.services.xsettingsd = {
-    wantedBy = [ "multi-user.target" ];
-    after = [ "display-manager.service" ];
-    environment.DISPLAY = ":0";
-    serviceConfig = {
-      ExecStart = "${pkgs.xsettingsd}/bin/xsettingsd -c /var/theme/config/xsettings.conf";
-      User = "lass";
-      Restart = "always";
-      RestartSec = "15s";
-    };
-  };
   systemd.tmpfiles.rules = [
     "d /var/theme/ 755 lass users"
   ];
