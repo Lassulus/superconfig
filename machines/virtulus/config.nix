@@ -4,4 +4,5 @@
   ];
 
   krebs.build.host.name = "virtulus";
+  services.mingetty.autologinUser = "lass";
 }
