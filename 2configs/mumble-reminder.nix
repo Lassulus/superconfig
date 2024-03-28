@@ -36,14 +36,14 @@
     config = {
       hooks.PRIVMSG = [
         {
-          pattern = "^erriner mich$";
+          pattern = "^erinner mich$";
           activate = "match";
           command = {
             filename = pkgs.writeDash "add_remind" ''
               echo "$_from" >> /var/lib/reaktor2-mumble-reminder/users
               sort /var/lib/reaktor2-mumble-reminder/users | uniq > /var/lib/reaktor2-mumble-reminder/users.tmp
               mv /var/lib/reaktor2-mumble-reminder/users.tmp /var/lib/reaktor2-mumble-reminder/users
-              echo "Ich werde $_from in zukunft an das meetup errinern"
+              echo "Ich werde $_from in zukunft an das meetup erinnern"
             '';
           };
         }
@@ -53,7 +53,7 @@
           command = {
             filename = pkgs.writeDash "del_remind" ''
               ${pkgs.gnused}/bin/sed -i "/$_from/d" /var/lib/reaktor2-mumble-reminder/users
-              echo "okok, Ich werde $_from nich mehr errinern"
+              echo "okok, Ich werde $_from nich mehr erinnern"
             '';
           };
         }
