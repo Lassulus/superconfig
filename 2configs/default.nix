@@ -1,6 +1,7 @@
 { self, config, lib, pkgs, ... }:
 {
   imports = [
+    ./security-workarounds.nix
     ./binary-cache/client.nix
     ./gc.nix
     ./mc.nix
