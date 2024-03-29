@@ -13,7 +13,7 @@ rustPlatform.buildRustPackage rec {
     owner = "threefoldtech";
     repo = "mycelium";
     rev = "v${version}";
-    hash = "sha256-bA4ci+vqXBCPBaxMvfUdFcqdaZbAw/+r5UbH/as/fnc=";
+    hash = "sha256-R5fX0TUKNokkYH0mRTpwUKgrflvkUXfeyTZnQnkmKP4=";
   };
 
   cargoLock = {
