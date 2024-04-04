@@ -53,8 +53,18 @@ in {
     serviceConfig = {
       User = "radio-news";
       LoadCredential = [
-        "openweather_api:${config.krebs.secret.directory}/openweather_api_key"
+        "openweather_api:${config.clanCore.facts.services.weather.secret.openweather_api_key.path}"
       ];
     };
+  };
+  clanCore.facts.services.weather = {
+    secret."openweather_api_key" = { };
+    generator.script = ''
+      cat > "$secrets"/openweather_api_key;
+    '';
+    generator.prompt = ''
+      goto https://openweathermap.org/appid and get an api key
+    '';
+
   };
 }
