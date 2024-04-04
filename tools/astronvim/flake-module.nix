@@ -1,72 +1,86 @@
 { inputs , ...  }:
 {
   perSystem = { system, lib, pkgs, ... }: let
-    vim_appname = "lassvim";
-    nvim_deps = with pkgs; [
+    nvim-appname = "lassvim";
+
+    lsp-packages = with pkgs; [
       nodejs # copilot
-      neovim
-      vale
       terraform-ls
       nodePackages.pyright
-      sumneko-lua-language-server
-
-      # based on ./suggested-pkgs.json nvim
-      delve
+    
+      # based on ./suggested-pkgs.json
       gopls
       golangci-lint
       nodePackages.bash-language-server
       taplo-lsp
       marksman
+      selene
       rust-analyzer
       yaml-language-server
       nil
-      gomodifytags
-      gofumpt
-      iferr
-      impl
-      gotools
       shellcheck
       shfmt
-      isort
-      black
       ruff
-      nixpkgs-fmt
+      ruff-lsp
+      nixfmt-rfc-style
       terraform-ls
       clang-tools
       nodePackages.prettier
       stylua
+      # based on https://github.com/ray-x/go.nvim#go-binaries-install-and-update
+      go
+      gofumpt
+      gomodifytags
+      gotools
+      delve
+      golines
+      gomodifytags
+      gotests
+      iferr
+      impl
+      reftools
+      ginkgo
+      richgo
+      govulncheck
+    
+      #ocaml-ng.ocamlPackages_5_0.ocaml-lsp
+      #ocaml-ng.ocamlPackages_5_0.ocamlformat
       # does not build yet on aarch64
-    ] ++ lib.optional (pkgs.stdenv.hostPlatform.system == "x86_64-linux") pkgs.deno; # lsp
-    nvim_config = pkgs.runCommand "nvim_config" { } ''
-      mkdir -p $out/parser
+    ] ++ lib.optional (pkgs.stdenv.hostPlatform.system == "x86_64-linux") pkgs.deno
+    ++ lib.optional (!pkgs.stdenv.hostPlatform.isDarwin) sumneko-lua-language-server;
 
-      ln -s ${inputs.astro-nvim}/* $out/
-      rm $out/lua
-      mkdir -p $out/lua
-      ln -s ${inputs.astro-nvim}/lua/* $out/lua
-      ln -s ${./user} $out/lua/user
+    lspEnv = pkgs.buildEnv {
+      name = "lspEnv";
+      paths = lsp-packages;
+    };
 
-      ${lib.concatMapStringsSep "\n" (grammar: ''
-        ln -s $(readlink -f ${grammar}/parser/*.so) $out/parser/${lib.last (builtins.split "-" grammar.name)}.so
-      '') pkgs.vimPlugins.nvim-treesitter.withAllGrammars.dependencies}
-    '';
+    treesitter-grammars = pkgs.runCommand "treesitter-grammars" { } (
+      lib.concatMapStringsSep "\n" (grammar: ''
+        mkdir -p $out
+        ln -s $(readlink -f ${grammar}/parser/*.so) $out/${lib.last (builtins.split "-" grammar.name)}.so
+      '') pkgs.vimPlugins.nvim-treesitter.withAllGrammars.dependencies
+    );
+
   in {
     packages.vim = pkgs.writeShellScriptBin "vim" ''
       set -efux
       unset VIMINIT
-      export PATH=$PATH:${pkgs.buildEnv {
-        name = "nvim_deps";
-        paths = nvim_deps;
-      }}/bin
-      export NVIM_APPNAME=${vim_appname}
-      mkdir -p $HOME/.config $HOME/.local/share/
-      ln -sfT ${nvim_config} "$HOME"/.config/${vim_appname}
-      nvim --headless -c 'quitall'
-      if [[ -d $HOME/.local/share/lassvim/lazy/telescope-fzf-native.nvim ]]; then
-        mkdir -p "$HOME/.local/share/lassvim/lazy/telescope-fzf-native.nvim/build"
-        ln -sf "${pkgs.vimPlugins.telescope-fzf-native-nvim}/build/libfzf.so" "$HOME/.local/share/lassvim/lazy/telescope-fzf-native.nvim/build/libfzf.so"
-      fi
-      exec nvim "$@"
+      export PATH=${lspEnv}/bin:$PATH
+      export NVIM_APPNAME=${nvim-appname}
+
+      XDG_CONFIG_HOME=''${XDG_CONFIG_HOME:-$HOME/.config}
+      XDG_DATA_HOME=''${XDG_DATA_HOME:-$HOME/.local/share}
+
+      mkdir -p "$XDG_CONFIG_HOME/$NVIM_APPNAME" "$XDG_DATA_HOME"
+      chmod -R u+w "$XDG_CONFIG_HOME/$NVIM_APPNAME"
+      rm -rf "$XDG_CONFIG_HOME/$NVIM_APPNAME"
+      cp -arfT '${./config}'/ "$XDG_CONFIG_HOME/$NVIM_APPNAME"
+      chmod -R u+w "$XDG_CONFIG_HOME/$NVIM_APPNAME"
+      ${pkgs.neovim}/bin/nvim --headless -c 'quitall' # install plugins
+      mkdir -p "$XDG_DATA_HOME/$NVIM_APPNAME/lib/" "$XDG_DATA_HOME/$NVIM_APPNAME/site/"
+      ln -sfT "${pkgs.vimPlugins.telescope-fzf-native-nvim}/build/libfzf.so" "$XDG_DATA_HOME/$NVIM_APPNAME/lib/libfzf.so"
+      ln -sfT "${treesitter-grammars}" "$XDG_DATA_HOME/$NVIM_APPNAME/site/parser"
+      exec ${pkgs.neovim}/bin/nvim "$@"
     '';
   };
 }
