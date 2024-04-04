@@ -9,7 +9,7 @@
       for host in ${self}/machines/*; do
         if test -e "$host"/facts/mycelium_pubkey; then
           if ! test -e "$OUTDIR"/"$(basename "$host")".json; then
-            ${pkgs.mycelium}/bin/mycelium inspect "$(cat "$host"/facts/mycelium_pubkey)" --json > "$OUTDIR/$(basename "$host").json"
+            ${self.packages.${pkgs.system}.mycelium}/bin/mycelium inspect "$(cat "$host"/facts/mycelium_pubkey)" --json > "$OUTDIR/$(basename "$host").json"
           fi
         fi
       done
