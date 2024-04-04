@@ -18,7 +18,7 @@
     public."mycelium_pubkey" = { };
     generator = { 
       path = [
-        pkgs.mycelium
+	      self.packages.${pkgs.system}.mycelium
         pkgs.coreutils
         pkgs.jq
       ];
