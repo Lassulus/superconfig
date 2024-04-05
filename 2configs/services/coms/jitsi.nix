@@ -43,7 +43,7 @@ in {
   services.jitsi-videobridge = {
     config.videobridge = {
       cc.assumed-bandwidth-limit = "1000 Mbps";
-      entity-expiration.timeout = "10 minutes";
+      entity-expiration.timeout = "100 minutes";
     };
   };
 
