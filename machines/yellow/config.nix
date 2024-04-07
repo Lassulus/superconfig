@@ -7,6 +7,11 @@ in {
     ../../2configs/services/flix
   ];
 
+  # we need to configure another port for the mycelium admin interface, because it conflicts with sonarr.
+  services.mycelium.extraArgs = [
+    "--api-addr" "127.0.0.1:9898"
+  ];
+
   services.transmission.settings.peer-port = torrentport;
   krebs.build.host = config.krebs.hosts.yellow;
 
