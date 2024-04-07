@@ -30,6 +30,7 @@
     ../../2configs/services/radio/proxy.nix
     ../../2configs/services/flix/proxy.nix
     ../../2configs/services/coms/jitsi.nix
+    ../../2configs/nextcloud.nix
 
     # dns
     ../../2configs/dns/knot.nix
