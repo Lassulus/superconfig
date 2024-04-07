@@ -45,7 +45,7 @@ in {
       ip link set airvpn netns transmission
       ip -n transmission addr add 10.176.43.231/32 dev airvpn
       ip -n transmission addr add fd7d:76ee:e68f:a993:41b3:846b:d271:30d8/128 dev airvpn
-      ip netns exec transmission wg syncconf airvpn <(wg-quick strip /etc/secrets/airvpn.conf)
+      ip netns exec transmission wg syncconf airvpn <(wg-quick strip ${config.clanCore.facts.services.airvpn.secret."airvpn.conf".path})
       ip -n transmission link set airvpn up
       ip -n transmission route add default dev airvpn
       ip -6 -n transmission route add default dev airvpn
@@ -64,6 +64,19 @@ in {
       RemainAfterExit = true;
       Type = "oneshot";
     };
+  };
+
+  clanCore.facts.services.airvpn = {
+    secret."airvpn.conf" = { };
+    generator.path = with pkgs; [ coreutils ];
+    generator.prompt = ''
+      login into https://airvpn.org/ goto https://airvpn.org/generator/
+      generate a wireguard config
+      paste the config here
+    '';
+    generator.script = ''
+      echo "$prompt_value" > "$secrets"/airvpn.conf
+    '';
   };
 
   # so we can forward traffic from the transmission network namespace
