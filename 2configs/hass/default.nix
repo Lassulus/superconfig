@@ -12,6 +12,7 @@
     { predicate = "-i retiolum -p tcp --dport 8123"; target = "ACCEPT"; } # hass
     { predicate = "-i retiolum -p tcp --dport 1337"; target = "ACCEPT"; } # zigbee2mqtt frontend
     { predicate = "-i wiregrill -p tcp --dport 8123"; target = "ACCEPT"; } # hass
+    { predicate = "-i zttzibeakb -p tcp --dport 8123"; target = "ACCEPT"; } # hass
   ];
 
   systemd.services.hass-update = {
