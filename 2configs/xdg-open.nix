@@ -40,7 +40,7 @@
       text/*)
         alacritty --execute vim "$FILE" ;;
       image/*)
-        sxiv "$FILE" ;;
+        nsxiv "$FILE" ;;
       application/x-bittorrent)
         env DISPLAY=:0 transgui "$FILE" ;;
       application/pdf)
