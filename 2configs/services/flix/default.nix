@@ -21,6 +21,20 @@
       rpc-host-whitelist-enabled = false;
     };
   };
+  systemd.services.transmission-watcher = {
+    wantedBy = [ "multi-user.target" ];
+    startAt = "*:0/5";
+    path = [
+      pkgs.curl
+      pkgs.systemdMinimal
+    ];
+    script = ''
+      set -efu -o pipefail
+      if ! curl -SsfL http://transmission.r; then
+        systemctl restart transmission*
+      fi
+    '';
+  };
 
   security.acme.defaults.email = "spam@krebsco.de";
   security.acme.acceptTerms = true;
