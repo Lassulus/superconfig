@@ -52,7 +52,6 @@
             clanCore.machineName = machineName;
             clanCore.facts.secretStore = "password-store";
             clanCore.facts.secretUploadDirectory = "/etc/secrets";
-            clanCore.facts.secretDirectory = pkgs.lib.mkForce config.clanCore.facts.secretUploadDirectory;
             clan.networking.targetHost = "root@${machineName}";
             krebs.secret.directory = config.clanCore.facts.secretUploadDirectory;
             nixpkgs.overlays = [
