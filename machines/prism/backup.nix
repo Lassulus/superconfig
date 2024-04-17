@@ -4,6 +4,19 @@
 
   systemd.services.borgbackup-job-hetzner.serviceConfig.ReadWritePaths = [ "/var/log/telegraf" ];
 
+  clanCore.facts.services.borgbackup = {
+    secret."borgbackup.ssh.id25519" = {};
+    public."borgbackup.ssh.id25519.pub" = {};
+    generator.path = [
+      pkgs.coreutils
+      pkgs.openssh
+    ];
+    generator.script = ''
+      ssh-keygen -t ed25519 -N "" -f $secrets/borgbackup.ssh.id25519
+      mv $secrets/borgbackup.ssh.id25519.pub $facts/borgbackup.ssh.id25519.pub
+    '';
+  };
+
   services.borgbackup.jobs.hetzner = {
     paths = [
       "/var/backup"
