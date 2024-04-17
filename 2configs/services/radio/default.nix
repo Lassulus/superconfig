@@ -134,7 +134,7 @@ in {
           ${pkgs.jq}/bin/jq '[.icestats.source[].listeners] | add' || echo 0)
         echo "$(${pkgs.coreutils}/bin/date -Is)" "$filename" | ${pkgs.coreutils}/bin/tee -a "$HISTORY_FILE"
         echo "$(${pkgs.coreutils}/bin/tail -$LIMIT "$HISTORY_FILE")" > "$HISTORY_FILE"
-        ${set_irc_topic} "playing: $filename listeners: $listeners"
+        ${set_irc_topic} "playing: $filename listeners: $listeners stream: https://radio.lassul.us/radio.ogg"
       '';
       MUSIC = "${music_dir}/the_playlist";
       ICECAST_HOST = "localhost";
