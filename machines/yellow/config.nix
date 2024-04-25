@@ -29,19 +29,30 @@ in {
   '';
   services.resolved.enable = lib.mkForce false;
 
+  systemd.services."netns@" = {
+    description = "%I network namespace";
+    before = [ "network.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.iproute}/bin/ip netns add %I";
+      ExecStop = "${pkgs.iproute}/bin/ip netns del %I";
+    };
+  };
+
   systemd.services.transmission-netns = {
-    wantedBy = [ "multi-user.target" ];
+    bindsTo = [ "netns@transmission.service" ];
+    after = [ "netns@transmission.service" ];
     path = [
       pkgs.iproute2
       pkgs.wireguard-tools
     ];
     script = ''
       set -efux
-      ip netns delete transmission || :
       ip link del t2 || :
-      ip netns add transmission
       ip -n transmission link set lo up
       ip link add airvpn type wireguard
+      ip -n transmission link del airvpn || :
       ip link set airvpn netns transmission
       ip -n transmission addr add 10.176.43.231/32 dev airvpn
       ip -n transmission addr add fd7d:76ee:e68f:a993:41b3:846b:d271:30d8/128 dev airvpn
@@ -50,6 +61,8 @@ in {
       ip -n transmission route add default dev airvpn
       ip -6 -n transmission route add default dev airvpn
       ip link add t1 type veth peer name t2
+
+      ip -n transmission link del t1 || :
       ip link set t1 netns transmission
 
       ip addr add 128.0.0.2/30 dev t2
@@ -84,6 +97,8 @@ in {
 
   systemd.services.transmission = {
     after = [ "transmission-netns.service" ];
+    wants = [ "transmission-netns.service" ];
+    bindsTo = [ "netns@transmission.service" ];
     serviceConfig = {
       NetworkNamespacePath = "/var/run/netns/transmission";
       # https://github.com/NixOS/nixpkgs/issues/258793
