@@ -10,7 +10,6 @@
       "quic://10.42.0.1:9651"
       "tcp://10.42.0.1:9651"
     ];
-    package = self.packages.${pkgs.system}.mycelium;
   };
   clanCore.facts.services.mycelium = {
     secret."mycelium_key" = { };
@@ -18,7 +17,7 @@
     public."mycelium_pubkey" = { };
     generator = { 
       path = [
-	      self.packages.${pkgs.system}.mycelium
+	      pkgs.mycelium
         pkgs.coreutils
         pkgs.jq
       ];
