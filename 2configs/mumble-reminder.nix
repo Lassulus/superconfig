@@ -30,6 +30,7 @@
     Waschbären
     Kurzschwanzwiesel
     Buschochsen
+    Kurzschwanzaffen
   '';
   systemPlugin = {
     plugin = "system";
