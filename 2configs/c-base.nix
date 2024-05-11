@@ -1,11 +1,21 @@
 { config, lib, pkgs, ... }:
 
-let
-in {
+{
 
   environment.systemPackages = [
     pkgs.cifs-utils
   ];
+
+
+  clanCore.facts.services.c-base = {
+    secret."c-base.txt" = { };
+    generator.prompt = ''
+      Please enter your username in the first line and your c-base password in the next line
+    '';
+    generator.script = ''
+      echo "$prompt_value" > "$secrets"/c-base.txt
+    '';
+  };
 
   systemd.network.networks.c-base = {
     matchConfig.Name = "c-base";
@@ -44,7 +54,7 @@ in {
       # register-dns
       # block-outside-dns
       script-security 2
-      auth-user-pass ${config.krebs.secret.directory}/cbase.txt
+      auth-user-pass ${config.clanCore.facts.services.c-base.secret."c-base.txt".path}
       #auth-user-pass
       key-direction 1
       <tls-auth>
