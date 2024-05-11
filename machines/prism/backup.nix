@@ -29,7 +29,7 @@
     compression = "auto,zstd";
     startAt = "*-*-* 02:00:00";
     # TODO: change backup key
-    environment.BORG_RSH = "ssh -oPort=23 -i ${"${config.krebs.secret.directory}/borgbackup.ssh.id25519"}";
+    environment.BORG_RSH = "ssh -oPort=23 -i ${config.clanCore.facts.services.borgbackup.secret."borgbackup.ssh.id25519".path}";
     preHook = ''
       set -x
     '';
