@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ self, config, lib, pkgs, ... }:
 
 {
   imports = [
@@ -75,4 +75,8 @@
   };
 
   documentation.nixos.enable = true;
+
+  environment.systemPackages = [
+    self.inputs.clan-core.packages.x86_64-linux.clan-vm-manager
+  ];
 }
