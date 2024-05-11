@@ -50,6 +50,7 @@
 
         # motion sensors https://www.zigbee2mqtt.io/devices/SNZB-03.html#sonoff-snzb-03
         "0x00124b002a68be83".friendly_name = "s_wohn";
+        "0x00124b002a6890ef".friendly_name = "s_nass2";
 
         # motion sensors https://www.zigbee2mqtt.io/devices/RTCGQ11LM.html#aqara-rtcgq11lm
         "0x00158d0005468b98".friendly_name = "s_flur";
