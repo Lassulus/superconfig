@@ -1,7 +1,9 @@
-{ self, modulesPath, config, lib, pkgs, ... }:
+{ self, modulesPath, lib, ... }:
 
 {
   imports = [
+    self.inputs.disko.nixosModules.disko
+    ./disk.nix
     ./config.nix
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
@@ -10,6 +12,10 @@
   boot.initrd.kernelModules = [ "dm-snapshot" ];
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
+  boot.loader.grub = {
+    efiSupport = true;
+    efiInstallAsRemovable = true;
+  };
 
   swapDevices = [ ];
 
