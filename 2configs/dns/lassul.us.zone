@@ -1,4 +1,4 @@
-@ 3600 IN SOA lassul.us. ns1.lassul.us. 2024040701 7200 3600 86400 3600
+@ 3600 IN SOA lassul.us. ns1.lassul.us. 2024041701 7200 3600 86400 3600
 
 ;;@ 3600 IN NS ns1
 @ 3600 IN NS ns1
@@ -46,6 +46,7 @@ streaming IN CNAME prism
 flix IN CNAME neoprism
 flex IN CNAME neoprism
 flux IN CNAME neoprism
+flax IN CNAME neoprism
 mergebot IN CNAME neoprism
 cdio IN CNAME neoprism
 c IN CNAME neoprism
