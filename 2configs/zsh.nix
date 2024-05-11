@@ -33,8 +33,7 @@
       bindkey "^X^E" edit-command-line
 
       #fzf inclusion
-      source ${pkgs.fzf-zsh}/share/fzf/completion.zsh
-      source ${pkgs.fzf-zsh}/share/fzf/key-bindings.zsh
+      eval "$(${pkgs.fzf}/bin/fzf --zsh)"
 
       # atuin distributed shell history
       export ATUIN_NOBIND="true" # disable all keybdinings of atuin
