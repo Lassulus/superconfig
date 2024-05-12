@@ -51,7 +51,7 @@
           ({ config, pkgs, ... }: {
             clanCore.machineName = machineName;
             clanCore.facts.secretStore = "password-store";
-            clanCore.facts.secretUploadDirectory = "/etc/secrets";
+            clanCore.facts.secretUploadDirectory = nixpkgs.lib.mkDefault "/etc/secrets";
             clan.networking.targetHost = "root@${machineName}";
             krebs.secret.directory = config.clanCore.facts.secretUploadDirectory;
             nixpkgs.overlays = [
