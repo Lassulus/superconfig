@@ -348,7 +348,7 @@ in {
   };
   services.syncthing.settings.folders."/home/lass/tmp/the_playlist" = {
     path = lib.mkForce "/var/music/the_playlist";
-    devices = [ "mors" "phone" "prism" "omo" "radio" ];
+    devices = [ "mors" "prism" "radio" ];
   };
   krebs.acl."/var/music/the_playlist"."u:lass:X".parents = true;
   krebs.acl."/var/music/the_playlist"."u:lass:rwX" = {};
