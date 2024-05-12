@@ -95,6 +95,12 @@ def wish_tracklist(request, response) =
 end
 harbor.http.register(port = port, "/wish", wish_tracklist)
 
+def announce(req, response) =
+  news.push(request.create("http://c.r/announce.ogg"))
+  response.data("ok")
+end
+harbor.http.register(method = "POST", port = port, "/announce", announce)
+
 def newsshow(req, response) =
   news.push(request.create("http://c.r/news.ogg"))
   response.data("ok")
