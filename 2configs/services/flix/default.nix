@@ -193,7 +193,7 @@
       workgroup = WORKGROUP
       server string = ${config.networking.hostName}
       # only allow retiolum addresses
-      hosts allow = 42::/16 10.243.0.0/16 10.244.0.0/16
+      hosts allow = 42::/16 10.243.0.0/16 10.244.0.0/16 fdcc:c5da:5295:c853:d499::/80
 
       # Use sendfile() for performance gain
       use sendfile = true
@@ -273,20 +273,13 @@
       { predicate = "-p tcp --dport 6767"; target = "ACCEPT"; } # bazarr
 
       # smbd
-      { predicate = "-i retiolum -p tcp --dport 445"; target = "ACCEPT"; }
-      { predicate = "-i retiolum -p tcp --dport 111"; target = "ACCEPT"; }
-      { predicate = "-i retiolum -p udp --dport 111"; target = "ACCEPT"; }
-      { predicate = "-i retiolum -p tcp --dport 2049"; target = "ACCEPT"; }
-      { predicate = "-i retiolum -p udp --dport 2049"; target = "ACCEPT"; }
-      { predicate = "-i retiolum -p tcp --dport 4000:4002"; target = "ACCEPT"; }
-      { predicate = "-i retiolum -p udp --dport 4000:4002"; target = "ACCEPT"; }
-      { predicate = "-i wiregrill -p tcp --dport 445"; target = "ACCEPT"; }
-      { predicate = "-i wiregrill -p tcp --dport 111"; target = "ACCEPT"; }
-      { predicate = "-i wiregrill -p udp --dport 111"; target = "ACCEPT"; }
-      { predicate = "-i wiregrill -p tcp --dport 2049"; target = "ACCEPT"; }
-      { predicate = "-i wiregrill -p udp --dport 2049"; target = "ACCEPT"; }
-      { predicate = "-i wiregrill -p tcp --dport 4000:4002"; target = "ACCEPT"; }
-      { predicate = "-i wiregrill -p udp --dport 4000:4002"; target = "ACCEPT"; }
+      { predicate = "-p tcp --dport 445"; target = "ACCEPT"; }
+      { predicate = "-p tcp --dport 111"; target = "ACCEPT"; }
+      { predicate = "-p udp --dport 111"; target = "ACCEPT"; }
+      { predicate = "-p tcp --dport 2049"; target = "ACCEPT"; }
+      { predicate = "-p udp --dport 2049"; target = "ACCEPT"; }
+      { predicate = "-p tcp --dport 4000:4002"; target = "ACCEPT"; }
+      { predicate = "-p udp --dport 4000:4002"; target = "ACCEPT"; }
     ];
 
     tables.nat.PREROUTING.rules = [
