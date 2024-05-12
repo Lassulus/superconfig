@@ -1,4 +1,13 @@
-{ self, pkgs, ... }:
+{ self, lib, pkgs, ... }:
+let
+  # pcsclite workaround until https://github.com/NixOS/nixpkgs/pull/308884 is in unstable
+  pcsclite = pkgs.pcsclite.overrideAttrs (old: {
+    postPatch = old.postPatch + (lib.optionalString (!(lib.strings.hasInfix ''--replace-fail "libpcsclite_real.so.1"'' old.postPatch)) ''
+      substituteInPlace src/libredirect.c src/spy/libpcscspy.c \
+        --replace-fail "libpcsclite_real.so.1" "$lib/lib/libpcsclite_real.so.1"
+    '');
+  });
+in
 {
   environment.systemPackages = with pkgs; [
     yubikey-personalization
@@ -18,7 +27,7 @@
     mkdir -p $HOME/.gnupg
     ${pkgs.coreutils}/bin/ln -sf ${pkgs.writeText "scdaemon.conf" ''
       disable-ccid
-      pcsc-driver ${pkgs.pcsclite.lib}/lib/libpcsclite.so.1
+      pcsc-driver ${pcsclite.lib}/lib/libpcsclite.so.1
       card-timeout 1
 
       # Always try to use yubikey as the first reader
