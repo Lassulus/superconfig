@@ -10,6 +10,7 @@
 
   krebs.build.host = config.krebs.hosts.orange;
   system.stateVersion = "24.05";
+  clan.password-store.targetDirectory = "/var/state/secrets";
 
   services.nginx.enable = true;
   networking.firewall.allowedTCPPorts = [ 80 443 ];

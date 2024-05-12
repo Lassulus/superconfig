@@ -7,7 +7,7 @@
     ../../2configs/services/radio
   ];
 
-  clanCore.facts.secretUploadDirectory = lib.mkForce "/var/state/secrets";
+  clan.password-store.targetDirectory = "/var/state/secrets";
 
   krebs.build.host = config.krebs.hosts.radio;
   system.stateVersion = "24.05";
