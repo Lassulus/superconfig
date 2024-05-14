@@ -28,7 +28,6 @@
   };
   services.nextcloud = {
     enable = true;
-    enableBrokenCiphersForSSE = false;
     hostName = "c.apanowicz.de";
     package = pkgs.nextcloud26;
     config.adminpassFile = "/run/nextcloud.pw";
