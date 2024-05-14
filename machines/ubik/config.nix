@@ -8,6 +8,7 @@
   ];
 
   krebs.build.host = config.krebs.hosts.ubik;
+  clan.password-store.targetDirectory = "/var/state/secrets";
 
   krebs.sync-containers3.inContainer = {
     enable = true;
