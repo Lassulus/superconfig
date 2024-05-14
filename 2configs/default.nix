@@ -14,7 +14,6 @@
     ./pinned-registry.nix
     ./zerotier.nix
     ./nether.nix
-    ./spora.nix
     self.inputs.stockholm.nixosModules.users
     self.inputs.stockholm.nixosModules.hosts
     self.inputs.stockholm.nixosModules.kartei
