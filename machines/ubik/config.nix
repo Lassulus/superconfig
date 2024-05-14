@@ -30,7 +30,7 @@
     enable = true;
     enableBrokenCiphersForSSE = false;
     hostName = "c.apanowicz.de";
-    package = pkgs.nextcloud25;
+    package = pkgs.nextcloud26;
     config.adminpassFile = "/run/nextcloud.pw";
     https = true;
     maxUploadSize = "9001M";
