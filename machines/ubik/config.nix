@@ -112,6 +112,7 @@
   };
 
   # users
+  users.groups.xanf = {};
   users.users.UBIK-SFTP = {
     uid = pkgs.stockholm.lib.genid_uint31 "UBIK-SFTP";
     home = "/home/UBIK-SFTP";
