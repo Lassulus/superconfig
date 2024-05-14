@@ -29,7 +29,7 @@
   services.nextcloud = {
     enable = true;
     hostName = "c.apanowicz.de";
-    package = pkgs.nextcloud26;
+    package = pkgs.nextcloud27;
     config.adminpassFile = "/run/nextcloud.pw";
     https = true;
     maxUploadSize = "9001M";
