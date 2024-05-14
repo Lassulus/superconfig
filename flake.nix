@@ -3,7 +3,8 @@
 
   inputs = {
     # nixpkgs.url = "github:lassulus/nixpkgs/jitsi-upgrade";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
     # nixpkgs.url = "git+file:/home/lass/src/nixpkgs";
 
     # nixvim.url = "github:nix-community/nixvim";
