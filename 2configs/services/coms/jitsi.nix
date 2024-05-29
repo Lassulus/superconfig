@@ -40,6 +40,12 @@ in {
     };
   };
 
+  services.nginx.virtualHosts."meet.lassul.us" = {
+    enableACME = true;
+    addSSL = true;
+    locations."/".return = "301 https://jitsi.lassul.us$request_uri";
+  };
+
   services.jitsi-videobridge = {
     config.videobridge = {
       cc.assumed-bandwidth-limit = "1000 Mbps";
