@@ -78,8 +78,8 @@
       chmod -R u+w "$XDG_CONFIG_HOME/$NVIM_APPNAME"
       ${pkgs.neovim}/bin/nvim --headless -c 'quitall' # install plugins
       mkdir -p "$XDG_DATA_HOME/$NVIM_APPNAME/lib/" "$XDG_DATA_HOME/$NVIM_APPNAME/site/"
-      ln -sfT "${pkgs.vimPlugins.telescope-fzf-native-nvim}/build/libfzf.so" "$XDG_DATA_HOME/$NVIM_APPNAME/lib/libfzf.so"
-      ln -sfT "${treesitter-grammars}" "$XDG_DATA_HOME/$NVIM_APPNAME/site/parser"
+      ${pkgs.coreutils}/bin/ln -sfT "${pkgs.vimPlugins.telescope-fzf-native-nvim}/build/libfzf.so" "$XDG_DATA_HOME/$NVIM_APPNAME/lib/libfzf.so"
+      ${pkgs.coreutils}/bin/ln -sfT "${treesitter-grammars}" "$XDG_DATA_HOME/$NVIM_APPNAME/site/parser"
       exec ${pkgs.neovim}/bin/nvim "$@"
     '';
   };
