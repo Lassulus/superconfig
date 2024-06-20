@@ -244,6 +244,11 @@ let
     macro index,pager ,@) "<enter-command> set sidebar_visible=no; macro index,pager [ ,@( 'Toggle sidebar'<Enter>"
     macro index,pager ,@( "<enter-command> set sidebar_visible=yes; macro index,pager [ ,@) 'Toggle sidebar'<Enter>"
     macro index,pager [ ,@( 'Toggle sidebar'      # toggle the sidebar
+
+    # forward with attachment
+    # https://github.com/neomutt/neomutt/issues/1258#issuecomment-689522156
+    set mime_forward = no
+    set forward_attachments = yes
   '';
 
   mutt = pkgs.symlinkJoin {
