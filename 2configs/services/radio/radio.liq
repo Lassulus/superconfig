@@ -45,7 +45,7 @@ music = mksafe(music)
 music = normalize(music)
 
 news = request.queue()
-radio = smooth_add(normal = music, special = amplify(1.5, news))
+radio = smooth_add(duration = 0.1, normal = music, special = amplify(1.5, news))
 
 if string.length(env["ICECAST_HOST"]) > 0 then
   output.icecast(host = env["ICECAST_HOST"], mount = '/music.ogg', password = 'hackme', %vorbis(quality = 1), music)
