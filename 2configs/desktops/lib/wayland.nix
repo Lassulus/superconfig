@@ -92,6 +92,9 @@
     (pkgs.writers.writeDashBin "screenshot" ''
       ${pkgs.grim}/bin/grim -g "$(${pkgs.slurp}/bin/slurp)" - | ${pkgs.wl-clipboard}/bin/wl-copy
     '')
+    (pkgs.writers.writeDashBin "type_paste" ''
+      ${pkgs.wl-clipboard}/bin/wl-paste | ${pkgs.wtype}/bin/wtype -d 10 -s 400 -
+    '')
   ];
 
   environment.pathsToLink = [
