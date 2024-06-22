@@ -36,6 +36,9 @@
     # spora.url = "git+file:/home/lass/src/spora";
     spora.url = "github:krebs/spora";
     spora.inputs.nixpkgs.follows = "nixpkgs";
+
+    nix-darwin.url = "github:LnL7/nix-darwin";
+    nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs@{ self, flake-parts, nixpkgs, clan-core, ... }:
@@ -83,6 +86,9 @@
             clan-core.packages.${system}.clan-cli
           ];
         };
+      };
+      flake.darwinConfigurations.barnacle = inputs.nix-darwin.lib.darwinSystem {
+        modules = [ ./darwin/barnacle/config.nix ];
       };
     };
 }
