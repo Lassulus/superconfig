@@ -6,7 +6,7 @@
     lsp-packages = with pkgs; [
       nodejs # copilot
       terraform-ls
-      nodePackages.pyright
+      pyright
     
       # based on ./suggested-pkgs.json
       gopls
