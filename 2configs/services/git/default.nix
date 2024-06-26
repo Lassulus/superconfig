@@ -20,7 +20,10 @@
   };
   systemd.tmpfiles.settings."cgit"."/tmp/cgit".d = {
     mode = "0755";
-    user = "fcgiwrap";
-    group = "fcgiwrap";
+    user = "git";
+    group = "git";
   };
+  krebs.git.cgit.fcgiwrap.group.name = "git";
+  krebs.git.cgit.fcgiwrap.user.name = "git";
+  krebs.git.cgit.fcgiwrap.user.home = toString pkgs.emptyDirectory;
 }
