@@ -52,9 +52,9 @@
         imports = [
           ./machines/${machineName}/physical.nix
           ({ config, pkgs, ... }: {
-            clanCore.machineName = machineName;
-            clanCore.facts.secretStore = "password-store";
-            clanCore.facts.secretUploadDirectory = nixpkgs.lib.mkDefault "/etc/secrets";
+            clan.core.machineName = machineName;
+            clan.core.facts.secretStore = "password-store";
+            clan.core.facts.secretUploadDirectory = nixpkgs.lib.mkDefault "/etc/secrets";
             clan.networking.targetHost = "root@${machineName}";
             krebs.secret.directory = config.clanCore.facts.secretUploadDirectory;
             nixpkgs.overlays = [
