@@ -271,4 +271,10 @@
 
   # disable doc usually
   documentation.nixos.enable = lib.mkDefault false;
+
+  # use new rebuild switch
+  system.switch = {
+    enable = false;
+    enableNg = true;
+  };
 }
