@@ -46,7 +46,6 @@
   programs.wshowkeys.enable = true;
 
   environment.systemPackages = with pkgs; [
-    qtile
     swaylock-effects # lockscreen
     pavucontrol
     swayidle

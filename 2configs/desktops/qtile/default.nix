@@ -28,7 +28,7 @@
   };
 
   environment.systemPackages = [
-    pkgs.qtile
+    pkgs.python3.pkgs.qtile
     pkgs.copyq
   ];
 
