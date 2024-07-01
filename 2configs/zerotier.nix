@@ -17,6 +17,7 @@ in
       "10.243.0.0/16".blacklist = true;
       "10.244.0.0/16".blacklist = true;
       "42::/16".blacklist = true;
+      "5d9::/7".blacklist = true;
     };
   };
 
