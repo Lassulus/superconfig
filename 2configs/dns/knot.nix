@@ -85,7 +85,7 @@ in
         }
         {
           id = "hetzner_ip4_2";
-          address = "213.133.105.6";
+          address = "213.133.100.103";
           action = "transfer";
         }
         {
@@ -100,7 +100,7 @@ in
         }
         {
           id = "hetzner_ip6_2";
-          address = "2a01:4f8:d0a:2004::2";
+          address = "2a01:4f8:0:1::5ddc:2";
           action = "transfer";
         }
         {
