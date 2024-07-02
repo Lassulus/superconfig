@@ -15,6 +15,8 @@
     ../../2configs/services/matrix
     ../../2configs/services/matrix/proxy.nix
 
+    ../../2configs/services/pad
+
     ../../2configs/hass/proxy.nix
 
     # sync-containers
