@@ -1,0 +1,24 @@
+{
+  "meta": {
+    "name": "superconfig",
+    "description": null,
+    "icon": null
+  },
+  "services": {
+    "borgbackup": {},
+    "packages": {},
+    "single-disk": {}
+  },
+  "machines": {
+    "jon": {
+      "deploy": {
+        "targetHost": null
+      },
+      "name": "jon",
+      "description": null,
+      "icon": null,
+      "system": null,
+      "tags": []
+    }
+  }
+}
