@@ -39,6 +39,9 @@
     # dns
     ../../2configs/dns/knot.nix
 
+    # video strreaming
+    ../../2configs/cast.nix
+
     # debug stuff
     ../../2configs/websites/mergebot.lassul.us.nix
 

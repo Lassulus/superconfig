@@ -119,7 +119,6 @@ in {
     }
     ../../2configs/minecraft.nix
     ../../2configs/codimd.nix
-    ../../2configs/go.nix
     {
       lass.nichtparasoup.enable = true;
       services.nginx = {
