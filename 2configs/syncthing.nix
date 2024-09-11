@@ -21,7 +21,7 @@ let
   };
 
   used_peer_names = lib.unique (lib.filter lib.isString (lib.flatten (lib.mapAttrsToList (n: v: v.devices) config.services.syncthing.settings.folders)));
-  used_peers = lib.filterAttrs (n: v: lib.elem n used_peer_names) (lib.traceValSeq all_peers);
+  used_peers = lib.filterAttrs (n: v: lib.elem n used_peer_names) all_peers;
 in {
   services.syncthing = {
     enable = true;
