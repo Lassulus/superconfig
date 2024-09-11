@@ -4,19 +4,12 @@
 {
   environment.systemPackages = with pkgs; [
     aria2
-    generate-secrets
-    gnupg1compat
-    htop
-    i3lock
     mosh
     pass
     pavucontrol
     pv
     pwgen
-    remmina
     ripgrep
-    silver-searcher
-    transmission
     wget
     xsel
     yt-dlp
