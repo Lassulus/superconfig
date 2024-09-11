@@ -4,7 +4,6 @@
   imports = [
     ../../2configs/mouse.nix
     ../../2configs/retiolum.nix
-    ../../2configs/git.nix
     ../../2configs/exim-retiolum.nix
     ../../2configs/desktops/xmonad
     ../../2configs/pipewire.nix
