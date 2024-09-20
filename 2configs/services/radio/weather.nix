@@ -14,7 +14,6 @@ let
     ]}"
     curl -fSsz /tmp/GeoLite2-City.mmdb -o /tmp/GeoLite2-City.mmdb http://c.r/GeoLite2-City.mmdb
     MAXMIND_GEOIP_DB="/tmp/GeoLite2-City.mmdb"; export MAXMIND_GEOIP_DB
-    OPENWEATHER_API_KEY=$(cat "$CREDENTIALS_DIRECTORY/openweather_api"); export OPENWEATHER_API_KEY
     (
       curl -sS 'http://admin:hackme@localhost:8000/admin/listclients.json?mount=/radio.ogg'
       curl -sS 'http://admin:hackme@localhost:8000/admin/listclients.json?mount=/radio.mp3'
@@ -52,19 +51,6 @@ in {
     startAt = "*:58:00";
     serviceConfig = {
       User = "radio-news";
-      LoadCredential = [
-        "openweather_api:${config.clanCore.facts.services.weather.secret.openweather_api_key.path}"
-      ];
     };
-  };
-  clanCore.facts.services.weather = {
-    secret."openweather_api_key" = { };
-    generator.script = ''
-      cat > "$secrets"/openweather_api_key;
-    '';
-    generator.prompt = ''
-      goto https://openweathermap.org/appid and get an api key
-    '';
-
   };
 }

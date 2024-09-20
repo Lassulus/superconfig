@@ -6,6 +6,73 @@ import os
 import random
 
 
+# https://open-meteo.com/en/docs
+def weather_code_representation(code: int) -> str:
+    if code == 0:
+        return 'clear sky'
+    if code == 1:
+        return 'mainly clear'
+    if code == 2:
+        return 'partly cloudy'
+    if code == 3:
+        return 'overcast'
+    if code == 45:
+        return 'fog'
+    if code == 48:
+        return 'depositing rime fog'
+    if code == 51:
+        return 'light drizzle'
+    if code == 53:
+        return 'moderate drizzle'
+    if code == 55:
+        return 'heavy drizzle'
+    if code == 56:
+        return 'light freezing drizzle'
+    if code == 57:
+        return 'heavy freezing drizzle'
+    if code == 61:
+        return 'light rain'
+    if code == 63:
+        return 'moderate rain'
+    if code == 65:
+        return 'heavy rain'
+    if code == 66:
+        return 'light freezing rain'
+    if code == 67:
+        return 'heavy freezing rain'
+    if code == 71:
+        return 'light snow'
+    if code == 73:
+        return 'moderate snow'
+    if code == 75:
+        return 'heavy snow'
+    if code == 77:
+        return 'light snow grains'
+    if code == 80:
+        return 'light rain showers'
+    if code == 81:
+        return 'moderate rain showers'
+    if code == 82:
+        return 'heavy rain showers'
+    if code == 85:
+        return 'light snow showers'
+    if code == 86:
+        return 'heavy snow showers'
+    if code == 95:
+        return 'thunderstorm'
+    if code == 96:
+        return 'thunderstorm with light hail'
+    if code == 99:
+        return 'thunderstorm with heavy hail'
+    return f'unknown weather code {code}'
+
+
+def downfall_representation(precipitation: float) -> str:
+    if precipitation > 0:
+        return f' the precipitation is {precipitation} millimeter'
+    else:
+        return ''
+
 geoip = geoip2.database.Reader(os.environ['MAXMIND_GEOIP_DB'])
 seen = {}
 output = []
@@ -23,20 +90,18 @@ if len(ips) > 5:
                 location = geoip.city(ip.strip())
                 if location.city.geoname_id not in seen:
                     seen[location.city.geoname_id] = True
-                    weather_api_key = os.environ['OPENWEATHER_API_KEY']
                     url = (
-                        f'https://api.openweathermap.org/data/2.5/onecall'
-                        f'?lat={location.location.latitude}'
-                        f'&lon={location.location.longitude}'
-                        f'&appid={weather_api_key}'
-                        f'&units=metric'
+                        f'https://api.open-meteo.com/v1/forecast'
+                        f'?latitude={location.location.latitude}'
+                        f'&longitude={location.location.longitude}'
+                        f'&current=temperature_2m,weather_code'
                     )
                     resp = requests.get(url)
                     weather = json.loads(resp.text)
                     output.append(
                         f'{location.city.name}, {location.country.name}. '
-                        f'{weather["current"]["weather"][0]["description"]}. '
-                        f'{weather["current"]["temp"]:.1f} degrees.'
+                        f'{weather_code_representation(weather["current"]["weather_code"])}. '
+                        f'{weather["current"]["temperature_2m"]} degrees.'
                     )
             except:  # noqa E722
                 pass
@@ -57,23 +122,22 @@ else:
                 location = geoip.city(ip.strip())
                 if location.city.geoname_id not in seen:
                     seen[location.city.geoname_id] = True
-                    weather_api_key = os.environ['OPENWEATHER_API_KEY']
                     url = (
-                        f'https://api.openweathermap.org/data/2.5/onecall'
-                        f'?lat={location.location.latitude}'
-                        f'&lon={location.location.longitude}'
-                        f'&appid={weather_api_key}'
-                        f'&units=metric'
+                        f'https://api.open-meteo.com/v1/forecast'
+                        f'?latitude={location.location.latitude}'
+                        f'&longitude={location.location.longitude}'
+                        '&current=temperature_2m,precipitation,weather_code,relative_humidity_2m,wind_speed_10m'
+                        '&wind_speed_unit=ms'
                     )
                     resp = requests.get(url)
                     weather = json.loads(resp.text)
                     output.append(
                         f'Weather report for {location.city.name}, {location.country.name}. '
-                        f'It is {weather["current"]["weather"][0]["description"]} outside '
-                        f'with a temperature of {weather["current"]["temp"]:.1f} degrees, '
-                        f'a wind speed of {weather["current"]["wind_speed"]:.1f} meters per second '
-                        f'and a humidity of {weather["current"]["humidity"]} percent. '
-                        f'The probability of precipitation is {weather["hourly"][0]["pop"] * 100:.0f} percent. '
+                        f'It is {weather_code_representation(weather["current"]["weather_code"])} outside'
+                        f'{downfall_representation(weather["current"]["precipitation"])}, '
+                        f'with a temperature of {weather["current"]["temperature_2m"]} degrees, '
+                        f'a wind speed of {weather["current"]["wind_speed_10m"]} meters per second '
+                        f'and a humidity of {weather["current"]["relative_humidity_2m"]} percent. '
                     )
             except:  # noqa E722
                 pass
