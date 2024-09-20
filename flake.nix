@@ -2,7 +2,6 @@
   description = "lassulus superconfig";
 
   inputs = {
-    # nixpkgs.url = "github:lassulus/nixpkgs/jitsi-upgrade";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     # nixpkgs.url = "path:/home/lass/tmp/nixpkgs-disk-debug";
     # nixpkgs.url = "git+file:/home/lass/src/nixpkgs";
@@ -19,27 +18,35 @@
     clan-core.inputs.flake-parts.follows = "flake-parts";
     clan-core.inputs.disko.follows = "disko";
 
+    stockholm.url = "github:krebs/stockholm";
     # stockholm.url = "git+https://cgit.lassul.us/stockholm";
     # stockholm.url = "path:/home/lass/sync/stockholm";
-    stockholm.url = "github:krebs/stockholm";
     stockholm.inputs.nixpkgs.follows = "nixpkgs";
 
     disko.url = "github:nix-community/disko";
-    # disko.url = "git+file:/home/lass/src/disko/";
+    # disko.url = "path:/home/lass/src/disko/";
     disko.inputs.nixpkgs.follows = "nixpkgs";
 
     nixos-hardware.url = "github:nixos/nixos-hardware";
 
+    data-mesher.url = "https://git.clan.lol/clan/data-mesher/archive/main.tar.gz";
+    # data-mesher.url = "path:/home/lass/src/data-mesher/";
+    data-mesher.inputs.nixpkgs.follows = "nixpkgs";
+
     nether.url = "github:krebs/nether";
+    # nether.url = "git+file:/home/lass/src/nether";
     nether.inputs.nixpkgs.follows = "nixpkgs";
     nether.inputs.clan-core.follows = "clan-core";
+    nether.inputs.data-mesher.follows = "data-mesher";
 
-    # spora.url = "git+file:/home/lass/src/spora";
     spora.url = "github:krebs/spora";
+    # spora.url = "git+file:/home/lass/src/spora";
     spora.inputs.nixpkgs.follows = "nixpkgs";
 
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+
+    nixos-facter.url = "github:numtide/nixos-facter-modules";
   };
 
   outputs = inputs@{ self, flake-parts, nixpkgs, clan-core, ... }:
