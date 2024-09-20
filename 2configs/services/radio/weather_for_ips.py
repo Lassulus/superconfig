@@ -4,6 +4,7 @@ import json
 import requests
 import os
 import random
+import sys
 
 
 # https://open-meteo.com/en/docs
@@ -76,7 +77,10 @@ def downfall_representation(precipitation: float) -> str:
 geoip = geoip2.database.Reader(os.environ['MAXMIND_GEOIP_DB'])
 seen = {}
 output = []
-ips = list(fileinput.input())
+if len(sys.argv) > 1:
+    ips = sys.argv[1:]
+else:
+    ips = list(fileinput.input())
 if len(ips) > 5:
     output.append('weather report.')
     for ip in fileinput.input():
