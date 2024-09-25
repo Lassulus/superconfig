@@ -63,6 +63,7 @@
           bashls.enable = true; # bash
           nixd.enable = true; # nix
           ruff-lsp.enable = true; # python
+          harper-ls.enable = true; # comments
         };
       };
       plugins.undotree = {
