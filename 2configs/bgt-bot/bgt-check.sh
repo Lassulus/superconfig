@@ -40,14 +40,14 @@ else
 fi
 prevstate=$(cat state ||:)
 
-if test "$state" == "$(cat state)";then
+if test "$state" = "$(cat state)";then
   #echo "current and last state is the same ($state), doing nothing"
   :
 else
   echo "API state and last state differ ( '$state' != '$prevstate')"
-  if test "$state" == 'live';then
+  if test "$state" = 'live';then
     send_reaktor "$live"
-  elif test "$state" == 'offline';then
+  elif test "$state" = 'offline';then
     send_reaktor "$offline"
   else
     send_reaktor "$error"
