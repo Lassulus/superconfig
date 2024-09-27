@@ -47,6 +47,9 @@
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
 
     nixos-facter.url = "github:numtide/nixos-facter-modules";
+
+    treefmt-nix.url = "github:numtide/treefmt-nix";
+    treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs@{ self, flake-parts, nixpkgs, clan-core, ... }:
@@ -83,6 +86,7 @@
         ./tools/astronvim/flake-module.nix
         ./tools/zsh.nix
         ./tools/get-spora-hosts.nix
+        ./formatter.nix
       ];
       flake.nixosConfigurations = clan.nixosConfigurations;
       flake.clanInternals = clan.clanInternals;
