@@ -39,6 +39,9 @@
     # dns
     ../../2configs/dns/knot.nix
 
+    # url shortener
+    ../../2configs/go.nix
+
     # video strreaming
     ../../2configs/cast.nix
 
