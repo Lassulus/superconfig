@@ -1,6 +1,9 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, self, ... }:
 
 {
+  imports = [
+    self.inputs.stockholm.nixosModules.htgen
+  ];
   services.nginx.virtualHosts.cyberlocker = {
     serverAliases = [ "c.r" ];
     locations."/".extraConfig = ''
