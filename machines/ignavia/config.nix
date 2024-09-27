@@ -6,6 +6,7 @@
     ../../2configs/exim-retiolum.nix
     # ../../2configs/baseX.nix
     ../../2configs/desktops/qtile
+    # ../../2configs/desktops/xmonad
     ../../2configs/yubikey.nix
     ../../2configs/pipewire.nix
     ../../2configs/browsers.nix
@@ -26,22 +27,11 @@
     ../../2configs/dunst.nix
     ../../2configs/yggdrasil.nix
     ../../2configs/container-tests.nix
-    ../../2configs/sunshine.nix
-    ../../2configs/spora.nix
+    # ../../2configs/sunshine.nix
     # ../../2configs/print.nix
     # ../../2configs/br.nix
-    # ../../2configs/c-base.nix
-    { # clan backups playground
-      imports = [
-        self.inputs.clan-core.clanModules.borgbackup
-      ];
-      clanCore.state.teststate = {
-        folders = [ "/home/lass/sync" ];
-      };
-      clan.borgbackup = {
-        destinations.mors.repo = "borg@mors.r:.";
-      };
-    }
+    ../../2configs/c-base.nix
+    ../../2configs/services/radio/tts.nix
   ];
 
   system.stateVersion = "23.11";
@@ -49,12 +39,6 @@
   krebs.build.host = config.krebs.hosts.ignavia;
 
   programs.adb.enable = true;
-
-  hardware.bluetooth = {
-    enable = true;
-    powerOnBoot = true;
-  };
-  hardware.pulseaudio.package = pkgs.pulseaudioFull;
 
   nix.settings.trusted-users = [ "root" "lass" ];
 
@@ -75,6 +59,8 @@
     pkgs.gh
     self.packages.${pkgs.system}.bank
     pkgs.mycelium
+    pkgs.tmate
+    pkgs.ntfs3g
   ];
 
   krebs.hosts.styx.nets.retiolum.tinc.extraConfig = "Address = 10.42.0.1 655";
