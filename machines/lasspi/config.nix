@@ -1,6 +1,4 @@
-{ config, lib, pkgs, ... }:
-let
-in
+{ config, pkgs, ... }:
 {
   imports = [
     ../../2configs

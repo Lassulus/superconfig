@@ -1,10 +1,18 @@
-{ config, lib, pkgs, ... }: let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+let
 
   format-github-message = pkgs.writeDashBin "format-github-message" ''
     set -efu
-    export PATH=${lib.makeBinPath [
-      pkgs.jq
-    ]}
+    export PATH=${
+      lib.makeBinPath [
+        pkgs.jq
+      ]
+    }
     INPUT=$(jq -c .)
     if $(printf '%s' "$INPUT" | jq 'has("issue") or has("pull_request")'); then
       ${write_to_irc} "$(printf '%s' "$INPUT" | jq -r '
@@ -26,9 +34,13 @@
       )"
   '';
 
-in {
+in
+{
   krebs.iptables.tables.filter.INPUT.rules = [
-    { predicate = "-p tcp --dport 44002"; target = "ACCEPT"; }
+    {
+      predicate = "-p tcp --dport 44002";
+      target = "ACCEPT";
+    }
   ];
   krebs.reaktor2.fysiweb-github = {
     hostname = "irc.libera.chat";

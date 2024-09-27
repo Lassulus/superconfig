@@ -1,57 +1,59 @@
-{ config, pkgs, ... }: let
+{ config, pkgs, ... }:
+let
 
-nginxCfg = pkgs.writeText "nginx.conf" ''
-  daemon off;
-  pid /var/lib/rtmp/nginx.pid;
-  events {
-    use epoll;
-    worker_connections  128;
-  }
-  error_log stderr info;
+  nginxCfg = pkgs.writeText "nginx.conf" ''
+    daemon off;
+    pid /var/lib/rtmp/nginx.pid;
+    events {
+      use epoll;
+      worker_connections  128;
+    }
+    error_log stderr info;
 
-  http {
-    client_body_temp_path /var/lib/rtmp/nginx_cache_client_body;
-    proxy_temp_path /var/lib/rtmp/nginx_cache_proxy;
-    fastcgi_temp_path /var/lib/rtmp/nginx_cache_fastcgi;
-    uwsgi_temp_path /var/lib/rtmp/nginx_cache_uwsgi;
-    scgi_temp_path /var/lib/rtmp/nginx_cache_scgi;
+    http {
+      client_body_temp_path /var/lib/rtmp/nginx_cache_client_body;
+      proxy_temp_path /var/lib/rtmp/nginx_cache_proxy;
+      fastcgi_temp_path /var/lib/rtmp/nginx_cache_fastcgi;
+      uwsgi_temp_path /var/lib/rtmp/nginx_cache_uwsgi;
+      scgi_temp_path /var/lib/rtmp/nginx_cache_scgi;
 
-    server {
-      listen 8080;
-      root /var/lib/rtmp;
-      access_log stderr;
-      error_log stderr;
+      server {
+        listen 8080;
+        root /var/lib/rtmp;
+        access_log stderr;
+        error_log stderr;
 
-      # This URL provides RTMP statistics in XML
-      location /stat {
-        rtmp_stat all;
+        # This URL provides RTMP statistics in XML
+        location /stat {
+          rtmp_stat all;
+        }
       }
     }
-  }
 
-  rtmp {
-    server {
-      access_log stderr;
-      listen 1935;
-      ping 30s;
-      notify_method get;
+    rtmp {
+      server {
+        access_log stderr;
+        listen 1935;
+        ping 30s;
+        notify_method get;
 
-      application stream {
-        live on;
+        application stream {
+          live on;
 
-        hls on;
-        hls_path /var/lib/rtmp/tmp/hls;
-        hls_fragment 1;
-        hls_playlist_length 10;
+          hls on;
+          hls_path /var/lib/rtmp/tmp/hls;
+          hls_fragment 1;
+          hls_playlist_length 10;
 
-        dash on;
-        dash_path /var/lib/rtmp/tmp/dash;
+          dash on;
+          dash_path /var/lib/rtmp/tmp/dash;
+        }
       }
     }
-  }
-'';
+  '';
 
-in {
+in
+{
 
   services.nginx = {
     enable = true;
@@ -109,10 +111,12 @@ in {
       '';
       locations."= /dash.all.min.js".extraConfig = ''
         default_type "text/javascript";
-        alias ${pkgs.fetchurl {
-          url = "http://cdn.dashjs.org/v3.2.0/dash.all.min.js";
-          sha256 = "16f0b40gdqsnwqi01s5sz9f1q86dwzscgc3m701jd1sczygi481c";
-        }};
+        alias ${
+          pkgs.fetchurl {
+            url = "http://cdn.dashjs.org/v3.2.0/dash.all.min.js";
+            sha256 = "16f0b40gdqsnwqi01s5sz9f1q86dwzscgc3m701jd1sczygi481c";
+          }
+        };
       '';
       locations."= /player".extraConfig = ''
         default_type "text/html";
@@ -150,7 +154,11 @@ in {
   fileSystems."/var/lib/rtmp/tmp" = {
     device = "tmpfs";
     fsType = "tmpfs";
-    options = [ "nosuid" "nodev" "noatime" ];
+    options = [
+      "nosuid"
+      "nodev"
+      "noatime"
+    ];
   };
 
   users.users.rtmp = {
@@ -169,11 +177,13 @@ in {
     after = [ "network.target" ];
     restartIfChanged = true;
     script = ''
-      ${pkgs.nginx.override {
-        modules = [
-          pkgs.nginxModules.rtmp
-        ];
-      }}/bin/nginx -c ${nginxCfg} -p /var/lib/rtmp
+      ${
+        pkgs.nginx.override {
+          modules = [
+            pkgs.nginxModules.rtmp
+          ];
+        }
+      }/bin/nginx -c ${nginxCfg} -p /var/lib/rtmp
     '';
     serviceConfig = {
       ExecStartPre = pkgs.writers.writeDash "setup-rtmp" ''
@@ -189,6 +199,9 @@ in {
   };
 
   krebs.iptables.tables.filter.INPUT.rules = [
-    { predicate = "-p tcp --dport 1935"; target = "ACCEPT"; }
+    {
+      predicate = "-p tcp --dport 1935";
+      target = "ACCEPT";
+    }
   ];
 }

@@ -1,6 +1,13 @@
-{ config, pkgs, lib, ... }: let
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+let
   torrentport = 56709; # port forwarded in airvpn webinterface
-in {
+in
+{
   imports = [
     ../../2configs
     ../../2configs/retiolum.nix
@@ -11,7 +18,8 @@ in {
 
   # we need to configure another port for the mycelium admin interface, because it conflicts with sonarr.
   services.mycelium.extraArgs = [
-    "--api-addr" "127.0.0.1:9898"
+    "--api-addr"
+    "127.0.0.1:9898"
   ];
 
   services.transmission.settings.peer-port = torrentport;
@@ -58,7 +66,9 @@ in {
       ip link set airvpn netns transmission
       ip -n transmission addr add 10.176.43.231/32 dev airvpn
       ip -n transmission addr add fd7d:76ee:e68f:a993:41b3:846b:d271:30d8/128 dev airvpn
-      ip netns exec transmission wg syncconf airvpn <(wg-quick strip ${config.clanCore.facts.services.airvpn.secret."airvpn.conf".path})
+      ip netns exec transmission wg syncconf airvpn <(wg-quick strip ${
+        config.clanCore.facts.services.airvpn.secret."airvpn.conf".path
+      })
       ip -n transmission link set airvpn up
       ip -n transmission route add default dev airvpn
       ip -6 -n transmission route add default dev airvpn
@@ -114,7 +124,10 @@ in {
   clanCore.facts.services.yellow-container = {
     secret."yellow.sync.key" = { };
     public."yellow.sync.pub" = { };
-    generator.path = with pkgs; [ coreutils openssh ];
+    generator.path = with pkgs; [
+      coreutils
+      openssh
+    ];
     generator.script = ''
       ssh-keygen -t ed25519 -N "" -f "$secrets"/yellow.sync.key
       mv "$secrets"/yellow.sync.key "$facts"/yellow.sync.pub

@@ -24,13 +24,35 @@
   #   { predicate = "-p tcp --dport 2"; target = "DNAT --to-destination ${config.krebs.hosts.radio.nets.retiolum.ip4.addr}:8000"; v6 = false; }
   #   { predicate = "-p tcp --dport 2"; target = "DNAT --to-destination ${config.krebs.hosts.radio.nets.retiolum.ip6.addr}:8000"; v4 = false; }
   # ];
-  networking.firewall.allowedTCPPorts = [ 8096 8920 ];
-  networking.firewall.allowedUDPPorts = [ 1900 7359 ];
+  networking.firewall.allowedTCPPorts = [
+    8096
+    8920
+  ];
+  networking.firewall.allowedUDPPorts = [
+    1900
+    7359
+  ];
   containers.yellow.forwardPorts = [
-    { hostPort = 8096; containerPort = 8096; protocol = "tcp"; }
-    { hostPort = 8920; containerPort = 8920; protocol = "tcp"; }
-    { hostPort = 1900; containerPort = 1900; protocol = "udp"; }
-    { hostPort = 7359; containerPort = 7359; protocol = "udp"; }
+    {
+      hostPort = 8096;
+      containerPort = 8096;
+      protocol = "tcp";
+    }
+    {
+      hostPort = 8920;
+      containerPort = 8920;
+      protocol = "tcp";
+    }
+    {
+      hostPort = 1900;
+      containerPort = 1900;
+      protocol = "udp";
+    }
+    {
+      hostPort = 7359;
+      containerPort = 7359;
+      protocol = "udp";
+    }
   ];
 
   services.nginx.virtualHosts."flix.lassul.us" = {

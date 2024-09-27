@@ -1,4 +1,9 @@
-{ pkgs, lib, config, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
 let
   cfg = config.lass.screenlock;
 
@@ -34,4 +39,5 @@ let
     };
   };
 
-in out
+in
+out

@@ -1,4 +1,5 @@
-{ config, ... }: {
+{ config, ... }:
+{
   services.owncast.enable = true;
   services.owncast.port = 8081;
   services.nginx = {

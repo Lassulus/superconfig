@@ -1,11 +1,11 @@
-{ config, lib, pkgs, ... }:
+{ ... }:
 {
   services.terraria = {
     enable = true;
     openFirewall = true;
   };
 
-  users.groups.terraria = {};
+  users.groups.terraria = { };
   users.users.terraria.group = "terraria";
 
   # mobile
@@ -18,4 +18,3 @@
   #   });
   # };
 }
-

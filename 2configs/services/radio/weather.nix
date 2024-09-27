@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ lib, pkgs, ... }:
 let
   weather_for_ips = pkgs.writers.writePython3Bin "weather_for_ips" {
     libraries = [ pkgs.python3Packages.geoip2 ];
@@ -7,11 +7,13 @@ let
 
   weather_report = pkgs.writers.writeDashBin "weather_report" ''
     set -efux
-    export PATH="${lib.makeBinPath [
-      pkgs.coreutils
-      pkgs.curl
-      pkgs.jq
-    ]}"
+    export PATH="${
+      lib.makeBinPath [
+        pkgs.coreutils
+        pkgs.curl
+        pkgs.jq
+      ]
+    }"
     curl -fSsz /tmp/GeoLite2-City.mmdb -o /tmp/GeoLite2-City.mmdb http://c.r/GeoLite2-City.mmdb
     MAXMIND_GEOIP_DB="/tmp/GeoLite2-City.mmdb"; export MAXMIND_GEOIP_DB
     (
@@ -30,7 +32,8 @@ let
     ' |
       ${weather_for_ips}/bin/weather_for_ips
   '';
-in {
+in
+{
   systemd.services.weather = {
     path = [
       weather_report

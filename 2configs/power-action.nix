@@ -5,12 +5,14 @@ let
     ${pkgs.systemd}/bin/systemctl suspend
   '';
 
-  speak = text:
+  speak =
+    text:
     pkgs.writers.writeDash "speak" ''
       ${pkgs.espeak}/bin/espeak -v +whisper -s 110 "${text}"
     '';
 
-in {
+in
+{
   krebs.power-action = {
     enable = true;
     plans.low-battery = {

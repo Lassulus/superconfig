@@ -16,7 +16,10 @@
   clanCore.facts.services.hotdog-container = {
     secret."hotdog.sync.key" = { };
     public."hotdog.sync.pub" = { };
-    generator.path = with pkgs; [ coreutils openssh ];
+    generator.path = with pkgs; [
+      coreutils
+      openssh
+    ];
     generator.script = ''
       ssh-keygen -t ed25519 -N "" -f "$secrets"/hotdog.sync.key
       mv "$secrets"/hotdog.sync.key.pub "$facts"/hotdog.sync.pub

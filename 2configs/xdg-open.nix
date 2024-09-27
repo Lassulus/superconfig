@@ -1,4 +1,5 @@
-{ pkgs, ... }: let
+{ pkgs, ... }:
+let
 
   xdg-open = pkgs.writeBashBin "xdg-open" ''
     set -xe
@@ -60,6 +61,7 @@
         exec $runner "$FILE";;
     esac
   '';
-in {
+in
+{
   environment.systemPackages = [ xdg-open ];
 }

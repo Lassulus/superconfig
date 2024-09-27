@@ -1,4 +1,5 @@
-{ pkgs, ... }: let
+{ pkgs, ... }:
+let
 
   keynavrc = pkgs.writeText "keynavrc" ''
     clear
@@ -21,6 +22,7 @@
     2 click 2
     3 click 3
   '';
-in pkgs.writeScriptBin "knav" ''
+in
+pkgs.writeScriptBin "knav" ''
   ${pkgs.keynav}/bin/keynav "loadconfig ${keynavrc}, start"
 ''

@@ -17,7 +17,8 @@ let
     ${pkgs.copyq}/bin/copyq config move true
     ${pkgs.copyq}/bin/copyq config text_wrap true
   '';
-in {
+in
+{
   systemd.user.services.copyq = {
     wantedBy = [ "graphical-session.target" ];
     requires = [ "xmonad.service" ];

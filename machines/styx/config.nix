@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   imports = [
@@ -103,4 +108,3 @@
   # for usb internet
   hardware.usbWwan.enable = true;
 }
-

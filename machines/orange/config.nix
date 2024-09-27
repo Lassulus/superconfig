@@ -13,7 +13,10 @@
   clan.password-store.targetDirectory = "/var/state/secrets";
 
   services.nginx.enable = true;
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+  networking.firewall.allowedTCPPorts = [
+    80
+    443
+  ];
   security.acme = {
     acceptTerms = true;
     defaults.email = "acme@lassul.us";
@@ -26,7 +29,10 @@
   clanCore.facts.services.orange-container = {
     secret."orange.sync.key" = { };
     public."orange.sync.pub" = { };
-    generator.path = with pkgs; [ coreutils openssh ];
+    generator.path = with pkgs; [
+      coreutils
+      openssh
+    ];
     generator.script = ''
       ssh-keygen -t ed25519 -N "" -f "$secrets"/orange.sync.key
       mv "$secrets"/orange.sync.key "$facts"/orange.sync.pub

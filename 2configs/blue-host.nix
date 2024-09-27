@@ -1,19 +1,14 @@
-{ config, lib, pkgs, ... }:
-let
-  all_hosts = [
-    "icarus"
-    "shodan"
-    "daedalus"
-    "skynet"
-    "prism"
-    "littleT"
-  ];
-  remote_hosts = lib.filter (h: h != config.networking.hostName) all_hosts;
-
-in {
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+{
   imports = [
     <stockholm/lass/2configs/container-networking.nix>
-    { #hack for already defined
+    {
+      #hack for already defined
       systemd.services."container@blue".reloadIfChanged = lib.mkForce false;
       systemd.services."container@blue".preStart = ''
         ${pkgs.mount}/bin/mount | ${pkgs.gnugrep}/bin/grep -q '^encfs on /var/lib/containers/blue'
@@ -30,23 +25,24 @@ in {
   '';
 
   containers.blue = {
-    config = { ... }: {
-      environment.systemPackages = [
-        pkgs.git
-        pkgs.rxvt-unicode-unwrapped.terminfo
-      ];
-      services.openssh.enable = true;
-      users.users.root.openssh.authorizedKeys.keys = [
-        config.krebs.users.lass.pubkey
-      ];
-    };
+    config =
+      { ... }:
+      {
+        environment.systemPackages = [
+          pkgs.git
+          pkgs.rxvt-unicode-unwrapped.terminfo
+        ];
+        services.openssh.enable = true;
+        users.users.root.openssh.authorizedKeys.keys = [
+          config.krebs.users.lass.pubkey
+        ];
+      };
     autoStart = false;
     enableTun = true;
     privateNetwork = true;
     hostAddress = "10.233.2.9";
     localAddress = "10.233.2.10";
   };
-
 
   #systemd.services = builtins.listToAttrs (map (host:
   #  let

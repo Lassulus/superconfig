@@ -52,35 +52,50 @@
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ self, flake-parts, nixpkgs, clan-core, ... }:
-  let
-    clan = clan-core.lib.buildClan {
-      directory = self;
-      specialArgs.self = self;
-      machines = nixpkgs.lib.mapAttrs (machineName: _: {
+  outputs =
+    inputs@{
+      self,
+      flake-parts,
+      nixpkgs,
+      clan-core,
+      ...
+    }:
+    let
+      clan = clan-core.lib.buildClan {
+        directory = self;
+        specialArgs.self = self;
+        machines = nixpkgs.lib.mapAttrs (machineName: _: {
 
-        imports = [
-          ./machines/${machineName}/physical.nix
-          ({ config, pkgs, ... }: {
-            clan.core.machineName = machineName;
-            clan.core.facts.secretStore = "password-store";
-            clan.core.facts.secretUploadDirectory = nixpkgs.lib.mkDefault "/etc/secrets";
-            clan.networking.targetHost = "root@${machineName}";
-            krebs.secret.directory = config.clanCore.facts.secretUploadDirectory;
-            nixpkgs.overlays = [
-              self.inputs.stockholm.overlays.default
-              (import (self.inputs.stockholm.inputs.nix-writers + "/pkgs")) # TODO get rid of that overlay
-            ];
-          })
-          ./2configs
-          ./3modules
-          self.inputs.stockholm.nixosModules.krebs
-        ];
-      }) (builtins.readDir ./machines);
-    };
-  in
+          imports = [
+            ./machines/${machineName}/physical.nix
+            (
+              { config, ... }:
+              {
+                clan.core.machineName = machineName;
+                clan.core.facts.secretStore = "password-store";
+                clan.core.facts.secretUploadDirectory = nixpkgs.lib.mkDefault "/etc/secrets";
+                clan.networking.targetHost = "root@${machineName}";
+                krebs.secret.directory = config.clanCore.facts.secretUploadDirectory;
+                nixpkgs.overlays = [
+                  self.inputs.stockholm.overlays.default
+                  (import (self.inputs.stockholm.inputs.nix-writers + "/pkgs")) # TODO get rid of that overlay
+                ];
+              }
+            )
+            ./2configs
+            ./3modules
+            self.inputs.stockholm.nixosModules.krebs
+          ];
+        }) (builtins.readDir ./machines);
+      };
+    in
     flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "aarch64-darwin"
+        "x86_64-darwin"
+      ];
       imports = [
         ./tools/nvim.nix
         ./tools/astronvim/flake-module.nix
@@ -90,14 +105,23 @@
       ];
       flake.nixosConfigurations = clan.nixosConfigurations;
       flake.clanInternals = clan.clanInternals;
-      perSystem = { config, lib, pkgs, system, ... }: {
-        packages = lib.mapAttrs (name: v_: pkgs.callPackage ./5pkgs/${name} {}) (builtins.readDir ./5pkgs);
-        devShells.default = pkgs.mkShell {
-          packages = [
-            clan-core.packages.${system}.clan-cli
-          ];
+      perSystem =
+        {
+          lib,
+          pkgs,
+          system,
+          ...
+        }:
+        {
+          packages = lib.mapAttrs (name: _v_: pkgs.callPackage ./5pkgs/${name} { }) (
+            builtins.readDir ./5pkgs
+          );
+          devShells.default = pkgs.mkShell {
+            packages = [
+              clan-core.packages.${system}.clan-cli
+            ];
+          };
         };
-      };
       flake.darwinConfigurations.barnacle = inputs.nix-darwin.lib.darwinSystem {
         modules = [ ./darwin/barnacle/config.nix ];
       };

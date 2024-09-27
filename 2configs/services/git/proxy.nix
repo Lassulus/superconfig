@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ ... }:
 {
   services.nginx.virtualHosts."cgit.lassul.us" = {
     forceSSL = true;

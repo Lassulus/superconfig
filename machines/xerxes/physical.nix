@@ -1,4 +1,9 @@
-{ modulesPath, pkgs, lib, ... }:
+{
+  modulesPath,
+  pkgs,
+  lib,
+  ...
+}:
 {
   imports = [
     ./config.nix
@@ -16,7 +21,12 @@
     "sdhci_pci"
   ];
 
-  boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "usbhid" "sd_mod" ];
+  boot.initrd.availableKernelModules = [
+    "xhci_pci"
+    "ahci"
+    "usbhid"
+    "sd_mod"
+  ];
   boot.initrd.luks.devices.crypted.device = "/dev/sda3";
   boot.kernelModules = [ "kvm-intel" ];
   boot.kernelParams = [

@@ -1,4 +1,9 @@
-{ self, config, pkgs, ... }:
+{
+  self,
+  config,
+  pkgs,
+  ...
+}:
 
 {
   imports = [
@@ -32,10 +37,19 @@
     {
       krebs.iptables.tables.filter.INPUT.rules = [
         #risk of rain
-        { predicate = "-p tcp --dport 11100"; target = "ACCEPT"; }
+        {
+          predicate = "-p tcp --dport 11100";
+          target = "ACCEPT";
+        }
         #quake3
-        { predicate = "-p tcp --dport 27950:27965"; target = "ACCEPT"; }
-        { predicate = "-p udp --dport 27950:27965"; target = "ACCEPT"; }
+        {
+          predicate = "-p tcp --dport 27950:27965";
+          target = "ACCEPT";
+        }
+        {
+          predicate = "-p udp --dport 27950:27965";
+          target = "ACCEPT";
+        }
       ];
     }
     {
@@ -107,8 +121,6 @@
   nixpkgs.config.android_sdk.accept_license = true;
   programs.adb.enable = true;
 
-
-
   # It may leak your data, but look how FAST it is!1!!
   # https://make-linux-fast-again.com/
   boot.kernelParams = [
@@ -128,7 +140,10 @@
     "aarch64-linux"
   ];
 
-  nix.trustedUsers = [ "root" "lass" ];
+  nix.trustedUsers = [
+    "root"
+    "lass"
+  ];
 
   services.nscd.enableNsncd = true;
 

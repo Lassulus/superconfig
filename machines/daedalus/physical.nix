@@ -17,12 +17,22 @@
     "/home" = {
       device = "/dev/mapper/pool-home";
       fsType = "btrfs";
-      options = ["defaults" "noatime" "ssd" "compress=lzo"];
+      options = [
+        "defaults"
+        "noatime"
+        "ssd"
+        "compress=lzo"
+      ];
     };
     "/bku" = {
       device = "/dev/mapper/pool-bku";
       fsType = "btrfs";
-      options = ["defaults" "noatime" "ssd" "compress=lzo"];
+      options = [
+        "defaults"
+        "noatime"
+        "ssd"
+        "compress=lzo"
+      ];
     };
     "/backups" = {
       device = "/dev/pool/backup";
@@ -37,7 +47,12 @@
 
   boot = {
     initrd.luks.devices.luksroot.device = "/dev/sda3";
-    initrd.availableKernelModules = [ "xhci_hcd" "ehci_pci" "ahci" "usb_storage" ];
+    initrd.availableKernelModules = [
+      "xhci_hcd"
+      "ehci_pci"
+      "ahci"
+      "usb_storage"
+    ];
   };
 
   services.logind.lidSwitch = "ignore";

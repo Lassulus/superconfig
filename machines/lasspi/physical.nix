@@ -1,4 +1,4 @@
-{ config, lib, pkgs, modulesPath, ... }:
+{ modulesPath, ... }:
 {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
@@ -8,14 +8,18 @@
   boot = {
     # kernelPackages = pkgs.linuxPackages_rpi4;
     tmpOnTmpfs = true;
-    initrd.availableKernelModules = [ "usbhid" "usb_storage" "xhci_pci" ];
+    initrd.availableKernelModules = [
+      "usbhid"
+      "usb_storage"
+      "xhci_pci"
+    ];
     # ttyAMA0 is the serial console broken out to the GPIO
     kernelParams = [
-        "8250.nr_uarts=1"
-        "console=ttyAMA0,115200"
-        "console=tty1"
-        # Some gui programs need this
-        "cma=128M"
+      "8250.nr_uarts=1"
+      "console=ttyAMA0,115200"
+      "console=tty1"
+      # Some gui programs need this
+      "cma=128M"
     ];
   };
 

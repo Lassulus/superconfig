@@ -13,8 +13,14 @@
     '';
   };
   krebs.iptables.tables.filter.INPUT.rules = [
-    { predicate = "-i retiolum -p tcp --dport 5555"; target = "ACCEPT"; }
-    { predicate = "-i wiregrill -p tcp --dport 5555"; target = "ACCEPT"; }
+    {
+      predicate = "-i retiolum -p tcp --dport 5555";
+      target = "ACCEPT";
+    }
+    {
+      predicate = "-i wiregrill -p tcp --dport 5555";
+      target = "ACCEPT";
+    }
   ];
   #services.nginx.virtualHosts."lassul.us".locations."/radicale/".extraConfig = ''
   #  proxy_pass        http://localhost:5555/; # The / is important!

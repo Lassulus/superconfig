@@ -11,7 +11,12 @@
     "/bku" = {
       device = "/dev/mapper/pool-bku";
       fsType = "btrfs";
-      options = ["defaults" "noatime" "ssd" "compress=lzo"];
+      options = [
+        "defaults"
+        "noatime"
+        "ssd"
+        "compress=lzo"
+      ];
     };
     "/home/virtual" = {
       device = "/dev/mapper/pool-virtual";

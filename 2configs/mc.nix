@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
 let
   mcExt = pkgs.writeText "mc.ext" ''
@@ -205,16 +205,19 @@ let
     View=/run/current-system/sw/bin/xdg-open %f
   '';
 
-in {
+in
+{
   environment.systemPackages = [
     (pkgs.symlinkJoin {
       name = "mc";
       paths = [
         (pkgs.writeDashBin "mc" ''
-          export MC_DATADIR=${pkgs.write "mc-ext" {
+          export MC_DATADIR=${
+            pkgs.write "mc-ext" {
               "/mc.ext.ini".link = mcExt;
               "/sfs.ini".text = "";
-          }};
+            }
+          };
           export TERM=xterm-256color
           exec ${pkgs.mc}/bin/mc -S nicedark "$@"
         '')
@@ -223,4 +226,3 @@ in {
     })
   ];
 }
-

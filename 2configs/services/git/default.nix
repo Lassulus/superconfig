@@ -1,7 +1,7 @@
-{ config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 {
   imports = [
-     ../../git.nix
+    ../../git.nix
   ];
   services.nginx.virtualHosts."cgit.lassul.us" = {
     enableACME = true;

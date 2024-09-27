@@ -1,4 +1,11 @@
-{ config, lib, pkgs, ... }@args: with lib; let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib;
+let
 
   cfg = config.lass.usershadow;
 
@@ -17,15 +24,6 @@
       type = types.str;
     };
   };
-
-  debugscript = pkgs.writeDash "testpam" ''
-    env > /tmp/xxx
-    echo xxx >> /tmp/xxx
-    ${pkgs.coreutils}/bin/cat /home/testuser/.shadow >> /tmp/xxx
-    echo yyy >> /tmp/xxx
-    env >> /tmp/xxx
-    exit 23
-  '';
 
   imp = {
     environment.systemPackages = [ usershadow ];
@@ -58,12 +56,14 @@
     };
   };
 
-  usershadow = let
-    deps = [
-      "pwstore-fast"
-      "bytestring"
-    ];
-    in pkgs.writeHaskellPackage "passwords" {
+  usershadow =
+    let
+      deps = [
+        "pwstore-fast"
+        "bytestring"
+      ];
+    in
+    pkgs.writeHaskellPackage "passwords" {
       ghc-options = [
         "-rtsopts"
         "-Wall"
@@ -144,4 +144,5 @@
       };
     };
 
-in out
+in
+out

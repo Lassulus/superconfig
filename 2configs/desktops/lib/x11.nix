@@ -1,4 +1,9 @@
-{ self, config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 {
   imports = [
     ../../alacritty.nix
@@ -18,7 +23,8 @@
         lass ALL= (root) NOPASSWD:SETENV: ${pkgs.sshuttle}/bin/.sshuttle-wrapped
       '';
     }
-    { #font magic
+    {
+      #font magic
       options.lass.fonts = {
         regular = lib.mkOption {
           type = lib.types.str;
@@ -41,7 +47,11 @@
     }
   ];
 
-  users.users.mainUser.extraGroups = [ "audio" "pipewire" "video" ];
+  users.users.mainUser.extraGroups = [
+    "audio"
+    "pipewire"
+    "video"
+  ];
 
   time.timeZone = "Europe/Berlin";
 
@@ -131,7 +141,7 @@
     };
   };
 
-  nixpkgs.config.packageOverrides = super: {
+  nixpkgs.config.packageOverrides = _super: {
     dmenu = pkgs.writers.writeDashBin "dmenu" ''
       ${pkgs.fzfmenu}/bin/fzfmenu "$@"
     '';

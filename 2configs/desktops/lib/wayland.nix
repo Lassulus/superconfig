@@ -1,4 +1,9 @@
-{ self, pkgs, lib, ... }:
+{
+  self,
+  pkgs,
+  lib,
+  ...
+}:
 {
   imports = [
     ../../alacritty.nix
@@ -27,7 +32,12 @@
     freeMemThreshold = 5;
   };
 
-  users.users.mainUser.extraGroups = [ "audio" "pipewire" "video" "input" ];
+  users.users.mainUser.extraGroups = [
+    "audio"
+    "pipewire"
+    "video"
+    "input"
+  ];
 
   xdg.portal.enable = true;
   xdg.portal.wlr.enable = true;

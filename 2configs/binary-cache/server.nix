@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ...}:
+{ config, pkgs, ... }:
 {
   # nixpkgs.config.packageOverrides = p: {
   #   nix-serve = p.haskellPackages.nix-serve-ng;
@@ -8,7 +8,10 @@
   clanCore.facts.services."nix-serve" = {
     secret."nix-serve.key" = { };
     public."nix-serve.pub" = { };
-    generator.path = with pkgs; [ coreutils nix ];
+    generator.path = with pkgs; [
+      coreutils
+      nix
+    ];
     generator.script = ''
       nix-store --generate-binary-cache-key "$secrets"/nix-serve.key "$facts"/nix-serve.pub
     '';
@@ -36,4 +39,3 @@
     };
   };
 }
-

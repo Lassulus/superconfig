@@ -1,4 +1,9 @@
-{ self, config, lib, pkgs, ... }:
+{
+  self,
+  config,
+  pkgs,
+  ...
+}:
 
 {
   imports = [
@@ -40,7 +45,10 @@
 
   programs.adb.enable = true;
 
-  nix.settings.trusted-users = [ "root" "lass" ];
+  nix.settings.trusted-users = [
+    "root"
+    "lass"
+  ];
 
   services.tor = {
     enable = true;

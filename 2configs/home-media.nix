@@ -6,7 +6,11 @@
   users.users.media = {
     isNormalUser = true;
     uid = self.inputs.stockholm.lib.genid_uint31 "media";
-    extraGroups = [ "video" "audio" "pipewire" ];
+    extraGroups = [
+      "video"
+      "audio"
+      "pipewire"
+    ];
     packages = [
       (pkgs.writers.writeDashBin "mpv" ''
         if test -e "$1"; then
@@ -68,16 +72,17 @@
       User = "media";
       RemainAfterExit = true;
       Nice = "-10";
-      ExecStart = ''${pkgs.tmux}/bin/tmux -2 new-session -d -s mpvd -- /run/current-system/sw/bin/ipc-mpv \
-        --audio-display=no --audio-channels=stereo \
-        --audio-samplerate=48000 --audio-format=s16 \
-        --ao-pcm-file=/run/snapserver/snapfifo --ao=pcm \
-        --audio-delay=-1 \
-        --network-timeout=3 \
-        --untimed --cache-pause=no \
-        --idle=yes --force-window=yes \
-        --loop-playlist=inf \
-        --input-ipc-server=/tmp/mpv.ipc
+      ExecStart = ''
+        ${pkgs.tmux}/bin/tmux -2 new-session -d -s mpvd -- /run/current-system/sw/bin/ipc-mpv \
+                --audio-display=no --audio-channels=stereo \
+                --audio-samplerate=48000 --audio-format=s16 \
+                --ao-pcm-file=/run/snapserver/snapfifo --ao=pcm \
+                --audio-delay=-1 \
+                --network-timeout=3 \
+                --untimed --cache-pause=no \
+                --idle=yes --force-window=yes \
+                --loop-playlist=inf \
+                --input-ipc-server=/tmp/mpv.ipc
       '';
       ExecStop = "${pkgs.tmux}/bin/tmux kill-session -t mpvd";
       ExecStartPre = [

@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 #TODO: implement recursive mode maybe?
 # enable different mods for files and folders
@@ -6,7 +11,7 @@
 let
   inherit (pkgs)
     writeScript
-  ;
+    ;
 
   inherit (lib)
     concatMapStringsSep
@@ -15,7 +20,7 @@ let
     mkIf
     mkOption
     types
-  ;
+    ;
 
   cfg = config.lass.folderPerms;
 
@@ -27,29 +32,31 @@ let
   api = {
     enable = mkEnableOption "folder permissions";
     permissions = mkOption {
-      type = with types; listOf (submodule ({
-        options = {
-          path = mkOption {
-            type = str;
+      type =
+        with types;
+        listOf (submodule ({
+          options = {
+            path = mkOption {
+              type = str;
+            };
+            permission = mkOption {
+              type = nullOr str;
+              example = "755";
+              description = ''
+                basically anything that chmod takes as permission
+              '';
+              default = null;
+            };
+            owner = mkOption {
+              type = nullOr str;
+              example = "root:root";
+              description = ''
+                basically anything that chown takes as owner
+              '';
+              default = null;
+            };
           };
-          permission = mkOption {
-            type = nullOr str;
-            example = "755";
-            description = ''
-              basically anything that chmod takes as permission
-            '';
-            default = null;
-          };
-          owner = mkOption {
-            type = nullOr str;
-            example = "root:root";
-            description = ''
-              basically anything that chown takes as owner
-            '';
-            default = null;
-          };
-        };
-      }));
+        }));
     };
   };
 
@@ -77,28 +84,24 @@ let
     ${concatMapStringsSep "\n" writeCommand cfg.permissions}
   '';
 
-  writeCommand = fperm:
+  writeCommand =
+    fperm:
     concatStringsSep "\n" [
       (buildPermission fperm)
       (buildOwner fperm)
     ];
 
-  buildPermission = perm:
+  buildPermission =
+    perm:
     #TODO: create folder maybe
     #TODO: check if permission is valid
-    if (perm.permission == null) then
-      ""
-    else
-      "chmod ${perm.permission} ${perm.path}"
-  ;
+    if (perm.permission == null) then "" else "chmod ${perm.permission} ${perm.path}";
 
-  buildOwner = perm:
+  buildOwner =
+    perm:
     #TODO: create folder maybe
     #TODO: check if owner/group valid
-    if (perm.owner == null) then
-      ""
-    else
-      "chown ${perm.owner} ${perm.path}"
-  ;
+    if (perm.owner == null) then "" else "chown ${perm.owner} ${perm.path}";
 
-in out
+in
+out

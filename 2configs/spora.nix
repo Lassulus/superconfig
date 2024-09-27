@@ -1,4 +1,9 @@
-{ self, config, pkgs, ... }:
+{
+  self,
+  config,
+  pkgs,
+  ...
+}:
 {
   imports = [
     self.inputs.spora.nixosModules.spora
@@ -18,9 +23,9 @@
     secret."mycelium_key" = { };
     public."mycelium_ip" = { };
     public."mycelium_pubkey" = { };
-    generator = { 
+    generator = {
       path = [
-	      pkgs.mycelium
+        pkgs.mycelium
         pkgs.coreutils
         pkgs.jq
       ];

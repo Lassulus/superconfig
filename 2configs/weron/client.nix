@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ pkgs, ... }:
 {
   systemd.services.weron = {
     wantedBy = [ "multi-user.target" ];

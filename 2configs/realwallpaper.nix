@@ -1,4 +1,9 @@
-{ self, config, lib, pkgs, ... }:
+{
+  self,
+  config,
+  pkgs,
+  ...
+}:
 {
   imports = [
     self.inputs.stockholm.nixosModules.realwallpaper
@@ -41,7 +46,10 @@
   krebs.iptables = {
     tables = {
       filter.INPUT.rules = [
-        { predicate = "-i retiolum -p tcp --dport 80"; target = "ACCEPT"; }
+        {
+          predicate = "-i retiolum -p tcp --dport 80";
+          target = "ACCEPT";
+        }
       ];
     };
   };

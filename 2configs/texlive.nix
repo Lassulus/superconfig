@@ -2,11 +2,13 @@
 
 {
   environment.systemPackages = with pkgs; [
-    (texLiveAggregationFun { paths = [
-      texLive
-      texLiveExtra
-      texLiveCMSuper
-      texLiveModerncv
-    ];})
+    (texLiveAggregationFun {
+      paths = [
+        texLive
+        texLiveExtra
+        texLiveCMSuper
+        texLiveModerncv
+      ];
+    })
   ];
 }

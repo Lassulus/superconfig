@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 {
   environment.systemPackages = [
     pkgs.cunicu
@@ -38,18 +43,23 @@
       interface_filter = "w*|e*|v*|i*";
     };
 
-    interfaces.wiregrill = {};
+    interfaces.wiregrill = { };
 
-    peers = lib.mapAttrs
-      (_: host: {
+    peers = lib.mapAttrs (
+      _: host:
+      {
         public_key = host.nets.wiregrill.wireguard.pubkey;
-        allowed_ips = with host.nets.wiregrill; [
-          "${ip6.addr}/128"
-        ] ++ (lib.optional (ip4 != null) "${ip4.addr}/32");
-      } // lib.optionalAttrs (host.nets.wiregrill.via != null) {
+        allowed_ips =
+          with host.nets.wiregrill;
+          [
+            "${ip6.addr}/128"
+          ]
+          ++ (lib.optional (ip4 != null) "${ip4.addr}/32");
+      }
+      // lib.optionalAttrs (host.nets.wiregrill.via != null) {
         endpoint = host.nets.wiregrill.via.ip4.addr + ":${toString host.nets.wiregrill.wireguard.port}";
-      })
-      (lib.filterAttrs (_: host: lib.hasAttr "wiregrill" host.nets) config.krebs.hosts);
+      }
+    ) (lib.filterAttrs (_: host: lib.hasAttr "wiregrill" host.nets) config.krebs.hosts);
   };
 
   systemd.services.cunicu = {

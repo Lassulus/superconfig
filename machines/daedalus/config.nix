@@ -1,4 +1,10 @@
-{ self, config, lib, pkgs, ... }:
+{
+  self,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   imports = [
@@ -55,7 +61,7 @@
     }
     {
       users = {
-        groups.plugdev = {};
+        groups.plugdev = { };
         users = {
           bitcoin = {
             name = "bitcoin";
@@ -89,7 +95,10 @@
         # torbrowser
       ];
       krebs.iptables.tables.filter.INPUT.rules = [
-        { predicate = "-p tcp -i retiolum --dport 5900"; target = "ACCEPT"; }
+        {
+          predicate = "-p tcp -i retiolum --dport 5900";
+          target = "ACCEPT";
+        }
       ];
     }
   ];

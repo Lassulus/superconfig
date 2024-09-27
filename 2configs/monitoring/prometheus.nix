@@ -1,10 +1,13 @@
-{ config, lib, pkgs, ... }:
+{ lib, pkgs, ... }:
 {
   #prometheus
   krebs.iptables = {
     enable = true;
     tables.filter.INPUT.rules = [
-      { predicate = "-i retiolum -p tcp --dport 80"; target = "ACCEPT"; } # nginx
+      {
+        predicate = "-i retiolum -p tcp --dport 80";
+        target = "ACCEPT";
+      } # nginx
       # { predicate = "-i retiolum -p tcp --dport 3012"; target = "ACCEPT"; } # grafana
       # { predicate = "-i retiolum -p tcp --dport 9093"; target = "ACCEPT"; } # alertmanager
       # { predicate = "-i retiolum -p tcp --dport 9223"; target = "ACCEPT"; } # alertmanager
@@ -38,12 +41,16 @@
   services.prometheus = {
     enable = true;
     ruleFiles = [
-      (pkgs.writeText "prometheus-rules.yml" (builtins.toJSON {
-        groups = [{
-          name = "alerting-rules";
-          rules = import ./alert-rules.nix { inherit lib; };
-        }];
-      }))
+      (pkgs.writeText "prometheus-rules.yml" (
+        builtins.toJSON {
+          groups = [
+            {
+              name = "alerting-rules";
+              rules = import ./alert-rules.nix { inherit lib; };
+            }
+          ];
+        }
+      ))
     ];
     scrapeConfigs = [
       {
@@ -62,7 +69,8 @@
       }
     ];
     alertmanagers = [
-      { scheme = "http";
+      {
+        scheme = "http";
         path_prefix = "/";
         static_configs = [ { targets = [ "localhost:9093" ]; } ];
       }
@@ -94,10 +102,12 @@
         receivers = [
           {
             name = "all";
-            webhook_configs = [{
-              url = "http://127.0.0.1:9223/";
-              max_alerts = 5;
-            }];
+            webhook_configs = [
+              {
+                url = "http://127.0.0.1:9223/";
+                max_alerts = 5;
+              }
+            ];
           }
           {
             name = "default";

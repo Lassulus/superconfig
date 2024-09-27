@@ -258,7 +258,8 @@ let
     #
     # vim: ft=cfg
   '';
-in {
+in
+{
   systemd.user.services.dunst = {
     wantedBy = [ "graphical-session.target" ];
     requires = [ "xmonad.service" ];

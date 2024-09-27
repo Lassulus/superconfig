@@ -1,4 +1,5 @@
-{ pkgs }: let
+{ pkgs }:
+let
 
   review = pkgs.writers.writeBash "review-mail" ''
     mail="$1"
@@ -30,7 +31,8 @@
     echo '-------------------'
   '';
 
-in pkgs.writers.writeBashBin "review-mail" ''
+in
+pkgs.writers.writeBashBin "review-mail" ''
   for mail in $(${pkgs.exim}/bin/exim -bp \
   | ${pkgs.gnugrep}/bin/grep frozen \
   | ${pkgs.gawk}/bin/awk '{print $3}'); do

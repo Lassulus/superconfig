@@ -1,11 +1,12 @@
 # seems to work, very slow though
 
-{ config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 let
 
   cname = "green-cryfs";
 
-in {
+in
+{
   imports = [
     <stockholm/lass/2configs/container-networking.nix>
     <stockholm/lass/2configs/syncthing.nix>
@@ -14,7 +15,14 @@ in {
   programs.fuse.userAllowOther = true;
 
   services.syncthing.declarative.folders."/var/lib/sync-containers/${cname}/cryfs" = {
-    devices = [ "icarus" "skynet" "littleT" "shodan" "mors" "morpheus" ];
+    devices = [
+      "icarus"
+      "skynet"
+      "littleT"
+      "shodan"
+      "mors"
+      "morpheus"
+    ];
     ignorePerms = false;
   };
 
@@ -25,27 +33,31 @@ in {
     ];
   };
 
-
   systemd.services."container@${cname}".reloadIfChanged = mkForce false;
   containers.${cname} = {
-    config = { ... }: {
-      environment.systemPackages = [
-        pkgs.git
-        pkgs.rxvt-unicode-unwrapped.terminfo
-      ];
-      services.openssh.enable = true;
-      users.users.root.openssh.authorizedKeys.keys = [
-        config.krebs.users.lass.pubkey
-      ];
-      system.activationScripts.fuse = {
-        text = ''
-          ${pkgs.coreutils}/bin/mknod /dev/fuse c 10 229
-        '';
-        deps = [];
+    config =
+      { ... }:
+      {
+        environment.systemPackages = [
+          pkgs.git
+          pkgs.rxvt-unicode-unwrapped.terminfo
+        ];
+        services.openssh.enable = true;
+        users.users.root.openssh.authorizedKeys.keys = [
+          config.krebs.users.lass.pubkey
+        ];
+        system.activationScripts.fuse = {
+          text = ''
+            ${pkgs.coreutils}/bin/mknod /dev/fuse c 10 229
+          '';
+          deps = [ ];
+        };
       };
-    };
     allowedDevices = [
-      { modifier = "rwm"; node = "/dev/fuse"; }
+      {
+        modifier = "rwm";
+        node = "/dev/fuse";
+      }
     ];
     autoStart = false;
     enableTun = true;

@@ -1,9 +1,10 @@
-{ config, pkgs, ... }:
+{ config, ... }:
 
 let
   mainUser = config.users.extraUsers.mainUser;
 
-in {
+in
+{
   #services.virtualboxHost.enable = true;
   virtualisation.virtualbox.host.enable = true;
   virtualisation.virtualbox.host.enableHardening = false;
@@ -14,7 +15,11 @@ in {
       description = "user for running VirtualBox";
       home = "/home/virtual";
       useDefaultShell = true;
-      extraGroups = [ "vboxusers" "audio" "video" ];
+      extraGroups = [
+        "vboxusers"
+        "audio"
+        "video"
+      ];
       createHome = true;
     };
   };

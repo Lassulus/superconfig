@@ -1,4 +1,9 @@
-{ self, config, pkgs, ... }:
+{
+  self,
+  config,
+  pkgs,
+  ...
+}:
 {
   imports = [
     ../../2configs
@@ -19,7 +24,10 @@
     acceptTerms = true;
     defaults.email = "acme@lassul.us";
   };
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+  networking.firewall.allowedTCPPorts = [
+    80
+    443
+  ];
 
   # nextcloud
   services.nginx.virtualHosts."c.apanowicz.de" = {
@@ -89,19 +97,55 @@
       # server_condition = ''${run{/run/current-system/sw/bin/debug_exim ${config.lass.usershadow.pattern} $auth1 $auth2}{yes}{no}}
     '';
     internet-aliases = [
-      { from = "dma@ubikmedia.de"; to = "domsen"; }
-      { from = "dma@ubikmedia.eu"; to = "domsen"; }
-      { from = "hallo@apanowicz.de"; to = "domsen"; }
-      { from = "bruno@apanowicz.de"; to = "bruno"; }
-      { from = "mail@jla-trading.com"; to = "jla-trading"; }
-      { from = "jms@ubikmedia.eu"; to = "jms"; }
-      { from = "ms@ubikmedia.eu"; to = "ms"; }
-      { from = "ubik@ubikmedia.eu"; to = "domsen, jms, ms"; }
-      { from = "kontakt@alewis.de"; to ="klabusterbeere"; }
-      { from = "hallo@jarugadesign.de"; to ="kasia"; }
-      { from = "noreply@beeshmooth.ch"; to ="besmooth@gmx.ch"; }
+      {
+        from = "dma@ubikmedia.de";
+        to = "domsen";
+      }
+      {
+        from = "dma@ubikmedia.eu";
+        to = "domsen";
+      }
+      {
+        from = "hallo@apanowicz.de";
+        to = "domsen";
+      }
+      {
+        from = "bruno@apanowicz.de";
+        to = "bruno";
+      }
+      {
+        from = "mail@jla-trading.com";
+        to = "jla-trading";
+      }
+      {
+        from = "jms@ubikmedia.eu";
+        to = "jms";
+      }
+      {
+        from = "ms@ubikmedia.eu";
+        to = "ms";
+      }
+      {
+        from = "ubik@ubikmedia.eu";
+        to = "domsen, jms, ms";
+      }
+      {
+        from = "kontakt@alewis.de";
+        to = "klabusterbeere";
+      }
+      {
+        from = "hallo@jarugadesign.de";
+        to = "kasia";
+      }
+      {
+        from = "noreply@beeshmooth.ch";
+        to = "besmooth@gmx.ch";
+      }
 
-      { from = "testuser@ubikmedia.eu"; to = "testuser"; }
+      {
+        from = "testuser@ubikmedia.eu";
+        to = "testuser";
+      }
     ];
     sender_domains = [
       "jla-trading.com"
@@ -121,7 +165,7 @@
   };
 
   # users
-  users.groups.xanf = {};
+  users.groups.xanf = { };
   users.users.UBIK-SFTP = {
     uid = pkgs.stockholm.lib.genid_uint31 "UBIK-SFTP";
     home = "/home/UBIK-SFTP";
@@ -144,7 +188,11 @@
     description = "maintenance acc for domsen";
     home = "/home/domsen";
     useDefaultShell = true;
-    extraGroups = [ "syncthing" "download" "xanf" ];
+    extraGroups = [
+      "syncthing"
+      "download"
+      "xanf"
+    ];
     createHome = true;
     isNormalUser = true;
   };

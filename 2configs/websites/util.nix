@@ -4,16 +4,17 @@ with lib;
 
 rec {
 
-  ssl = domains :
-    let
-      domain = head domains;
-    in {
+  ssl =
+    domains:
+    {
     };
 
-  servePage = domains:
+  servePage =
+    domains:
     let
       domain = head domains;
-    in {
+    in
+    {
       services.nginx.virtualHosts.${domain} = {
         enableACME = true;
         addSSL = true;
@@ -24,10 +25,12 @@ rec {
       };
     };
 
-  serveOwncloud = domains:
+  serveOwncloud =
+    domains:
     let
       domain = head domains;
-    in {
+    in
+    {
       services.nginx.virtualHosts."${domain}" = {
         enableACME = true;
         addSSL = true;
@@ -77,7 +80,7 @@ rec {
           deny all;
         '';
 
-        locations."~ ^/(?:autotest|occ|issue|indie|db_|console)".extraConfig =  ''
+        locations."~ ^/(?:autotest|occ|issue|indie|db_|console)".extraConfig = ''
           deny all;
         '';
 
@@ -87,7 +90,7 @@ rec {
           try_files $uri $uri/ =404;
         '';
 
-        locations."~ \.php(?:$|/)".extraConfig =  ''
+        locations."~ \.php(?:$|/)".extraConfig = ''
           fastcgi_split_path_info ^(.+\.php)(/.+)$;
           include ${pkgs.nginx}/conf/fastcgi_params;
           fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
@@ -131,11 +134,13 @@ rec {
       };
     };
 
-  serveWordpress = domains:
+  serveWordpress =
+    domains:
     let
       domain = head domains;
 
-    in {
+    in
+    {
       services.nginx.virtualHosts."${domain}" = {
         enableACME = true;
         forceSSL = true;

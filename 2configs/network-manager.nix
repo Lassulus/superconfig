@@ -1,4 +1,9 @@
-{ self, pkgs, lib, ... }:
+{
+  self,
+  pkgs,
+  lib,
+  ...
+}:
 {
   networking.wireless.enable = lib.mkForce false;
 

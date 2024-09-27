@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ lib, pkgs, ... }:
 
 let
 
@@ -69,39 +69,66 @@ let
     dn42 = [ "to:dn42@lists.nox.tf" ];
     eloop = [ "to:eloop.org" ];
     github = [ "to:github@lassul.us" ];
-    gmail = [ "to:gmail@lassul.us" "to:lassulus@gmail.com" "lassulus@googlemail.com" ];
-    india = [ "to:hillhackers@lists.hillhacks.in" "to:hackbeach@lists.hackbeach.in" "to:hackbeach@mail.hackbeach.in" ];
-    kaosstuff = [ "to:gearbest@lassul.us" "to:banggood@lassul.us" "to:tomtop@lassul.us" ];
+    gmail = [
+      "to:gmail@lassul.us"
+      "to:lassulus@gmail.com"
+      "lassulus@googlemail.com"
+    ];
+    india = [
+      "to:hillhackers@lists.hillhacks.in"
+      "to:hackbeach@lists.hackbeach.in"
+      "to:hackbeach@mail.hackbeach.in"
+    ];
+    kaosstuff = [
+      "to:gearbest@lassul.us"
+      "to:banggood@lassul.us"
+      "to:tomtop@lassul.us"
+    ];
     lugs = [ "to:lugs@lug-s.org" ];
     meetup = [ "to:meetup@lassul.us" ];
-    nix = [ "to:nix-devel@googlegroups.com" "to:nix@lassul.us" ];
+    nix = [
+      "to:nix-devel@googlegroups.com"
+      "to:nix@lassul.us"
+    ];
     patreon = [ "to:patreon@lassul.us" ];
     paypal = [ "to:paypal@lassul.us" ];
     ptl = [ "to:ptl@posttenebraslab.ch" ];
     retiolum = [ "to:lass@mors.r" ];
     security = [
-      "to:seclists.org" "to:bugtraq" "to:securityfocus@lassul.us"
+      "to:seclists.org"
+      "to:bugtraq"
+      "to:securityfocus@lassul.us"
       "to:security-announce@lists.apple.com"
     ];
     shack = [ "to:shackspace.de" ];
     steam = [ "to:steam@lassul.us" ];
-    tinc = [ "to:tinc@tinc-vpn.org" "to:tinc-devel@tinc-vpn.org" ];
+    tinc = [
+      "to:tinc@tinc-vpn.org"
+      "to:tinc-devel@tinc-vpn.org"
+    ];
     wireguard = [ "to:wireguard@lists.zx2c4" ];
-    zzz = [ "to:pizza@lassul.us" "to:spam@krebsco.de" ];
+    zzz = [
+      "to:pizza@lassul.us"
+      "to:spam@krebsco.de"
+    ];
   };
 
   tag-new-mails = pkgs.writeDashBin "nm-tag-init" ''
     ${pkgs.notmuch}/bin/notmuch new
     ${lib.concatMapStringsSep "\n" (i: ''
       mkdir -p "$HOME/Maildir/.${i.name}/cur"
-      for mail in $(${pkgs.notmuch}/bin/notmuch search --output=files 'tag:inbox and (${lib.concatMapStringsSep " or " (f: "${f}") i.value})'); do
+      for mail in $(${pkgs.notmuch}/bin/notmuch search --output=files 'tag:inbox and (${
+        lib.concatMapStringsSep " or " (f: "${f}") i.value
+      })'); do
         if test -e "$mail"; then
           mv "$mail" "$HOME/Maildir/.${i.name}/cur/"
         else
           echo "$mail does not exist"
         fi
       done
-      ${pkgs.notmuch}/bin/notmuch tag -inbox +${i.name} -- tag:inbox ${lib.concatMapStringsSep " or " (f: "${f}") i.value}
+      ${pkgs.notmuch}/bin/notmuch tag -inbox +${i.name} -- tag:inbox ${
+        lib.concatMapStringsSep " or " (f: "${f}") i.value
+      }
     '') (lib.mapAttrsToList lib.nameValuePair mailboxes)}
     ${pkgs.notmuch}/bin/notmuch new
     ${pkgs.notmuch}/bin/notmuch dump > "$HOME/Maildir/notmuch.backup"
@@ -110,9 +137,13 @@ let
   tag-old-mails = pkgs.writeDashBin "nm-tag-old" ''
     set -efux
     ${lib.concatMapStringsSep "\n" (i: ''
-      ${pkgs.notmuch}/bin/notmuch tag -inbox -archive +${i.name} -- ${lib.concatMapStringsSep " or " (f: "${f}") i.value}
+      ${pkgs.notmuch}/bin/notmuch tag -inbox -archive +${i.name} -- ${
+        lib.concatMapStringsSep " or " (f: "${f}") i.value
+      }
       mkdir -p "$HOME/Maildir/.${i.name}/cur"
-      for mail in $(${pkgs.notmuch}/bin/notmuch search --output=files ${lib.concatMapStringsSep " or " (f: "${f}") i.value}); do
+      for mail in $(${pkgs.notmuch}/bin/notmuch search --output=files ${
+        lib.concatMapStringsSep " or " (f: "${f}") i.value
+      }); do
         if test -e "$mail"; then
           mv "$mail" "$HOME/Maildir/.${i.name}/cur/"
         else
@@ -151,7 +182,9 @@ let
 
     virtual-mailboxes "Unread" "notmuch://?query=tag:unread"
     virtual-mailboxes "INBOX" "notmuch://?query=tag:inbox"
-    ${lib.concatMapStringsSep "\n" (i: ''${"  "}virtual-mailboxes "${i.name}" "notmuch://?query=tag:${i.name}"'') (lib.mapAttrsToList lib.nameValuePair mailboxes)}
+    ${lib.concatMapStringsSep "\n" (
+      i: ''${"  "}virtual-mailboxes "${i.name}" "notmuch://?query=tag:${i.name}"''
+    ) (lib.mapAttrsToList lib.nameValuePair mailboxes)}
     virtual-mailboxes "TODO" "notmuch://?query=tag:TODO"
     virtual-mailboxes "Starred" "notmuch://?query=tag:*"
     virtual-mailboxes "Archive" "notmuch://?query=tag:archive"
@@ -261,7 +294,8 @@ let
     ];
   };
 
-in {
+in
+{
   environment.variables.NOTMUCH_CONFIG = toString notmuch-config;
   environment.systemPackages = [
     msmtp

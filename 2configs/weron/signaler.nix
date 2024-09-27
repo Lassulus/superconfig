@@ -1,9 +1,10 @@
-{ config, lib, pkgs, ... }:
+{ pkgs, ... }:
 {
   systemd.services.weron-signaler = {
     wantedBy = [ "multi-user.target" ];
-    environment = {
-    };
+    environment =
+      {
+      };
     serviceConfig = {
       ExecStart = ''${pkgs.weron}/bin/weron signaler --verbose=7 --laddr ":23420"'';
     };

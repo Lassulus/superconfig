@@ -1,4 +1,9 @@
-{ self, config, pkgs, ... }:
+{
+  self,
+  config,
+  pkgs,
+  ...
+}:
 {
   users.users.pairprogramming = {
     uid = self.inputs.stockholm.lib.genid_uint31 "pairprogramming";
@@ -15,7 +20,6 @@
   };
 
   virtualisation.podman.enable = true;
-
 
   environment.systemPackages = [
     pkgs.ripgrep

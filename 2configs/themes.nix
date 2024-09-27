@@ -1,27 +1,29 @@
-{ config, lib, pkgs, ... }: let
+{ pkgs, ... }:
+let
 
-    switch-theme = pkgs.writers.writeDashBin "switch-theme" ''
-      set -efux
-      if [ "$1" = toggle ]; then
-        if [ "$(${pkgs.coreutils}/bin/cat /var/theme/current_theme)" = dark ]; then
-          ${placeholder "out"}/bin/switch-theme light
-        else
-          ${placeholder "out"}/bin/switch-theme dark
-        fi
-      elif test -e "/etc/themes/$1"; then
-        ${pkgs.coreutils}/bin/mkdir -p /var/theme/config
-        ${pkgs.rsync}/bin/rsync --chown=lass:users -a --delete "/etc/themes/$1/" /var/theme/config/
-        echo "$1" > /var/theme/current_theme
-        ${pkgs.coreutils}/bin/chown lass:users /var/theme/current_theme
-        ${pkgs.xorg.xrdb}/bin/xrdb -merge /var/theme/config/xresources || : # wayland has no xresources
-        ${pkgs.procps}/bin/pkill -HUP xsettingsd || :
-        ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface gtk-theme "$(cat /var/theme/config/gtk-theme)" || :
+  switch-theme = pkgs.writers.writeDashBin "switch-theme" ''
+    set -efux
+    if [ "$1" = toggle ]; then
+      if [ "$(${pkgs.coreutils}/bin/cat /var/theme/current_theme)" = dark ]; then
+        ${placeholder "out"}/bin/switch-theme light
       else
-        echo "theme $1 not found"
+        ${placeholder "out"}/bin/switch-theme dark
       fi
-    '';
+    elif test -e "/etc/themes/$1"; then
+      ${pkgs.coreutils}/bin/mkdir -p /var/theme/config
+      ${pkgs.rsync}/bin/rsync --chown=lass:users -a --delete "/etc/themes/$1/" /var/theme/config/
+      echo "$1" > /var/theme/current_theme
+      ${pkgs.coreutils}/bin/chown lass:users /var/theme/current_theme
+      ${pkgs.xorg.xrdb}/bin/xrdb -merge /var/theme/config/xresources || : # wayland has no xresources
+      ${pkgs.procps}/bin/pkill -HUP xsettingsd || :
+      ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface gtk-theme "$(cat /var/theme/config/gtk-theme)" || :
+    else
+      echo "theme $1 not found"
+    fi
+  '';
 
-in {
+in
+{
   systemd.tmpfiles.rules = [
     "d /var/theme/ 755 lass users"
   ];

@@ -1,7 +1,9 @@
-{ config, pkgs, ... }: let
+{ config, pkgs, ... }:
+let
   mainUser = config.users.extraUsers.mainUser;
-in {
-  users.users= {
+in
+{
+  users.users = {
     starcraft = {
       isNormalUser = true;
       extraGroups = [
@@ -19,4 +21,3 @@ in {
     ${mainUser.name} ALL=(starcraft) NOPASSWD: ALL
   '';
 }
-

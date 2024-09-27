@@ -1,4 +1,5 @@
-{ config, lib, pkgs, ... }: let
+{ config, pkgs, ... }:
+let
 
   weechat-configured = pkgs.weechat-declarative.override {
     config = {
@@ -7,7 +8,10 @@
         pkgs.weechatScripts.wee-slack
       ];
       settings = {
-        irc.server_default.nicks = [ "lassulus" "hackulus" ];
+        irc.server_default.nicks = [
+          "lassulus"
+          "hackulus"
+        ];
         irc.server.bitlbee = {
           addresses = "localhost/6666";
           command = "msg &bitlbee identify \${sec.data.bitlbee}";
@@ -128,20 +132,82 @@
         matrix.look.server_buffer = "independent";
         weechat.bar.buflist.size_max = 20;
         weechat.color.chat_nick_colors = [
-          1 2 3 4 5 6 9
-          10 11 12 13 14
-          28 29
-          30 31 32 33 34 35 36 37 38 39
+          1
+          2
+          3
+          4
+          5
+          6
+          9
+          10
+          11
+          12
+          13
+          14
+          28
+          29
+          30
+          31
+          32
+          33
+          34
+          35
+          36
+          37
+          38
+          39
           70
           94
-          101 102 103 104 105 106 107
-          130 131 133 134 135 136 137
-          140 141 142 143
-          160 161 162 163 165 166 167 168 169
-          170 171 172 173 174 175
-          196 197 198 199
-          200 201 202 203 204 205 206 208 209 209
-          210 211 212
+          101
+          102
+          103
+          104
+          105
+          106
+          107
+          130
+          131
+          133
+          134
+          135
+          136
+          137
+          140
+          141
+          142
+          143
+          160
+          161
+          162
+          163
+          165
+          166
+          167
+          168
+          169
+          170
+          171
+          172
+          173
+          174
+          175
+          196
+          197
+          198
+          199
+          200
+          201
+          202
+          203
+          204
+          205
+          206
+          208
+          209
+          209
+          210
+          211
+          212
         ];
       };
       extraCommands = ''
@@ -166,26 +232,32 @@
         /matrix connect nixos_dev
         /matrix connect lassulus
       '';
-      files."sec.conf" = toString (pkgs.writeText "sec.conf" ''
-        [crypt]
-        cipher = aes256
-        hash_algo = sha256
-        passphrase_command = "cat $CREDENTIALS_DIRECTORY/WEECHAT_PASSPHRASE"
-        salt = on
+      files."sec.conf" = toString (
+        pkgs.writeText "sec.conf" ''
+          [crypt]
+          cipher = aes256
+          hash_algo = sha256
+          passphrase_command = "cat $CREDENTIALS_DIRECTORY/WEECHAT_PASSPHRASE"
+          salt = on
 
-        [data]
-        __passphrase__ = on
-        hackint_sasl = "5CA242E92E7A09B180711B50C4AE2E65C42934EB4E584EC82BC1281D8C72CD411D590C16CC435687C0DA13759873CC"
-        libera_sasl = "9500B5AC3B29F9CAA273F1B89DC99550E038AF95C4B47442B1FB4CB9F0D6B86B26015988AD39E642CA9C4A78DED7F42D1F409B268C93E778"
-        r_sasl = "CB6FB1421ED5A9094CD2C05462DB1FA87C4A675628ABD9AEC9928A1A6F3F96C07D9F26472331BAF80B7B73270680EB1BBEFD"
-        c3-gsm = "C49DD845900CFDFA93EEBCE4F1ABF4A963EF6082B7DA6410FA701CC77A04BB6C201FCB864988C4F2B97ED7D44D5A28F162"
-        bitlbee = "814ECAC59D9CF6E8340B566563E5D7E92AB92209B49C1EDE4CAAC32DD0DF1EC511D97C75E840C45D69BB9E3D03E79C"
-        matrix_lassulus = "0CA5C0F70A9F893881370F4A665B4CC40FBB1A41E53BC94916CD92B029103528611EC0B390116BE60FA79AE10F486E96E17B0824BE2DE1C97D87B88F5407330DAD70C044147533C36B09B7030CAD97"
-      '');
+          [data]
+          __passphrase__ = on
+          hackint_sasl = "5CA242E92E7A09B180711B50C4AE2E65C42934EB4E584EC82BC1281D8C72CD411D590C16CC435687C0DA13759873CC"
+          libera_sasl = "9500B5AC3B29F9CAA273F1B89DC99550E038AF95C4B47442B1FB4CB9F0D6B86B26015988AD39E642CA9C4A78DED7F42D1F409B268C93E778"
+          r_sasl = "CB6FB1421ED5A9094CD2C05462DB1FA87C4A675628ABD9AEC9928A1A6F3F96C07D9F26472331BAF80B7B73270680EB1BBEFD"
+          c3-gsm = "C49DD845900CFDFA93EEBCE4F1ABF4A963EF6082B7DA6410FA701CC77A04BB6C201FCB864988C4F2B97ED7D44D5A28F162"
+          bitlbee = "814ECAC59D9CF6E8340B566563E5D7E92AB92209B49C1EDE4CAAC32DD0DF1EC511D97C75E840C45D69BB9E3D03E79C"
+          matrix_lassulus = "0CA5C0F70A9F893881370F4A665B4CC40FBB1A41E53BC94916CD92B029103528611EC0B390116BE60FA79AE10F486E96E17B0824BE2DE1C97D87B88F5407330DAD70C044147533C36B09B7030CAD97"
+        ''
+      );
     };
   };
 
-in {
+in
+{
+  nixpkgs.config.permittedInsecurePackages = [
+    "olm-3.2.16"
+  ];
   users.users.mainUser.packages = [
     weechat-configured
   ];
@@ -205,9 +277,9 @@ in {
       User = "lass";
       RemainAfterExit = true;
       Type = "oneshot";
-      LoadCredential = [
-        "WEECHAT_PASSPHRASE:${config.krebs.secret.directory}/weechat_passphrase"
-      ];
+      # LoadCredential = [
+      #   "WEECHAT_PASSPHRASE:${config.krebs.secret.directory}/weechat_passphrase"
+      # ];
       ExecStart = "${pkgs.tmux}/bin/tmux -2 new-session -d -s IM ${weechat-configured}/bin/weechat";
       ExecStop = "${pkgs.tmux}/bin/tmux kill-session -t IM"; # TODO run save in weechat
     };

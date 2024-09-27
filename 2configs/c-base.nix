@@ -1,11 +1,10 @@
-{ config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 
 {
 
   environment.systemPackages = [
     pkgs.cifs-utils
   ];
-
 
   clanCore.facts.services.c-base = {
     secret."c-base.txt" = { };
@@ -26,14 +25,18 @@
       Domains = "cbrp3.c-base.org";
     };
     routes = [
-      { routeConfig = {
-        Destination = "10.0.0.0/23";
-        Gateway = "172.31.77.1";
-      };}
-      { routeConfig = {
-        Destination = "91.102.9.99/32"; # vorstand.c-base.org
-        Gateway = "172.31.77.1";
-      };}
+      {
+        routeConfig = {
+          Destination = "10.0.0.0/23";
+          Gateway = "172.31.77.1";
+        };
+      }
+      {
+        routeConfig = {
+          Destination = "91.102.9.99/32"; # vorstand.c-base.org
+          Gateway = "172.31.77.1";
+        };
+      }
     ];
   };
   services.openvpn.servers.c-base = {

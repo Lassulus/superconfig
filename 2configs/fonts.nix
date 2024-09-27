@@ -8,7 +8,13 @@
       xorg.fontschumachermisc
       inconsolata
       noto-fonts
-      (nerdfonts.override { fonts = [ "Iosevka" "IosevkaTerm" "IosevkaTermSlab" ]; })
+      (nerdfonts.override {
+        fonts = [
+          "Iosevka"
+          "IosevkaTerm"
+          "IosevkaTermSlab"
+        ];
+      })
     ];
   };
 }

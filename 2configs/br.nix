@@ -1,4 +1,5 @@
-{ config, lib, pkgs, modulesPath, ... }: {
+{ pkgs, modulesPath, ... }:
+{
 
   imports = [
     (modulesPath + "/services/hardware/sane_extra_backends/brscan4.nix")
@@ -38,6 +39,9 @@
     ];
   };
 
-  users.users.mainUser.extraGroups = [ "scanner" "lp" ];
+  users.users.mainUser.extraGroups = [
+    "scanner"
+    "lp"
+  ];
 
 }

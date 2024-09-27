@@ -1,4 +1,9 @@
-{ self, modulesPath, lib, ... }:
+{
+  self,
+  modulesPath,
+  lib,
+  ...
+}:
 {
   imports = [
     ./config.nix
@@ -13,7 +18,13 @@
   boot.loader.grub.device = "/dev/disk/by-id/wwn-0x5002538d702f5ac6";
   boot.initrd.luks.devices.ssd.device = "/dev/disk/by-id/wwn-0x5002538d702f5ac6-part3";
 
-  boot.initrd.availableKernelModules = [ "ehci_pci" "ahci" "xhci_pci" "sd_mod" "sdhci_pci" ];
+  boot.initrd.availableKernelModules = [
+    "ehci_pci"
+    "ahci"
+    "xhci_pci"
+    "sd_mod"
+    "sdhci_pci"
+  ];
   boot.initrd.kernelModules = [ "dm-snapshot" ];
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];

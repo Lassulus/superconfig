@@ -1,4 +1,4 @@
-{ config, lib, pkgs, modulesPath, ... }:
+{ pkgs, modulesPath, ... }:
 {
   imports = [
     ./config.nix
@@ -25,7 +25,14 @@
   hardware.opengl.extraPackages = [ pkgs.amdvlk ];
   hardware.opengl.extraPackages32 = [ pkgs.driversi686Linux.amdvlk ];
 
-  boot.initrd.availableKernelModules = [ "nvme" "ehci_pci" "xhci_pci" "usb_storage" "sd_mod" "rtsx_pci_sdmmc" ];
+  boot.initrd.availableKernelModules = [
+    "nvme"
+    "ehci_pci"
+    "xhci_pci"
+    "usb_storage"
+    "sd_mod"
+    "rtsx_pci_sdmmc"
+  ];
   boot.kernelModules = [ "kvm-amd" ];
 
   fileSystems."/" = {

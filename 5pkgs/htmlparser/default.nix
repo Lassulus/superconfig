@@ -1,4 +1,4 @@
-{ lib, buildGoModule, fetchFromGitHub }:
+{ buildGoModule, fetchFromGitHub }:
 
 buildGoModule rec {
   pname = "htmlparser";

@@ -10,30 +10,37 @@
   libnotify,
   xclip,
   xdotool,
-  gawk,
-}: let
-  unicode-file = runCommand "unicode.txt" {} ''
+}:
+let
+  unicode-file = runCommand "unicode.txt" { } ''
     ${
-      writers.writePython3 "generate.py" {flakeIgnore = ["E501" "E722"];} ''
-        import csv
+      writers.writePython3 "generate.py"
+        {
+          flakeIgnore = [
+            "E501"
+            "E722"
+          ];
+        }
+        ''
+          import csv
 
-        with open("${
-          fetchurl {
-            url = "https://unicode.org/Public/UCD/latest/ucd/UnicodeData.txt";
-            sha256 = "sha256-NgGOaGV/3LNIX2NmMP/oyFMuAcl3cD0oA/W4nWxf6vs=";
-          }
-        }", "r") as unicode_data:
-            reader = csv.reader(unicode_data, delimiter=";")
-            next(reader)  # skip first row containing \0
-            for row in reader:
-                codepoint = row[0]
-                name = row[1]
-                alternate_name = row[10]
-                try:
-                    print(chr(int(codepoint, 16)), codepoint, name, alternate_name, sep="    ")
-                except:
-                    continue
-      ''
+          with open("${
+            fetchurl {
+              url = "https://unicode.org/Public/UCD/latest/ucd/UnicodeData.txt";
+              sha256 = "sha256-NgGOaGV/3LNIX2NmMP/oyFMuAcl3cD0oA/W4nWxf6vs=";
+            }
+          }", "r") as unicode_data:
+              reader = csv.reader(unicode_data, delimiter=";")
+              next(reader)  # skip first row containing \0
+              for row in reader:
+                  codepoint = row[0]
+                  name = row[1]
+                  alternate_name = row[10]
+                  try:
+                      print(chr(int(codepoint, 16)), codepoint, name, alternate_name, sep="    ")
+                  except:
+                      continue
+        ''
     } > $out
   '';
   kaomoji-file = writeText "kaomoji.txt" ''
@@ -83,19 +90,28 @@
     (^_~)    wink
   '';
 in
-  # ref https://github.com/LukeSmithxyz/voidrice/blob/9fe6802122f6e0392c7fe20eefd30437771d7f8e/.local/bin/dmenuunicode
-  writers.writeDashBin "unimenu" ''
-    history_file=$HOME/.cache/unimenu
-    PATH=${lib.makeBinPath [coreutils dmenu gnused libnotify xclip xdotool]}
-    chosen=$(cat "$history_file" ${kaomoji-file} ${unicode-file} | dmenu -p unicode -i -l 10 | tee --append "$history_file" | sed "s/    .*//")
+# ref https://github.com/LukeSmithxyz/voidrice/blob/9fe6802122f6e0392c7fe20eefd30437771d7f8e/.local/bin/dmenuunicode
+writers.writeDashBin "unimenu" ''
+  history_file=$HOME/.cache/unimenu
+  PATH=${
+    lib.makeBinPath [
+      coreutils
+      dmenu
+      gnused
+      libnotify
+      xclip
+      xdotool
+    ]
+  }
+  chosen=$(cat "$history_file" ${kaomoji-file} ${unicode-file} | dmenu -p unicode -i -l 10 | tee --append "$history_file" | sed "s/    .*//")
 
-    [ "$chosen" != "" ] || exit
+  [ "$chosen" != "" ] || exit
 
-    echo "$chosen" | tr -d '\n' | xclip -selection clipboard
+  echo "$chosen" | tr -d '\n' | xclip -selection clipboard
 
-    if [ -n "$1" ]; then
-      xdotool key Shift+Insert
-    else
-      notify-send --app-name="$(basename "$0")" "'$chosen' copied to clipboard." &
-    fi
-  ''
+  if [ -n "$1" ]; then
+    xdotool key Shift+Insert
+  else
+    notify-send --app-name="$(basename "$0")" "'$chosen' copied to clipboard." &
+  fi
+''

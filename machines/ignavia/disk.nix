@@ -38,11 +38,11 @@
                   };
                   # Mountpoints inferred from subvolume name
                   "/home" = {
-                    mountOptions = [];
+                    mountOptions = [ ];
                     mountpoint = "/home";
                   };
                   "/nix" = {
-                    mountOptions = [];
+                    mountOptions = [ ];
                     mountpoint = "/nix";
                   };
                 };
@@ -54,4 +54,3 @@
     };
   };
 }
-

@@ -1,74 +1,95 @@
-{ config, lib, pkgs, self, ... }: let
+{
+  config,
+  lib,
+  pkgs,
+  self,
+  ...
+}:
+let
   cfg = config.lass.drbd;
   slib = self.inputs.stockholm.lib;
-in {
+in
+{
   options = {
     lass.drbd = lib.mkOption {
-      default = {};
-      type = lib.types.attrsOf (lib.types.submodule ({ config, ... }: {
-        options = {
-          name = lib.mkOption {
-            type = lib.types.str;
-            default = config._module.args.name;
-          };
-          blockMinor = lib.mkOption {
-            type = lib.types.int;
-            default = lib.mod (slib.genid config.name) 16000; # TODO get max_id fron drbd
-          };
-          port = lib.mkOption {
-            type = lib.types.int;
-            default = 20000 + config.blockMinor;
-          };
-          peers = lib.mkOption {
-            type = lib.types.listOf slib.types.host;
-          };
-          disk = lib.mkOption {
-            type = lib.types.str;
-            default = "/dev/loop${toString config.blockMinor}";
-          };
-          drbdConfig = lib.mkOption {
-            type = lib.types.path;
-            internal = true;
-            default = pkgs.writeText "drbd-${config.name}.conf" ''
-              resource ${config.name} {
-                net {
-                  protocol a;
-                  ping-int 10;
-                  csums-alg crc32c;
-                  connect-int 3;
-                  after-sb-0pri discard-older-primary;
-                  after-sb-1pri discard-secondary;
+      default = { };
+      type = lib.types.attrsOf (
+        lib.types.submodule (
+          { config, ... }:
+          {
+            options = {
+              name = lib.mkOption {
+                type = lib.types.str;
+                default = config._module.args.name;
+              };
+              blockMinor = lib.mkOption {
+                type = lib.types.int;
+                default = lib.mod (slib.genid config.name) 16000; # TODO get max_id fron drbd
+              };
+              port = lib.mkOption {
+                type = lib.types.int;
+                default = 20000 + config.blockMinor;
+              };
+              peers = lib.mkOption {
+                type = lib.types.listOf slib.types.host;
+              };
+              disk = lib.mkOption {
+                type = lib.types.str;
+                default = "/dev/loop${toString config.blockMinor}";
+              };
+              drbdConfig = lib.mkOption {
+                type = lib.types.path;
+                internal = true;
+                default = pkgs.writeText "drbd-${config.name}.conf" ''
+                  resource ${config.name} {
+                    net {
+                      protocol a;
+                      ping-int 10;
+                      csums-alg crc32c;
+                      connect-int 3;
+                      after-sb-0pri discard-older-primary;
+                      after-sb-1pri discard-secondary;
 
-                  # seems to be drbd-proxy premium feature
-                  on-congestion pull-ahead;
-                  congestion-fill 1G;
-                  congestion-extents 500;
+                      # seems to be drbd-proxy premium feature
+                      on-congestion pull-ahead;
+                      congestion-fill 1G;
+                      congestion-extents 500;
 
-                  sndbuf-size 10M;
-                  max-epoch-size 20000;
-                }
-                device minor ${toString config.blockMinor};
-                disk ${config.disk};
-                meta-disk internal;
-                ${slib.indent (lib.concatStrings (lib.imap1 (i: peer: /* shell */ ''
-                  on ${peer.name} {
-                    address ${peer.nets.retiolum.ip4.addr}:${toString config.port};
-                    node-id ${toString i};
+                      sndbuf-size 10M;
+                      max-epoch-size 20000;
+                    }
+                    device minor ${toString config.blockMinor};
+                    disk ${config.disk};
+                    meta-disk internal;
+                    ${
+                      slib.indent (
+                        lib.concatStrings (
+                          lib.imap1 (
+                            i: peer: # shell
+                            ''
+                              on ${peer.name} {
+                                address ${peer.nets.retiolum.ip4.addr}:${toString config.port};
+                                node-id ${toString i};
+                              }
+                            '') config.peers
+                        )
+                      )
+                    }
+                    connection-mesh {
+                      hosts ${lib.concatMapStringsSep " " (peer: peer.name) config.peers};
+                    }
                   }
-                '') config.peers))}
-                connection-mesh {
-                  hosts ${lib.concatMapStringsSep " " (peer: peer.name) config.peers};
-                }
-              }
-            '';
-          };
-        };
-      }));
+                '';
+              };
+            };
+          }
+        )
+      );
     };
   };
-  config = lib.mkIf (cfg != {}) {
+  config = lib.mkIf (cfg != { }) {
     boot.extraModulePackages = [
-      (pkgs.linuxPackages.callPackage ../5pkgs/drbd9/default.nix {})
+      (pkgs.linuxPackages.callPackage ../5pkgs/drbd9/default.nix { })
     ];
     boot.extraModprobeConfig = ''
       options drbd usermode_helper=/run/current-system/sw/bin/drbdadm
@@ -109,9 +130,14 @@ in {
     ];
 
     networking.firewall.allowedTCPPorts = map (device: device.port) (lib.attrValues cfg);
-    systemd.services = lib.mapAttrs' (_: device:
+    systemd.services = lib.mapAttrs' (
+      _: device:
       lib.nameValuePair "drbd-${device.name}" {
-        after = [ "systemd-udev.settle.service" "network.target" "retiolum.service" ];
+        after = [
+          "systemd-udev.settle.service"
+          "network.target"
+          "retiolum.service"
+        ];
         wants = [ "systemd-udev.settle.service" ];
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
@@ -144,16 +170,16 @@ in {
       }
     ) cfg;
 
-
     environment.etc."drbd.conf".text = ''
       global {
         usage-count yes;
       }
 
-      ${lib.concatMapStrings (device: /* shell */ ''
-        include ${device.drbdConfig};
-      '') (lib.attrValues cfg)}
+      ${lib.concatMapStrings (
+        device: # shell
+        ''
+          include ${device.drbdConfig};
+        '') (lib.attrValues cfg)}
     '';
   };
 }
-

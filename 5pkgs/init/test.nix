@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ lib, pkgs, ... }:
 {
   virtualisation.emptyDiskImages = [
     8000
@@ -7,7 +7,7 @@
   boot.tmpOnTmpfs = true;
 
   environment.systemPackages = [
-    (pkgs.callPackage ./default.nix {})
+    (pkgs.callPackage ./default.nix { })
   ];
   services.mingetty.autologinUser = lib.mkForce "root";
 }

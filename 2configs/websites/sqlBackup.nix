@@ -32,7 +32,6 @@
 
   lass.mysqlBackup = {
     enable = true;
-    config.all = {};
+    config.all = { };
   };
 }
-

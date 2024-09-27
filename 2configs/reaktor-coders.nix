@@ -1,8 +1,9 @@
-{ config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 
 let
   hooks = pkgs.reaktor2-plugins.hooks;
-in {
+in
+{
   krebs.reaktor2.coders = {
     hostname = "irc.hackint.org";
     port = "9999";
@@ -30,7 +31,7 @@ in {
               activate = "match";
               pattern = ''^!([^ ]+)(?:\s*(.*))?'';
               command = 1;
-              arguments = [2];
+              arguments = [ 2 ];
               commands = {
                 ping.filename = pkgs.writeDash "ping" ''
                   exec /run/wrappers/bin/ping -q -c1 "$1" 2>&1 | tail -1

@@ -1,4 +1,9 @@
-{ self, config, pkgs, ... }:
+{
+  self,
+  config,
+  pkgs,
+  ...
+}:
 {
   imports = [
     (self.inputs.stockholm + "/krebs/2configs/hw/x220.nix")
@@ -6,7 +11,12 @@
 
   boot = {
     initrd.luks.devices.luksroot.device = "/dev/sda3";
-    initrd.availableKernelModules = [ "xhci_hcd" "ehci_pci" "ahci" "usb_storage" ];
+    initrd.availableKernelModules = [
+      "xhci_hcd"
+      "ehci_pci"
+      "ahci"
+      "usb_storage"
+    ];
     extraModulePackages = [
       config.boot.kernelPackages.tp_smapi
       config.boot.kernelPackages.acpi_call
@@ -25,7 +35,12 @@
     "/" = {
       device = "/dev/mapper/pool-root";
       fsType = "btrfs";
-      options = ["defaults" "noatime" "ssd" "compress=lzo"];
+      options = [
+        "defaults"
+        "noatime"
+        "ssd"
+        "compress=lzo"
+      ];
     };
     "/boot" = {
       device = "/dev/sda2";
@@ -33,7 +48,12 @@
     "/home" = {
       device = "/dev/mapper/pool-home";
       fsType = "btrfs";
-      options = ["defaults" "noatime" "ssd" "compress=lzo"];
+      options = [
+        "defaults"
+        "noatime"
+        "ssd"
+        "compress=lzo"
+      ];
     };
   };
 

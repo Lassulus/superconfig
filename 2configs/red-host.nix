@@ -1,7 +1,4 @@
-{ config, lib, pkgs, ... }:
-let
-  ctr.name = "red";
-in
+{ config, ... }:
 {
 
   krebs.sync-containers3.containers.red = {
@@ -160,4 +157,3 @@ in
   # };
 
 }
-

@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ pkgs, ... }:
 {
   services.snapserver = {
     enable = true;
@@ -25,6 +25,10 @@
     http.enable = true;
   };
 
-  networking.firewall.interfaces.int0.allowedTCPPorts = [ 1704 1705 1780 ];
+  networking.firewall.interfaces.int0.allowedTCPPorts = [
+    1704
+    1705
+    1780
+  ];
   networking.firewall.interfaces.retiolum.allowedTCPPorts = [ 1780 ];
 }

@@ -1,7 +1,9 @@
-{ config, pkgs, ... }: let
+{ config, pkgs, ... }:
+let
   mainUser = config.users.extraUsers.mainUser;
-in {
-  users.users= {
+in
+{
+  users.users = {
     ableton = {
       isNormalUser = true;
       extraGroups = [

@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 {
   systemd.services.snapclient = {
     wantedBy = [ "multi-user.target" ];

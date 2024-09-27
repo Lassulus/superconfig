@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, ... }:
 
 let
   dl_subs = pkgs.writers.writeDashBin "dl_subs" ''
@@ -55,13 +55,15 @@ let
         Y_RES=1081
         # we need to disable sponsorblock local database because of
         # https://github.com/po5/mpv_sponsorblock/issues/31
-        exec ${pkgs.mpv.override {
-          scripts = with pkgs.mpvScripts; [
-            sponsorblock
-            quality-menu
-            vr-reversal
-          ];
-        }}/bin/mpv \
+        exec ${
+          pkgs.mpv.override {
+            scripts = with pkgs.mpvScripts; [
+              sponsorblock
+              quality-menu
+              vr-reversal
+            ];
+          }
+        }/bin/mpv \
          --no-config \
          --input-conf=${mpvInput} \
          --include=${mpvConfig} \
@@ -76,7 +78,8 @@ let
     ];
   };
 
-in {
+in
+{
   environment.systemPackages = [
     mpv
     dl_subs

@@ -1,6 +1,16 @@
-{ config, lib, pkgs, ... }: let
-  vim_nix = import ./vim.nix { inherit lib pkgs; config = {}; };
-in {
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+let
+  vim_nix = import ./vim.nix {
+    inherit lib pkgs;
+    config = { };
+  };
+in
+{
   programs.git = {
     enable = true;
     userName = "lassulus";

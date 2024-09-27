@@ -1,5 +1,4 @@
-_:
-{
+_: {
   imports = [
     ./drbd.nix
     ./folderPerms.nix

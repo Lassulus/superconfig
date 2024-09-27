@@ -1,4 +1,10 @@
-{ self, config, lib, pkgs, ... }:
+{
+  self,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 {
   imports = [
     ./security-workarounds.nix
@@ -39,7 +45,11 @@
       clanCore.facts.services.password = {
         secret.password = { };
         secret.passwordHash = { };
-        generator.path = with pkgs; [ coreutils xkcdpass mkpasswd ];
+        generator.path = with pkgs; [
+          coreutils
+          xkcdpass
+          mkpasswd
+        ];
         generator.script = ''
           xkcdpass -n 4 -d - > $secrets/password
           cat $secrets/password | mkpasswd -s -m sha-512 > $secrets/passwordHash
@@ -47,15 +57,69 @@
       };
     }
     {
+      clan.core.vars.settings.secretStore = "password-store";
+      clan.core.vars.generators.testing = {
+        files.testaaa = { };
+        runtimeInputs = with pkgs; [ coreutils ];
+        script = ''
+          echo lol > $out/testaaa
+        '';
+      };
+    }
+    {
+      # deployment information
+      options.clan.flake-inputs = lib.mkOption {
+        description = ''
+          information about the flake inputs.
+          Used for update tracking.
+        '';
+        type = lib.types.attrsOf (
+          lib.types.attrsOf (
+            lib.types.nullOr (
+              lib.types.oneOf [
+                lib.types.str
+                lib.types.int
+              ]
+            )
+          )
+        );
+        default =
+          let
+            inputs = config.clan.core.clanDir.inputs;
+            cleanSourceInfo = input: {
+              rev = input.rev or null;
+              dirtyRev = input.dirtyRev or null;
+              lastModified = input.lastModified or null;
+              narHash = input.narHash or null;
+            };
+            sourceInfo = lib.mapAttrs (_: input: cleanSourceInfo input) inputs;
+          in
+          sourceInfo
+          // {
+            self = cleanSourceInfo config.clan.core.clanDir.sourceInfo;
+          };
+      };
+      config.environment.etc."flake-inputs.json".text =
+        let
+          text = builtins.unsafeDiscardStringContext (builtins.toJSON config.clan.flake-inputs);
+        in
+        text;
+    }
+    {
       services.openssh.enable = true;
-      services.openssh.hostKeys = [{
-        path = config.clanCore.facts.services.ssh.secret."ssh.id_ed25519".path;
-        type = "ed25519";
-      }];
+      services.openssh.hostKeys = [
+        {
+          path = config.clanCore.facts.services.ssh.secret."ssh.id_ed25519".path;
+          type = "ed25519";
+        }
+      ];
       clanCore.facts.services.ssh = {
         secret."ssh.id_ed25519" = { };
         public."ssh.id_ed25519.pub" = { };
-        generator.path = with pkgs; [ coreutils openssh ];
+        generator.path = with pkgs; [
+          coreutils
+          openssh
+        ];
         generator.script = ''
           ssh-keygen -t ed25519 -N "" -f $secrets/ssh.id_ed25519
           mv $secrets/ssh.id_ed25519.pub $facts/ssh.id_ed25519.pub
@@ -90,13 +154,18 @@
         };
       };
     }
-    (let ca-bundle = "/etc/ssl/certs/ca-bundle.crt"; in {
-      environment.variables = {
-        CURL_CA_BUNDLE = ca-bundle;
-        GIT_SSL_CAINFO = ca-bundle;
-        SSL_CERT_FILE = ca-bundle;
-      };
-    })
+    (
+      let
+        ca-bundle = "/etc/ssl/certs/ca-bundle.crt";
+      in
+      {
+        environment.variables = {
+          CURL_CA_BUNDLE = ca-bundle;
+          GIT_SSL_CAINFO = ca-bundle;
+          SSL_CERT_FILE = ca-bundle;
+        };
+      }
+    )
     {
       #for sshuttle
       environment.systemPackages = [
@@ -125,9 +194,9 @@
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [
-    self.packages.${pkgs.system}.vim
+    self.packages.${pkgs.system}.nvim
 
-  #stockholm
+    #stockholm
     git
     git-absorb
     git-preview
@@ -135,15 +204,15 @@
     jq
     nix-output-monitor
 
-  #style
+    #style
     rxvt-unicode-unwrapped.terminfo
     alacritty.terminfo
 
-  #monitoring tools
+    #monitoring tools
     htop
     iotop
 
-  #network
+    #network
     iptables
     iftop
     tcpdump
@@ -151,10 +220,10 @@
     eternal-terminal
     self.packages.${pkgs.system}.sshify
 
-  #stuff for dl
+    #stuff for dl
     aria2
 
-  #neat utils
+    #neat utils
     file
     hashPassword
     kpaste
@@ -171,7 +240,7 @@
     self.packages.${pkgs.system}.logify
     goify
 
-  #unpack stuff
+    #unpack stuff
     libarchive
 
     (pkgs.writeDashBin "sshn" ''
@@ -232,21 +301,57 @@
       filter.FORWARD.policy = lib.mkDefault "DROP";
       filter.INPUT.rules = lib.mkMerge [
         (lib.mkBefore [
-          { predicate = "-m conntrack --ctstate RELATED,ESTABLISHED"; target = "ACCEPT"; }
-          { predicate = "-p icmp"; target = "ACCEPT"; }
-          { predicate = "-p ipv6-icmp"; target = "ACCEPT"; v4 = false;  }
-          { predicate = "-i lo"; target = "ACCEPT"; }
-          { predicate = "-p tcp --dport 22"; target = "ACCEPT"; }
+          {
+            predicate = "-m conntrack --ctstate RELATED,ESTABLISHED";
+            target = "ACCEPT";
+          }
+          {
+            predicate = "-p icmp";
+            target = "ACCEPT";
+          }
+          {
+            predicate = "-p ipv6-icmp";
+            target = "ACCEPT";
+            v4 = false;
+          }
+          {
+            predicate = "-i lo";
+            target = "ACCEPT";
+          }
+          {
+            predicate = "-p tcp --dport 22";
+            target = "ACCEPT";
+          }
         ])
         (lib.mkOrder 1000 [
-          { predicate = "-p udp --dport 60000:61000"; target = "ACCEPT"; } # mosh
-          { predicate = "-i retiolum -p udp -m udp --dport 53"; target = "ACCEPT"; }
-          { predicate = "-i retiolum -p tcp --dport 19999"; target = "ACCEPT"; }
+          {
+            predicate = "-p udp --dport 60000:61000";
+            target = "ACCEPT";
+          } # mosh
+          {
+            predicate = "-i retiolum -p udp -m udp --dport 53";
+            target = "ACCEPT";
+          }
+          {
+            predicate = "-i retiolum -p tcp --dport 19999";
+            target = "ACCEPT";
+          }
         ])
         (lib.mkAfter [
-          { predicate = "-p tcp -i retiolum"; target = "REJECT --reject-with tcp-reset"; }
-          { predicate = "-p udp -i retiolum"; target = "REJECT --reject-with icmp-port-unreachable"; v6 = false; }
-          { predicate = "-i retiolum"; target = "REJECT --reject-with icmp-proto-unreachable"; v6 = false; }
+          {
+            predicate = "-p tcp -i retiolum";
+            target = "REJECT --reject-with tcp-reset";
+          }
+          {
+            predicate = "-p udp -i retiolum";
+            target = "REJECT --reject-with icmp-port-unreachable";
+            v6 = false;
+          }
+          {
+            predicate = "-i retiolum";
+            target = "REJECT --reject-with icmp-proto-unreachable";
+            v6 = false;
+          }
         ])
       ];
     };
@@ -267,7 +372,7 @@
 
   # use 24:00 time format, the default got sneakily changed around 20.03
   i18n.defaultLocale = lib.mkDefault "C.UTF-8";
-  time.timeZone = lib.mkDefault"Europe/Berlin";
+  time.timeZone = lib.mkDefault "Europe/Berlin";
 
   # disable doc usually
   documentation.nixos.enable = lib.mkDefault false;
@@ -277,4 +382,11 @@
     enable = false;
     enableNg = true;
   };
+
+  # use latest nix to hunt all the bugs
+  nix.package = pkgs.nixVersions.latest;
+
+  # workaround for systemd freezing up when suspending
+  # https://github.com/systemd/systemd/issues/33083
+  environment.variables.SYSTEMD_SLEEP_FREEZE_USER_SESSIONS = "false";
 }

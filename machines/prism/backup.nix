@@ -1,12 +1,12 @@
-{ config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 {
   services.postgresqlBackup.enable = true;
 
   systemd.services.borgbackup-job-hetzner.serviceConfig.ReadWritePaths = [ "/var/log/telegraf" ];
 
   clanCore.facts.services.borgbackup = {
-    secret."borgbackup.ssh.id25519" = {};
-    public."borgbackup.ssh.id25519.pub" = {};
+    secret."borgbackup.ssh.id25519" = { };
+    public."borgbackup.ssh.id25519.pub" = { };
     generator.path = [
       pkgs.coreutils
       pkgs.openssh
@@ -29,7 +29,9 @@
     compression = "auto,zstd";
     startAt = "*-*-* 02:00:00";
     # TODO: change backup key
-    environment.BORG_RSH = "ssh -oPort=23 -i ${config.clanCore.facts.services.borgbackup.secret."borgbackup.ssh.id25519".path}";
+    environment.BORG_RSH = "ssh -oPort=23 -i ${
+      config.clanCore.facts.services.borgbackup.secret."borgbackup.ssh.id25519".path
+    }";
     preHook = ''
       set -x
     '';

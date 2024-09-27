@@ -1,15 +1,18 @@
-{ lib, stdenv
-, fetchFromGitHub
-, python39Packages
-, glibcLocales
-, coreutils
-, git
-, extraInputs ? []
-}: let
+{
+  lib,
+  fetchFromGitHub,
+  python39Packages,
+  glibcLocales,
+  coreutils,
+  git,
+  extraInputs ? [ ],
+}:
+let
 
   python3Packages = python39Packages;
 
-in python3Packages.buildPythonApplication rec {
+in
+python3Packages.buildPythonApplication rec {
   pname = "xonsh2";
   version = "master";
 
@@ -38,9 +41,21 @@ in python3Packages.buildPythonApplication rec {
     HOME=$TMPDIR pytest -k 'test_ptk_highlight'
   '';
 
-  checkInputs = [ python3Packages.pytest python3Packages.pytest-rerunfailures glibcLocales git ];
+  checkInputs = [
+    python3Packages.pytest
+    python3Packages.pytest-rerunfailures
+    glibcLocales
+    git
+  ];
 
-  propagatedBuildInputs = with python3Packages; [ ply prompt_toolkit pygments ] ++ extraInputs;
+  propagatedBuildInputs =
+    with python3Packages;
+    [
+      ply
+      prompt_toolkit
+      pygments
+    ]
+    ++ extraInputs;
 
   meta = with lib; {
     description = "A Python-ish, BASHwards-compatible shell";

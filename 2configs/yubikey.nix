@@ -1,18 +1,29 @@
-{ self, lib, pkgs, ... }:
+{
+  self,
+  lib,
+  pkgs,
+  ...
+}:
 let
   # pcsclite workaround until https://github.com/NixOS/nixpkgs/pull/308884 is in unstable
   pcsclite = pkgs.pcsclite.overrideAttrs (old: {
-    postPatch = old.postPatch + (lib.optionalString (!(lib.strings.hasInfix ''--replace-fail "libpcsclite_real.so.1"'' old.postPatch)) ''
-      substituteInPlace src/libredirect.c src/spy/libpcscspy.c \
-        --replace-fail "libpcsclite_real.so.1" "$lib/lib/libpcsclite_real.so.1"
-    '');
+    postPatch =
+      old.postPatch
+      + (lib.optionalString
+        (!(lib.strings.hasInfix ''--replace-fail "libpcsclite_real.so.1"'' old.postPatch))
+        ''
+          substituteInPlace src/libredirect.c src/spy/libpcscspy.c \
+            --replace-fail "libpcsclite_real.so.1" "$lib/lib/libpcsclite_real.so.1"
+        ''
+      );
   });
 in
 {
   environment.systemPackages = with pkgs; [
     yubikey-personalization
     yubikey-manager
-    pinentry-curses pinentry-qt
+    pinentry-curses
+    pinentry-qt
     # fix polkit rules
     # https://github.com/NixOS/nixpkgs/issues/280826
     pcscliteWithPolkit.out
@@ -40,7 +51,9 @@ in
     ''} $HOME/.gnupg/scdaemon.conf
   '';
   systemd.user.services.gpg-agent.serviceConfig.ExecStartPost = pkgs.writers.writeDash "init_gpg" ''
-    ${pkgs.gnupg}/bin/gpg --import ${self.inputs.stockholm.outPath + "/kartei/lass/pgp/yubikey.pgp"} >/dev/null
+    ${pkgs.gnupg}/bin/gpg --import ${
+      self.inputs.stockholm.outPath + "/kartei/lass/pgp/yubikey.pgp"
+    } >/dev/null
     echo -e '5\ny\n' | ${pkgs.gnupg}/bin/gpg --command-fd 0 --expert --edit-key DBCD757846069B392EA9401D6657BE8A8D1EE807 trust >/dev/null || :
   '';
 

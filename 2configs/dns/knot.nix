@@ -1,8 +1,6 @@
-{ pkgs
-, config
-, lib
-, inputs
-, ...
+{
+  lib,
+  ...
 }:
 let
   ip4 = "95.217.192.59";
@@ -21,9 +19,9 @@ let
 
   #     $TTL 300
 
-  #     @ IN NS ns1.lassul.us.
-  #   '';
 in
+#     @ IN NS ns1.lassul.us.
+#   '';
 {
   #content of the secret
   #key:
@@ -45,7 +43,10 @@ in
     # ];
     settings = {
       server = {
-        listen = [ "${ip4}@53" "${ip6}@53" ];
+        listen = [
+          "${ip4}@53"
+          "${ip6}@53"
+        ];
       };
 
       remote = [
@@ -110,26 +111,44 @@ in
         }
       ];
 
-      mod-rrl = [{
-        id = "default";
-        rate-limit = 200;
-        slip = 2;
-      }];
+      mod-rrl = [
+        {
+          id = "default";
+          rate-limit = 200;
+          slip = 2;
+        }
+      ];
 
-      policy = [{
-        id = "rsa2k";
-        algorithm = "RSASHA256";
-        ksk-size = 4096;
-        zsk-size = 2048;
-        nsec3 = true;
-      }];
+      policy = [
+        {
+          id = "rsa2k";
+          algorithm = "RSASHA256";
+          ksk-size = 4096;
+          zsk-size = 2048;
+          nsec3 = true;
+        }
+      ];
 
       zone = [
         {
           domain = "lassul.us";
           file = "${./lassul.us.zone}";
-          notify = [ "hetzner_ip4_1" "hetzner_ip4_2" "hetzner_ip4_3" "hetzner_ip6_1" "hetzner_ip6_2" "hetzner_ip6_3" ];
-          acl = [ "hetzner_ip4_1" "hetzner_ip4_2" "hetzner_ip4_3" "hetzner_ip6_1" "hetzner_ip6_2" "hetzner_ip6_3" ];
+          notify = [
+            "hetzner_ip4_1"
+            "hetzner_ip4_2"
+            "hetzner_ip4_3"
+            "hetzner_ip6_1"
+            "hetzner_ip6_2"
+            "hetzner_ip6_3"
+          ];
+          acl = [
+            "hetzner_ip4_1"
+            "hetzner_ip4_2"
+            "hetzner_ip4_3"
+            "hetzner_ip6_1"
+            "hetzner_ip6_2"
+            "hetzner_ip6_3"
+          ];
           dnssec-signing = true;
           dnssec-policy = "rsa2k";
         }
@@ -138,7 +157,7 @@ in
   };
 
   # disable to enable auto key generation
-  systemd.services.knot.serviceConfig.SystemCallFilter = lib.mkForce [];
+  systemd.services.knot.serviceConfig.SystemCallFilter = lib.mkForce [ ];
 
   networking.firewall.allowedTCPPorts = [ 53 ];
   networking.firewall.allowedUDPPorts = [ 53 ];

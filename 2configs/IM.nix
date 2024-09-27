@@ -1,15 +1,19 @@
-{ config, lib, pkgs, ... }: let
+{ pkgs, ... }:
+let
   weechat = pkgs.weechat.override {
-    configure = { availablePlugins, ... }: {
-      scripts = with pkgs.weechatScripts; [
-        weechat-matrix
-      ];
-    };
+    configure =
+      { ... }:
+      {
+        scripts = with pkgs.weechatScripts; [
+          weechat-matrix
+        ];
+      };
   };
 
   tmux = "/run/current-system/sw/bin/tmux";
 
-in {
+in
+{
   imports = [
     ./bitlbee.nix
   ];

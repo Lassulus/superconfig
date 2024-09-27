@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, ... }:
 let
   domain = "pad.lassul.us";
 in
@@ -21,13 +21,15 @@ in
   };
 
   security.acme.certs.${domain}.group = "hedgecert";
-  users.groups.hedgecert.members = [ "hedgedoc" "nginx" ];
+  users.groups.hedgecert.members = [
+    "hedgedoc"
+    "nginx"
+  ];
 
   security.dhparams = {
     enable = true;
     params.hedgedoc = { };
   };
-
 
   services.borgbackup.jobs.hetzner.paths = [
     "/var/backup"

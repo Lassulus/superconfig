@@ -1,15 +1,19 @@
 { pkgs, ... }:
 let
-  model = pkgs.runCommand "model" {} ''
+  model = pkgs.runCommand "model" { } ''
     mkdir -p $out
-    ln -s ${pkgs.fetchurl {
-      url = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/libritts/high/en_US-libritts-high.onnx?download=true";
-      hash = "sha256-kSelWeEWA/ELNm0aIKx0JoJggdvFId5MJCDFdyjXPw8=";
-    }} $out/model.onnx
-    ln -s ${pkgs.fetchurl {
-      url = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/libritts/high/en_US-libritts-high.onnx.json?download=true.json";
-      hash = "sha256-Lv3G1/lUWIuBgBMsvZuAAZM/3QCTLJK8kv0NICip6z0=";
-    }} $out/model.onnx.json
+    ln -s ${
+      pkgs.fetchurl {
+        url = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/libritts/high/en_US-libritts-high.onnx?download=true";
+        hash = "sha256-kSelWeEWA/ELNm0aIKx0JoJggdvFId5MJCDFdyjXPw8=";
+      }
+    } $out/model.onnx
+    ln -s ${
+      pkgs.fetchurl {
+        url = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/libritts/high/en_US-libritts-high.onnx.json?download=true.json";
+        hash = "sha256-Lv3G1/lUWIuBgBMsvZuAAZM/3QCTLJK8kv0NICip6z0=";
+      }
+    } $out/model.onnx.json
   '';
 
   tts = pkgs.writers.writeBashBin "tts" ''

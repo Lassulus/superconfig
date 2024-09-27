@@ -1,11 +1,23 @@
-{ config, pkgs, ... }:
+{ config, ... }:
 
 {
   krebs.iptables.tables.filter.INPUT.rules = [
-    { predicate = "-p tcp --dport 139"; target = "ACCEPT"; }
-    { predicate = "-p tcp --dport 445"; target = "ACCEPT"; }
-    { predicate = "-p udp --dport 137"; target = "ACCEPT"; }
-    { predicate = "-p udp --dport 138"; target = "ACCEPT"; }
+    {
+      predicate = "-p tcp --dport 139";
+      target = "ACCEPT";
+    }
+    {
+      predicate = "-p tcp --dport 445";
+      target = "ACCEPT";
+    }
+    {
+      predicate = "-p udp --dport 137";
+      target = "ACCEPT";
+    }
+    {
+      predicate = "-p udp --dport 138";
+      target = "ACCEPT";
+    }
   ];
   users.users.smbguest = {
     name = "smbguest";
@@ -15,7 +27,7 @@
     createHome = true;
     group = "share";
   };
-  users.groups.share = {};
+  users.groups.share = { };
 
   services.samba = {
     enable = true;

@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.lass.fetchWallpaper;
@@ -10,7 +15,8 @@ let
     feh --no-fehbg --bg-scale wallpaper
   '';
 
-in {
+in
+{
   options.lass.fetchWallpaper = {
     enable = lib.mkEnableOption "fetch wallpaper";
     url = lib.mkOption {
@@ -33,7 +39,7 @@ in {
         # do not start when running on umts
         { ConditionPathExists = "!/var/run/ppp0.pid"; }
       '';
-      default = {};
+      default = { };
     };
   };
 
@@ -74,6 +80,6 @@ in {
       isSystemUser = true;
       group = "wallpaper";
     };
-    users.groups.wallpaper = {};
+    users.groups.wallpaper = { };
   };
 }

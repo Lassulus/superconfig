@@ -75,7 +75,6 @@
         # button https://www.zigbee2mqtt.io/devices/8718699693985.html#philips-8718699693985
         "0x0017880108016e3e".friendly_name = "going_out_button";
 
-
         # rotation https://www.zigbee2mqtt.io/devices/E1744.html
         "0x8cf681fffe065493" = {
           friendly_name = "r_test";
@@ -90,4 +89,3 @@
     };
   };
 }
-

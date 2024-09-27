@@ -9,7 +9,7 @@
         args.database = "matrix-synapse";
         name = "psycopg2";
       };
-      turn_uris  = [
+      turn_uris = [
         "turn:turn.matrix.org?transport=udp"
         "turn:turn.matrix.org?transport=tcp"
       ];
@@ -51,7 +51,10 @@
 
   clanCore.facts.services."matrix-synapse" = {
     secret."synapse-registration_shared_secret" = { };
-    generator.path = with pkgs; [ coreutils pwgen ];
+    generator.path = with pkgs; [
+      coreutils
+      pwgen
+    ];
     generator.script = ''
       echo "registration_shared_secret: $(pwgen -s 32 1)" > "$secrets"/synapse-registration_shared_secret
     '';

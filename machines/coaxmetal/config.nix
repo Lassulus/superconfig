@@ -1,4 +1,10 @@
-{ self, config, lib, pkgs, ... }:
+{
+  self,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   imports = [
@@ -14,7 +20,8 @@
     ../../2configs/wine.nix
     ../../2configs/yellow-mounts/samba.nix
     ../../2configs/review.nix
-    { # moonlight test env
+    {
+      # moonlight test env
       imports = [
         ../../2configs/sunshine.nix
         ../../2configs/mpv.nix
@@ -22,14 +29,21 @@
       users.users.moon = {
         isNormalUser = true;
         uid = 1338;
-        extraGroups = [ "video" "audio" "input" "pipewire" ];
+        extraGroups = [
+          "video"
+          "audio"
+          "input"
+          "pipewire"
+        ];
         home = "/home/moon";
         password = "moon";
         packages = with pkgs; [
-          (retroarch.override { cores = [
-            libretro.bsnes-hd
-            libretro.mupen64plus
-          ]; })
+          (retroarch.override {
+            cores = [
+              libretro.bsnes-hd
+              libretro.mupen64plus
+            ];
+          })
         ];
       };
       services.xserver.enable = true;
@@ -68,7 +82,10 @@
 
   programs.adb.enable = true;
 
-  nix.settings.trusted-users = [ "root" "lass" ];
+  nix.settings.trusted-users = [
+    "root"
+    "lass"
+  ];
 
   services.tor = {
     enable = true;

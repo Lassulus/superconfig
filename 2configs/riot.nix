@@ -1,9 +1,17 @@
-{ self, config, lib, pkgs, ... }: let
+{
+  self,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+let
   domains = [
     "hackerfleet.eu"
     "hackerfleet.de"
   ];
-in {
+in
+{
   imports = [
     self.inputs.stockholm.nixosModules.exim-smarthost
   ];
@@ -60,18 +68,31 @@ in {
   boot.kernel.sysctl."net.ipv4.ip_forward" = lib.mkDefault 1;
 
   krebs.iptables.tables.nat.POSTROUTING.rules = [
-    { v6 = false; predicate = "-s ${config.containers.riot.localAddress}"; target = "MASQUERADE"; }
+    {
+      v6 = false;
+      predicate = "-s ${config.containers.riot.localAddress}";
+      target = "MASQUERADE";
+    }
   ];
 
   # networking.nat can be used instead of this
   krebs.iptables.tables.nat.PREROUTING.rules = [
-    { predicate = "-p tcp --dport 45622"; target = "DNAT --to-destination ${config.containers.riot.localAddress}:22"; v6 = false; }
+    {
+      predicate = "-p tcp --dport 45622";
+      target = "DNAT --to-destination ${config.containers.riot.localAddress}:22";
+      v6 = false;
+    }
   ];
   krebs.iptables.tables.filter.FORWARD.rules = [
-    { predicate = "-i ve-riot"; target = "ACCEPT"; }
-    { predicate = "-o ve-riot"; target = "ACCEPT"; }
+    {
+      predicate = "-i ve-riot";
+      target = "ACCEPT";
+    }
+    {
+      predicate = "-o ve-riot";
+      target = "ACCEPT";
+    }
   ];
-
 
   # non container stuff
 

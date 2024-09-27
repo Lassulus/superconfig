@@ -14,14 +14,19 @@
         source /grub/autoiso.cfg
       }
     '';
-    extraFiles."/grub/autoiso.cfg" = (pkgs.stdenv.mkDerivation {
-      name = "autoiso.cfg";
-      src = pkgs.grub2.src;
-      phases = [ "unpackPhase" "installPhase" ];
-      installPhase = ''
-        cp docs/autoiso.cfg $out
-      '';
-    });
+    extraFiles."/grub/autoiso.cfg" = (
+      pkgs.stdenv.mkDerivation {
+        name = "autoiso.cfg";
+        src = pkgs.grub2.src;
+        phases = [
+          "unpackPhase"
+          "installPhase"
+        ];
+        installPhase = ''
+          cp docs/autoiso.cfg $out
+        '';
+      }
+    );
   };
 
   services.logind.lidSwitch = "ignore";

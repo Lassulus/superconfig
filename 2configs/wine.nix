@@ -3,8 +3,9 @@
 let
   mainUser = config.users.extraUsers.mainUser;
 
-in {
-  users.users= {
+in
+{
+  users.users = {
     wine = {
       home = "/home/wine";
       useDefaultShell = true;

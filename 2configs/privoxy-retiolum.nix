@@ -2,7 +2,8 @@
 
 let
   r_ip = config.krebs.build.host.nets.retiolum.ip4.addr;
-in {
+in
+{
   imports = [
     ./privoxy.nix
   ];
@@ -12,8 +13,14 @@ in {
   krebs.iptables = {
     tables = {
       filter.INPUT.rules = [
-        { predicate = "-i retiolum -p tcp --dport 8118"; target = "ACCEPT"; }
-        { predicate = "-i dns0 -p tcp --dport 8118"; target = "ACCEPT"; }
+        {
+          predicate = "-i retiolum -p tcp --dport 8118";
+          target = "ACCEPT";
+        }
+        {
+          predicate = "-i dns0 -p tcp --dport 8118";
+          target = "ACCEPT";
+        }
       ];
     };
   };

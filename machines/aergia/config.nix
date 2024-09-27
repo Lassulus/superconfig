@@ -1,4 +1,4 @@
-{ self, config, pkgs, ... }:
+{ config, pkgs, ... }:
 
 {
   imports = [
@@ -23,7 +23,8 @@
     ../../2configs/print.nix
     ../../2configs/br.nix
     ../../2configs/c-base.nix
-    { # autorandrs
+    {
+      # autorandrs
       services.autorandr = {
         enable = true;
         hooks.postswitch.reset_usb = ''
@@ -127,7 +128,10 @@
   };
   hardware.pulseaudio.package = pkgs.pulseaudioFull;
 
-  nix.trustedUsers = [ "root" "lass" ];
+  nix.trustedUsers = [
+    "root"
+    "lass"
+  ];
 
   services.tor = {
     enable = true;

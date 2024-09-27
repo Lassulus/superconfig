@@ -12,7 +12,12 @@
     loader.grub.device = "/dev/sda";
 
     initrd.luks.devices.lusksroot.device = "/dev/sda2";
-    initrd.availableKernelModules = [ "xhci_hcd" "ehci_pci" "ahci" "usb_storage" ];
+    initrd.availableKernelModules = [
+      "xhci_hcd"
+      "ehci_pci"
+      "ahci"
+      "usb_storage"
+    ];
   };
   fileSystems = {
     "/" = {
@@ -26,7 +31,12 @@
     "/home" = {
       device = "/dev/mapper/pool-home";
       fsType = "btrfs";
-      options = ["defaults" "noatime" "ssd" "compress=lzo"];
+      options = [
+        "defaults"
+        "noatime"
+        "ssd"
+        "compress=lzo"
+      ];
     };
     "/bku" = {
       device = "/dev/pool/bku";

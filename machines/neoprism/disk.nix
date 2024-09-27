@@ -1,4 +1,5 @@
-{ lib, ... }: {
+{ lib, ... }:
+{
   disko.imageBuilder.extraRootModules = [
     "zfs"
   ];
@@ -6,43 +7,51 @@
     services.mingetty.autologinUser = "root";
   };
   disko.devices = {
-    disk = (lib.genAttrs [ "/dev/nvme0n1" "/dev/nvme1n1" ] (disk: {
-      type = "disk";
-      device = disk;
-      imageSize = "3G";
-      content = {
-        type = "gpt";
-        partitions = {
-          boot = {
-            size = "1M";
-            type = "EF02";
-          };
-          ESP = {
-            size = "1G";
-            content = {
-              type = "mdraid";
-              name = "boot";
+    disk =
+      (lib.genAttrs
+        [
+          "/dev/nvme0n1"
+          "/dev/nvme1n1"
+        ]
+        (disk: {
+          type = "disk";
+          device = disk;
+          imageSize = "3G";
+          content = {
+            type = "gpt";
+            partitions = {
+              boot = {
+                size = "1M";
+                type = "EF02";
+              };
+              ESP = {
+                size = "1G";
+                content = {
+                  type = "mdraid";
+                  name = "boot";
+                };
+              };
+              zfs = {
+                size = "100%";
+                content = {
+                  type = "zfs";
+                  pool = "zroot";
+                };
+              };
             };
           };
-          zfs = {
-            size = "100%";
-            content = {
-              type = "zfs";
-              pool = "zroot";
-            };
+        })
+      )
+      // {
+        hdd1 = {
+          type = "disk";
+          device = "/dev/sda";
+          content = {
+            type = "zfs";
+            pool = "tank";
           };
         };
       };
-    })) // {
-      hdd1 = {
-        type = "disk";
-        device = "/dev/sda";
-        content = {
-          type = "zfs";
-          pool = "tank";
-        };
-      };
-    };
     mdadm = {
       boot = {
         type = "mdadm";
@@ -60,8 +69,9 @@
         type = "zpool";
         mode = "mirror";
         mountpoint = "/";
-        rootFsOptions = {
-        };
+        rootFsOptions =
+          {
+          };
         datasets = {
           reserved = {
             type = "zfs_fs";

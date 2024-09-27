@@ -1,4 +1,4 @@
-{ config, lib, pkgs, modulesPath, ... }:
+{ pkgs, modulesPath, ... }:
 {
   imports = [
     ./config.nix
@@ -74,12 +74,13 @@
   services.xserver.displayManager.sessionCommands = ''
     ${pkgs.xorg.xmodmap}/bin/xmodmap -e 'keycode 96 = F12 Insert F12 F12' # rebind shift + F12 to shift + insert
   '';
-  services.udev.extraHwdb = /* sh */ ''
-    # disable back buttons
-    evdev:input:b0003v2F24p0135* # /dev/input/event2
-      KEYBOARD_KEY_70026=reserved
-      KEYBOARD_KEY_70027=reserved
-  '';
+  services.udev.extraHwdb = # sh
+    ''
+      # disable back buttons
+      evdev:input:b0003v2F24p0135* # /dev/input/event2
+        KEYBOARD_KEY_70026=reserved
+        KEYBOARD_KEY_70027=reserved
+    '';
 
   # update cpu microcode
   hardware.cpu.amd.updateMicrocode = true;
@@ -92,9 +93,11 @@
   ];
 
   # suspend to disk
-  swapDevices = [{
-    device = "/swapfile";
-  }];
+  swapDevices = [
+    {
+      device = "/swapfile";
+    }
+  ];
   boot.resumeDevice = "/dev/mapper/aergia1";
   services.logind.lidSwitch = "suspend-then-hibernate";
   services.logind.extraConfig = ''

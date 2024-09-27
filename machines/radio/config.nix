@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 {
   imports = [
     ../../2configs
@@ -25,7 +25,10 @@
   clanCore.facts.services.radio-container = {
     secret."radio.sync.key" = { };
     public."radio.sync.pub" = { };
-    generator.path = with pkgs; [ coreutils openssh ];
+    generator.path = with pkgs; [
+      coreutils
+      openssh
+    ];
     generator.script = ''
       ssh-keygen -t ed25519 -N "" -f "$secrets"/radio.sync.key
       mv "$secrets"/radio.sync.key "$facts"/radio.sync.pub

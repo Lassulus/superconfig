@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   imports = [
@@ -43,12 +48,16 @@
   systemd.services.xboxdrv = {
     wantedBy = [ "multi-user.target" ];
     script = ''
-      ${pkgs.xboxdrv.overrideAttrs(o: {
-        patches = o.patches ++ [ (pkgs.fetchurl {
-          url = "https://patch-diff.githubusercontent.com/raw/xboxdrv/xboxdrv/pull/251.patch";
-          sha256 = "17784y20mxqrlhgvwvszh8lprxrvgmb7ah9dknmbhj5jhkjl8wq5";
-        }) ];
-      })}/bin/xboxdrv --type xbox360 --dbus disabled -D
+      ${
+        pkgs.xboxdrv.overrideAttrs (o: {
+          patches = o.patches ++ [
+            (pkgs.fetchurl {
+              url = "https://patch-diff.githubusercontent.com/raw/xboxdrv/xboxdrv/pull/251.patch";
+              sha256 = "17784y20mxqrlhgvwvszh8lprxrvgmb7ah9dknmbhj5jhkjl8wq5";
+            })
+          ];
+        })
+      }/bin/xboxdrv --type xbox360 --dbus disabled -D
     '';
   };
 

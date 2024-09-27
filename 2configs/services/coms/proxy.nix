@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, ... }:
 let
   tcpports = [
     4443 # jitsi
@@ -23,10 +23,20 @@ in
     '') tcpports}
   '';
 
-  krebs.iptables.tables.nat.PREROUTING.rules = lib.flatten (map (port: [
-    { predicate = "-p udp --dport ${toString port}"; target = "DNAT --to-destination ${config.krebs.hosts.orange.nets.retiolum.ip4.addr}:${toString port}"; v6 = false; }
-    { predicate = "-p udp --dport ${toString port}"; target = "DNAT --to-destination [${config.krebs.hosts.orange.nets.retiolum.ip6.addr}]:${toString port}"; v4 = false; }
-  ]) udpports);
+  krebs.iptables.tables.nat.PREROUTING.rules = lib.flatten (
+    map (port: [
+      {
+        predicate = "-p udp --dport ${toString port}";
+        target = "DNAT --to-destination ${config.krebs.hosts.orange.nets.retiolum.ip4.addr}:${toString port}";
+        v6 = false;
+      }
+      {
+        predicate = "-p udp --dport ${toString port}";
+        target = "DNAT --to-destination [${config.krebs.hosts.orange.nets.retiolum.ip6.addr}]:${toString port}";
+        v4 = false;
+      }
+    ]) udpports
+  );
 
   services.nginx.virtualHosts."jitsi.lassul.us" = {
     enableACME = true;

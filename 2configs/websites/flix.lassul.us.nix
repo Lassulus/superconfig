@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ ... }:
 {
   services.nginx.virtualHosts."flix.lassul.us" = {
     forceSSL = true;
@@ -10,4 +10,3 @@
     };
   };
 }
-

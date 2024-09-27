@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 {
   systemd.services.rebuild-on-boot = {
     wantedBy = [ "multi-user.target" ];

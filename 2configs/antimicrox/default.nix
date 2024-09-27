@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 {
   systemd.services.antimicrox = {
     after = [ "display-manager.service" ];

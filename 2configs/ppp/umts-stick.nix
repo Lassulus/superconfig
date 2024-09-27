@@ -1,4 +1,5 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
 
   # usage: pppd call stick
 
@@ -30,4 +31,3 @@
   ];
 
 }
-

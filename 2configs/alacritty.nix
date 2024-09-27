@@ -1,46 +1,54 @@
-{ config, lib, pkgs, ... }: let
+{ pkgs, ... }:
+let
 
-  alacritty-cfg = extrVals: pkgs.writers.writeTOML "alacritty.toml" ({
-    font = let
-      family = "IosevkaTerm Nerd Font";
-    in {
-      normal = {
-        family = family;
-        style = "Regular";
-      };
-      bold = {
-        family = family;
-        style = "Bold";
-      };
-      italic = {
-        family = family;
-        style = "Italic";
-      };
-      bold_italic = {
-        family = family;
-        style = "Bold Italic";
-      };
-      size = 12;
-    };
-    live_config_reload = true;
-    window.dimensions = {
-      columns = 80;
-      lines = 20;
-    };
-    env.WINIT_X11_SCALE_FACTOR = "1.0";
-    hints.enabled = [
+  alacritty-cfg =
+    extrVals:
+    pkgs.writers.writeTOML "alacritty.toml" (
       {
-        regex = ''(mailto:|gemini:|gopher:|https:|http:|news:|file:|git:|ssh:|ftp:)[^\u0000-\u001F\u007F-\u009F<>"\s{-}\^⟨⟩`]+'';
-        command = "/run/current-system/sw/bin/xdg-open";
-        post_processing = true;
-        mouse.enabled = true;
-        binding = {
-          key = "U";
-          mods = "Alt";
+        font =
+          let
+            family = "IosevkaTerm Nerd Font";
+          in
+          {
+            normal = {
+              family = family;
+              style = "Regular";
+            };
+            bold = {
+              family = family;
+              style = "Bold";
+            };
+            italic = {
+              family = family;
+              style = "Italic";
+            };
+            bold_italic = {
+              family = family;
+              style = "Bold Italic";
+            };
+            size = 12;
+          };
+        live_config_reload = true;
+        window.dimensions = {
+          columns = 80;
+          lines = 20;
         };
+        env.WINIT_X11_SCALE_FACTOR = "1.0";
+        hints.enabled = [
+          {
+            regex = ''(mailto:|gemini:|gopher:|https:|http:|news:|file:|git:|ssh:|ftp:)[^\u0000-\u001F\u007F-\u009F<>"\s{-}\^⟨⟩`]+'';
+            command = "/run/current-system/sw/bin/xdg-open";
+            post_processing = true;
+            mouse.enabled = true;
+            binding = {
+              key = "U";
+              mods = "Alt";
+            };
+          }
+        ];
       }
-    ];
-  } // extrVals);
+      // extrVals
+    );
 
   alacritty = pkgs.symlinkJoin {
     name = "alacritty";
@@ -53,7 +61,8 @@
     ];
   };
 
-in {
+in
+{
   environment.etc = {
     "themes/light/alacritty.toml".source = alacritty-cfg {
       colors = {
@@ -69,25 +78,25 @@ in {
         # Normal colors
         normal = {
           black = "#fbf1c7";
-          red =     "#cc241d";
-          green =   "#98971a";
-          yellow =  "#d79921";
-          blue =    "#458588";
+          red = "#cc241d";
+          green = "#98971a";
+          yellow = "#d79921";
+          blue = "#458588";
           magenta = "#b16286";
-          cyan =    "#689d6a";
-          white =   "#7c6f64";
+          cyan = "#689d6a";
+          white = "#7c6f64";
         };
 
         # Bright colors
         bright = {
-          black =   "#928374";
-          red =     "#9d0006";
-          green =   "#79740e";
-          yellow =  "#b57614";
-          blue =    "#076678";
+          black = "#928374";
+          red = "#9d0006";
+          green = "#79740e";
+          yellow = "#b57614";
+          blue = "#076678";
           magenta = "#8f3f71";
-          cyan =    "#427b58";
-          white =   "#3c3836";
+          cyan = "#427b58";
+          white = "#3c3836";
         };
       };
     };

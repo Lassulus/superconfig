@@ -1,14 +1,23 @@
-{ self, config, lib, pkgs, ... }: let
-  write_to_irc = chan: pkgs.writeDash "write_to_irc" ''
-    ${pkgs.curl}/bin/curl -fsSv --unix-socket '${lib.removePrefix "unix:" config.krebs.reaktor2.mumble-reminder.API.listen}' http://z/ \
-      -H content-type:application/json \
-      -d "$(${pkgs.jq}/bin/jq -n \
-        --arg text "$1" '{
-          command:"PRIVMSG",
-          params:["${chan}",$text]
-        }'
-      )"
-  '';
+{
+  self,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+let
+  write_to_irc =
+    chan:
+    pkgs.writeDash "write_to_irc" ''
+      ${pkgs.curl}/bin/curl -fsSv --unix-socket '${lib.removePrefix "unix:" config.krebs.reaktor2.mumble-reminder.API.listen}' http://z/ \
+        -H content-type:application/json \
+        -d "$(${pkgs.jq}/bin/jq -n \
+          --arg text "$1" '{
+            command:"PRIVMSG",
+            params:["${chan}",$text]
+          }'
+        )"
+    '';
   animals = ''
     Erdferkel
     Paviane
@@ -62,7 +71,8 @@
     };
   };
 
-in {
+in
+{
   imports = [
     self.inputs.stockholm.nixosModules.reaktor2
   ];

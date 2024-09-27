@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ ... }:
 # Enables second factor for ssh password login
 
 ## Usage:

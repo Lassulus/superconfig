@@ -1,4 +1,10 @@
-{ self, config, pkgs, lib, ... }:
+{
+  self,
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 let
   name = "radio";
@@ -73,7 +79,8 @@ let
       )"
   '';
 
-in {
+in
+{
   imports = [
     ./news.nix
     ./weather.nix
@@ -102,7 +109,7 @@ in {
   };
 
   users.groups = {
-    "radio" = {};
+    "radio" = { };
   };
 
   systemd.services.radio_watcher = {
@@ -148,7 +155,12 @@ in {
 
   nixpkgs.config.packageOverrides = opkgs: {
     liquidsoap = opkgs.liquidsoap.override {
-      runtimePackages = with opkgs; [ bubblewrap curl ffmpeg yt-dlp ];
+      runtimePackages = with opkgs; [
+        bubblewrap
+        curl
+        ffmpeg
+        yt-dlp
+      ];
     };
     icecast = opkgs.icecast.overrideAttrs (old: rec {
       version = "2.5-beta3";
@@ -187,9 +199,18 @@ in {
   krebs.iptables = {
     tables = {
       filter.INPUT.rules = [
-        { predicate = "-p tcp --dport 8000"; target = "ACCEPT"; }
-        { predicate = "-i retiolum -p tcp --dport 8001"; target = "ACCEPT"; }
-        { predicate = "-i retiolum -p tcp --dport 8002"; target = "ACCEPT"; }
+        {
+          predicate = "-p tcp --dport 8000";
+          target = "ACCEPT";
+        }
+        {
+          predicate = "-i retiolum -p tcp --dport 8001";
+          target = "ACCEPT";
+        }
+        {
+          predicate = "-i retiolum -p tcp --dport 8002";
+          target = "ACCEPT";
+        }
       ];
     };
   };
@@ -224,7 +245,7 @@ in {
               activate = "match";
               pattern = "^(?:.*\\s)?\\s*the_playlist:\\s*([0-9A-Za-z._][0-9A-Za-z._-]*)(?:\\s+(.*\\S))?\\s*$";
               command = 1;
-              arguments = [2];
+              arguments = [ 2 ];
               commands = {
                 skip.filename = "${skip_track}/bin/skip_track";
                 next.filename = "${skip_track}/bin/skip_track";
@@ -348,9 +369,13 @@ in {
   };
   services.syncthing.settings.folders."/home/lass/tmp/the_playlist" = {
     path = lib.mkForce "/var/music/the_playlist";
-    devices = [ "mors" "prism" "radio" ];
+    devices = [
+      "mors"
+      "prism"
+      "radio"
+    ];
   };
   krebs.acl."/var/music/the_playlist"."u:lass:X".parents = true;
-  krebs.acl."/var/music/the_playlist"."u:lass:rwX" = {};
-  krebs.acl."/var/music/the_playlist"."u:radio:rwX" = {};
+  krebs.acl."/var/music/the_playlist"."u:lass:rwX" = { };
+  krebs.acl."/var/music/the_playlist"."u:radio:rwX" = { };
 }

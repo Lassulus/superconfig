@@ -13,7 +13,10 @@
   clanCore.facts.services.nix-serve = {
     secret."nix-serve.key" = { };
     public."nix-serve.pub" = { };
-    generator.path = with pkgs; [ coreutils nix ];
+    generator.path = with pkgs; [
+      coreutils
+      nix
+    ];
     generator.script = ''
       nix-store --generate-binary-cache-key cache.${config.networking.hostName} "$secrets"/nix-serve.key "$facts"/nix-serve.pub
     '';

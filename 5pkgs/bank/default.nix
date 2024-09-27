@@ -1,4 +1,10 @@
-{ writers, coreutils, pass, hledger, diffutils }:
+{
+  writers,
+  coreutils,
+  pass,
+  hledger,
+  diffutils,
+}:
 
 writers.writeDashBin "bank" ''
   tmp=$(mktemp)
@@ -11,4 +17,3 @@ writers.writeDashBin "bank" ''
   fi
   ${coreutils}/bin/rm $tmp
 ''
-

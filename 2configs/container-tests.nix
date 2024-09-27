@@ -1,4 +1,5 @@
-{ lib, ... }: {
+{ lib, ... }:
+{
   nix.settings.experimental-features = [
     # for container in builds support
     "auto-allocate-uids"

@@ -1,4 +1,11 @@
-{ lib, nixosTests, python3, python3Packages, fetchFromGitHub, fetchpatch }:
+{
+  lib,
+  nixosTests,
+  python3,
+  python3Packages,
+  fetchFromGitHub,
+  fetchpatch,
+}:
 
 with python3Packages;
 
@@ -58,12 +65,19 @@ toPythonModule (buildPythonApplication rec {
     ln -s ../${python3.sitePackages}/searx/static $out/share/
   '';
 
-  passthru.tests = { inherit (nixosTests) searx; };
+  passthru.tests = {
+    inherit (nixosTests) searx;
+  };
 
   meta = with lib; {
     homepage = "https://github.com/searx/searx";
     description = "A privacy-respecting, hackable metasearch engine";
     license = licenses.agpl3Plus;
-    maintainers = with maintainers; [ matejc fpletz globin danielfullmer ];
+    maintainers = with maintainers; [
+      matejc
+      fpletz
+      globin
+      danielfullmer
+    ];
   };
 })

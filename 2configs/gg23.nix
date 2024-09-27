@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ lib, pkgs, ... }:
 {
   # vodafone router drifts out of time
   services.timesyncd.servers = [
@@ -43,13 +43,15 @@
       # DHCPPrefixDelegation = "yes";
     };
     dhcpServerStaticLeases = [
-      { # printer
+      {
+        # printer
         dhcpServerStaticLeaseConfig = {
           Address = "10.42.0.4";
           MACAddress = "3c:2a:f4:22:28:37";
         };
       }
-      { # firetv
+      {
+        # firetv
         dhcpServerStaticLeaseConfig = {
           Address = "10.42.0.11";
           MACAddress = "84:28:59:f0:d2:a8";
@@ -71,18 +73,39 @@
   };
   networking.networkmanager.unmanaged = [ "int0" ];
   krebs.iptables.tables.filter.INPUT.rules = [
-    { predicate = "-i int0"; target = "ACCEPT"; }
+    {
+      predicate = "-i int0";
+      target = "ACCEPT";
+    }
   ];
   krebs.iptables.tables.filter.FORWARD.rules = [
-    { predicate = "-i int0"; target = "ACCEPT"; }
-    { predicate = "-o int0"; target = "ACCEPT"; }
-    { predicate = "-p ipv6-icmp"; target = "ACCEPT"; v4 = false; }
+    {
+      predicate = "-i int0";
+      target = "ACCEPT";
+    }
+    {
+      predicate = "-o int0";
+      target = "ACCEPT";
+    }
+    {
+      predicate = "-p ipv6-icmp";
+      target = "ACCEPT";
+      v4 = false;
+    }
   ];
   krebs.iptables.tables.nat.PREROUTING.rules = lib.mkBefore [
-    { v6 = false; predicate = "-s 10.42.0.0/24"; target = "ACCEPT"; }
+    {
+      v6 = false;
+      predicate = "-s 10.42.0.0/24";
+      target = "ACCEPT";
+    }
   ];
   krebs.iptables.tables.nat.POSTROUTING.rules = [
-    { v6 = false; predicate = "-s 10.42.0.0/24"; target = "MASQUERADE"; }
+    {
+      v6 = false;
+      predicate = "-s 10.42.0.0/24";
+      target = "MASQUERADE";
+    }
   ];
 
   networking.domain = "gg23";

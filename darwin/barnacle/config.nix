@@ -19,10 +19,13 @@
   # Auto upgrade nix package and the daemon service.
   services.nix-daemon.enable = true;
   nix = {
-   package = pkgs.nix;
-   settings = {
-     extra-experimental-features = [ "nix-command" "flakes" ];
-   };
+    package = pkgs.nix;
+    settings = {
+      extra-experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
+    };
   };
 
   homebrew = {
@@ -61,7 +64,7 @@
   # nix.linux-builder.enable = true;
 
   # Create /etc/zshrc that loads the nix-darwin environment.
-  programs.zsh.enable = true;  # default shell on catalina
+  programs.zsh.enable = true; # default shell on catalina
   # programs.fish.enable = true;
 
   programs.direnv.enable = true;

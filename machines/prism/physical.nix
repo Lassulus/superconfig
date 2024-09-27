@@ -1,4 +1,4 @@
-{ modulesPath, config, lib, pkgs, ... }:
+{ modulesPath, lib, ... }:
 
 {
 
@@ -7,7 +7,11 @@
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
 
-  boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "sd_mod" ];
+  boot.initrd.availableKernelModules = [
+    "xhci_pci"
+    "ahci"
+    "sd_mod"
+  ];
   boot.kernelModules = [ "kvm-intel" ];
   boot.swraid.enable = true;
 
@@ -71,13 +75,19 @@
   powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
 
   boot.loader.grub.enable = true;
-  boot.loader.grub.devices = [ "/dev/sda" "/dev/sdb" ];
+  boot.loader.grub.devices = [
+    "/dev/sda"
+    "/dev/sdb"
+  ];
 
   # we don't pay for power there and this might solve a problem we observed at least once
   # https://www.thomas-krenn.com/de/wiki/PCIe_Bus_Error_Status_00001100_beheben
-  boot.kernelParams = [ "pcie_aspm=off" "net.ifnames=0" "nomodeset" ];
+  boot.kernelParams = [
+    "pcie_aspm=off"
+    "net.ifnames=0"
+    "nomodeset"
+  ];
   networking.dhcpcd.enable = false;
-
 
   networking.useNetworkd = lib.mkForce false;
   systemd.network.enable = lib.mkForce false;
@@ -86,7 +96,10 @@
   networking = {
     hostId = "2283aaae";
     defaultGateway = "95.216.1.129";
-    defaultGateway6 = { address = "fe80::1"; interface = "ext-br"; };
+    defaultGateway6 = {
+      address = "fe80::1";
+      interface = "ext-br";
+    };
     # Use google's public DNS server
     nameservers = [ "8.8.8.8" ];
     interfaces.ext-br.ipv4.addresses = [

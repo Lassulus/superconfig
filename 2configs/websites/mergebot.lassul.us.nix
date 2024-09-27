@@ -1,4 +1,5 @@
-{... }: {
+{ ... }:
+{
   services.nginx.virtualHosts."mergebot.lassul.us" = {
     enableACME = true;
     addSSL = true;

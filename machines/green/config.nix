@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 {
   imports = [
     ../../2configs
@@ -33,7 +33,10 @@
   clanCore.facts.services.green-container = {
     secret."green.sync.key" = { };
     public."green.sync.pub" = { };
-    generator.path = with pkgs; [ coreutils openssh ];
+    generator.path = with pkgs; [
+      coreutils
+      openssh
+    ];
     generator.script = ''
       ssh-keygen -t ed25519 -N "" -f "$secrets"/green.sync.key
       mv "$secrets"/green.sync.key "$facts"/green.sync.pub
@@ -67,7 +70,10 @@
   ];
 
   krebs.iptables.tables.nat.PREROUTING.rules = [
-    { predicate = "-i eth0 -p tcp -m tcp --dport 22"; target = "ACCEPT"; }
+    {
+      predicate = "-i eth0 -p tcp -m tcp --dport 22";
+      target = "ACCEPT";
+    }
   ];
 
   # workaround for ssh access from yubikey via android

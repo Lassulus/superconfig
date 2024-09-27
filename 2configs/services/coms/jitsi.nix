@@ -1,4 +1,5 @@
-{ pkgs, ... }: let
+{ pkgs, ... }:
+let
 
   prosody-contrib-plugins = pkgs.fetchFromGitHub {
     owner = "jitsi-contrib";
@@ -7,8 +8,12 @@
     sha256 = "sha256-1Lmj+ZWqZRRvHVgNDXXEqH2DwhE7TwP0gktjihJCg1g=";
   };
 
-in {
+in
+{
 
+  nixpkgs.config.permittedInsecurePackages = [
+    "jitsi-meet-1.0.8043"
+  ];
   services.jitsi-meet = {
     enable = true;
     hostName = "jitsi.lassul.us";
@@ -16,7 +21,7 @@ in {
       enableWelcomePage = true;
       requireDisplayName = true;
       analytics.disabled = true;
-      startAudioOnly = true;
+      startAudioOnly = false; # check if webcams work nicer with that
       channelLastN = 4;
       stunServers = [
         # - https://www.kuketz-blog.de/jitsi-meet-server-einstellungen-fuer-einen-datenschutzfreundlichen-betrieb/
@@ -53,7 +58,10 @@ in {
   };
 
   services.prosody.extraPluginPaths = [ "${prosody-contrib-plugins}/event_sync" ];
-  services.prosody.extraModules = [ "admin_shell" "event_sync" ];
+  services.prosody.extraModules = [
+    "admin_shell"
+    "event_sync"
+  ];
   services.prosody.extraConfig = ''
     Component "event_sync.jitsi.lassul.us" "event_sync_component"
       muc_component = "conference.jitsi.lassul.us"
@@ -63,8 +71,17 @@ in {
   '';
 
   krebs.iptables.tables.filter.INPUT.rules = [
-    { predicate = "-p tcp --dport 4443"; target = "ACCEPT"; }
-    { predicate = "-p udp --dport 10000"; target = "ACCEPT"; }
-    { predicate = "-p tcp --dport 10000"; target = "ACCEPT"; }
+    {
+      predicate = "-p tcp --dport 4443";
+      target = "ACCEPT";
+    }
+    {
+      predicate = "-p udp --dport 10000";
+      target = "ACCEPT";
+    }
+    {
+      predicate = "-p tcp --dport 10000";
+      target = "ACCEPT";
+    }
   ];
 }

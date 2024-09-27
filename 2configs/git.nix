@@ -1,4 +1,10 @@
-{ self, config, lib, pkgs, ... }:
+{
+  self,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   git = self.inputs.stockholm.lib.git;
@@ -20,7 +26,10 @@ let
     };
 
     krebs.iptables.tables.filter.INPUT.rules = [
-      { predicate = "-i retiolum -p tcp --dport 80"; target = "ACCEPT"; }
+      {
+        predicate = "-i retiolum -p tcp --dport 80";
+        target = "ACCEPT";
+      }
     ];
 
     system.activationScripts.spool-chmod = ''
@@ -32,9 +41,7 @@ let
     inherit (config.krebs.git.cgit.settings) cache-root;
   };
 
-  repos =
-    public-repos //
-    lib.optionalAttrs config.krebs.build.host.secure restricted-repos;
+  repos = public-repos // lib.optionalAttrs config.krebs.build.host.secure restricted-repos;
 
   rules = lib.concatMap make-rules (lib.attrValues repos);
 
@@ -112,7 +119,7 @@ let
     };
     the_playlist = {
       cgit.desc = "Good Music collection + tools";
-      cgit.section  = "art";
+      cgit.section = "art";
     };
     workadventure-nix = {
       cgit.desc = "Nix packaging for workadventure";
@@ -126,78 +133,105 @@ let
 
   restricted-repos = lib.mapAttrs make-restricted-repo {
     brain = {
-      collaborators = with config.krebs.users; [ tv makefu ];
+      collaborators = with config.krebs.users; [
+        tv
+        makefu
+      ];
       announce = true;
     };
   };
 
-  make-public-repo = name: { cgit ? {}, collaborators ? [], ... }: {
-    inherit cgit collaborators name;
-    public = true;
-    hooks = {
-      post-receive = ''
-        ${pkgs.git-hooks.irc-announce {
-          # TODO make nick = config.krebs.build.host.name the default
-          nick = config.krebs.build.host.name;
-          channel = "#xxx";
-          # TODO define refs in some kind of option per repo
-          server = "irc.r";
-          verbose = config.krebs.build.host.name == "orange";
-        }}
-        ${cgit-clear-cache}/bin/cgit-clear-cache
-      '';
+  make-public-repo =
+    name:
+    {
+      cgit ? { },
+      collaborators ? [ ],
+      ...
+    }:
+    {
+      inherit cgit collaborators name;
+      public = true;
+      hooks = {
+        post-receive = ''
+          ${pkgs.git-hooks.irc-announce {
+            # TODO make nick = config.krebs.build.host.name the default
+            nick = config.krebs.build.host.name;
+            channel = "#xxx";
+            # TODO define refs in some kind of option per repo
+            server = "irc.r";
+            verbose = config.krebs.build.host.name == "orange";
+          }}
+          ${cgit-clear-cache}/bin/cgit-clear-cache
+        '';
+      };
     };
-  };
 
-  make-public-repo-silent = name: { cgit ? {}, ... }: {
-    inherit cgit name;
-    public = true;
-  };
-
-  make-restricted-repo = name: { admins ? [], collaborators ? [], announce ? true, hooks ? {}, ... }: {
-    inherit admins collaborators name;
-    public = false;
-    hooks = {
-      post-receive = ''
-        ${lib.optionalString announce (pkgs.git-hooks.irc-announce {
-          # TODO make nick = config.krebs.build.host.name the default
-          nick = config.krebs.build.host.name;
-          channel = "#xxx";
-          # TODO define refs in some kind of option per repo
-          refs = [
-            "refs/heads/master"
-            "refs/heads/staging*"
-          ];
-          server = "irc.r";
-          verbose = false;
-        })}
-        ${cgit-clear-cache}/bin/cgit-clear-cache
-      '';
-    } // hooks;
-  };
+  make-restricted-repo =
+    name:
+    {
+      admins ? [ ],
+      collaborators ? [ ],
+      announce ? true,
+      hooks ? { },
+      ...
+    }:
+    {
+      inherit admins collaborators name;
+      public = false;
+      hooks = {
+        post-receive = ''
+          ${lib.optionalString announce (
+            pkgs.git-hooks.irc-announce {
+              # TODO make nick = config.krebs.build.host.name the default
+              nick = config.krebs.build.host.name;
+              channel = "#xxx";
+              # TODO define refs in some kind of option per repo
+              refs = [
+                "refs/heads/master"
+                "refs/heads/staging*"
+              ];
+              server = "irc.r";
+              verbose = false;
+            }
+          )}
+          ${cgit-clear-cache}/bin/cgit-clear-cache
+        '';
+      } // hooks;
+    };
 
   make-rules =
     with git // config.krebs.users;
     repo:
-      lib.singleton {
-        user = [ lass ];
-        repo = [ repo ];
-        perm = push "refs/*" [ non-fast-forward create delete merge ];
-      } ++
-      lib.optional (lib.length (repo.admins or []) > 0) {
-        user = repo.admins;
-        repo = [ repo ];
-        perm = push "refs/*" [ non-fast-forward create delete merge ];
-      } ++
-      lib.optional (lib.length (repo.collaborators or []) > 0) {
-        user = repo.collaborators;
-        repo = [ repo ];
-        perm = fetch;
-      } ++
-      lib.optional repo.public {
-        user = lib.attrValues config.krebs.users;
-        repo = [ repo ];
-        perm = fetch;
-      };
+    lib.singleton {
+      user = [ lass ];
+      repo = [ repo ];
+      perm = push "refs/*" [
+        non-fast-forward
+        create
+        delete
+        merge
+      ];
+    }
+    ++ lib.optional (lib.length (repo.admins or [ ]) > 0) {
+      user = repo.admins;
+      repo = [ repo ];
+      perm = push "refs/*" [
+        non-fast-forward
+        create
+        delete
+        merge
+      ];
+    }
+    ++ lib.optional (lib.length (repo.collaborators or [ ]) > 0) {
+      user = repo.collaborators;
+      repo = [ repo ];
+      perm = fetch;
+    }
+    ++ lib.optional repo.public {
+      user = lib.attrValues config.krebs.users;
+      repo = [ repo ];
+      perm = fetch;
+    };
 
-in out
+in
+out

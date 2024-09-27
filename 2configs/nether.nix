@@ -9,6 +9,10 @@
     name = "nether";
   };
   services.zerotierone.localConf = {
-    settings.interfacePrefixBlacklist = [ "retiolum" "wiregrill" "mycelium" ];
+    settings.interfacePrefixBlacklist = [
+      "retiolum"
+      "wiregrill"
+      "mycelium"
+    ];
   };
 }

@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ lib, ... }:
 {
   services.murmur = {
     enable = true;
@@ -8,8 +8,14 @@
     autobanTime = 30;
   };
   krebs.iptables.tables.filter.INPUT.rules = [
-    { predicate = "-p tcp --dport 64738"; target = "ACCEPT";}
-    { predicate = "-p udp --dport 64738"; target = "ACCEPT";}
+    {
+      predicate = "-p tcp --dport 64738";
+      target = "ACCEPT";
+    }
+    {
+      predicate = "-p udp --dport 64738";
+      target = "ACCEPT";
+    }
   ];
 
   systemd.services.docker-mumble-web.serviceConfig = {

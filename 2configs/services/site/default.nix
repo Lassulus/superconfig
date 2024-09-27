@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 {
   security.acme = {
     certs."lassul.us" = {
@@ -34,13 +34,15 @@
       default_type "text/html";
       alias ${pkgs.krebspage}/index.html;
     '';
-    locations."= /init".extraConfig = let
-      initscript = pkgs.init.override {
-        pubkey = config.krebs.users.lass.pubkey;
-      };
-    in ''
-      alias ${initscript}/bin/init;
-    '';
+    locations."= /init".extraConfig =
+      let
+        initscript = pkgs.init.override {
+          pubkey = config.krebs.users.lass.pubkey;
+        };
+      in
+      ''
+        alias ${initscript}/bin/init;
+      '';
     locations."= /blue.pub".extraConfig = ''
       alias ${pkgs.writeText "pub" config.krebs.users.lass-blue.pubkey};
     '';

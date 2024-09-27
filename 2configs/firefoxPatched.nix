@@ -1,11 +1,11 @@
-{ config, lib, pkgs, ... }:
+{ lib, pkgs, ... }:
 
 let
   lpkgs = import ../5pkgs { inherit pkgs; };
 
   inherit (lib)
     concatMapStrings
-  ;
+    ;
 
   plugins = with lpkgs.firefoxPlugins; [
     noscript
@@ -13,8 +13,7 @@ let
     vimperator
   ];
 
-  copyXpi = plugin:
-    "cp ${plugin}/*.xpi $out/usr/lib/firefox-*/browser/extensions/";
+  copyXpi = plugin: "cp ${plugin}/*.xpi $out/usr/lib/firefox-*/browser/extensions/";
 
   preferences = pkgs.writeText "autoload.js" ''
     pref('general.config.filename', 'firefox.cfg');
@@ -40,9 +39,10 @@ let
     defaultPref("plugin.scan.plid.all", false);
   '';
 
-in {
+in
+{
   environment.systemPackages = [
-    (pkgs.lib.overrideDerivation pkgs.firefox-bin (original : {
+    (pkgs.lib.overrideDerivation pkgs.firefox-bin (original: {
       installPhase = ''
         ${original.installPhase}
         find $out/usr/lib
@@ -55,4 +55,3 @@ in {
     }))
   ];
 }
-

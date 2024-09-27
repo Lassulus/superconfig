@@ -1,4 +1,10 @@
-{ pkgs, lib, vgname ? "vgname", luksmap ? "luksmap", ... }:
+{
+  pkgs,
+  lib,
+  vgname ? "vgname",
+  luksmap ? "luksmap",
+  ...
+}:
 
 with lib;
 

@@ -1,14 +1,21 @@
-{ self, config, pkgs, lib, ... }:
+{
+  self,
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 let
 
   inherit (self.inputs.stockholm.lib)
     genid_uint31
-  ;
-  inherit (import ./util.nix {inherit lib pkgs;})
+    ;
+  inherit (import ./util.nix { inherit lib pkgs; })
     servePage
     serveOwncloud
-    serveWordpress;
+    serveWordpress
+    ;
 
   msmtprc = pkgs.writeText "msmtprc" ''
     account localhost
@@ -20,19 +27,38 @@ let
     exec ${pkgs.msmtp}/bin/msmtp --read-envelope-from -C ${msmtprc} "$@"
   '';
 
-in {
+in
+{
   imports = [
     self.inputs.stockholm.nixosModules.acl
     self.inputs.stockholm.nixosModules.on-failure
     ./default.nix
     ./sqlBackup.nix
-    (servePage [ "aldonasiech.com" "www.aldonasiech.com" ])
-    (servePage [ "apanowicz.de" "www.apanowicz.de" ])
-    (servePage [ "reich-gebaeudereinigung.de" "www.reich-gebaeudereinigung.de" ])
-    (servePage [ "illustra.de" "www.illustra.de" ])
-    (servePage [ "event-extra.de" "www.event-extra.de" ])
+    (servePage [
+      "aldonasiech.com"
+      "www.aldonasiech.com"
+    ])
+    (servePage [
+      "apanowicz.de"
+      "www.apanowicz.de"
+    ])
+    (servePage [
+      "reich-gebaeudereinigung.de"
+      "www.reich-gebaeudereinigung.de"
+    ])
+    (servePage [
+      "illustra.de"
+      "www.illustra.de"
+    ])
+    (servePage [
+      "event-extra.de"
+      "www.event-extra.de"
+    ])
     # (servePage [ "nirwanabluete.de" "www.nirwanabluete.de" ])
-    (servePage [ "familienrat-hamburg.de" "www.familienrat-hamburg.de" ])
+    (servePage [
+      "familienrat-hamburg.de"
+      "www.familienrat-hamburg.de"
+    ])
     (servePage [ "karlaskop.de" ])
     (servePage [
       "freemonkey.art"
@@ -75,10 +101,23 @@ in {
   # https://github.com/nextcloud/server/issues/25436
   services.mysql.settings.mysqld.innodb_read_only_compressed = 0;
 
-  services.mysql.ensureDatabases = [ "ubikmedia_de" "o_ubikmedia_de" ];
+  services.mysql.ensureDatabases = [
+    "ubikmedia_de"
+    "o_ubikmedia_de"
+  ];
   services.mysql.ensureUsers = [
-    { ensurePermissions = { "ubikmedia_de.*" = "ALL"; }; name = "nginx"; }
-    { ensurePermissions = { "o_ubikmedia_de.*" = "ALL"; }; name = "nginx"; }
+    {
+      ensurePermissions = {
+        "ubikmedia_de.*" = "ALL";
+      };
+      name = "nginx";
+    }
+    {
+      ensurePermissions = {
+        "o_ubikmedia_de.*" = "ALL";
+      };
+      name = "nginx";
+    }
   ];
 
   services.nginx.virtualHosts."ubikmedia.de".locations."/piwika".extraConfig = ''
@@ -153,8 +192,14 @@ in {
     sslServerKey = "/var/lib/acme/lassul.us/key.pem";
   };
   krebs.iptables.tables.filter.INPUT.rules = [
-    { predicate = "-p tcp --dport pop3s"; target = "ACCEPT"; }
-    { predicate = "-p tcp --dport imaps"; target = "ACCEPT"; }
+    {
+      predicate = "-p tcp --dport pop3s";
+      target = "ACCEPT";
+    }
+    {
+      predicate = "-p tcp --dport imaps";
+      target = "ACCEPT";
+    }
   ];
 
   environment.systemPackages = [
@@ -182,22 +227,67 @@ in {
       # server_condition = ''${run{/run/current-system/sw/bin/debug_exim ${config.lass.usershadow.pattern} $auth1 $auth2}{yes}{no}}
     '';
     internet-aliases = [
-      { from = "dma@ubikmedia.de"; to = "domsen"; }
-      { from = "dma@ubikmedia.eu"; to = "domsen"; }
-      { from = "mail@habsys.de"; to = "domsen"; }
-      { from = "mail@habsys.eu"; to = "domsen"; }
-      { from = "hallo@apanowicz.de"; to = "domsen"; }
-      { from = "bruno@apanowicz.de"; to = "bruno"; }
-      { from = "mail@jla-trading.com"; to = "jla-trading"; }
-      { from = "jms@ubikmedia.eu"; to = "jms"; }
-      { from = "ms@ubikmedia.eu"; to = "ms"; }
-      { from = "ubik@ubikmedia.eu"; to = "domsen, jms, ms"; }
-      { from = "kontakt@alewis.de"; to ="klabusterbeere"; }
-      { from = "hallo@jarugadesign.de"; to ="kasia"; }
-      { from = "noreply@beeshmooth.ch"; to ="besmooth@gmx.ch"; }
+      {
+        from = "dma@ubikmedia.de";
+        to = "domsen";
+      }
+      {
+        from = "dma@ubikmedia.eu";
+        to = "domsen";
+      }
+      {
+        from = "mail@habsys.de";
+        to = "domsen";
+      }
+      {
+        from = "mail@habsys.eu";
+        to = "domsen";
+      }
+      {
+        from = "hallo@apanowicz.de";
+        to = "domsen";
+      }
+      {
+        from = "bruno@apanowicz.de";
+        to = "bruno";
+      }
+      {
+        from = "mail@jla-trading.com";
+        to = "jla-trading";
+      }
+      {
+        from = "jms@ubikmedia.eu";
+        to = "jms";
+      }
+      {
+        from = "ms@ubikmedia.eu";
+        to = "ms";
+      }
+      {
+        from = "ubik@ubikmedia.eu";
+        to = "domsen, jms, ms";
+      }
+      {
+        from = "kontakt@alewis.de";
+        to = "klabusterbeere";
+      }
+      {
+        from = "hallo@jarugadesign.de";
+        to = "kasia";
+      }
+      {
+        from = "noreply@beeshmooth.ch";
+        to = "besmooth@gmx.ch";
+      }
 
-      { from = "testuser@lassul.us"; to = "testuser"; }
-      { from = "testuser@ubikmedia.eu"; to = "testuser"; }
+      {
+        from = "testuser@lassul.us";
+        to = "testuser";
+      }
+      {
+        from = "testuser@ubikmedia.eu";
+        to = "testuser";
+      }
     ];
     sender_domains = [
       "jla-trading.com"
@@ -218,27 +308,48 @@ in {
   clanCore.facts.services."ubikmedia.eu-dkim" = {
     secret."ubikmedia.eu.dkim.priv" = { };
     public."ubikmedia.eu.dkim.pub" = { };
-    generator.path = with pkgs; [ coreutils openssl ];
+    generator.path = with pkgs; [
+      coreutils
+      openssl
+    ];
     generator.script = ''
-      openssl genrsa -out "$secrets"/ubikmedia.eu.dkim.priv 2048
+      openssl genrsa -out "$secrets"/ubikmedia.eu.dkim.priv 1024
       openssl rsa -in "$secrets"/ubikmedia.eu.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$facts"/ubikmedia.eu.dkim.pub
     '';
   };
   clanCore.facts.services."apanowicz.de-dkim" = {
     secret."apanowicz.de.dkim.priv" = { };
     public."apanowicz.de.dkim.pub" = { };
-    generator.path = with pkgs; [ coreutils openssl ];
+    generator.path = with pkgs; [
+      coreutils
+      openssl
+    ];
     generator.script = ''
-      openssl genrsa -out "$secrets"/apanowicz.de.dkim.priv 2048
+      openssl genrsa -out "$secrets"/apanowicz.de.dkim.priv 1024
       openssl rsa -in "$secrets"/apanowicz.de.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$facts"/apanowicz.de.dkim.pub
     '';
   };
   clanCore.facts.services."beesmooth.ch-dkim" = {
     secret."beesmooth.ch.dkim.priv" = { };
     public."beesmooth.ch.dkim.pub" = { };
-    generator.path = with pkgs; [ coreutils openssl ];
+    generator.path = with pkgs; [
+      coreutils
+      openssl
+    ];
     generator.script = ''
-      openssl genrsa -out "$secrets"/beesmooth.ch.dkim.priv 2048
+      openssl genrsa -out "$secrets"/beesmooth.ch.dkim.priv 1024
+      openssl rsa -in "$secrets"/beesmooth.ch.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$facts"/beesmooth.ch.dkim.pub
+    '';
+  };
+  clanCore.facts.services."freemonkey.art" = {
+    secret."beesmooth.ch.dkim.priv" = { };
+    public."beesmooth.ch.dkim.pub" = { };
+    generator.path = with pkgs; [
+      coreutils
+      openssl
+    ];
+    generator.script = ''
+      openssl genrsa -out "$secrets"/beesmooth.ch.dkim.priv 1024
       openssl rsa -in "$secrets"/beesmooth.ch.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$facts"/beesmooth.ch.dkim.pub
     '';
   };
@@ -283,7 +394,11 @@ in {
     description = "maintenance acc for domsen";
     home = "/home/domsen";
     useDefaultShell = true;
-    extraGroups = [ "syncthing" "download" "xanf" ];
+    extraGroups = [
+      "syncthing"
+      "download"
+      "xanf"
+    ];
     createHome = true;
     isNormalUser = true;
   };
@@ -437,13 +552,22 @@ in {
     createHome = true;
     isNormalUser = true;
   };
-  krebs.acl."/srv/http/familienrat-hamburg.de"."u:familienrat:rwX" = {};
+
+  users.users.pr = {
+    uid = genid_uint31 "pr";
+    home = "/home/pr";
+    useDefaultShell = true;
+    createHome = true;
+    isNormalUser = true;
+  };
+
+  krebs.acl."/srv/http/familienrat-hamburg.de"."u:familienrat:rwX" = { };
   krebs.acl."/srv/http"."u:familienrat:X" = {
     default = false;
     recursive = false;
   };
 
-  users.groups.xanf = {};
+  users.groups.xanf = { };
 
   krebs.on-failure.plans.restic-backups-domsen = {
     journalctl = {
@@ -455,7 +579,10 @@ in {
     initialize = true;
     repository = "/backups/domsen";
     passwordFile = "${config.krebs.secret.directory}/domsen_backup_pw";
-    timerConfig = { OnCalendar = "00:05"; RandomizedDelaySec = "5h"; };
+    timerConfig = {
+      OnCalendar = "00:05";
+      RandomizedDelaySec = "5h";
+    };
     paths = [
       "/home/domsen/Mail"
       "/home/ms/Mail"
@@ -468,16 +595,16 @@ in {
     ];
   };
 
-  services.syncthing.settings.folders = {
-    domsen-backups = {
-      path = "/backups/domsen";
-      devices = [ "domsen-backup" ];
-    };
-    domsen-backup-srv-http = {
-      path = "/srv/http";
-      devices = [ "domsen-backup" ];
-    };
-  };
+  # services.syncthing.settings.folders = {
+  #   domsen-backups = {
+  #     path = "/backups/domsen";
+  #     devices = [ "domsen-backup" ];
+  #   };
+  #   domsen-backup-srv-http = {
+  #     path = "/srv/http";
+  #     devices = [ "domsen-backup" ];
+  #   };
+  # };
 
   system.activationScripts.domsen-backups = ''
     ${pkgs.coreutils}/bin/chmod 750 /backups
@@ -487,10 +614,9 @@ in {
   # krebs.acl."/srv/http"."u:syncthing:rwX" = {};
   # krebs.acl."/srv/http"."u:nginx:rwX" = {};
   # krebs.acl."/srv/http/ubikmedia.de"."u:avada:rwX" = {};
-  krebs.acl."/home/xanf/XANF_TEAM"."g:xanf:rwX" = {};
+  krebs.acl."/home/xanf/XANF_TEAM"."g:xanf:rwX" = { };
   krebs.acl."/home/xanf"."g:xanf:X" = {
     default = false;
     recursive = false;
   };
 }
-

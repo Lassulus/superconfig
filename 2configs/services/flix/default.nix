@@ -233,58 +233,126 @@
   };
 
   systemd.services.bruellwuerfel =
-  let
-    bruellwuerfelSrc = pkgs.fetchFromGitHub {
-      owner = "krebs";
-      repo = "bruellwuerfel";
-      rev = "dc73adf69249fb63a4b024f1f3fbc9e541b27015";
-      sha256 = "078jp1gbavdp8lnwa09xa5m6bbbd05fi4x5ldkkgin5z04hwlhmd";
+    let
+      bruellwuerfelSrc = pkgs.fetchFromGitHub {
+        owner = "krebs";
+        repo = "bruellwuerfel";
+        rev = "dc73adf69249fb63a4b024f1f3fbc9e541b27015";
+        sha256 = "078jp1gbavdp8lnwa09xa5m6bbbd05fi4x5ldkkgin5z04hwlhmd";
+      };
+    in
+    {
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network-online.target" ];
+      environment = {
+        IRC_CHANNEL = "#flix";
+        IRC_NICK = "bruelli";
+        IRC_SERVER = "irc.r";
+        IRC_HISTORY_FILE = "/tmp/bruelli.history";
+      };
+      serviceConfig = {
+        ExecStart = "${pkgs.deno}/bin/deno run -A ${bruellwuerfelSrc}/src/index.ts";
+      };
     };
-  in {
-    wantedBy = [ "multi-user.target" ];
-    after = [ "network-online.target" ];
-    environment = {
-      IRC_CHANNEL = "#flix";
-      IRC_NICK = "bruelli";
-      IRC_SERVER = "irc.r";
-      IRC_HISTORY_FILE = "/tmp/bruelli.history";
-    };
-    serviceConfig = {
-      ExecStart = "${pkgs.deno}/bin/deno run -A ${bruellwuerfelSrc}/src/index.ts";
-    };
-  };
 
   krebs.iptables = {
     enable = true;
     tables.filter.INPUT.rules = [
-      { predicate = "-p tcp --dport 80"; target = "ACCEPT"; } # nginx web dir
-      { predicate = "-p tcp --dport 443"; target = "ACCEPT"; } # nginx web dir
-      { predicate = "-p tcp --dport 9091"; target = "ACCEPT"; } # transmission-web
-      { predicate = "-p tcp --dport 51413"; target = "ACCEPT"; } # transmission-traffic
-      { predicate = "-p udp --dport 51413"; target = "ACCEPT"; } # transmission-traffic
-      { predicate = "-p tcp --dport 8096"; target = "ACCEPT"; } # jellyfin
-      { predicate = "-p tcp --dport 8920"; target = "ACCEPT"; } # jellyfin
-      { predicate = "-p udp --dport 1900"; target = "ACCEPT"; } # jellyfin
-      { predicate = "-p udp --dport 7359"; target = "ACCEPT"; } # jellyfin
-      { predicate = "-p tcp --dport 5055"; target = "ACCEPT"; } # jellyseerr
-      { predicate = "-p tcp --dport 9696"; target = "ACCEPT"; } # prowlarr
-      { predicate = "-p tcp --dport 8989"; target = "ACCEPT"; } # sonarr
-      { predicate = "-p tcp --dport 7878"; target = "ACCEPT"; } # radarr
-      { predicate = "-p tcp --dport 6767"; target = "ACCEPT"; } # bazarr
+      {
+        predicate = "-p tcp --dport 80";
+        target = "ACCEPT";
+      } # nginx web dir
+      {
+        predicate = "-p tcp --dport 443";
+        target = "ACCEPT";
+      } # nginx web dir
+      {
+        predicate = "-p tcp --dport 9091";
+        target = "ACCEPT";
+      } # transmission-web
+      {
+        predicate = "-p tcp --dport 51413";
+        target = "ACCEPT";
+      } # transmission-traffic
+      {
+        predicate = "-p udp --dport 51413";
+        target = "ACCEPT";
+      } # transmission-traffic
+      {
+        predicate = "-p tcp --dport 8096";
+        target = "ACCEPT";
+      } # jellyfin
+      {
+        predicate = "-p tcp --dport 8920";
+        target = "ACCEPT";
+      } # jellyfin
+      {
+        predicate = "-p udp --dport 1900";
+        target = "ACCEPT";
+      } # jellyfin
+      {
+        predicate = "-p udp --dport 7359";
+        target = "ACCEPT";
+      } # jellyfin
+      {
+        predicate = "-p tcp --dport 5055";
+        target = "ACCEPT";
+      } # jellyseerr
+      {
+        predicate = "-p tcp --dport 9696";
+        target = "ACCEPT";
+      } # prowlarr
+      {
+        predicate = "-p tcp --dport 8989";
+        target = "ACCEPT";
+      } # sonarr
+      {
+        predicate = "-p tcp --dport 7878";
+        target = "ACCEPT";
+      } # radarr
+      {
+        predicate = "-p tcp --dport 6767";
+        target = "ACCEPT";
+      } # bazarr
 
       # smbd
-      { predicate = "-p tcp --dport 445"; target = "ACCEPT"; }
-      { predicate = "-p tcp --dport 111"; target = "ACCEPT"; }
-      { predicate = "-p udp --dport 111"; target = "ACCEPT"; }
-      { predicate = "-p tcp --dport 2049"; target = "ACCEPT"; }
-      { predicate = "-p udp --dport 2049"; target = "ACCEPT"; }
-      { predicate = "-p tcp --dport 4000:4002"; target = "ACCEPT"; }
-      { predicate = "-p udp --dport 4000:4002"; target = "ACCEPT"; }
+      {
+        predicate = "-p tcp --dport 445";
+        target = "ACCEPT";
+      }
+      {
+        predicate = "-p tcp --dport 111";
+        target = "ACCEPT";
+      }
+      {
+        predicate = "-p udp --dport 111";
+        target = "ACCEPT";
+      }
+      {
+        predicate = "-p tcp --dport 2049";
+        target = "ACCEPT";
+      }
+      {
+        predicate = "-p udp --dport 2049";
+        target = "ACCEPT";
+      }
+      {
+        predicate = "-p tcp --dport 4000:4002";
+        target = "ACCEPT";
+      }
+      {
+        predicate = "-p udp --dport 4000:4002";
+        target = "ACCEPT";
+      }
     ];
 
     tables.nat.PREROUTING.rules = [
       # transmission rpc port
-      { predicate = "-i retiolum -p tcp --dport 9091"; target = "DNAT --to-destination fdb4:3310:947::2"; v4 = false; }
+      {
+        predicate = "-i retiolum -p tcp --dport 9091";
+        target = "DNAT --to-destination fdb4:3310:947::2";
+        v4 = false;
+      }
     ];
     tables.filter.FORWARD.policy = "ACCEPT"; # we need this so we can forward into the the transmission network namespace
   };

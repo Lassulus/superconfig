@@ -25,16 +25,18 @@ let
       ) | .[]'
   '';
 
-  newsshow = pkgs.writers.writeDashBin "newsshow" /* sh */ ''
-    cat << EOF
-    hello crabpeople!
-    $(${pkgs.ddate}/bin/ddate +'Today is %{%A, the %e of %B%}, %Y. %N%nCelebrate %H')
-    It is $(date --utc +%H) o clock UTC.
-    todays news:
-    $(get_current_news)
-    $(gc_news)
-    EOF
-  '';
+  newsshow =
+    pkgs.writers.writeDashBin "newsshow" # sh
+      ''
+        cat << EOF
+        hello crabpeople!
+        $(${pkgs.ddate}/bin/ddate +'Today is %{%A, the %e of %B%}, %Y. %N%nCelebrate %H')
+        It is $(date --utc +%H) o clock UTC.
+        todays news:
+        $(get_current_news)
+        $(gc_news)
+        EOF
+      '';
 in
 {
   systemd.services.newsshow = {

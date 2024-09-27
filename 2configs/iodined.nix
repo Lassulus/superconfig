@@ -1,9 +1,10 @@
-{ pkgs, config, ... }:
+{ config, ... }:
 
 let
   # TODO: make this a parameter
   domain = "io.lassul.us";
-in {
+in
+{
 
   services.iodine.server = {
     enable = true;
@@ -13,7 +14,10 @@ in {
   };
 
   krebs.iptables.tables.filter.INPUT.rules = [
-    { predicate = "-p udp --dport 53"; target = "ACCEPT";}
+    {
+      predicate = "-p udp --dport 53";
+      target = "ACCEPT";
+    }
   ];
 
 }

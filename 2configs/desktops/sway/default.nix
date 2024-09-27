@@ -1,8 +1,10 @@
-{ config, lib, pkgs, ... }: let
+{ pkgs, ... }:
+let
 
   term = "/run/current-system/sw/bin/alacritty";
 
-in {
+in
+{
   imports = [
     ../lib/wayland.nix
   ];
@@ -266,10 +268,7 @@ in {
        systemctl --user start xdg-desktop-portal xdg-desktop-portal-wlr
     ''}
 
-    exec_always ${let
-      schema = pkgs.gsettings-desktop-schemas;
-      datadir = "${schema}/share/gsettings-schemas/${schema.name}";
-    in pkgs.writers.writeDash "gsettings" ''
+    exec_always ${pkgs.writers.writeDash "gsettings" ''
       set -efux
       export XDG_DATA_DIRS=${pkgs.gsettings-desktop-schemas}:$XDG_DATA_DIRS
       gnome_schema=org.gnome.desktop.interface

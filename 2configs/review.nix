@@ -2,7 +2,8 @@
 
 let
   mainUser = config.users.extraUsers.mainUser;
-in {
+in
+{
 
   users.users.review = {
     isNormalUser = true;

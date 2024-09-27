@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ lib, ... }:
 with lib;
 {
   security.chromiumSuidSandbox.enable = true;

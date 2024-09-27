@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ ... }:
 {
   imports = [
     <stockholm/lass/2configs/container-networking.nix>

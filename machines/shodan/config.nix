@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, ... }:
 
 {
   imports = [
@@ -21,6 +21,9 @@
 
   services.logind.lidSwitch = "ignore";
   services.logind.lidSwitchDocked = "ignore";
-  nix.trustedUsers = [ "root" "lass" ];
+  nix.trustedUsers = [
+    "root"
+    "lass"
+  ];
   system.stateVersion = "22.05";
 }

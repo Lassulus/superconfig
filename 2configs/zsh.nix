@@ -1,17 +1,19 @@
-{ config, lib, pkgs, ... }:
+{ pkgs, ... }:
 {
   environment.systemPackages = with pkgs; [
     atuin
     direnv
     fzf
   ];
-  environment.variables.ATUIN_CONFIG_DIR = toString (pkgs.writeTextDir "/config.toml" ''
-    auto_sync = true
-    update_check = false
-    sync_address = "http://green.r:8888"
-    sync_frequency = 0
-    style = "compact"
-  '');
+  environment.variables.ATUIN_CONFIG_DIR = toString (
+    pkgs.writeTextDir "/config.toml" ''
+      auto_sync = true
+      update_check = false
+      sync_address = "http://green.r:8888"
+      sync_frequency = 0
+      style = "compact"
+    ''
+  );
   programs.zsh = {
     enable = true;
     shellInit = ''
@@ -63,12 +65,14 @@
       }
 
       #beautiful colors
-      eval $(dircolors -b ${pkgs.fetchFromGitHub {
-        owner = "trapd00r";
-        repo = "LS_COLORS";
-        rev = "a75fca8545f91abb8a5f802981033ef54bf1eac0";
-        sha256="1lzj0qnj89mzh76ha137mnz2hf86k278rh0y9x124ghxj9yqsnb4";
-      }}/LS_COLORS)
+      eval $(dircolors -b ${
+        pkgs.fetchFromGitHub {
+          owner = "trapd00r";
+          repo = "LS_COLORS";
+          rev = "a75fca8545f91abb8a5f802981033ef54bf1eac0";
+          sha256 = "1lzj0qnj89mzh76ha137mnz2hf86k278rh0y9x124ghxj9yqsnb4";
+        }
+      }/LS_COLORS)
       zstyle ':completion:*:default' list-colors ''${(s.:.)LS_COLORS}
 
       #emacs bindings

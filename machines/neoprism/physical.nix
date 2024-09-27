@@ -1,4 +1,11 @@
-{ self, modulesPath, config, lib, pkgs, ... }:
+{
+  self,
+  modulesPath,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 {
 
   imports = [
@@ -13,7 +20,12 @@
 
   boot.loader.grub.enable = true;
   boot.loader.grub.efiSupport = true;
-  boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "nvme" "sd_mod" ];
+  boot.initrd.availableKernelModules = [
+    "xhci_pci"
+    "ahci"
+    "nvme"
+    "sd_mod"
+  ];
   boot.kernelParams = [
     "boot.shell_on_fail"
   ];
