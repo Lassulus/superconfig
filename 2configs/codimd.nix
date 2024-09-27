@@ -79,7 +79,7 @@ in
   clanCore.facts.services.hedgedoc-github-auth = {
     secret."hedgedoc.env" = { };
     generator.script = ''
-      cat > "$secrets"/hedgedoc.env
+      echo "$prompt_value" > "$secrets"/hedgedoc.env
     '';
     generator.prompt = ''
       goto https://github.com/settings/applications/2352617 and paste the data in the following format:
