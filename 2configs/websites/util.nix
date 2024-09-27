@@ -5,7 +5,7 @@ with lib;
 rec {
 
   ssl =
-    domains:
+    _domains:
     {
     };
 
