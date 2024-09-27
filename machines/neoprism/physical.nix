@@ -5,15 +5,18 @@
     ./config.nix
     (modulesPath + "/installer/scan/not-detected.nix")
     self.inputs.disko.nixosModules.disko
+    ./disk.nix
   ];
 
-  disko.devices = import ./disk.nix;
   networking.hostId = "9c0a74ac";
   boot.kernelPackages = pkgs.zfs.latestCompatibleLinuxPackages;
 
   boot.loader.grub.enable = true;
   boot.loader.grub.efiSupport = true;
   boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "nvme" "sd_mod" ];
+  boot.kernelParams = [
+    "boot.shell_on_fail"
+  ];
   boot.kernelModules = [ "kvm-amd" ];
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
