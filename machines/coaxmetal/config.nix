@@ -33,12 +33,13 @@
         ];
       };
       services.xserver.enable = true;
+      hardware.pulseaudio.enable = false;
       services.xserver.displayManager.autoLogin = {
         enable = true;
-        user = "moon";
+        user = "lass";
       };
-      services.xserver.desktopManager.xfce.enable = true;
-      services.xserver.displayManager.defaultSession = lib.mkForce "xfce";
+      services.xserver.desktopManager.gnome.enable = true;
+      services.xserver.displayManager.defaultSession = lib.mkForce "gnome";
       services.xserver.displayManager.sessionCommands = ''
         tmux new-session -A -s sun -- sun
       '';
