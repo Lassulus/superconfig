@@ -14,6 +14,7 @@
         mouse = "a";
         number = true;
         shiftwidth = 2;
+        clipboard = "unnamedplus";
         # undo stuff
         undofile = {};
         undolevels = 10000;
@@ -33,6 +34,8 @@
         lua vim.o.undodir = vim.fs.normalize('$HOME/.vim/undodir')
       '';
       keymaps = [
+        { mode = "i"; key = "<C-p>"; action = "<Nop>"; }
+        { mode = "i"; key = "<C-n>"; action = "<Nop>"; }
         { mode = "n"; key = "<C-c>"; action = ":q<cr>"; }
         { mode = "n"; key = "<Space>"; action = "<Nop>"; }
         { mode = "n"; key = "<leader>u"; action = ":UndotreeToggle<cr>"; }
@@ -57,6 +60,7 @@
           "<leader>fp" = "yank_history";
         };
       };
+      plugins.lsp-format.enable = true;
       plugins.lsp = {
         enable = true;
         servers = {
@@ -64,60 +68,46 @@
           nixd.enable = true; # nix
           ruff-lsp.enable = true; # python
           harper-ls.enable = true; # comments
+          jsonls.enable = true; # json
         };
       };
       plugins.undotree = {
         enable = true;
         settings.SetFocusWhenToggle = true;
-        settings.DiffAutoOpen = true;
       };
       plugins.treesitter.enable = true;
       plugins.copilot-cmp.enable = true;
       plugins.copilot-lua.panel.enabled = false;
       plugins.copilot-lua.suggestion.enabled = false;
-      plugins.luasnip.enable = true;
+      plugins.cmp_yanky.enable = true;
       plugins.cmp = {
         enable = true;
         autoEnableSources = true;
         settings = {
-          autoEnableSources = true;
           experimental = { ghost_text = true; };
-          performance = {
-            debounce = 60;
-            fetchingTimeout = 200;
-            maxViewEntries = 30;
-          };
-          snippet = { expand = "luasnip"; };
-          formatting = { fields = [ "kind" "abbr" "menu" ]; };
           sources = [
             { name = "nvim_lsp"; }
             { name = "emoji"; }
             {
               name = "buffer"; # text within current buffer
               option.get_bufnrs.__raw = "vim.api.nvim_list_bufs";
-              keywordLength = 3;
+              keywordLength = 2;
             }
             {
-              name = "copilot"; # enable/disable copilot
+              name = "copilot"; # enable copilot
             }
             {
               name = "path"; # file system paths
               keywordLength = 3;
             }
-            {
-              name = "luasnip"; # snippets
-              keywordLength = 3;
-            }
+            { name = "cmp_yanky"; }
           ];
-
-          window = {
-            completion = { border = "solid"; };
-            documentation = { border = "solid"; };
-          };
 
           mapping = {
             "<Tab>" = "cmp.mapping.select_next_item()";
             "<S-Tab>" = "cmp.mapping.select_prev_item()";
+            "<C-n>" = "cmp.mapping.select_next_item()";
+            "<C-p>" = "cmp.mapping.select_prev_item()";
             "<C-e>" = "cmp.mapping.abort()";
             "<C-b>" = "cmp.mapping.scroll_docs(-4)";
             "<C-f>" = "cmp.mapping.scroll_docs(4)";
@@ -126,6 +116,10 @@
             "<S-CR>" = "cmp.mapping.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = true })";
           };
         };
+      };
+      plugins.none-ls = {
+        enable = true;
+        sources.formatting.treefmt.enable = true;
       };
       plugins.bufferline.enable = true;
       plugins.which-key.enable = true;
