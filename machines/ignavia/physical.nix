@@ -1,14 +1,11 @@
-{ self, lib, modulesPath, ... }:
+{ self, modulesPath, ... }:
 {
   imports = [
     ./config.nix
     (modulesPath + "/installer/scan/not-detected.nix")
     ./disk.nix
     self.inputs.nixos-hardware.nixosModules.framework-13th-gen-intel
-    self.inputs.nixos-facter.nixosModules.facter
   ];
-
-  facter = lib.importJSON ./facter.json;
 
   # fprintd is currently broken
   services.fprintd.enable = false;
