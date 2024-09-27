@@ -1,21 +1,32 @@
-{ self, config, lib, pkgs, ... }: let
+{
+  self,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+let
 
   to = lib.concatStringsSep "," [
     "lass@green.r"
   ];
 
-  mails = import "${config.krebs.secret.directory}/mails.nix"; # todo make this pure somehow
+  mails = [
+  ];
 
-in {
+in
+{
   imports = [
     self.inputs.stockholm.nixosModules.exim-smarthost
   ];
-  environment.systemPackages = [ pkgs.review-mail-queue ];
 
-  clanCore.secrets."lassul.us-dkim" = {
-    secrets."lassul.us.dkim.priv" = { };
-    facts."lassul.us.dkim.pub" = { };
-    generator.path = with pkgs; [ coreutils openssl ];
+  clanCore.facts.services."lassul.us-dkim" = {
+    secret."lassul.us.dkim.priv" = { };
+    public."lassul.us.dkim.pub" = { };
+    generator.path = with pkgs; [
+      coreutils
+      openssl
+    ];
     generator.script = ''
       openssl genrsa -out "$secrets"/lassul.us.dkim.priv 2048
       openssl rsa -in "$secrets"/lassul.us.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$facts"/lassul.us.dkim.pub
@@ -42,26 +53,70 @@ in {
       config.krebs.hosts.mors
       config.krebs.hosts.xerxes
     ];
-    internet-aliases = map (from: { inherit from to; }) mails ++ [
-    ];
+    internet-aliases =
+      map (from: { inherit from to; }) mails
+      ++ [
+      ];
     system-aliases = [
-      { from = "mailer-daemon"; to = "postmaster"; }
-      { from = "postmaster"; to = "root"; }
-      { from = "nobody"; to = "root"; }
-      { from = "hostmaster"; to = "root"; }
-      { from = "usenet"; to = "root"; }
-      { from = "news"; to = "root"; }
-      { from = "webmaster"; to = "root"; }
-      { from = "www"; to = "root"; }
-      { from = "ftp"; to = "root"; }
-      { from = "abuse"; to = "root"; }
-      { from = "noc"; to = "root"; }
-      { from = "security"; to = "root"; }
-      { from = "root"; to = "lass"; }
+      {
+        from = "mailer-daemon";
+        to = "postmaster";
+      }
+      {
+        from = "postmaster";
+        to = "root";
+      }
+      {
+        from = "nobody";
+        to = "root";
+      }
+      {
+        from = "hostmaster";
+        to = "root";
+      }
+      {
+        from = "usenet";
+        to = "root";
+      }
+      {
+        from = "news";
+        to = "root";
+      }
+      {
+        from = "webmaster";
+        to = "root";
+      }
+      {
+        from = "www";
+        to = "root";
+      }
+      {
+        from = "ftp";
+        to = "root";
+      }
+      {
+        from = "abuse";
+        to = "root";
+      }
+      {
+        from = "noc";
+        to = "root";
+      }
+      {
+        from = "security";
+        to = "root";
+      }
+      {
+        from = "root";
+        to = "lass";
+      }
     ];
   };
   krebs.iptables.tables.filter.INPUT.rules = [
-    { predicate = "-p tcp --dport smtp"; target = "ACCEPT"; }
+    {
+      predicate = "-p tcp --dport smtp";
+      target = "ACCEPT";
+    }
   ];
 
   security.acme.certs."mail.lassul.us" = {
