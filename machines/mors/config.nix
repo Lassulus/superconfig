@@ -108,11 +108,6 @@
   programs.adb.enable = true;
 
 
-  services.earlyoom = {
-    enable = true;
-    freeMemThreshold = 5;
-  };
-
 
   # It may leak your data, but look how FAST it is!1!!
   # https://make-linux-fast-again.com/
