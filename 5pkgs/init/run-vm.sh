@@ -1,4 +1,5 @@
 #!/usr/bin/env nix-shell
+# shellcheck shell=bash
 #! nix-shell -i bash -p nixos-generators
 
 set -efu

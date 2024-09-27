@@ -1,3 +1,3 @@
 #!/bin/sh
 echo "hello world"
-echo "hello debug" > 2
+echo "hello debug" >&2
