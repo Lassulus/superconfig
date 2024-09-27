@@ -2,7 +2,7 @@
 
   alacritty-cfg = extrVals: pkgs.writers.writeTOML "alacritty.toml" ({
     font = let
-      family = "Iosevka Term SS15";
+      family = "IosevkaTerm Nerd Font";
     in {
       normal = {
         family = family;

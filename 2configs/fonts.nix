@@ -8,7 +8,7 @@
       xorg.fontschumachermisc
       inconsolata
       noto-fonts
-      (iosevka-bin.override { variant = "SS15"; })
+      (nerdfonts.override { fonts = [ "Iosevka" "IosevkaTerm" "IosevkaTermSlab" ]; })
     ];
   };
 }
