@@ -21,6 +21,12 @@
       '';
     }
   ];
+
+  services.earlyoom = {
+    enable = true;
+    freeMemThreshold = 5;
+  };
+
   users.users.mainUser.extraGroups = [ "audio" "pipewire" "video" "input" ];
 
   xdg.portal.enable = true;
