@@ -59,6 +59,7 @@ let
           scripts = with pkgs.mpvScripts; [
             sponsorblock
             quality-menu
+            vr-reversal
           ];
         }}/bin/mpv \
          --no-config \
