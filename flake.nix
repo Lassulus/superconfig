@@ -110,6 +110,7 @@
           lib,
           pkgs,
           system,
+          config,
           ...
         }:
         {
@@ -119,6 +120,7 @@
           devShells.default = pkgs.mkShell {
             packages = [
               clan-core.packages.${system}.clan-cli
+              config.treefmt.build.wrapper
             ];
           };
         };
