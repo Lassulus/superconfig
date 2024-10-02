@@ -37,6 +37,22 @@
           " need to use lua to expand $HOME
           lua vim.o.undodir = vim.fs.normalize('$HOME/.vim/undodir')
         '';
+        extraConfigLua = ''
+          local null_ls = require("null-ls")
+          local helpers = require("null-ls.helpers")
+
+          local treefmt_nix = {
+              method = null_ls.methods.FORMATTING,
+              filetypes = {},
+              generator = helpers.formatter_factory({
+                  command = "treefmt",
+                  args = { "--allow-missing-formatter", "--stdin", "$FILENAME" },
+                  to_stdin = true,
+              }),
+          }
+
+          null_ls.register(treefmt_nix)
+        '';
         keymaps = [
           {
             mode = "i";
@@ -130,6 +146,34 @@
             action = "<Plug>(YankyPutBefore)";
           }
         ];
+        # autoCmd = [
+        #   {
+        #     event = "BufWritePost";
+        #     desc = "run treefmt on save";
+        #     # https://stackoverflow.com/questions/77466697/how-to-automatically-format-on-save
+        #     callback.__raw = ''
+        #       function()
+        #         vim.cmd("silent !treefmt %")
+        #         vim.cmd("edit")
+        #       end
+        #     '';
+        #   }
+        # ];
+        plugins.none-ls = {
+          enable = true;
+          # sources.formatting.treefmt = {
+          #   enable = true;
+          #   package = pkgs.emptyDirectory;
+          # };
+          # package = pkgs.vimPlugins.none-ls-nvim.overrideAttrs (_old: {
+          #   src = pkgs.fetchFromGitHub {
+          #     owner = "lassulus";
+          #     repo = "none-ls.nvim";
+          #     rev = "292c2b5eadea0a097b9a01804aea70f5c8125200";
+          #     sha256 = "sha256-nbzqXsxmYfxngdJH3NXMLmGgygh6reSEnruoc6l8t/s=";
+          #   };
+          # });
+        };
         plugins.web-devicons.enable = true;
         plugins.telescope = {
           enable = true;
@@ -199,10 +243,6 @@
               "<S-CR>" = "cmp.mapping.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = true })";
             };
           };
-        };
-        plugins.none-ls = {
-          enable = true;
-          sources.formatting.treefmt.enable = true;
         };
         plugins.bufferline.enable = true;
         plugins.which-key.enable = true;
