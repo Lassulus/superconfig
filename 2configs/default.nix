@@ -196,7 +196,6 @@
   environment.systemPackages = with pkgs; [
     self.packages.${pkgs.system}.nvim
 
-    #stockholm
     git
     git-absorb
     git-preview
@@ -226,6 +225,7 @@
     #neat utils
     file
     hashPassword
+    xkcdpass
     kpaste
     cyberlocker-tools
     pciutils
