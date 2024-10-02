@@ -76,11 +76,6 @@
           }
           {
             mode = "n";
-            key = "<leader>u";
-            action = ":UndotreeToggle<cr>";
-          }
-          {
-            mode = "n";
             key = "<leader>sd";
             action = ":colorscheme ayu-dark<cr>";
           }
@@ -175,10 +170,12 @@
           # });
         };
         plugins.web-devicons.enable = true;
+        plugins.telescope.extensions.undo.enable = true;
         plugins.telescope = {
           enable = true;
           keymaps = {
             "<leader>b" = "buffers";
+            "<leader>u" = "undo";
             "<leader>ff" = "find_files";
             "<leader>fg" = "live_grep";
             "<leader>fh" = "help_tags";
@@ -195,10 +192,6 @@
             harper-ls.enable = true; # comments
             jsonls.enable = true; # json
           };
-        };
-        plugins.undotree = {
-          enable = true;
-          settings.SetFocusWhenToggle = true;
         };
         plugins.treesitter.enable = true;
         plugins.copilot-cmp.enable = true;
@@ -252,6 +245,7 @@
         };
         plugins.comment.enable = true;
         plugins.copilot-chat.enable = true;
+        plugins.undotree.enable = true; # seems to be needed for undo history in telescope
       };
     };
 }
