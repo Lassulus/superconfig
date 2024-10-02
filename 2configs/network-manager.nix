@@ -26,5 +26,6 @@
   };
   environment.systemPackages = [
     self.packages.${pkgs.system}.nm-dmenu
+    pkgs.wirelesstools
   ];
 }
