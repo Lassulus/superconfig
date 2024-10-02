@@ -40,6 +40,7 @@
         extraConfigLua = ''
           local null_ls = require("null-ls")
           local helpers = require("null-ls.helpers")
+          local utils = require("null-ls.utils")
 
           local treefmt_nix = {
               method = null_ls.methods.FORMATTING,
@@ -48,6 +49,22 @@
                   command = "treefmt",
                   args = { "--allow-missing-formatter", "--stdin", "$FILENAME" },
                   to_stdin = true,
+                  runtime_condition = function()
+                      return utils.is_executable("treefmt")
+                  end,
+              }),
+          }
+
+          local treefmt_nix2 = {
+              method = null_ls.methods.FORMATTING,
+              filetypes = {},
+              generator = helpers.formatter_factory({
+                  command = "treefmt-nix",
+                  args = { "--allow-missing-formatter", "--stdin", "$FILENAME" },
+                  to_stdin = true,
+                  runtime_condition = function()
+                      return utils.is_executable("treefmt-nix")
+                  end,
               }),
           }
 
