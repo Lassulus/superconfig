@@ -183,6 +183,7 @@
           };
         };
         plugins.lsp-format.enable = true;
+        plugins.lsp-lines.enable = true;
         plugins.lsp = {
           enable = true;
           servers = {
