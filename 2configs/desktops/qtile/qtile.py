@@ -227,6 +227,7 @@ auto_minimize = True
 # When using the Wayland backend, this can be used to configure input devices.
 wl_input_rules = {
     "type:keyboard": InputConfig(kb_options="ctrl:nocaps", kb_layout="us", kb_variant="altgr-intl"),
+    "*": InputConfig(click_method="clickfinger"),
 }
 
 @hook.subscribe.startup
