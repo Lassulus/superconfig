@@ -175,6 +175,7 @@ let
     unset envelope_from_address
     set use_envelope_from
     set reverse_name
+    set markers=no
 
     set sort=threads
 
@@ -258,6 +259,11 @@ let
     macro pager ,@2 "<enter-command> set pager_index_lines=3; macro pager ] ,@3 'Toggle indexbar<Enter>"
     macro pager ,@3 "<enter-command> set pager_index_lines=7; macro pager ] ,@1 'Toggle indexbar<Enter>"
     macro pager ] ,@1 'Toggle indexbar
+
+
+    # scan urls from emails
+    macro index,pager \cb "<pipe-message> ${lib.getExe pkgs.urlscan}<Enter>" "call urlscan to extract URLs out of a message"
+    macro attach,compose \cb "<pipe-entry> ${lib.getExe pkgs.urlscan}<Enter>" "call urlscan to extract URLs out of a message"
 
     # sidebar
     set sidebar_divider_char = '│'
