@@ -59,6 +59,8 @@ in
     ];
     script = ''
       set -efux
+      until ${pkgs.dig.host}/bin/host europe.vpn.airdns.org; do sleep; done
+
       ip link del t2 || :
       ip -n transmission link set lo up
       ip link add airvpn type wireguard
