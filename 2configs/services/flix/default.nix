@@ -278,26 +278,6 @@
         predicate = "-p udp --dport 7359";
         target = "ACCEPT";
       } # jellyfin
-      {
-        predicate = "-p tcp --dport 5055";
-        target = "ACCEPT";
-      } # jellyseerr
-      {
-        predicate = "-p tcp --dport 9696";
-        target = "ACCEPT";
-      } # prowlarr
-      {
-        predicate = "-p tcp --dport 8989";
-        target = "ACCEPT";
-      } # sonarr
-      {
-        predicate = "-p tcp --dport 7878";
-        target = "ACCEPT";
-      } # radarr
-      {
-        predicate = "-p tcp --dport 6767";
-        target = "ACCEPT";
-      } # bazarr
 
       # smbd
       {
@@ -371,11 +351,13 @@
   # request managment
   services.jellyseerr = {
     enable = true;
+    openFirewall = true;
   };
 
   # movies
   services.radarr = {
     enable = true;
+    openFirewall = true;
     user = "download";
     group = "download";
   };
@@ -383,6 +365,7 @@
   # shows
   services.sonarr = {
     enable = true;
+    openFirewall = true;
     user = "download";
     group = "download";
   };
@@ -390,11 +373,13 @@
   # indexers
   services.prowlarr = {
     enable = true;
+    openFirewall = true;
   };
 
   # subtitles
   services.bazarr = {
     enable = true;
+    openFirewall = true;
     user = "download";
     group = "download";
   };
