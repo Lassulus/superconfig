@@ -1,7 +1,7 @@
 { inputs, ... }:
 {
   perSystem =
-    { system, ... }:
+    { system, pkgs, ... }:
     {
       packages.nvim = inputs.nixvim.legacyPackages.${system}.makeNixvim {
         vimAlias = true;
@@ -37,6 +37,9 @@
           " need to use lua to expand $HOME
           lua vim.o.undodir = vim.fs.normalize('$HOME/.vim/undodir')
         '';
+        extraPlugins = [
+          pkgs.vimPlugins.vim-fetch
+        ];
         extraConfigLua = ''
           local null_ls = require("null-ls")
           local helpers = require("null-ls.helpers")
