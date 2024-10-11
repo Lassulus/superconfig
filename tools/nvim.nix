@@ -157,6 +157,16 @@
             key = "P";
             action = "<Plug>(YankyPutBefore)";
           }
+          {
+            mode = [
+              "c"
+              "i"
+              "n"
+              "x"
+            ];
+            key = "<M-CR>";
+            action = ":lua vim.lsp.buf.code_action()<CR>";
+          }
         ];
         # autoCmd = [
         #   {
