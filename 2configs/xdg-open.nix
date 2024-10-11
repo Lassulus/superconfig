@@ -20,6 +20,10 @@ let
       irc:*)
         mime=x-scheme-handler/irc
         ;;
+      "")
+        echo "empty file" 1>&2
+        exit 0
+        ;;
       *)
         # it’s a file
 
