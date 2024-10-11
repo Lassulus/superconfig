@@ -376,6 +376,11 @@
     openFirewall = true;
   };
 
+  services.flaresolverr = {
+    enable = true;
+    openFirewall = true;
+  };
+
   # subtitles
   services.bazarr = {
     enable = true;
