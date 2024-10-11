@@ -216,8 +216,8 @@
           servers = {
             bashls.enable = true; # bash
             nixd.enable = true; # nix
-            ruff-lsp.enable = true; # python
-            harper-ls.enable = true; # comments
+            ruff_lsp.enable = true; # python
+            harper_ls.enable = true; # comments
             jsonls.enable = true; # json
           };
         };
