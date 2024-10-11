@@ -39,7 +39,6 @@
       "alewis.de"
       "jarugadesign.de"
       "beesmooth.ch"
-      "event-extra.de"
       "jla-trading.com"
     ];
     extraRouters = ''
@@ -52,7 +51,7 @@
 
       forward_ubik:
         driver = manualroute
-        domains = ubikmedia.eu:ubikmedia.de:apanowicz.de:alewis.de:jarugadesign.de:beesmooth.ch:event-extra.de:jla-trading.com
+        domains = ubikmedia.eu:ubikmedia.de:apanowicz.de:alewis.de:jarugadesign.de:beesmooth.ch:jla-trading.com
         transport = remote_smtp
         route_list = * ubik.r
         no_more

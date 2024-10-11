@@ -155,7 +155,6 @@
       "alewis.de"
       "jarugadesign.de"
       "beesmooth.ch"
-      "event-extra.de"
     ];
     dkim = [
       { domain = "ubikmedia.eu"; }

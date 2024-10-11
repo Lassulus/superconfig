@@ -50,10 +50,6 @@ in
       "illustra.de"
       "www.illustra.de"
     ])
-    (servePage [
-      "event-extra.de"
-      "www.event-extra.de"
-    ])
     # (servePage [ "nirwanabluete.de" "www.nirwanabluete.de" ])
     (servePage [
       "familienrat-hamburg.de"
