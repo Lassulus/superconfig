@@ -123,7 +123,6 @@ in
     ../../2configs/iodined.nix
     ../../2configs/paste.nix
     ../../2configs/syncthing.nix
-    ../../2configs/reaktor-coders.nix
     ../../2configs/container-networking.nix
     ../../2configs/bgt-bot
     (self.inputs.stockholm + "/krebs/2configs/mastodon-proxy.nix")
