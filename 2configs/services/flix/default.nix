@@ -189,37 +189,21 @@
   services.samba = {
     enable = true;
     enableNmbd = false;
-    extraConfig = ''
-      workgroup = WORKGROUP
-      server string = ${config.networking.hostName}
-      # only allow retiolum addresses
-      hosts allow = 42::/16 10.243.0.0/16 10.244.0.0/16 fdcc:c5da:5295:c853:d499::/80
-
-      # Use sendfile() for performance gain
-      use sendfile = true
-
-      # No NetBIOS is needed
-      disable netbios = true
-
-      # Only mangle non-valid NTFS names, don't care about DOS support
-      mangled names = illegal
-
-      # Performance optimizations
-      socket options = TCP_NODELAY IPTOS_LOWDELAY SO_RCVBUF=65536 SO_SNDBUF=65536
-
-      # Disable all printing
-      load printers = false
-      disable spoolss = true
-      printcap name = /dev/null
-
-      map to guest = Bad User
-      max log size = 50
-      dns proxy = no
-      security = user
-
-      [global]
-      syslog only = yes
-    '';
+    settings.global = {
+      "hosts allow" = "42::/16 10.243.0.0/16 10.244.0.0/16 fdcc:c5da:5295:c853:d499::/80";
+      "use sendfile" = "true";
+      "disable netbios" = "true";
+      "mangled names" = "illegal";
+      "socket options" = "TCP_NODELAY IPTOS_LOWDELAY SO_RCVBUF=65536 SO_SNDBUF=65536";
+      "load printers" = "false";
+      "disable spoolss" = "true";
+      "printcap name" = "/dev/null";
+      "map to guest" = "Bad User";
+      "max log size" = "50";
+      "dns proxy" = "no";
+      "security" = "user";
+      "syslog only" = "yes";
+    };
     shares.public = {
       comment = "Warez";
       path = "/var/download";
