@@ -207,12 +207,7 @@ let
     bind index \Cr noop
     macro index \Cr \
     "<enter-command>unset wait_key<enter> \
-    <shell-escape>${pkgs.writeDash "muchsync" ''
-      set -efu
-      until ${pkgs.muchsync}/bin/muchsync -F lass@green.s; do
-        sleep 1
-      done
-    ''}<enter>
+    <shell-escape>mailsync<enter>
 
     #killed
     bind index d noop
@@ -310,5 +305,22 @@ in
     pkgs.muchsync
     tag-new-mails
     tag-old-mails
+    (pkgs.writeShellApplication {
+      name = "mailsync";
+      meta.description = "sync mails with muchsync with green";
+      runtimeInputs = [ pkgs.muchsync ];
+      text = ''
+        if ping -W2 -c1 green.s; then
+          muchsync lass@green.s
+        elif ping -W2 -c1 green.n; then
+          muchsync lass@green.n
+        elif ping -W2 -c1 green.r; then
+          muchsync lass@green.r
+        else
+          echo no green host reachable
+          exit 1
+        fi
+      '';
+    })
   ];
 }
