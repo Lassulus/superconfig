@@ -118,13 +118,13 @@
     enable = true;
     resolveLocalQueries = false;
 
-    extraConfig = ''
-      local=/gg23/
-      domain=gg23
-      expand-hosts
-      listen-address=10.42.0.1,10.233.0.1
-      interface=int0
-    '';
+    settings = {
+      local = "/gg23/";
+      domain = "gg23";
+      expand-hosts = true;
+      listen-address = "10.42.0.1,10.233.0.1";
+      interface = "int0";
+    };
   };
 
   environment.systemPackages = [
