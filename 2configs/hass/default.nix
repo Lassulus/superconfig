@@ -74,5 +74,10 @@
     ];
   };
 
+  services.ollama = {
+    enable = true;
+    openFirewall = true;
+  };
+
   environment.systemPackages = [ pkgs.mosquitto ];
 }
