@@ -15,6 +15,9 @@
   boot.initrd.kernelModules = [ "dm-snapshot" ];
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
+  boot.kernelParams = [
+    "boot.shell_on_fail"
+  ];
 
   boot.loader.grub.enable = true;
   boot.loader.grub.efiSupport = true;
