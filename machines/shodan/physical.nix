@@ -1,51 +1,16 @@
 { self, ... }:
 {
-  #TODO reinstall with correct layout and use lass/hw/x220
   imports = [
     ./config.nix
-    (self.inputs.stockholm + "/krebs/2configs/hw/x220.nix")
+    ./disk.nix
+    self.inputs.nixos-hardware.nixosModules.lenovo-thinkpad-x220
   ];
 
-  boot = {
-    loader.grub.enable = true;
-    loader.grub.version = 2;
-    loader.grub.device = "/dev/sda";
-
-    initrd.luks.devices.lusksroot.device = "/dev/sda2";
-    initrd.availableKernelModules = [
-      "xhci_hcd"
-      "ehci_pci"
-      "ahci"
-      "usb_storage"
-    ];
-  };
-  fileSystems = {
-    "/" = {
-      device = "/dev/pool/nix";
-      fsType = "btrfs";
-    };
-
-    "/boot" = {
-      device = "/dev/sda1";
-    };
-    "/home" = {
-      device = "/dev/mapper/pool-home";
-      fsType = "btrfs";
-      options = [
-        "defaults"
-        "noatime"
-        "ssd"
-        "compress=lzo"
-      ];
-    };
-    "/bku" = {
-      device = "/dev/pool/bku";
-      fsType = "btrfs";
-    };
-    "/backups" = {
-      device = "/dev/pool/backup";
-      fsType = "ext4";
-    };
+  boot.loader.grub = {
+    enable = true;
+    device = "/dev/disk/by-id/ata-Samsung_SSD_850_EVO_500GB_S2RBNX0H662201F";
+    efiSupport = true;
+    efiInstallAsRemovable = true;
   };
 
   services.udev.extraRules = ''
