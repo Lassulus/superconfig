@@ -25,7 +25,7 @@
   boot.loader.grub.efiInstallAsRemovable = true;
 
   fileSystems."/" = {
-    device = "/dev/disk/by-uuid/ee5c9099-17fa-401e-852e-67cb4ae068f4";
+    device = "/dev/pool/root";
     fsType = "ext4";
   };
 
