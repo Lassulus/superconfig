@@ -164,7 +164,8 @@
       '';
     in
     {
-      packages.sh = pkgs.writeScriptBin "sh" ''
+      packages.shell = pkgs.writeScriptBin "shell" ''
+        #!/bin/sh
         zdotdir=$(mktemp -d)
         export ZDOTDIR=${pkgs.writeTextDir "/.zshrc" zshrc}
         exec ${pkgs.zsh}/bin/zsh "$@"
