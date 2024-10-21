@@ -1,23 +1,8 @@
 {
   self,
-  lib,
   pkgs,
   ...
 }:
-let
-  # pcsclite workaround until https://github.com/NixOS/nixpkgs/pull/308884 is in unstable
-  pcsclite = pkgs.pcsclite.overrideAttrs (old: {
-    postPatch =
-      old.postPatch
-      + (lib.optionalString
-        (!(lib.strings.hasInfix ''--replace-fail "libpcsclite_real.so.1"'' old.postPatch))
-        ''
-          substituteInPlace src/libredirect.c src/spy/libpcscspy.c \
-            --replace-fail "libpcsclite_real.so.1" "$lib/lib/libpcsclite_real.so.1"
-        ''
-      );
-  });
-in
 {
   environment.systemPackages = with pkgs; [
     yubikey-personalization
@@ -36,19 +21,7 @@ in
   systemd.user.services.gpg-agent.serviceConfig.ExecStartPre = pkgs.writers.writeDash "init_gpg" ''
     set -x
     mkdir -p $HOME/.gnupg
-    ${pkgs.coreutils}/bin/ln -sf ${pkgs.writeText "scdaemon.conf" ''
-      disable-ccid
-      pcsc-driver ${pcsclite.lib}/lib/libpcsclite.so.1
-      card-timeout 1
-
-      # Always try to use yubikey as the first reader
-      # even when other smart card readers are connected
-      # Name of the reader can be found using the pcsc_scan command
-      # If you have problems with gpg not recognizing the Yubikey
-      # then make sure that the string here matches exacly pcsc_scan
-      # command output. Also check journalctl -f for errors.
-      reader-port Yubico YubiKey
-    ''} $HOME/.gnupg/scdaemon.conf
+    rm -f $HOME/.gnupg/scdaemon.conf
   '';
   systemd.user.services.gpg-agent.serviceConfig.ExecStartPost = pkgs.writers.writeDash "init_gpg" ''
     ${pkgs.gnupg}/bin/gpg --import ${
