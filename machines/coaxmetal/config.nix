@@ -1,8 +1,6 @@
 {
   self,
   config,
-  lib,
-  pkgs,
   ...
 }:
 
@@ -20,61 +18,6 @@
     ../../2configs/wine.nix
     ../../2configs/yellow-mounts/samba.nix
     ../../2configs/review.nix
-    {
-      # moonlight test env
-      imports = [
-        ../../2configs/sunshine.nix
-        ../../2configs/mpv.nix
-      ];
-      users.users.moon = {
-        isNormalUser = true;
-        uid = 1338;
-        extraGroups = [
-          "video"
-          "audio"
-          "input"
-          "pipewire"
-        ];
-        home = "/home/moon";
-        password = "moon";
-        packages = with pkgs; [
-          (retroarch.override {
-            cores = [
-              libretro.bsnes-hd
-              libretro.mupen64plus
-            ];
-          })
-        ];
-      };
-      services.xserver.enable = true;
-      hardware.pulseaudio.enable = false;
-      services.xserver.displayManager.autoLogin = {
-        enable = true;
-        user = "lass";
-      };
-      services.xserver.desktopManager.gnome.enable = true;
-      services.xserver.displayManager.defaultSession = lib.mkForce "gnome";
-      services.xserver.displayManager.sessionCommands = ''
-        tmux new-session -A -s sun -- sun
-      '';
-      environment.systemPackages = [
-        pkgs.firefox-devedition
-        pkgs.vulkan-tools
-      ];
-      systemd.user.services.sun = {
-        wantedBy = [ "default.target" ];
-        environment = {
-          DISPLAY = ":0";
-          XAUTHORITY = "/home/moon/.Xauthority";
-        };
-        serviceConfig = {
-          Type = "oneshot";
-          ExecStart = "${pkgs.tmux}/bin/tmux new-session -A -s sun -- /run/current-system/sw/bin/sun";
-          Restart = "always";
-          RestartSec = 5;
-        };
-      };
-    }
   ];
 
   system.stateVersion = "24.05";
