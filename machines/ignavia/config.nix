@@ -35,7 +35,7 @@
     # ../../2configs/sunshine.nix
     # ../../2configs/print.nix
     # ../../2configs/br.nix
-    ../../2configs/c-base.nix
+    # ../../2configs/c-base.nix
     ../../2configs/services/radio/tts.nix
   ];
 
