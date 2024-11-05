@@ -28,7 +28,7 @@ let
             };
             size = 12;
           };
-        live_config_reload = true;
+        general.live_config_reload = true;
         window.dimensions = {
           columns = 80;
           lines = 20;
