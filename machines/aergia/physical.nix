@@ -3,7 +3,7 @@
   imports = [
     ./config.nix
     (modulesPath + "/installer/scan/not-detected.nix")
-    ../../2configs/antimicrox
+    # ../../2configs/antimicrox
     ./disk.nix
   ];
 

@@ -4,8 +4,8 @@
   imports = [
     ../../2configs/retiolum.nix
     ../../2configs/exim-retiolum.nix
-    ../../2configs/desktops/xmonad
-    ../../2configs/pipewire.nix
+    # ../../2configs/desktops/xmonad
+    # ../../2configs/pipewire.nix
     ../../2configs/browsers.nix
     ../../2configs/programs.nix
     ../../2configs/network-manager.nix
@@ -17,12 +17,12 @@
     ../../2configs/yellow-mounts/samba.nix
     ../../2configs/pass.nix
     ../../2configs/mail.nix
-    ../../2configs/bitcoin.nix
-    ../../2configs/review.nix
-    ../../2configs/dunst.nix
+    # ../../2configs/bitcoin.nix
+    # ../../2configs/review.nix
+    # ../../2configs/dunst.nix
     ../../2configs/print.nix
     ../../2configs/br.nix
-    ../../2configs/c-base.nix
+    # ../../2configs/c-base.nix
     {
       # autorandrs
       services.autorandr = {
@@ -109,16 +109,6 @@
   system.stateVersion = "22.11";
 
   krebs.build.host = config.krebs.hosts.aergia;
-
-  environment.systemPackages = [
-    pkgs.brain
-    pkgs.bank
-    pkgs.l-gen-secrets
-    pkgs.generate-secrets
-    pkgs.nixpkgs-review
-    pkgs.pipenv
-    # self.inputs.clan-core.packages.${pkgs.system}.clan-cli
-  ];
 
   programs.adb.enable = true;
 
