@@ -30,7 +30,7 @@ in
   environment.systemPackages = [
     switch-theme
     pkgs.dracula-theme
-    pkgs.gnome3.adwaita-icon-theme
+    pkgs.gnome.adwaita-icon-theme
   ];
   environment.etc = {
     "themes/light/gtk-theme".text = ''
