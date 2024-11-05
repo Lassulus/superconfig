@@ -22,7 +22,7 @@ in
       useDefaultShell = true;
       createHome = true;
       packages = [
-        pkgs.monero
+        pkgs.monero-cli
         pkgs.monero-gui
       ];
       isNormalUser = true;
