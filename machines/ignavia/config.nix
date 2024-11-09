@@ -25,7 +25,7 @@
     ../../2configs/yellow-mounts/samba.nix
     ../../2configs/pass.nix
     ../../2configs/mail.nix
-    ../../2configs/print.nix
+    ../../2configs/printing
     ../../2configs/br.nix
     # ../../2configs/bitcoin.nix
     ../../2configs/review.nix
@@ -33,7 +33,6 @@
     ../../2configs/yggdrasil.nix
     ../../2configs/container-tests.nix
     # ../../2configs/sunshine.nix
-    # ../../2configs/print.nix
     # ../../2configs/br.nix
     # ../../2configs/c-base.nix
     ../../2configs/services/radio/tts.nix

@@ -47,7 +47,7 @@
         # printer
         dhcpServerStaticLeaseConfig = {
           Address = "10.42.0.4";
-          MACAddress = "3c:2a:f4:22:28:37";
+          MACAddress = "94:dd:f8:23:c5:ac";
         };
       }
       {

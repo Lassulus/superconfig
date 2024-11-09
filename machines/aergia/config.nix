@@ -20,7 +20,7 @@
     # ../../2configs/bitcoin.nix
     # ../../2configs/review.nix
     # ../../2configs/dunst.nix
-    ../../2configs/print.nix
+    ../../2configs/printing.nix
     ../../2configs/br.nix
     # ../../2configs/c-base.nix
     {

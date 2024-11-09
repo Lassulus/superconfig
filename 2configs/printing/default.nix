@@ -2,10 +2,6 @@
 {
   services.printing = {
     enable = true;
-    drivers = [
-      pkgs.foomatic-filters
-      pkgs.gutenprint
-    ];
     browsing = true;
     browsedConf = ''
       BrowseDNSSDSubTypes _cups,_print
@@ -16,4 +12,8 @@
       BrowseProtocols all
     '';
   };
+  systemd.services.cups.serviceConfig.ExecStartPost = pkgs.writers.writeDash "init-gg23" ''
+    lpadmin -x gg23 || :
+    lpadmin -i ${./gg23.ppd} -p gg23 -E -v ipp://10.42.0.4
+  '';
 }

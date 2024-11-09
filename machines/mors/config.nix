@@ -26,7 +26,7 @@
     ../../2configs/ableton.nix
     ../../2configs/dunst.nix
     ../../2configs/rtl-sdr.nix
-    ../../2configs/print.nix
+    ../../2configs/printing
     ../../2configs/network-manager.nix
     ../../2configs/yellow-mounts/samba.nix
     ../../2configs/ppp/x220-modem.nix
