@@ -34,6 +34,7 @@
     ../../2configs/consul.nix
     ../../2configs/networkd.nix
     ../../2configs/autotether.nix
+    ../../2configs/autoupdate.nix
     {
       krebs.iptables.tables.filter.INPUT.rules = [
         #risk of rain
