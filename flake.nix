@@ -22,6 +22,7 @@
     # stockholm.url = "git+https://cgit.lassul.us/stockholm";
     # stockholm.url = "path:/home/lass/sync/stockholm";
     stockholm.inputs.nixpkgs.follows = "nixpkgs";
+    stockholm.inputs.buildbot-nix.follows = "";
 
     disko.url = "github:nix-community/disko";
     # disko.url = "path:/home/lass/src/disko/";
