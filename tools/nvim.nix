@@ -20,7 +20,7 @@
           shiftwidth = 2;
           clipboard = "unnamedplus";
           # undo stuff
-          undofile = { };
+          undofile = true;
           undolevels = 10000;
           undoreload = 10000;
           listchars = "tab:⇥ ,extends:❯,precedes:❮,nbsp:␣,trail:·,eol:↲";
