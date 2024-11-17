@@ -13,7 +13,6 @@ let
     ;
   inherit (import ./util.nix { inherit lib pkgs; })
     servePage
-    serveOwncloud
     serveWordpress
     ;
 
@@ -60,7 +59,6 @@ in
       "freemonkey.art"
       "www.freemonkey.art"
     ])
-    (serveOwncloud [ "o.ubikmedia.de" ])
     (serveWordpress [
       "ubikmedia.de"
       "ubikmedia.eu"
@@ -166,6 +164,13 @@ in
     forceSSL = true;
     locations."/".extraConfig = ''
       return 301 https://weirdwednesday.de/weirdweekender/;
+    '';
+  };
+  services.nginx.virtualHosts."shop.weirdwednesday.de" = {
+    enableACME = true;
+    addSSL = true;
+    locations."/".extraConfig = ''
+      return 301 https://weirdwednesday0711.etsy.com;
     '';
   };
 
@@ -368,23 +373,6 @@ in
     "/home/sts"
     "/home/familienrat"
   ];
-  users.users.UBIK-SFTP = {
-    uid = genid_uint31 "UBIK-SFTP";
-    home = "/home/UBIK-SFTP";
-    useDefaultShell = true;
-    createHome = true;
-    isNormalUser = true;
-  };
-
-  users.users.xanf = {
-    uid = genid_uint31 "xanf";
-    group = "xanf";
-    home = "/home/xanf";
-    useDefaultShell = true;
-    createHome = false; # creathome forces permissions
-    isNormalUser = true;
-  };
-
   users.users.domsen = {
     uid = genid_uint31 "domsen";
     description = "maintenance acc for domsen";
@@ -402,14 +390,6 @@ in
   users.users.bruno = {
     uid = genid_uint31 "bruno";
     home = "/home/bruno";
-    useDefaultShell = true;
-    createHome = true;
-    isNormalUser = true;
-  };
-
-  users.users.jla-trading = {
-    uid = genid_uint31 "jla-trading";
-    home = "/home/jla-trading";
     useDefaultShell = true;
     createHome = true;
     isNormalUser = true;
@@ -447,95 +427,9 @@ in
   #  isNormalUser = true;
   #};
 
-  users.users.bui = {
-    uid = genid_uint31 "bui";
-    home = "/home/bui";
-    useDefaultShell = true;
-    createHome = true;
-    isNormalUser = true;
-  };
-
   users.users.klabusterbeere = {
     uid = genid_uint31 "klabusterbeere";
     home = "/home/klabusterbeere";
-    useDefaultShell = true;
-    createHome = true;
-    isNormalUser = true;
-  };
-
-  users.users.kasia = {
-    uid = genid_uint31 "kasia";
-    home = "/home/kasia";
-    useDefaultShell = true;
-    createHome = true;
-    isNormalUser = true;
-  };
-
-  users.users.XANF_TEAM = {
-    uid = genid_uint31 "XANF_TEAM";
-    group = "xanf";
-    home = "/home/XANF_TEAM";
-    useDefaultShell = true;
-    createHome = true;
-    isNormalUser = true;
-  };
-
-  users.users.dif = {
-    uid = genid_uint31 "dif";
-    home = "/home/dif";
-    useDefaultShell = true;
-    extraGroups = [ "xanf" ];
-    createHome = true;
-    isNormalUser = true;
-  };
-
-  users.users.lavafilms = {
-    uid = genid_uint31 "lavafilms";
-    home = "/home/lavafilms";
-    useDefaultShell = true;
-    extraGroups = [ "xanf" ];
-    createHome = true;
-    isNormalUser = true;
-  };
-
-  users.users.movematchers = {
-    uid = genid_uint31 "movematchers";
-    home = "/home/movematchers";
-    useDefaultShell = true;
-    extraGroups = [ "xanf" ];
-    createHome = true;
-    isNormalUser = true;
-  };
-
-  users.users.blackphoton = {
-    uid = genid_uint31 "blackphoton";
-    home = "/home/blackphoton";
-    useDefaultShell = true;
-    extraGroups = [ "xanf" ];
-    createHome = true;
-    isNormalUser = true;
-  };
-
-  users.users.line = {
-    uid = genid_uint31 "line";
-    home = "/home/line";
-    useDefaultShell = true;
-    # extraGroups = [ "xanf" ];
-    createHome = true;
-    isNormalUser = true;
-  };
-
-  users.users.avada = {
-    uid = genid_uint31 "avada";
-    home = "/home/avada";
-    useDefaultShell = true;
-    createHome = true;
-    isNormalUser = true;
-  };
-
-  users.users.sts = {
-    uid = genid_uint31 "sts";
-    home = "/home/sts";
     useDefaultShell = true;
     createHome = true;
     isNormalUser = true;
@@ -562,8 +456,6 @@ in
     default = false;
     recursive = false;
   };
-
-  users.groups.xanf = { };
 
   krebs.on-failure.plans.restic-backups-domsen = {
     journalctl = {
@@ -610,9 +502,4 @@ in
   # krebs.acl."/srv/http"."u:syncthing:rwX" = {};
   # krebs.acl."/srv/http"."u:nginx:rwX" = {};
   # krebs.acl."/srv/http/ubikmedia.de"."u:avada:rwX" = {};
-  krebs.acl."/home/xanf/XANF_TEAM"."g:xanf:rwX" = { };
-  krebs.acl."/home/xanf"."g:xanf:X" = {
-    default = false;
-    recursive = false;
-  };
 }
