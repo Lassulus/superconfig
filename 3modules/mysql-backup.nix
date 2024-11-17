@@ -76,7 +76,7 @@ let
       _: plan:
       nameValuePair "mysqlBackup-${plan.name}" {
         path = with pkgs; [
-          mysql
+          mariadb
           gzip
         ];
         serviceConfig = rec {
