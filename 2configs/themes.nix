@@ -54,13 +54,13 @@ in
       *foreground: #ffffff
     '';
   };
-  system.activationScripts.theme.text = ''
-    export DISPLAY=:0
-    if test -e /var/theme/current_theme; then
-      ${switch-theme}/bin/switch-theme "$(cat /var/theme/current_theme)" ||
-      ${switch-theme}/bin/switch-theme dark
-    else
-      ${switch-theme}/bin/switch-theme dark
-    fi
-  '';
+  # system.activationScripts.theme.text = ''
+  #   export DISPLAY=:0
+  #   if test -e /var/theme/current_theme; then
+  #     ${switch-theme}/bin/switch-theme "$(cat /var/theme/current_theme)" ||
+  #     ${switch-theme}/bin/switch-theme dark
+  #   else
+  #     ${switch-theme}/bin/switch-theme dark
+  #   fi
+  # '';
 }
