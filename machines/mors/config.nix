@@ -13,24 +13,18 @@
     ../../2configs/pipewire.nix
     ../../2configs/exim-retiolum.nix
     ../../2configs/programs.nix
-    ../../2configs/bitcoin.nix
     ../../2configs/browsers.nix
-    ../../2configs/games.nix
     ../../2configs/pass.nix
     ../../2configs/steam.nix
-    ../../2configs/wine.nix
     ../../2configs/fetchWallpaper.nix
     ../../2configs/mail.nix
     ../../2configs/syncthing.nix
-    ../../2configs/br.nix
     ../../2configs/ableton.nix
     ../../2configs/dunst.nix
     ../../2configs/rtl-sdr.nix
     ../../2configs/printing
     ../../2configs/network-manager.nix
     ../../2configs/yellow-mounts/samba.nix
-    ../../2configs/ppp/x220-modem.nix
-    ../../2configs/ppp/umts-stick.nix
     ../../2configs/consul.nix
     ../../2configs/networkd.nix
     ../../2configs/autotether.nix
