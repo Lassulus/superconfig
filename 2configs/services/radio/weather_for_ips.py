@@ -74,6 +74,7 @@ def downfall_representation(precipitation: float) -> str:
     else:
         return ''
 
+
 geoip = geoip2.database.Reader(os.environ['MAXMIND_GEOIP_DB'])
 seen = {}
 output = []
