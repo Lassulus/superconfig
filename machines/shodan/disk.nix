@@ -27,7 +27,7 @@
             size = "100%";
             content = {
               type = "luks";
-              name = "aergia1";
+              name = "shodan";
               content = {
                 type = "btrfs";
                 extraArgs = [ "-f" ]; # Override existing partition
