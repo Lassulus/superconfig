@@ -237,6 +237,7 @@
               extraOptions.offset_encoding = "utf-8"; # workaround https://github.com/nix-community/nixvim/issues/2390#issuecomment-2408101568
             };
             ruff_lsp.enable = true; # python
+            pyright.enable = true; # python
             harper_ls.enable = true; # comments
             jsonls.enable = true; # json
           };
