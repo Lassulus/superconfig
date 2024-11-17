@@ -57,16 +57,6 @@
       };
     }
     {
-      clan.core.vars.settings.secretStore = "password-store";
-      clan.core.vars.generators.testing = {
-        files.testaaa = { };
-        runtimeInputs = with pkgs; [ coreutils ];
-        script = ''
-          echo lol > $out/testaaa
-        '';
-      };
-    }
-    {
       # deployment information
       options.clan.flake-inputs = lib.mkOption {
         description = ''
