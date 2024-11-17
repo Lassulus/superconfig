@@ -1,9 +1,5 @@
-{ pkgs, modulesPath, ... }:
+{ pkgs, ... }:
 {
-
-  imports = [
-    (modulesPath + "/services/hardware/sane_extra_backends/brscan4.nix")
-  ];
 
   hardware.sane = {
     enable = true;
@@ -30,18 +26,6 @@
       | ${pkgs.gawk}/bin/awk -v dev="*$name" '$1 == dev { print $2; exit }' \
       | ${pkgs.gnugrep}/bin/grep .
     '')
-  ];
-
-  services.printing = {
-    enable = true;
-    drivers = [
-      pkgs.mfcl2700dncupswrapper
-    ];
-  };
-
-  users.users.mainUser.extraGroups = [
-    "scanner"
-    "lp"
   ];
 
 }
