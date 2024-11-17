@@ -10,6 +10,18 @@
         # Bind gpg-agent to this TTY if gpg commands are used.
         export GPG_TTY=$(tty)
 
+        # show how long a command takes
+        ZSH_COMMAND_TIME_MIN_SECONDS=3
+        ZSH_COMMAND_TIME_EXCLUDE=(vim)
+        ZSH_COMMAND_TIME_MSG="took: %s sec"
+        source ${
+          pkgs.fetchFromGitHub {
+            owner = "popstas";
+            repo = "zsh-command-time";
+            rev = "803d26eef526bff1494d1a584e46a6e08d25d918";
+            hash = "sha256-ndHVFcz+XmUW0zwFq7pBXygdRKyPLjDZNmTelhd5bv8=";
+          }
+        }/command-time.plugin.zsh
 
         unsetopt nomatch # no matches found urls
         setopt autocd extendedglob
@@ -25,18 +37,20 @@
         source ${pkgs.fzf}/share/fzf/key-bindings.zsh
 
         # atuin distributed shell history
-        export ATUIN_CONFIG_DIR=${pkgs.writeTextDir "/config.toml" ''
-          auto_sync = true
-          update_check = false
-          sync_address = "http://green.r:8888"
-          sync_frequency = 0
-          style = "compact"
-        ''};
-        export ATUIN_NOBIND="true" # disable all keybdinings of atuin
-        eval "$(atuin init zsh)"
-        bindkey '^r' _atuin_search_widget # bind ctrl+r to atuin
-        # use zsh only session history
-        fc -p
+        if type -p atuin >/dev/null; then
+          export ATUIN_CONFIG_DIR=${pkgs.writeTextDir "/config.toml" ''
+            auto_sync = true
+            update_check = false
+            sync_address = "http://green.r:8888"
+            sync_frequency = 0
+            style = "compact"
+          ''};
+          export ATUIN_NOBIND="true" # disable all keybdinings of atuin
+          eval "$(${pkgs.atuin}/bin/atuin init zsh)" # TODO make this optional?
+          bindkey '^r' _atuin_search_widget # bind ctrl+r to atuin
+          # use zsh only session history
+          fc -p
+        fi
 
         #completion magic
         autoload -Uz compinit
@@ -166,7 +180,11 @@
     {
       packages.shell = pkgs.writeScriptBin "shell" ''
         #!/bin/sh
-        zdotdir=$(mktemp -d)
+        export ZDOTDIR=${pkgs.writeTextDir "/.zshrc" zshrc}
+        exec ${pkgs.zsh}/bin/zsh "$@"
+      '';
+      packages.zsh = pkgs.writeScriptBin "zsh" ''
+        #!/bin/sh
         export ZDOTDIR=${pkgs.writeTextDir "/.zshrc" zshrc}
         exec ${pkgs.zsh}/bin/zsh "$@"
       '';
