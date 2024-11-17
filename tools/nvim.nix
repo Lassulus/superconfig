@@ -170,6 +170,20 @@
             key = "<M-CR>";
             action = ":lua vim.lsp.buf.code_action()<CR>";
           }
+          {
+            mode = [
+              "n"
+            ];
+            key = "gd";
+            action = ":lua vim.lsp.buf.definition()<CR>";
+          }
+          {
+            mode = [
+              "n"
+            ];
+            key = "gD";
+            action = ":lua vim.lsp.buf.declaration()<CR>";
+          }
         ];
         # autoCmd = [
         #   {
