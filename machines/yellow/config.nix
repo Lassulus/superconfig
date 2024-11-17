@@ -45,8 +45,8 @@ in
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${pkgs.iproute}/bin/ip netns add %I";
-      ExecStop = "${pkgs.iproute}/bin/ip netns del %I";
+      ExecStart = "${pkgs.iproute2}/bin/ip netns add %I";
+      ExecStop = "${pkgs.iproute2}/bin/ip netns del %I";
     };
   };
 
