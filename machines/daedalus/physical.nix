@@ -9,7 +9,7 @@
   fileSystems = {
     "/" = {
       device = "/dev/pool/root";
-      fsType = "ext4";
+      fsType = "btrfs";
     };
     "/boot" = {
       device = "/dev/sda2";
