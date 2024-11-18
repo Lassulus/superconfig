@@ -42,6 +42,7 @@
     {
       users.extraUsers.mainUser.hashedPasswordFile = "${config.krebs.secret.directory}/passwordHash";
       users.extraUsers.root.hashedPasswordFile = "${config.krebs.secret.directory}/passwordHash";
+      boot.initrd.systemd.emergencyAccess = true;
       clanCore.facts.services.password = {
         secret.password = { };
         secret.passwordHash = { };
