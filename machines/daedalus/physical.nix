@@ -45,15 +45,7 @@
     SUBSYSTEM=="net", ATTR{address}=="f0:de:f1:71:cb:35", NAME="et0"
   '';
 
-  boot = {
-    initrd.luks.devices.luksroot.device = "/dev/sda3";
-    initrd.availableKernelModules = [
-      "xhci_hcd"
-      "ehci_pci"
-      "ahci"
-      "usb_storage"
-    ];
-  };
+  boot.initrd.luks.devices.luksroot.device = "/dev/sda3";
 
   services.logind.lidSwitch = "ignore";
   services.logind.lidSwitchDocked = "ignore";
