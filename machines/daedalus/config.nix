@@ -77,7 +77,6 @@
             ];
             packages = [
               pkgs.electrum
-              pkgs.electron-cash
               pkgs.ledger-live-desktop
             ];
           };
