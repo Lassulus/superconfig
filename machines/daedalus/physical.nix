@@ -1,4 +1,4 @@
-{ self, ... }:
+{ self, config, ... }:
 {
   imports = [
     ./config.nix
@@ -24,20 +24,37 @@
         "compress=lzo"
       ];
     };
-    "/bku" = {
-      device = "/dev/mapper/pool-bku";
-      fsType = "btrfs";
-      options = [
-        "defaults"
-        "noatime"
-        "ssd"
-        "compress=lzo"
-      ];
-    };
-    "/backups" = {
-      device = "/dev/pool/backup";
-      fsType = "ext4";
-    };
+    # "/bku" = {
+    #   device = "/dev/mapper/pool-bku";
+    #   fsType = "btrfs";
+    #   options = [
+    #     "defaults"
+    #     "noatime"
+    #     "ssd"
+    #     "compress=lzo"
+    #   ];
+    # };
+    # "/backups" = {
+    #   device = "/dev/pool/backup";
+    #   fsType = "ext4";
+    # };
+  };
+
+  boot = {
+    initrd.availableKernelModules = [
+      "xhci_hcd"
+      "ehci_pci"
+      "ahci"
+      "usb_storage"
+    ];
+    extraModulePackages = [
+      config.boot.kernelPackages.tp_smapi
+      config.boot.kernelPackages.acpi_call
+    ];
+    kernelModules = [
+      "acpi_call"
+      "tp_smapi"
+    ];
   };
 
   services.udev.extraRules = ''
