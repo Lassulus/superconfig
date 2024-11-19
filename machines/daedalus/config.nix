@@ -1,5 +1,4 @@
 {
-  self,
   config,
   lib,
   pkgs,
@@ -11,9 +10,10 @@
     ../../2configs/retiolum.nix
     ../../2configs/pipewire.nix
     {
+      users.mutableUsers = lib.mkForce true;
       # bubsy config
       users.users.bubsy = {
-        uid = self.inputs.stockholm.lib.genid "bubsy";
+        uid = 1001;
         home = "/home/bubsy";
         group = "users";
         createHome = true;
@@ -21,6 +21,7 @@
           "audio"
           "networkmanager"
           "pipewire"
+          "video"
           # "plugdev"
         ];
         useDefaultShell = true;
@@ -54,8 +55,9 @@
       # services.udev.packages = [ pkgs.ledger-udev-rules ];
       nixpkgs.config.firefox.enableAdobeFlash = true;
       services.xserver.enable = true;
-      services.xserver.displayManager.lightdm.enable = true;
-      services.xserver.desktopManager.plasma5.enable = true;
+      services.xserver.displayManager.sddm.enable = true;
+      services.xserver.desktopManager.plasma6.enable = true;
+      services.displayManager.sddm.wayland.enable = true;
       services.tlp.enable = lib.mkForce false;
       services.xserver.layout = "de";
     }
