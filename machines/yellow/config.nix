@@ -12,6 +12,7 @@ in
     ../../2configs
     ../../2configs/retiolum.nix
     ../../2configs/services/flix
+    ../../2configs/autoupdate.nix
   ];
 
   clan.password-store.targetDirectory = "/var/state/secrets";

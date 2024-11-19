@@ -47,6 +47,9 @@
 
     # debug stuff
     ../../2configs/websites/mergebot.lassul.us.nix
+
+    # autoupdates
+    ../../2configs/autoupdate.nix
   ];
 
   krebs.build.host = config.krebs.hosts.neoprism;

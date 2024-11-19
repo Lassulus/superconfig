@@ -8,6 +8,7 @@
   imports = [
     ../../2configs
     ../../2configs/retiolum.nix
+    ../../2configs/autoupdate.nix
 
     self.inputs.stockholm.nixosModules.exim-smarthost
   ];

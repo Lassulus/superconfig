@@ -5,6 +5,7 @@
     ../../2configs/retiolum.nix
     ../../2configs/syncthing.nix
     ../../2configs/services/radio
+    ../../2configs/autoupdate.nix
   ];
 
   clan.password-store.targetDirectory = "/var/state/secrets";

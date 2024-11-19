@@ -13,6 +13,7 @@ in
   system.stateVersion = "23.05";
   imports = [
     ./backup.nix
+    ../../2configs/autoupdate.nix
     ../../2configs/ssh-redirect.nix
     ../../2configs/retiolum.nix
     ../../2configs/libvirt.nix
