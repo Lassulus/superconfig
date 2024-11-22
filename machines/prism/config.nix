@@ -12,6 +12,12 @@ in
 
   system.stateVersion = "23.05";
   imports = [
+    {
+      # helsinki migration
+      users.users.root.openssh.authorizedKeys.keys = [
+        "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIP4MIZG/hZR3Ib7faGDyK67Tk53Q1P7pE5cFIWwEFbrtAAAABHNzaDo="
+      ];
+    }
     ./backup.nix
     ../../2configs/autoupdate.nix
     ../../2configs/ssh-redirect.nix
