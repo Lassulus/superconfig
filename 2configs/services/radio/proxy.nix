@@ -13,6 +13,26 @@
         proxy_set_header user-agent "$http_user_agent; client-ip=$remote_addr";
       '';
     };
+    locations."/wish" = {
+      # recommendedProxySettings = true;
+      proxyWebsockets = true;
+      proxyPass = "http://radio.r:8002/wish";
+      extraConfig = ''
+        proxy_set_header Host radio.r;
+        # get source ip for weather reports
+        proxy_set_header user-agent "$http_user_agent; client-ip=$remote_addr";
+      '';
+    };
+    locations."/all_tracks" = {
+      # recommendedProxySettings = true;
+      proxyWebsockets = true;
+      proxyPass = "http://radio.r:8002/all_tracks";
+      extraConfig = ''
+        proxy_set_header Host radio.r;
+        # get source ip for weather reports
+        proxy_set_header user-agent "$http_user_agent; client-ip=$remote_addr";
+      '';
+    };
   };
   krebs.htgen.radio-redirect = {
     port = 8000;
