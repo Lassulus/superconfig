@@ -143,6 +143,7 @@
   # };
   environment.shellAliases.ns = "nix-shell --command zsh";
   users.defaultUserShell = "/run/current-system/sw/bin/zsh";
+  programs.zsh.enable = true;
   environment.systemPackages = [
     pkgs.atuin
     pkgs.fzf
