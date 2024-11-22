@@ -1,4 +1,4 @@
-@ 3600 IN SOA lassul.us. ns1.lassul.us. 2024081401 7200 3600 86400 3600
+@ 3600 IN SOA lassul.us. ns1.lassul.us. 2024112201 7200 3600 86400 3600
 
 ;;@ 3600 IN NS ns1
 @ 3600 IN NS ns1
@@ -34,9 +34,7 @@ ns1 IN AAAA 2a01:4f9:4a:4f1a::2
 www IN CNAME prism
 cache IN CNAME prism
 cgit IN CNAME prism
-pad IN CNAME prism
-pad2 IN CNAME neoprism
-codi IN CNAME prism
+pad IN CNAME neoprism
 go IN CNAME neoprism
 cast IN CNAME neoprism
 lol IN CNAME prism

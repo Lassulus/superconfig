@@ -1,7 +1,7 @@
 { config, ... }:
 {
   imports = [ ./module.nix ];
-  clan.hedgedoc.domain = "pad2.lassul.us";
+  clan.hedgedoc.domain = "pad.lassul.us";
   clan.core.facts.services.hedgedoc-github-auth = {
     secret."hedgedoc.env" = { };
     generator.script = ''
