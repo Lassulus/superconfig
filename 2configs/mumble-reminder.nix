@@ -40,6 +40,7 @@ let
     Kurzschwanzwiesel
     Buschochsen
     Kurzschwanzaffen
+    Vicuñas
   '';
   systemPlugin = {
     plugin = "system";
