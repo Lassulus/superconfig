@@ -54,4 +54,13 @@
       '';
     };
   };
+  services.nginx.virtualHosts."flox.lassul.us" = {
+    forceSSL = true;
+    enableACME = true;
+    locations."/" = {
+      proxyPass = "http://yellow.r:5055";
+      proxyWebsockets = true;
+      recommendedProxySettings = true;
+    };
+  };
 }
