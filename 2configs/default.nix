@@ -105,20 +105,21 @@
       services.openssh.enable = true;
       services.openssh.hostKeys = [
         {
-          path = config.clanCore.facts.services.ssh.secret."ssh.id_ed25519".path;
+          path = config.clanCore.vars.generators.ssh.files."ssh.id_ed25519".path;
           type = "ed25519";
         }
       ];
-      clanCore.facts.services.ssh = {
-        secret."ssh.id_ed25519" = { };
-        public."ssh.id_ed25519.pub" = { };
-        generator.path = with pkgs; [
+      clan.core.vars.generators.ssh = {
+        files."ssh.id_ed25519".secret = true;
+        files."ssh.id_ed25519.pub".secret = false;
+        migrateFact = "ssh";
+        runtimeInputs = with pkgs; [
           coreutils
           openssh
         ];
-        generator.script = ''
-          ssh-keygen -t ed25519 -N "" -f $secrets/ssh.id_ed25519
-          mv $secrets/ssh.id_ed25519.pub $facts/ssh.id_ed25519.pub
+        script = ''
+          ssh-keygen -t ed25519 -N "" -f $out/ssh.id_ed25519
+          mv $secrets/ssh.id_ed25519.pub $out/ssh.id_ed25519.pub
         '';
       };
     }
