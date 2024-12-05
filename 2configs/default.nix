@@ -40,20 +40,25 @@
     self.inputs.stockholm.nixosModules.ssh
     self.inputs.stockholm.nixosModules.sync-containers3
     {
-      users.extraUsers.mainUser.hashedPasswordFile = "${config.krebs.secret.directory}/passwordHash";
-      users.extraUsers.root.hashedPasswordFile = "${config.krebs.secret.directory}/passwordHash";
+      # We need to mount these vars before the users phase, since that is the moment where the hashsed password are put into /etc/shadown
+      users.extraUsers.mainUser.hashedPasswordFile =
+        config.clan.core.vars.generators.password.files.passwordHash.path;
+      users.extraUsers.root.hashedPasswordFile =
+        config.clan.core.vars.generators.password.files.passwordHash.path;
       boot.initrd.systemd.emergencyAccess = true;
-      clanCore.facts.services.password = {
-        secret.password = { };
-        secret.passwordHash = { };
-        generator.path = with pkgs; [
+      clan.core.vars.generators.password = {
+        prompts.password.description = "Password for the main user";
+        files.password.deploy = false;
+        files.passwordHash.neededForUsers = true;
+        migrateFact = "password";
+        runtimeInputs = with pkgs; [
           coreutils
-          xkcdpass
           mkpasswd
         ];
-        generator.script = ''
-          xkcdpass -n 4 -d - > $secrets/password
-          cat $secrets/password | mkpasswd -s -m sha-512 > $secrets/passwordHash
+        script = ''
+          cp $prompts/password $out/password
+          exit 1
+          cat $out/password | mkpasswd -s -m sha-512 > $out/passwordHash
         '';
       };
     }
