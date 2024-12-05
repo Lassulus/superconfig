@@ -20,7 +20,7 @@
   users.users.mainUser = {
     extraGroups = [ "networkmanager" ];
     packages = with pkgs; [
-      gnome.gnome-keyring
+      gnome-keyring
       dconf
     ];
   };
