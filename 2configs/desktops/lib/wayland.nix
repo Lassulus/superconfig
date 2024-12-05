@@ -67,7 +67,7 @@
     swayidle
     rofi-wayland
     rofi-rbw
-    gnome.eog
+    eog
     libnotify
     mako # notifications
     kanshi # auto-configure display outputs
@@ -85,7 +85,7 @@
     evince
     libnotify
     pamixer
-    gnome.file-roller
+    file-roller
     xdg-utils
     # polkit agent
     polkit_gnome
