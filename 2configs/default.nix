@@ -383,7 +383,4 @@
   # use latest nix to hunt all the bugs
   nix.package = pkgs.nixVersions.latest;
 
-  # workaround for systemd freezing up when suspending
-  # https://github.com/systemd/systemd/issues/33083
-  environment.variables.SYSTEMD_SLEEP_FREEZE_USER_SESSIONS = "false";
 }
