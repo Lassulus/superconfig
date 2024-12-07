@@ -21,6 +21,7 @@
     ./zerotier.nix
     ./nether.nix
     ./spora.nix
+    ./nix.nix
     self.inputs.stockholm.nixosModules.users
     self.inputs.stockholm.nixosModules.hosts
     self.inputs.stockholm.nixosModules.kartei
@@ -178,8 +179,6 @@
     build.user = config.krebs.users.lass;
     ssl.trustIntermediate = true;
   };
-
-  nix.settings.sandbox = true;
 
   users.mutableUsers = false;
 
@@ -361,11 +360,6 @@
   networking.extraHosts = ''
     10.42.0.1 styx.gg23
   '';
-
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
 
   # use 24:00 time format, the default got sneakily changed around 20.03
   i18n.defaultLocale = lib.mkDefault "C.UTF-8";
