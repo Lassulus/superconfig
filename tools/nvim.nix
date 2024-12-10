@@ -304,7 +304,6 @@
         };
         plugins.comment.enable = true;
         plugins.copilot-chat.enable = true;
-        plugins.chatgpt.enable = true;
         plugins.undotree.enable = true; # seems to be needed for undo history in telescope
         plugins.leap.enable = true;
       };
