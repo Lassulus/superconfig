@@ -16,17 +16,18 @@
     client.enable = true;
   };
 
-  clanCore.facts.services.tor-ssh = {
-    secret."ssh-tor.priv" = { };
-    secret."tor-hostname" = { };
-    generator.path = with pkgs; [
+  clanCore.vars.generators.tor-ssh = {
+    files."ssh-tor.priv" = { };
+    files."tor-hostname".deploy = false;
+    migrateFact = "tor-ssh";
+    runtimeInputs = with pkgs; [
       coreutils
       mkp224o
     ];
-    generator.script = ''
+    script = ''
       mkp224o-donna lass -n 1 -d . -q -O addr
-      mv "$(cat addr)"/hs_ed25519_secret_key "$secrets"/ssh-tor.priv
-      mv addr "$secrets"/tor-hostname
+      mv "$(cat addr)"/hs_ed25519_secret_key "$out"/ssh-tor.priv
+      mv addr "$out"/tor-hostname
     '';
   };
 }
