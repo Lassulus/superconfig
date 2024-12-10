@@ -61,6 +61,7 @@ let
               sponsorblock
               quality-menu
               vr-reversal
+              visualizer
             ];
           }
         }/bin/mpv \
