@@ -29,8 +29,8 @@ in
   #  algorithm: hmac-sha256
   #  secret: 00000000000000000000000000000000000000000000
   #nix-shell -p knot-dns --run 'keymgr -t my_name hmac-sha256'
-  # clanCore.facts.services.knot = {
-  #   secret."knot-keys.conf" = {};
+  # clanCore.vars.generators.knot = {
+  #   files."knot-keys.conf" = {};
   #   generator = ''
   #     ${pkgs.knot-dns}/bin/keymgr -t  hmac-sha256
   #   '';
@@ -126,6 +126,38 @@ in
           ksk-size = 4096;
           zsk-size = 2048;
           nsec3 = true;
+        }
+      ];
+
+      template = [
+        {
+          id = "default";
+          semantic-checks = "on";
+          global-module = "mod-rrl/default";
+        }
+        {
+          id = "master";
+          semantic-checks = "on";
+          notify = [
+            "hetzner_ip4_1"
+            "hetzner_ip4_2"
+            "hetzner_ip4_3"
+            "hetzner_ip6_1"
+            "hetzner_ip6_2"
+            "hetzner_ip6_3"
+          ];
+          acl = [
+            "hetzner_ip4_1"
+            "hetzner_ip4_2"
+            "hetzner_ip4_3"
+            "hetzner_ip6_1"
+            "hetzner_ip6_2"
+            "hetzner_ip6_3"
+          ];
+          zonefile-sync = "-1";
+          zonefile-load = "difference-no-serial";
+          serial-policy = "dateserial";
+          journal-content = "all";
         }
       ];
 
