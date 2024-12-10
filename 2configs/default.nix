@@ -120,7 +120,6 @@
         ];
         script = ''
           ssh-keygen -t ed25519 -N "" -f $out/ssh.id_ed25519
-          mv $secrets/ssh.id_ed25519.pub $out/ssh.id_ed25519.pub
         '';
       };
     }
