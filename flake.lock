@@ -1,21 +1,5 @@
 {
   "nodes": {
-    "astro-nvim": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1734985352,
-        "narHash": "sha256-SAQ5kdIsOJPtqCz1z93DiRbbA6Eugf6dLOBXP12C6VM=",
-        "owner": "AstroNvim",
-        "repo": "AstroNvim",
-        "rev": "e341895375a7994c90085e837b0384f3071f6463",
-        "type": "github"
-      },
-      "original": {
-        "owner": "AstroNvim",
-        "repo": "AstroNvim",
-        "type": "github"
-      }
-    },
     "clan-core": {
       "inputs": {
         "disko": [
@@ -574,7 +558,6 @@
     },
     "root": {
       "inputs": {
-        "astro-nvim": "astro-nvim",
         "clan-core": "clan-core",
         "data-mesher": "data-mesher",
         "disko": "disko",
