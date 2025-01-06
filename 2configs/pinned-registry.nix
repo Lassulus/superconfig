@@ -1,7 +1,7 @@
 { self, ... }:
 {
   nix.nixPath = [
-    "nixpkgs=${self.inputs.nixpkgs}"
+    "nixpkgs=flake:nixpkgs"
   ];
   nix.registry = {
     nixpkgs.to = {
