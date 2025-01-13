@@ -52,7 +52,6 @@
     '')
   ];
 
-  # http://10.42.0.1:8081/smokeping.fcgi
   networking.firewall.allowedTCPPorts = [ 80 ];
   services.smokeping = {
     enable = true;
