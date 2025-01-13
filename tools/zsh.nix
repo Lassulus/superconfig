@@ -117,6 +117,8 @@
         alias -- ll='ls -l'
         alias -- ls='ls --color'
         alias -- ns='nix-shell --command zsh'
+        alias -- nb='nix build --no-link --print-out-paths -L'
+        alias -- ne='nix eval --strict --json'
 
         # Setup prompt.
         autoload -U promptinit
