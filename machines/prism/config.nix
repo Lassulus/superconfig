@@ -16,6 +16,7 @@ in
       # helsinki migration
       users.users.root.openssh.authorizedKeys.keys = [
         "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIP4MIZG/hZR3Ib7faGDyK67Tk53Q1P7pE5cFIWwEFbrtAAAABHNzaDo="
+        "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIHBR9+AP/K+CY3S66vAGFyD5CQfNe7mrpD+jpKp5YfFJAAAABHNzaDo= fabian_sk"
       ];
     }
     ./backup.nix
