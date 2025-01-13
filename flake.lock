@@ -502,16 +502,16 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1736645037,
-        "narHash": "sha256-n6Of7EIMw7kK7yvMkpXCA74AHk6Q2NhnX7WebL4s8uA=",
-        "owner": "lassulus",
+        "lastModified": 1736701207,
+        "narHash": "sha256-jG/+MvjVY7SlTakzZ2fJ5dC3V1PrKKrUEOEE30jrOKA=",
+        "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "50401b6e3d37b7d75e0c33f1fc1d071b4f71817c",
+        "rev": "ed4a395ea001367c1f13d34b1e01aa10290f67d6",
         "type": "github"
       },
       "original": {
-        "owner": "lassulus",
-        "ref": "synapse-fix",
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
         "repo": "nixpkgs",
         "type": "github"
       }
