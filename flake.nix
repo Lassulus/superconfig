@@ -67,6 +67,30 @@
       clan = clan-core.lib.buildClan {
         directory = self;
         specialArgs.self = self;
+        inventory = {
+          machines = {
+            ignavia.tags = [
+              "laptop"
+              "focus"
+            ];
+            mors.tags = [
+              "laptop"
+              "focus"
+            ];
+            aergia.tags = [
+              "laptop"
+              "focus"
+            ];
+            icarus.tags = [ "laptop" ];
+            prism.tags = [ "server" ];
+          };
+          services = {
+            state-version.x.roles.default.tags = [
+              "laptop"
+              "server"
+            ];
+          };
+        };
         machines = nixpkgs.lib.mapAttrs (machineName: _: {
 
           imports = [
