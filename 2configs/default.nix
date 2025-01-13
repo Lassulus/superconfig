@@ -146,6 +146,7 @@
             "fuse"
             "wheel"
             "tor"
+            "dialout"
           ];
           openssh.authorizedKeys.keys = [
             config.krebs.users.lass.pubkey
