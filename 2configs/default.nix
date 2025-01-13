@@ -48,7 +48,10 @@
         config.clan.core.vars.generators.password.files.passwordHash.path;
       boot.initrd.systemd.emergencyAccess = true;
       clan.core.vars.generators.password = {
-        prompts.password.description = "Password for the main user";
+        prompts.password = {
+          description = "Password for the main user";
+          type = "hidden";
+        };
         files.password.deploy = false;
         files.passwordHash.neededForUsers = true;
         migrateFact = "password";
