@@ -63,11 +63,17 @@ in
     "event_sync"
   ];
   services.prosody.extraConfig = ''
-    Component "event_sync.jitsi.lassul.us" "event_sync_component"
+    Component "event_sync.numtide" "event_sync_component"
       muc_component = "conference.jitsi.lassul.us"
       breakout_component = "breakout.jitsi.lassul.us"
 
       api_prefix = "http://jitsi-presence.numtide.com"
+
+    Component "event_sync.pinpox" "event_sync_component"
+      muc_component = "conference.jitsi.lassul.us"
+      breakout_component = "breakout.jitsi.lassul.us"
+
+      api_prefix = "http://matrixpresence.0cx.de:8227"
   '';
 
   krebs.iptables.tables.filter.INPUT.rules = [
