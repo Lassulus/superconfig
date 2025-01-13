@@ -40,39 +40,11 @@
         extraPlugins = [
           pkgs.vimPlugins.vim-fetch
         ];
-        extraConfigLua = ''
-          local null_ls = require("null-ls")
-          local helpers = require("null-ls.helpers")
-          local utils = require("null-ls.utils")
-
-          local treefmt_nix = {
-              method = null_ls.methods.FORMATTING,
-              filetypes = {},
-              generator = helpers.formatter_factory({
-                  command = "treefmt",
-                  args = { "--allow-missing-formatter", "--stdin", "$FILENAME" },
-                  to_stdin = true,
-                  runtime_condition = function()
-                      return utils.is_executable("treefmt")
-                  end,
-              }),
-          }
-
-          local treefmt_nix2 = {
-              method = null_ls.methods.FORMATTING,
-              filetypes = {},
-              generator = helpers.formatter_factory({
-                  command = "treefmt-nix",
-                  args = { "--allow-missing-formatter", "--stdin", "$FILENAME" },
-                  to_stdin = true,
-                  runtime_condition = function()
-                      return utils.is_executable("treefmt-nix")
-                  end,
-              }),
-          }
-
-          null_ls.register(treefmt_nix)
-        '';
+        # not ready yet, we are waiting for none-ls to get updated
+        # extraConfigLua = ''
+        #   local null_ls = require("null-ls")
+        #   null_ls.register(null_ls.builtins.formatting.nix_flake_fmt)
+        # '';
         keymaps = [
           {
             mode = "i";
