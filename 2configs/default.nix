@@ -53,7 +53,7 @@
           type = "hidden";
         };
         files.password.deploy = false;
-        files.passwordHash.neededForUsers = true;
+        files.passwordHash.neededFor = "users";
         migrateFact = "password";
         runtimeInputs = with pkgs; [
           coreutils
