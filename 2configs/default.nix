@@ -200,6 +200,7 @@
     gnumake
     jq
     nix-output-monitor
+    comma
 
     #style
     rxvt-unicode-unwrapped.terminfo
@@ -229,7 +230,6 @@
     pciutils
     pop
     q
-    rs
     untilport
     (pkgs.writeDashBin "urgent" ''
       printf '\a'
