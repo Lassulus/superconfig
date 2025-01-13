@@ -9,9 +9,6 @@
     nixvim.url = "github:nix-community/nixvim";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
 
-    astro-nvim.url = "github:AstroNvim/AstroNvim";
-    astro-nvim.flake = false;
-
     clan-core.url = "git+https://git.clan.lol/clan/clan-core";
     # clan-core.url = "path:///home/lass/src/clan/clan-core";
     # clan-core.url = "git+file:/home/lass/src/clan/clan-core";
