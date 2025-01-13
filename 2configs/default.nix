@@ -61,7 +61,6 @@
         ];
         script = ''
           cp $prompts/password $out/password
-          exit 1
           cat $out/password | mkpasswd -s -m sha-512 > $out/passwordHash
         '';
       };
