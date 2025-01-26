@@ -40,6 +40,7 @@
   ];
 
   xdg.portal.enable = true;
+  xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
   xdg.portal.wlr.enable = true;
   xdg.portal.config.common.default = "*"; # get old behavior back
   fonts.enableDefaultPackages = true;
@@ -48,6 +49,7 @@
   security.pam.services.swaylock = { };
 
   programs.dconf.enable = lib.mkDefault true;
+  services.gnome.gnome-keyring.enable = lib.mkDefault true;
   programs.xwayland.enable = lib.mkDefault true;
 
   environment.sessionVariables = {
@@ -57,6 +59,7 @@
     QT_QPA_PLATFORM = "wayland";
     QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
     _JAVA_AWT_WM_NONREPARENTING = "1";
+    NIXOS_OZONE_WL = "1"; # Hint for electron apps to use wayland
   };
 
   programs.wshowkeys.enable = true;

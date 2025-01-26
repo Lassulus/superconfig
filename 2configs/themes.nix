@@ -16,7 +16,12 @@ let
       ${pkgs.coreutils}/bin/chown lass:users /var/theme/current_theme
       ${pkgs.xorg.xrdb}/bin/xrdb -merge /var/theme/config/xresources || : # wayland has no xresources
       ${pkgs.procps}/bin/pkill -HUP xsettingsd || :
+      set +f
+      GSETTINGS_SCHEMA_DIR=$(echo /run/current-system/sw/share/gsettings-schemas/*/*/schemas | sed s', ,:,g')
+      export GSETTINGS_SCHEMA_DIR
+      set -f
       ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface gtk-theme "$(cat /var/theme/config/gtk-theme)" || :
+      ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface color-scheme "prefer-$1" || :
     else
       echo "theme $1 not found"
     fi

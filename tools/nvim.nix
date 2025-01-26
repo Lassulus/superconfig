@@ -37,6 +37,41 @@
           " need to use lua to expand $HOME
           lua vim.o.undodir = vim.fs.normalize('$HOME/.vim/undodir')
         '';
+        extraConfigLua = ''
+          local function watch_theme_file()
+              local path = '/var/theme/current_theme'
+              local uv = vim.loop
+
+              local watcher = uv.new_fs_event()
+              watcher:start(path, {}, function(err, filename, events)
+                  if err then
+                      print('Error watching file:', err)
+                      return
+                  end
+
+                  -- Use Lua's io.open to read the file content
+                  local file = io.open(path, 'r')
+                  if not file then
+                      print('Failed to open file:', path)
+                      return
+                  end
+
+                  local content = file:read('*a') -- Read the entire file
+                  file:close()
+
+                  content = content:gsub('%s+$', "")
+                  content = content:gsub('"', '\\"')
+
+                  -- Execute a Neovim command based on the content
+                  vim.schedule(function()
+                      cmd = 'set background=' .. content
+                      vim.cmd(cmd)
+                  end)
+              end)
+          end
+          watch_theme_file()
+
+        '';
         extraPlugins = [
           pkgs.vimPlugins.vim-fetch
         ];
