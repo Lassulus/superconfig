@@ -245,7 +245,6 @@
             };
             ruff.enable = true; # python
             pyright.enable = true; # python
-            harper_ls.enable = true; # comments
             jsonls.enable = true; # json
           };
         };
