@@ -37,43 +37,20 @@
           " need to use lua to expand $HOME
           lua vim.o.undodir = vim.fs.normalize('$HOME/.vim/undodir')
         '';
-        extraConfigLua = ''
-          local function watch_theme_file()
-              local path = '/var/theme/current_theme'
-              local uv = vim.loop
-
-              local watcher = uv.new_fs_event()
-              watcher:start(path, {}, function(err, filename, events)
-                  if err then
-                      print('Error watching file:', err)
-                      return
-                  end
-
-                  -- Use Lua's io.open to read the file content
-                  local file = io.open(path, 'r')
-                  if not file then
-                      print('Failed to open file:', path)
-                      return
-                  end
-
-                  local content = file:read('*a') -- Read the entire file
-                  file:close()
-
-                  content = content:gsub('%s+$', "")
-                  content = content:gsub('"', '\\"')
-
-                  -- Execute a Neovim command based on the content
-                  vim.schedule(function()
-                      cmd = 'set background=' .. content
-                      vim.cmd(cmd)
-                  end)
-              end)
-          end
-          watch_theme_file()
-
-        '';
+        extraPackages = [
+          pkgs.glib # for vim-lumen
+        ];
         extraPlugins = [
           pkgs.vimPlugins.vim-fetch
+          (pkgs.vimUtils.buildVimPlugin {
+            name = "vim-lumen";
+            src = pkgs.fetchFromGitHub {
+              owner = "vimpostor";
+              repo = "vim-lumen";
+              rev = "ac13c32c3e309f6c6a84ff6cad8dbb135e75f0e4";
+              hash = "sha256-rsDUDI9lh4CEX1upMBjeyBOm99GAXWGPQ9vSCN8cmFo=";
+            };
+          })
         ];
         # not ready yet, we are waiting for none-ls to get updated
         # extraConfigLua = ''
