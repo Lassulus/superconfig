@@ -626,11 +626,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1737896367,
-        "narHash": "sha256-Mo1h8rDbV/dUnE3HDBLJUedKXV7E48DabAGiN5hM83Q=",
+        "lastModified": 1737969857,
+        "narHash": "sha256-OrLWVsigZljnHNA5HRty6D/8IF4ge4WzHjmimYzxD+Q=",
         "owner": "krebs",
         "repo": "stockholm",
-        "rev": "5ef912d7b113f09deaa5453e7d8c9b83823ee812",
+        "rev": "c45109b564345a9aedb3577b3a3150a4fabb5403",
         "type": "github"
       },
       "original": {
