@@ -170,6 +170,10 @@ in
         sha256 = "sha256-4FDokoA9zBDYj8RAO/kuTHaZ6jZYBLSJZiX/IYFaCW8=";
       };
 
+      NIX_CFLAGS_COMPILE = "-Wno-error=implicit-function-declaration";
+
+
+
       buildInputs = old.buildInputs ++ [ pkgs.pkg-config ];
     });
   };
