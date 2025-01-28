@@ -9,6 +9,7 @@
   ];
 
   clan.password-store.targetDirectory = "/var/state/secrets";
+  clan.vars.password-store.secretLocation = "/var/state/secret-vars";
 
   krebs.build.host = config.krebs.hosts.radio;
   system.stateVersion = "24.05";
