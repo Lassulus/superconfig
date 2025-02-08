@@ -48,6 +48,10 @@ in
       *background: #ffffff
       *foreground: #000000
     '';
+    "themes/light/rofi-theme".text = ''
+      gruvbox-light-hard
+    '';
+
     "themes/dark/gtk-theme".text = ''
       Dracula
     '';
@@ -57,6 +61,9 @@ in
     "themes/dark/xresources".text = ''
       *background: #000000
       *foreground: #ffffff
+    '';
+    "themes/dark/rofi-theme".text = ''
+      gruvbox-dark-hard
     '';
   };
   # system.activationScripts.theme.text = ''
