@@ -1,4 +1,19 @@
 { pkgs, lib, ... }:
+let
+  qtile = pkgs.python3.pkgs.qtile.override {
+    pulsectl-asyncio = pkgs.python3.pkgs.pulsectl-asyncio.overrideAttrs (oldAttrs: {
+      postPatch = ''
+        substituteInPlace setup.cfg --replace "pulsectl >=23.5.0,<=24.11.0" "pulsectl >=23.5.0"
+      '';
+    });
+    extraPackages = [
+      pkgs.python3.pkgs.dbus-fast
+    ];
+  };
+  # qtile-extras = pkgs.python3.pkgs.qtile-extras.override {
+  #   qtile = qtile;
+  # };
+in
 {
   imports = [
     ../lib/wayland.nix
@@ -28,14 +43,15 @@
   };
 
   environment.systemPackages = [
-    pkgs.python3.pkgs.qtile
+    qtile
     pkgs.copyq
   ];
 
   systemd.user.services.qtile =
     let
       pyEnv = pkgs.python3.withPackages (_p: [
-        pkgs.python3.pkgs.qtile
+        qtile
+        # qtile-extras
         pkgs.python3.pkgs.iwlib
       ]);
     in
@@ -49,6 +65,7 @@
       # systemctl --user import-environment in startqtile
       environment.PATH = lib.mkForce null;
       environment.PYTHONPATH = lib.mkForce null;
+      environment.PYTHONTRACEMALLOC = "1";
       serviceConfig = {
         Type = "simple";
         ExecStart = "${pyEnv}/bin/qtile start -b wayland -c /etc/qtile.py";
