@@ -92,6 +92,8 @@
     # polkit agent
     polkit_gnome
 
+    self.packages.${pkgs.system}.wifi-qr
+
     # gtk3 themes
     gsettings-desktop-schemas
     self.packages.${pkgs.system}.otpmenu

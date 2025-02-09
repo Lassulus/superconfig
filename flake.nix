@@ -128,6 +128,7 @@
         ./tools/nvim.nix
         ./tools/astronvim/flake-module.nix
         ./tools/zsh.nix
+        ./tools/wifi-qr.nix
         ./tools/get-spora-hosts.nix
         ./formatter.nix
       ];
