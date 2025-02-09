@@ -9,7 +9,6 @@
     ../../alacritty.nix
     ../../mpv.nix
     ../../power-action.nix
-    ../../urxvt.nix
     ../../xdg-open.nix
     ../../yubikey.nix
     ../../tmux.nix
