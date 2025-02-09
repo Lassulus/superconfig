@@ -5,15 +5,29 @@
     {
       packages.nvim = inputs.nixvim.legacyPackages.${system}.makeNixvim {
         vimAlias = true;
-        colorschemes.ayu = {
-          enable = true;
-          settings.overrides = {
-            EoLSpace = {
-              bg = "#883333";
+        colorschemes = {
+          ayu = {
+            enable = true;
+            settings.overrides = {
+              EoLSpace = {
+                bg = "#883333";
+              };
+            };
+          };
+          everforest = {
+            enable = true;
+            settings.overrides = {
+              EoLSpace = {
+                bg = "#FF2222"; # doesn't work
+              };
             };
           };
         };
-        globals.mapleader = " ";
+        globals =  {
+          mapleader = " ";
+          lumen_light_colorscheme = "everforest";
+          lumen_dark_colorscheme = "ayu";
+        };
         opts = {
           mouse = "a";
           number = true;
