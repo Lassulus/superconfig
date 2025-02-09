@@ -1,6 +1,6 @@
 { pkgs, lib, ... }:
 let
-  qtile = pkgs.python3.pkgs.qtile.override {
+  qtile = (pkgs.python3.pkgs.qtile.override {
     pulsectl-asyncio = pkgs.python3.pkgs.pulsectl-asyncio.overrideAttrs (oldAttrs: {
       postPatch = ''
         substituteInPlace setup.cfg --replace "pulsectl >=23.5.0,<=24.11.0" "pulsectl >=23.5.0"
@@ -9,7 +9,16 @@ let
     extraPackages = [
       pkgs.python3.pkgs.dbus-fast
     ];
-  };
+  }).overrideAttrs (oldAttrs: {
+    pname = "qtile-0.29.0";
+    version = "0.29.0";
+    src = pkgs.fetchFromGitHub {
+      owner = "qtile";
+      repo = "qtile";
+      tag = "v0.29.0";
+      hash = "sha256-EqrvBXigMjevPERTcz3EXSRaZP2xSEsOxjuiJ/5QOz0=";
+    };
+  });
   # qtile-extras = pkgs.python3.pkgs.qtile-extras.override {
   #   qtile = qtile;
   # };
