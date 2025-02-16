@@ -4,7 +4,7 @@
   imports = [
     ../../2configs/mouse.nix
     ../../2configs/retiolum.nix
-    ../../2configs/desktops/qtile
+    ../../2configs/desktops/qtile/nixos.nix
     ../../2configs/pipewire.nix
     ../../2configs/exim-retiolum.nix
     ../../2configs/browsers.nix
