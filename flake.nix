@@ -65,7 +65,7 @@
     }:
     let
       clan = clan-core.lib.buildClan {
-        directory = self;
+        self = self;
         specialArgs.self = self;
         inventory = {
           machines = {
