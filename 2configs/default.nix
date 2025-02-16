@@ -71,45 +71,6 @@
       };
     }
     {
-      # deployment information
-      options.clan.flake-inputs = lib.mkOption {
-        description = ''
-          information about the flake inputs.
-          Used for update tracking.
-        '';
-        type = lib.types.attrsOf (
-          lib.types.attrsOf (
-            lib.types.nullOr (
-              lib.types.oneOf [
-                lib.types.str
-                lib.types.int
-              ]
-            )
-          )
-        );
-        default =
-          let
-            inputs = config.clan.core.clanDir.inputs;
-            cleanSourceInfo = input: {
-              rev = input.rev or null;
-              dirtyRev = input.dirtyRev or null;
-              lastModified = input.lastModified or null;
-              narHash = input.narHash or null;
-            };
-            sourceInfo = lib.mapAttrs (_: input: cleanSourceInfo input) inputs;
-          in
-          sourceInfo
-          // {
-            self = cleanSourceInfo config.clan.core.clanDir.sourceInfo;
-          };
-      };
-      config.environment.etc."flake-inputs.json".text =
-        let
-          text = builtins.unsafeDiscardStringContext (builtins.toJSON config.clan.flake-inputs);
-        in
-        text;
-    }
-    {
       services.openssh.enable = true;
       services.openssh.hostKeys = [
         {
