@@ -39,6 +39,12 @@
     self.inputs.stockholm.nixosModules.xresources
     self.inputs.stockholm.nixosModules.ssh
     self.inputs.stockholm.nixosModules.sync-containers3
+    { # nix-index
+      imports = [
+        self.inputs.nix-index-database.nixosModules.nix-index
+      ];
+      programs.nix-index-database.comma.enable = true;
+    }
     {
       # We need to mount these vars before the users phase, since that is the moment where the hashsed password are put into /etc/shadown
       users.extraUsers.mainUser.hashedPasswordFile =
