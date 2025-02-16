@@ -89,11 +89,11 @@
             ];
             icarus.tags = [ "laptop" ];
             prism.tags = [ "server" ];
+            neoprism.tags = [ "server" ];
           };
           services = {
             state-version.x.roles.default.tags = [
-              "laptop"
-              "server"
+              "all"
             ];
           };
         };
