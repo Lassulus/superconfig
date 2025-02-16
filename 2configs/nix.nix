@@ -10,6 +10,8 @@
     "auto-allocate-uids"
   ];
 
+  nix.settings.flake-registry = "";
+
   # The default at 10 is rarely enough.
   nix.settings.log-lines = lib.mkDefault 25;
 
