@@ -144,8 +144,9 @@
         "type": "github"
       },
       "original": {
-        "id": "flake-parts",
-        "type": "indirect"
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
       }
     },
     "flake-parts_2": {
@@ -417,6 +418,26 @@
         "type": "github"
       }
     },
+    "nix-index-database": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1738466368,
+        "narHash": "sha256-PZhUjtvQZOH3PO0EYdTpQvcqkgkq1NkP2A6w9SPHYsk=",
+        "owner": "nix-community",
+        "repo": "nix-index-database",
+        "rev": "46a8f5fc9552b776bfc5c5c96ea3bede33f68f52",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "nix-index-database",
+        "type": "github"
+      }
+    },
     "nix-writers": {
       "flake": false,
       "locked": {
@@ -566,6 +587,7 @@
         "le_menu": "le_menu",
         "nether": "nether",
         "nix-darwin": "nix-darwin",
+        "nix-index-database": "nix-index-database",
         "nixos-facter": "nixos-facter",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
