@@ -109,7 +109,7 @@
                 clan.core.facts.secretUploadDirectory = nixpkgs.lib.mkDefault "/etc/secrets";
                 clan.core.vars.settings.secretStore = "password-store";
                 clan.networking.targetHost = "root@${machineName}";
-                krebs.secret.directory = config.clanCore.facts.secretUploadDirectory;
+                krebs.secret.directory = config.clan.core.facts.secretUploadDirectory;
                 nixpkgs.overlays = [
                   self.inputs.stockholm.overlays.default
                   (import (self.inputs.stockholm.inputs.nix-writers + "/pkgs")) # TODO get rid of that overlay
@@ -145,7 +145,6 @@
           lib,
           pkgs,
           system,
-          config,
           ...
         }:
         {
@@ -172,7 +171,6 @@
           devShells.default = pkgs.mkShell {
             packages = [
               clan-core.packages.${system}.clan-cli
-              config.treefmt.build.wrapper
             ];
           };
         };
