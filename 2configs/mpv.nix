@@ -1,13 +1,25 @@
 { pkgs, ... }:
 
 let
-  dl_subs = pkgs.writers.writeDashBin "dl_subs" ''
-    set -efu
-    filename=$1
-    cd "$(dirname "$filename")"
-    filename=$(basename "$filename")
-    ${pkgs.subdl}/bin/subdl --download=best-rating --existing=overwrite --output='/tmp/{m}.{M}.sub' "$filename" 1>&2
-    echo "/tmp/$filename.sub"
+  dl_subs = pkgs.writers.writePython3Bin "dl_subs" {
+    libraries = [ pkgs.python3Packages.subliminal ];
+    flakeIgnore = [ "E501" ];
+  } ''
+    import babelfish
+    import subliminal
+    from pathlib import Path
+    import sys
+    import os
+
+    video_path = Path(sys.argv[1])
+    video = subliminal.scan_video(video_path)
+    cache_path = Path(os.path.expanduser("~/.cache/subliminal")) / f"{video.title}.srt"
+    if not cache_path.exists():
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        language = babelfish.Language("eng")
+        sub = subliminal.download_best_subtitles([video], {language})[video][0]
+        cache_path.write_bytes(sub.content)
+    print(cache_path)
   '';
 
   autosub = pkgs.writeText "autosub.lua" ''
@@ -50,7 +62,7 @@ let
   mpv = pkgs.symlinkJoin {
     name = "mpv";
     paths = [
-      (pkgs.writeDashBin "mpv" ''
+      (pkgs.writers.writeDashBin "mpv" ''
         set -efu
         Y_RES=1081
         # we need to disable sponsorblock local database because of
