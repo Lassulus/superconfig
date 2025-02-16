@@ -11,6 +11,7 @@
     alsa-utils
     pulseaudio
     ponymix
+    bluetuith
   ];
 
   services.pipewire = {
