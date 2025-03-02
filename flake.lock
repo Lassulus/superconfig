@@ -42,11 +42,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1740878543,
-        "narHash": "sha256-E8z2UAgQ4rVJUGzI9kJoipSpMA+w7hjUevbbWNSywMs=",
+        "lastModified": 1740927479,
+        "narHash": "sha256-UDp2+6omdZGGSWHGK/v34jlL7deSP/K7ibJ//Lhq/Kc=",
         "ref": "refs/heads/main",
-        "rev": "39761946a0203a24ead17b173e82b5b3e9bb8619",
-        "revCount": 5744,
+        "rev": "a903a9028b555223ddcb897cf8a8fb198fb991b4",
+        "revCount": 5750,
         "type": "git",
         "url": "https://git.clan.lol/clan/clan-core"
       },
@@ -376,11 +376,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1740695751,
-        "narHash": "sha256-D+R+kFxy1KsheiIzkkx/6L63wEHBYX21OIwlFV8JvDs=",
+        "lastModified": 1740828860,
+        "narHash": "sha256-cjbHI+zUzK5CPsQZqMhE3npTyYFt9tJ3+ohcfaOF/WM=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "6313551cd05425cd5b3e63fe47dbc324eabb15e4",
+        "rev": "303bd8071377433a2d8f76e684ec773d70c5b642",
         "type": "github"
       },
       "original": {
