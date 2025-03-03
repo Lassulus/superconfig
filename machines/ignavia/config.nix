@@ -26,6 +26,7 @@
     ../../2configs/pass.nix
     ../../2configs/mail.nix
     ../../2configs/printing
+    ../../2configs/auto-timezone.nix
     # ../../2configs/bitcoin.nix
     ../../2configs/review.nix
     ../../2configs/dunst.nix
