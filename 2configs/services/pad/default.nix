@@ -14,6 +14,7 @@
     '';
   };
   # https://github.com/settings/applications/2352617
-  services.hedgedoc.environmentFile =
-    config.clan.core.facts.services.hedgedoc-github-auth.secret."hedgedoc.env".path;
+  systemd.services.hedgedoc.serviceConfig.EnvironmentFile = [
+    config.clan.core.facts.services.hedgedoc-github-auth.secret."hedgedoc.env".path
+  ];
 }

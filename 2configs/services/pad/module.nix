@@ -1,6 +1,7 @@
 {
   lib,
   config,
+  pkgs,
   ...
 }:
 {
@@ -30,7 +31,7 @@
           "localhost"
           config.clan.hedgedoc.domain
         ];
-        useCDN = false;
+        useCDN = true;
         port = 3091;
         domain = config.clan.hedgedoc.domain;
         allowFreeURL = true;
@@ -49,12 +50,37 @@
       };
     };
 
+    systemd.services.hedgedoc.serviceConfig.SystemCallFilter = [
+      "fchown"
+    ];
+
+    systemd.services.hedgedoc.serviceConfig.EnvironmentFile = [
+      config.clan.core.vars.generators.hedgedoc.files."hedgedoc.env".path
+    ];
+    clan.core.vars.generators.hedgedoc = {
+      files."hedgedoc.env" = {};
+      runtimeInputs = [ pkgs.pwgen ];
+      script = ''
+        pwgen -s 64 1 > session_secret
+        cat >>  "$out/hedgedoc.env" <<EOF
+        CMD_SESSION_SECRET=$(cat session_secret)
+        EOF
+      '';
+    };
+
     services.nginx.virtualHosts.${config.clan.hedgedoc.domain} = {
       enableACME = true;
       forceSSL = true;
       locations."/" = {
-        proxyPass = "https://localhost:3091";
-        # proxyPass = "http://localhost:${toString config.services.hedgedoc.settings.port}";
+        # proxyPass = "https://localhost:3091";
+        proxyPass = "https://localhost:${toString config.services.hedgedoc.settings.port}";
+        recommendedProxySettings = true;
+        # proxyWebsockets = true;
+      };
+      locations."/socket.io/" = {
+        # proxyPass = "https://localhost:3091";
+        proxyPass = "https://localhost:${toString config.services.hedgedoc.settings.port}";
+        recommendedProxySettings = true;
         proxyWebsockets = true;
       };
     };
