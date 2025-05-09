@@ -33,7 +33,7 @@
     efiInstallAsRemovable = true;
   };
 
-  hardware.opengl.enable = true;
+  hardware.graphics.enable = true;
 
   boot.initrd.availableKernelModules = [
     "nvme"
