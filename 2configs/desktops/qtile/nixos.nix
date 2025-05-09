@@ -10,12 +10,12 @@ let
       pkgs.python3.pkgs.dbus-fast
     ];
   }).overrideAttrs (oldAttrs: {
-    pname = "qtile-0.29.0";
-    version = "0.29.0";
+    pname = "qtile-0.31.0";
+    version = "0.31.0";
     src = pkgs.fetchFromGitHub {
       owner = "qtile";
       repo = "qtile";
-      tag = "v0.29.0";
+      tag = "v0.31.0";
       hash = "sha256-EqrvBXigMjevPERTcz3EXSRaZP2xSEsOxjuiJ/5QOz0=";
     };
   });
@@ -30,6 +30,9 @@ in
 
   environment.sessionVariables.XDG_CURRENT_DESKTOP = "qtile";
   services.greetd.enable = true;
+
+  security.pam.services.swaylock = {};
+  security.pam.services.swaylock.fprintAuth = true;
 
   # For greetd, we need a shell script into path, which lets us start qtile.service (after importing the environment of the login shell).
   services.greetd.settings.default_session.command = "${pkgs.greetd.tuigreet}/bin/tuigreet --remember --cmd ${pkgs.writeScript "startqtile" ''
@@ -54,6 +57,7 @@ in
   environment.systemPackages = [
     qtile
     pkgs.copyq
+    pkgs.coreutils
   ];
 
   systemd.user.services.qtile =
@@ -85,4 +89,20 @@ in
     };
 
   environment.etc."qtile.py".source = ./qtile.py;
+
+  systemd.user.services.xwayland-satellite = {
+    wantedBy = [ "graphical-session.target" ];
+    serviceConfig = {
+      RestartSec = 5;
+      ExecStart = "${pkgs.xwayland}/bin/xwayland-satellite";
+    };
+  };
+
+  systemd.user.services.copyq = {
+    wantedBy = [ "graphical-session.target" ];
+    serviceConfig = {
+      RestartSec = 5;
+      ExecStart = "${pkgs.copyq}/bin/copyq";
+    };
+  };
 }
