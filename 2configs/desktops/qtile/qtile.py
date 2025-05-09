@@ -217,7 +217,12 @@ screens = [
                     background="#b18f00", backlight_name="intel_backlight"
                 ),
                 widget.Battery(background="#e52383"),
-                widget.Clock(format="%Y-%m-%d %a %H:%M"),
+                # widget.Clock(format="%Y-%m-%d %a %H:%M"),  # doesn't support timezone updates without restart
+                widget.GenPollCommand(
+                    cmd="date +'%Y-%m-%d %a %H:%M %:::z'",
+                    shell=True,
+                    update_interval=10,
+                ),
                 widget.StatusNotifier(),
             ],
             24,
