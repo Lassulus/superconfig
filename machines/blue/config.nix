@@ -7,8 +7,6 @@
 
     ../../2configs/blue.nix
     ../../2configs/syncthing.nix
-    ../../2configs/sync/sync.nix
-    ../../2configs/sync/decsync.nix
   ];
 
   krebs.build.host = config.krebs.hosts.blue;
