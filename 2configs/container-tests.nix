@@ -1,4 +1,3 @@
-{ lib, ... }:
 {
   nix.settings.experimental-features = [
     # for container in builds support
@@ -10,5 +9,5 @@
   nix.settings.auto-allocate-uids = true;
 
   # for container in builds support
-  nix.settings.system-features = lib.mkDefault [ "uid-range" ];
+  nix.settings.system-features = [ "uid-range" "kvm" "nixos-test" ];
 }
