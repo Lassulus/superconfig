@@ -484,25 +484,9 @@
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
         "nixvim": "nixvim",
-        "select": "select",
         "spora": "spora",
         "stockholm": "stockholm",
         "treefmt-nix": "treefmt-nix_4"
-      }
-    },
-    "select": {
-      "locked": {
-        "lastModified": 1745005516,
-        "narHash": "sha256-IVaoOGDIvAa/8I0sdiiZuKptDldrkDWUNf/+ezIRhyc=",
-        "owner": "clan-lol",
-        "repo": "select",
-        "rev": "69d8bf596194c5c35a4e90dd02c52aa530caddf8",
-        "type": "github"
-      },
-      "original": {
-        "owner": "clan-lol",
-        "repo": "select",
-        "type": "github"
       }
     },
     "sops-nix": {
