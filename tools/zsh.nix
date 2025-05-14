@@ -118,7 +118,7 @@
         alias -- ls='ls --color'
         alias -- ns='nix-shell --command zsh'
         alias -- nb='nix build --no-link --print-out-paths -L'
-        alias -- ne='nix eval --strict --json'
+        alias -- ne='nix eval --json'
         alias -- nloc='nix-locate --top-level --whole-name'
 
         # Setup prompt.
