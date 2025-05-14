@@ -7,7 +7,6 @@
     # nixpkgs.url = "git+file:/home/lass/src/nixpkgs";
 
     flake-parts.url = "github:hercules-ci/flake-parts";
-    flake-parts.inputs.nixpkgs.follows = "nixpkgs";
 
     nix-index-database.url = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
@@ -34,15 +33,12 @@
 
     nixos-hardware.url = "github:nixos/nixos-hardware";
 
-    data-mesher.url = "https://git.clan.lol/clan/data-mesher/archive/main.tar.gz";
-    # data-mesher.url = "path:/home/lass/src/data-mesher/";
-    data-mesher.inputs.nixpkgs.follows = "nixpkgs";
 
     nether.url = "github:krebs/nether";
     # nether.url = "git+file:/home/lass/src/nether";
     nether.inputs.nixpkgs.follows = "nixpkgs";
     nether.inputs.clan-core.follows = "clan-core";
-    nether.inputs.data-mesher.follows = "data-mesher";
+    nether.inputs.data-mesher.follows = "";
 
     spora.url = "github:krebs/spora";
     # spora.url = "git+file:/home/lass/src/spora";

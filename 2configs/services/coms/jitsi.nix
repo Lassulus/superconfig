@@ -74,6 +74,12 @@ in
       breakout_component = "breakout.jitsi.lassul.us"
 
       api_prefix = "http://matrixpresence.0cx.de:8227"
+
+    Component "event_sync.pinpox2" "event_sync_component"
+      muc_component = "conference.jitsi.lassul.us"
+      breakout_component = "breakout.jitsi.lassul.us"
+
+      api_prefix = "http://matrixpresence.0cx.de:8226"
   '';
 
   krebs.iptables.tables.filter.INPUT.rules = [
