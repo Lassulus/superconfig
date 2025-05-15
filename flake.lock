@@ -540,16 +540,18 @@
       },
       "locked": {
         "lastModified": 1747157099,
-        "narHash": "sha256-86NFd8P+JP6Xh2pwmiu2sWTbd5lbhcYdqqrqKXW0b7I=",
-        "owner": "krebs",
-        "repo": "stockholm",
+        "narHash": "sha256-k/3kMUymPXa41YXP4R1VIa+V6m79IcHyd8y2ojQvFfc=",
+        "ref": "refs/heads/master",
         "rev": "d4abc837cc7b87b4f23fe48cc306df26e3de7aab",
-        "type": "github"
+        "revCount": 12085,
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/krebs/stockholm"
       },
       "original": {
-        "owner": "krebs",
-        "repo": "stockholm",
-        "type": "github"
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/krebs/stockholm"
       }
     },
     "systems": {

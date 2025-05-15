@@ -21,7 +21,7 @@
     clan-core.inputs.flake-parts.follows = "flake-parts";
     clan-core.inputs.disko.follows = "disko";
 
-    stockholm.url = "github:krebs/stockholm";
+    stockholm.url = "git+https://github.com/krebs/stockholm?submodules=1";
     # stockholm.url = "git+https://cgit.lassul.us/stockholm";
     # stockholm.url = "path:/home/lass/sync/stockholm";
     stockholm.inputs.nixpkgs.follows = "nixpkgs";
@@ -32,7 +32,6 @@
     disko.inputs.nixpkgs.follows = "nixpkgs";
 
     nixos-hardware.url = "github:nixos/nixos-hardware";
-
 
     nether.url = "github:krebs/nether";
     # nether.url = "git+file:/home/lass/src/nether";
