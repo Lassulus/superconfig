@@ -10,7 +10,7 @@
   ];
   services.mycelium = {
     enable = true;
-    keyFile = config.clanCore.facts.services.mycelium.secret.mycelium_key.path;
+    keyFile = config.clan.core.vars.generators.mycelium.files.mycelium_key.path;
     extraArgs = [
       "--silent"
     ];
@@ -19,21 +19,20 @@
       "tcp://10.42.0.1:9651"
     ];
   };
-  clanCore.facts.services.mycelium = {
-    secret."mycelium_key" = { };
-    public."mycelium_ip" = { };
-    public."mycelium_pubkey" = { };
-    generator = {
-      path = [
-        pkgs.mycelium
-        pkgs.coreutils
-        pkgs.jq
-      ];
-      script = ''
-        timeout 5 mycelium --key-file "$secrets"/mycelium_key || :
-        mycelium inspect --key-file "$secrets"/mycelium_key --json | jq -r .publicKey > "$facts"/mycelium_pubkey
-        mycelium inspect --key-file "$secrets"/mycelium_key --json | jq -r .address > "$facts"/mycelium_ip
-      '';
-    };
+  clan.core.vars.generators.mycelium = {
+    files."mycelium_key" = { };
+    files."mycelium_ip".secret = false;
+    files."mycelium_pubkey".secret = false;
+    migrateFact = "mycelium";
+    runtimeInputs = [
+      pkgs.mycelium
+      pkgs.coreutils
+      pkgs.jq
+    ];
+    script = ''
+      timeout 5 mycelium --key-file "$secrets"/mycelium_key || :
+      mycelium inspect --key-file "$secrets"/mycelium_key --json | jq -r .publicKey > "$facts"/mycelium_pubkey
+      mycelium inspect --key-file "$secrets"/mycelium_key --json | jq -r .address > "$facts"/mycelium_ip
+    '';
   };
 }
