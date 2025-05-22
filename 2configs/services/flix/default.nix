@@ -352,9 +352,6 @@
   services.jellyseerr = {
     enable = true;
     openFirewall = true;
-    package = pkgs.jellyseerr.overrideAttrs (_: {
-      dontCheckForBrokenSymlinks = true;
-    });
   };
 
   # movies
