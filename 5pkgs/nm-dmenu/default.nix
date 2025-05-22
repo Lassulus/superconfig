@@ -3,7 +3,9 @@
 pkgs.writers.writeDashBin "nm-dmenu" ''
   export PATH=$PATH:${
     lib.makeBinPath [
-      pkgs.dmenu
+      (pkgs.writers.writeDashBin "dmenu" ''
+        exec ${lib.getExe pkgs.rofi} -dmenu "$@"
+      '')
       pkgs.networkmanagerapplet
       pkgs.procps
     ]
