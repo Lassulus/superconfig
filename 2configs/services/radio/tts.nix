@@ -25,11 +25,12 @@ let
     trap 'rm -rf "$OUTPUT"' EXIT
     SPEAKER=$[ $RANDOM % 900 ]
     while read line; do
+      filename=$(printf '%04d' $offset).wav
       echo "$line" |
         ${pkgs.piper-tts}/bin/piper \
           --model ${model}/model.onnx \
           -s "$SPEAKER" \
-          -f "$OUTPUT"/"$offset".wav >/dev/null
+          -f "$OUTPUT"/"$filename" >/dev/null
 
       ((offset+=1))
     done
