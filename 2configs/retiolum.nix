@@ -21,7 +21,7 @@
     privkey_ed25519 = config.clan.core.vars.generators.retiolum.files."retiolum.ed25519_key.priv".path;
   };
 
-  clanCore.vars.generators.retiolum = {
+  clan.core.vars.generators.retiolum = {
     files."retiolum.rsa_key.priv" = { };
     files."retiolum.ed25519_key.priv" = { };
     files."retiolum.rsa_key.pub".secret = false;
