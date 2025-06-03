@@ -321,9 +321,6 @@
     };
   };
 
-  networking.dhcpcd.extraConfig = ''
-    noipv4ll
-  '';
 
   networking.extraHosts = ''
     10.42.0.1 styx.gg23
