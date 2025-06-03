@@ -16,8 +16,6 @@
   # $ darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin/configuration.nix
   # environment.darwinConfig = "$HOME/.config/nixpkgs/darwin/configuration.nix";
 
-  # Auto upgrade nix package and the daemon service.
-  services.nix-daemon.enable = true;
   nix = {
     package = pkgs.nix;
     settings = {
@@ -78,6 +76,7 @@
   # $ darwin-rebuild changelog
   system.stateVersion = 4;
 
+  system.primaryUser = "lassulus";
   # enable ssh in the macos system settings:
   # apple -> system settings -> general -> sharing -> remote login
   users.users.lassulus.openssh.authorizedKeys.keys = [
