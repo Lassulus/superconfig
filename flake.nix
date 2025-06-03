@@ -165,6 +165,8 @@
           devShells.default = pkgs.mkShell {
             packages = [
               clan-core.packages.${system}.clan-cli
+              nixpkgs.legacyPackages.${system}.nil
+              nixpkgs.legacyPackages.${system}.nixd
             ];
           };
         };
