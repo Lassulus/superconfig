@@ -257,21 +257,4 @@ in
     enable = true;
     freeMemThreshold = 5;
   };
-
-  # test stable-confusion external access
-  services.nginx.virtualHosts."testing.lassul.us" = {
-    forceSSL = true;
-    enableACME = true;
-    locations."/".extraConfig = ''
-      auth_basic "Restricted Content";
-      auth_basic_user_file ${pkgs.writeText "flix-user-pass" ''
-        krebs:$apr1$1Fwt/4T0$YwcUn3OBmtmsGiEPlYWyq0
-      ''};
-      proxy_pass http://stable-confusion.r:80/;
-      proxy_http_version 1.1;
-      proxy_set_header Upgrade $http_upgrade;
-      proxy_set_header Connection "Upgrade";
-      proxy_set_header Accept-Encoding "";
-    '';
-  };
 }
