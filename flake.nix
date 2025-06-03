@@ -103,7 +103,7 @@
                 clan.core.facts.secretStore = "password-store";
                 clan.core.facts.secretUploadDirectory = nixpkgs.lib.mkDefault "/etc/secrets";
                 clan.core.vars.settings.secretStore = "password-store";
-                clan.networking.targetHost = "root@${machineName}";
+                clan.core.networking.targetHost = "root@${machineName}";
                 krebs.secret.directory = config.clan.core.facts.secretUploadDirectory;
                 nixpkgs.overlays = [
                   self.inputs.stockholm.overlays.default
