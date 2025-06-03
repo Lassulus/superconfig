@@ -17,6 +17,8 @@ in
       users.users.root.openssh.authorizedKeys.keys = [
         "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIP4MIZG/hZR3Ib7faGDyK67Tk53Q1P7pE5cFIWwEFbrtAAAABHNzaDo="
         "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIHBR9+AP/K+CY3S66vAGFyD5CQfNe7mrpD+jpKp5YfFJAAAABHNzaDo= fabian_sk"
+        "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAILVGDN7LfdnZQ0411u27288g+Nz8Z3qv5F280itDFArAAAAABHNzaDo="
+        "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIC9d1Di6VHunJrvzVQqvsCdZzO3dmNe7XpQ4BB1uaclnAAAABHNzaDo="
       ];
     }
     ./backup.nix
