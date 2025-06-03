@@ -49,7 +49,7 @@ mkIf (hasAttr "wiregrill" config.krebs.build.host.nets) {
     }
   ]);
 
-  clanCore.facts.services.wiregrill = {
+  clan.core.facts.services.wiregrill = {
     secret."wiregrill.key" = { };
     public."wiregrill.pub" = { };
     generator.path = with pkgs; [
