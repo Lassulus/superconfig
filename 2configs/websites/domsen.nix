@@ -38,22 +38,10 @@ in
       "www.aldonasiech.com"
     ])
     (servePage [
-      "apanowicz.de"
-      "www.apanowicz.de"
-    ])
-    (servePage [
-      "reich-gebaeudereinigung.de"
-      "www.reich-gebaeudereinigung.de"
-    ])
-    (servePage [
       "illustra.de"
       "www.illustra.de"
     ])
     # (servePage [ "nirwanabluete.de" "www.nirwanabluete.de" ])
-    (servePage [
-      "familienrat-hamburg.de"
-      "www.familienrat-hamburg.de"
-    ])
     (servePage [ "karlaskop.de" ])
     (servePage [
       "freemonkey.art"
