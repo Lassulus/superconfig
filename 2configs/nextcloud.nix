@@ -3,6 +3,7 @@
   services.nextcloud = {
     enable = true;
     hostName = "c.lassul.us";
+    package = pkgs.nextcloud30;
     database.createLocally = true;
     config.dbtype = "pgsql";
     config.adminpassFile = "/var/lib/nextcloud/admin.pass";
@@ -19,12 +20,12 @@
       mkdir -p /var/lib/nextcloud
       chown nextcloud:nextcloud /var/lib/nextcloud
       install -o nextcloud -g nextcloud -Dm0600 \
-        ${config.clanCore.facts.services.nextcloud.secret.nextcloud_adminpass.path} \
+        ${config.clan.core.facts.services.nextcloud.secret.nextcloud_adminpass.path} \
         /var/lib/nextcloud/admin.pass
     ''}"
   ];
 
-  clanCore.facts.services."nextcloud" = {
+  clan.core.facts.services."nextcloud" = {
     secret."nextcloud_adminpass" = { };
     generator.path = with pkgs; [ coreutils ];
     generator.prompt = ''
