@@ -222,7 +222,7 @@
   };
 
   programs.bash = {
-    enableCompletion = true;
+    completion.enable = true;
     interactiveShellInit = ''
       HISTCONTROL='erasedups:ignorespace'
       HISTSIZE=65536
