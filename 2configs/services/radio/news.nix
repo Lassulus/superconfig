@@ -31,7 +31,7 @@ let
         cat << EOF
         hello crabpeople!
         $(${pkgs.ddate}/bin/ddate +'Today is %{%A, the %e of %B%}, %Y. %N%nCelebrate %H')
-        It is $(date --utc +%H) o clock UTC.
+        It is $(date --utc +%H) o clock U.T.C.
         todays news:
         $(get_current_news)
         $(gc_news)
@@ -105,5 +105,7 @@ in
   environment.systemPackages = [
     send_to_radio
     newsshow
+    get_current_news
+    gc_news
   ];
 }
