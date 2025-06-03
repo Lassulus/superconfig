@@ -328,17 +328,19 @@
       pkgs.findutils
       pkgs.inotify-tools
     ];
+    startAt = "daily";
     serviceConfig = {
       Restart = "always";
       ExecStart = pkgs.writers.writeDash "flix-index" ''
         set -efu
+        index(){
+          find . -type f > "$DIR"/index.tmp
+          mv "$DIR"/index.tmp "$DIR"/index
+        }
 
         DIR=/var/download
         cd "$DIR"
-        while inotifywait -rq -e create -e move -e delete "$DIR"; do
-          find . -type f > "$DIR"/index.tmp
-          mv "$DIR"/index.tmp "$DIR"/index
-        done
+        index
       '';
     };
   };
