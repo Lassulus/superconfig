@@ -61,7 +61,6 @@
           {
             targets = [
               "prism.r:9273"
-              "dishfire.r:9273"
               "yellow.r:9273"
             ];
           }
