@@ -210,6 +210,7 @@
           #     sha256 = "sha256-nbzqXsxmYfxngdJH3NXMLmGgygh6reSEnruoc6l8t/s=";
           #   };
           # });
+          sources.formatting.nix_flake_fmt.enable = true;
         };
         plugins.web-devicons.enable = true;
         plugins.telescope.extensions.undo.enable = true;
@@ -241,8 +242,8 @@
         };
         plugins.treesitter.enable = true;
         plugins.copilot-cmp.enable = true;
-        plugins.copilot-lua.panel.enabled = false;
-        plugins.copilot-lua.suggestion.enabled = false;
+        plugins.copilot-lua.settings.panel.enabled = false;
+        plugins.copilot-lua.settings.suggestion.enabled = false;
         plugins.cmp_yanky.enable = true;
         plugins.cmp = {
           enable = true;
@@ -302,7 +303,7 @@
         plugins.comment.enable = true;
         plugins.copilot-chat.enable = true;
         plugins.undotree.enable = true; # seems to be needed for undo history in telescope
-        plugins.leap.enable = true;
+        plugins.gitsigns.enable = true;
       };
     };
 }
