@@ -8,7 +8,7 @@
       ${pkgs.nixos-rebuild}/bin/nixos-rebuild --refresh --flake github:lassulus/superconfig#ubik switch --no-write-lock-file
     '';
   };
-  clanCore.facts.services.ubik-container = {
+  clan.core.facts.services.ubik-container = {
     secret."ubik.sync.key" = { };
     generator.script = ":";
     generator.prompt = ''

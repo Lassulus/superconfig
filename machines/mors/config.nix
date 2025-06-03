@@ -64,7 +64,7 @@
       };
     }
     {
-      services.redis.enable = true;
+      services.redis.servers."".enable = true;
     }
     {
       environment.systemPackages = [
@@ -135,7 +135,7 @@
     "aarch64-linux"
   ];
 
-  nix.trustedUsers = [
+  nix.settings.trusted-users = [
     "root"
     "lass"
   ];

@@ -13,7 +13,7 @@
     hostPath = "/var/lib/sync-containers3/hotdog/state";
     isReadOnly = false;
   };
-  clanCore.facts.services.hotdog-container = {
+  clan.core.facts.services.hotdog-container = {
     secret."hotdog.sync.key" = { };
     public."hotdog.sync.pub" = { };
     generator.path = with pkgs; [

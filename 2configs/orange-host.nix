@@ -21,7 +21,7 @@
       proxyPass = "http://orange.r";
     };
   };
-  clanCore.facts.services.orange-container = {
+  clan.core.facts.services.orange-container = {
     secret."orange.sync.key" = { };
     generator.script = ";";
     generator.prompt = ''

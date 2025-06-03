@@ -37,8 +37,8 @@ in
     };
   };
 
-  hardware.opengl.driSupport32Bit = true;
-  hardware.pulseaudio.support32Bit = true;
+  hardware.graphics.enable32Bit = true;
+  services.pulseaudio.support32Bit = true;
 
   security.sudo.extraConfig = ''
     ${mainUser.name} ALL=(games) NOPASSWD: ALL

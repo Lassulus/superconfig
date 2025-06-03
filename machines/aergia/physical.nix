@@ -85,8 +85,8 @@
   # update cpu microcode
   hardware.cpu.amd.updateMicrocode = true;
 
-  hardware.opengl.enable = true;
-  hardware.opengl.extraPackages = [
+  hardware.graphics.enable = true;
+  hardware.graphics.extraPackages = [
     pkgs.amdvlk
   ];
 

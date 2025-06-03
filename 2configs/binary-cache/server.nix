@@ -5,7 +5,7 @@
   # };
   # generate private key with:
   # nix-store --generate-binary-cache-key my-secret-key my-public-key
-  clanCore.facts.services."nix-serve" = {
+  clan.core.facts.services."nix-serve" = {
     secret."nix-serve.key" = { };
     public."nix-serve.pub" = { };
     generator.path = with pkgs; [

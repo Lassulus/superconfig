@@ -9,7 +9,7 @@
     "nginx"
   ];
 
-  clanCore.facts.services."lassul.us-dkim" = {
+  clan.core.facts.services."lassul.us-dkim" = {
     secret."lassul.us.dkim.priv" = { };
     public."lassul.us.dkim.pub" = { };
     generator.path = with pkgs; [

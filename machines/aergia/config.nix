@@ -115,9 +115,9 @@
     enable = true;
     powerOnBoot = true;
   };
-  hardware.pulseaudio.package = pkgs.pulseaudioFull;
+  services.pulseaudio.package = pkgs.pulseaudioFull;
 
-  nix.trustedUsers = [
+  nix.settings.trusted-users = [
     "root"
     "lass"
   ];
@@ -132,6 +132,6 @@
     "aarch64-linux"
   ];
 
-  boot.cleanTmpDir = true;
+  boot.tmp.cleanOnBoot = true;
   programs.noisetorch.enable = true;
 }

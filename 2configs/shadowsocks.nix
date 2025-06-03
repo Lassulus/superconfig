@@ -2,10 +2,10 @@
 {
   services.shadowsocks = {
     enable = true;
-    passwordFile = config.clanCore.facts.services.shadowsocks.secret.shadowsocks_password.path;
+    passwordFile = config.clan.core.facts.services.shadowsocks.secret.shadowsocks_password.path;
   };
   networking.firewall.allowedTCPPorts = [ 8388 ];
-  clanCore.facts.services.shadowsocks = {
+  clan.core.facts.services.shadowsocks = {
     secret."shadowsocks_password" = { };
     generator = {
       prompt = "please enter your shadowsocks password";
