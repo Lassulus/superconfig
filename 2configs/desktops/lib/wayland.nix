@@ -39,9 +39,12 @@
   ];
 
   xdg.portal.enable = true;
-  xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-  xdg.portal.wlr.enable = true;
-  xdg.portal.config.common.default = "*"; # get old behavior back
+  xdg.portal.extraPortals = [
+    pkgs.xdg-desktop-portal-gtk
+    pkgs.xdg-desktop-portal-wlr
+  ];
+  # xdg.portal.wlr.enable = true;
+  xdg.portal.config.common.default = "wlr";
   fonts.enableDefaultPackages = true;
 
   security.polkit.enable = true;
@@ -64,12 +67,12 @@
   programs.wshowkeys.enable = true;
 
   environment.systemPackages = with pkgs; [
-    (gamescope.overrideAttrs (old: {
-      patches = old.patches ++ [
-        ./gamescope_libinput.patch
-      ];
-
-    }))
+    # (gamescope.overrideAttrs (old: {
+    #   patches = old.patches ++ [
+    #     ./gamescope_libinput.patch
+    #   ];
+    #
+    # }))
     swaylock-effects # lockscreen
     pavucontrol
     swayidle
@@ -128,4 +131,37 @@
   ];
 
   qt.platformTheme = "qt5ct";
+
+  security.pam.services.swaylock = { };
+  security.pam.services.swaylock.fprintAuth = true;
+
+  # from nixpkgs/nixos/modules/services/system/systemd-lock-handler.md
+  services.systemd-lock-handler.enable = true;
+
+  systemd.user.services.swaylock = {
+    description = "Screen locker for Wayland";
+    documentation = [ "man:swaylock(1)" ];
+
+    # If swaylock exits cleanly, unlock the session:
+    onSuccess = [ "unlock.target" ];
+
+    # When lock.target is stopped, stops this too:
+    partOf = [ "lock.target" ];
+
+    # Delay lock.target until this service is ready:
+    before = [ "lock.target" ];
+    wantedBy = [ "lock.target" ];
+
+    serviceConfig = {
+      # systemd will consider this service started when swaylock forks...
+      Type = "forking";
+
+      # ... and swaylock will fork only after it has locked the screen.
+      ExecStart = "${lib.getExe pkgs.swaylock} --image /var/lib/wallpaper/wallpaper -f";
+
+      # If swaylock crashes, always restart it immediately:
+      Restart = "on-failure";
+      RestartSec = 0;
+    };
+  };
 }
