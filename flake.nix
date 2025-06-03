@@ -69,6 +69,7 @@
         self = self;
         specialArgs.self = self;
         inventory = {
+          meta.name = "superconfig";
           machines = {
             ignavia.tags = [
               "laptop"
