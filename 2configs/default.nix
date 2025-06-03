@@ -20,6 +20,7 @@
     ./pinned-registry.nix
     ./zerotier.nix
     ./nether.nix
+    ./spora.nix
     ./nix.nix
     self.inputs.stockholm.nixosModules.users
     self.inputs.stockholm.nixosModules.hosts
