@@ -88,8 +88,6 @@
   hardware.opengl.enable = true;
   hardware.opengl.extraPackages = [
     pkgs.amdvlk
-    pkgs.rocm-opencl-icd
-    pkgs.rocm-opencl-runtime
   ];
 
   # suspend to disk
