@@ -139,18 +139,19 @@ in
       enter initial admin password for nextcloud
     '';
   };
-  systemd.services.nextcloud-setup.after = [ "secret-nextcloud_pw.service" ];
-  krebs.secret.files.nextcloud_pw = {
-    path = "/run/nextcloud.pw";
-    owner.name = "nextcloud";
-    group-name = "nextcloud";
-    source-path = "${config.krebs.secret.directory}/nextcloud_pw";
-  };
+  # systemd.services.nextcloud-setup.after = [ "secret-nextcloud_pw.service" ];
+  # krebs.secret.files.nextcloud_pw = {
+  #   path = "/run/nextcloud.pw";
+  #   owner.name = "nextcloud";
+  #   group-name = "nextcloud";
+  #   source-path = "${config.krebs.secret.directory}/nextcloud_pw";
+  # };
   services.nextcloud = {
     enable = true;
     hostName = "o.xanf.org";
-    package = pkgs.nextcloud28;
+    package = pkgs.nextcloud30;
     settings.overwriteProtocol = "https";
+    config.dbtype = "sqlite";
     config.adminpassFile = "/run/nextcloud.pw";
     https = true;
   };
@@ -343,15 +344,15 @@ in
     '';
   };
   clanCore.facts.services."freemonkey.art" = {
-    secret."beesmooth.ch.dkim.priv" = { };
-    public."beesmooth.ch.dkim.pub" = { };
+    secret."freemonkey.art.dkim.priv" = { };
+    public."freemonkey.art.dkim.pub" = { };
     generator.path = with pkgs; [
       coreutils
       openssl
     ];
     generator.script = ''
-      openssl genrsa -out "$secrets"/beesmooth.ch.dkim.priv 1024
-      openssl rsa -in "$secrets"/beesmooth.ch.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$facts"/beesmooth.ch.dkim.pub
+      openssl genrsa -out "$secrets"/freemonkey.art.dkim.priv 1024
+      openssl rsa -in "$secrets"/freemonkey.art.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$facts"/freemonkey.art.dkim.pub
     '';
   };
   services.borgbackup.jobs.hetzner.paths = [
@@ -463,25 +464,25 @@ in
     };
   };
 
-  services.restic.backups.domsen = {
-    initialize = true;
-    repository = "/backups/domsen";
-    passwordFile = "${config.krebs.secret.directory}/domsen_backup_pw";
-    timerConfig = {
-      OnCalendar = "00:05";
-      RandomizedDelaySec = "5h";
-    };
-    paths = [
-      "/home/domsen/Mail"
-      "/home/ms/Mail"
-      "/home/klabusterbeere/Mail"
-      "/home/jms/Mail"
-      "/home/kasia/Mail"
-      "/home/bruno/Mail"
-      "/home/akayguen/Mail"
-      "/backups/sql_dumps"
-    ];
-  };
+  # services.restic.backups.domsen = {
+  #   initialize = true;
+  #   repository = "/backups/domsen";
+  #   passwordFile = "${config.krebs.secret.directory}/domsen_backup_pw";
+  #   timerConfig = {
+  #     OnCalendar = "00:05";
+  #     RandomizedDelaySec = "5h";
+  #   };
+  #   paths = [
+  #     "/home/domsen/Mail"
+  #     "/home/ms/Mail"
+  #     "/home/klabusterbeere/Mail"
+  #     "/home/jms/Mail"
+  #     "/home/kasia/Mail"
+  #     "/home/bruno/Mail"
+  #     "/home/akayguen/Mail"
+  #     "/backups/sql_dumps"
+  #   ];
+  # };
 
   # services.syncthing.settings.folders = {
   #   domsen-backups = {
