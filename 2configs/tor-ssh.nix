@@ -10,13 +10,13 @@
           target.port = 22;
         }
       ];
-      secretKey = "${config.krebs.secret.directory}/ssh-tor.priv";
+      secretKey = config.clan.core.vars.generators.tor-ssh.files."ssh-tor.priv".path;
     };
     controlSocket.enable = true;
     client.enable = true;
   };
 
-  clanCore.vars.generators.tor-ssh = {
+  clan.core.vars.generators.tor-ssh = {
     files."ssh-tor.priv" = { };
     files."tor-hostname".deploy = false;
     migrateFact = "tor-ssh";
