@@ -73,20 +73,21 @@ in
     user = "lass";
   };
 
-  clanCore.facts.services.syncthing = {
-    secret."syncthing.key" = { };
-    secret."syncthing.cert" = { };
-    public."syncthing.pub" = { };
-    generator.path = with pkgs; [
+  clan.core.vars.generators.syncthing = {
+    migrateFact = "syncthing";
+    files."syncthing.key" = { };
+    files."syncthing.cert" = { };
+    files."syncthing.pub".secret = false;
+    runtimeInputs = with pkgs; [
       coreutils
       gnugrep
       syncthing
     ];
-    generator.script = ''
-      syncthing generate --config "$secrets"
-      mv "$secrets"/key.pem "$secrets"/syncthing.key
-      mv "$secrets"/cert.pem "$secrets"/syncthing.cert
-      cat "$secrets"/config.xml | grep -oP '(?<=<device id=")[^"]+' | uniq > "$facts"/syncthing.pub
+    script = ''
+      syncthing generate --config "$out"
+      mv "$out"/key.pem "$out"/syncthing.key
+      mv "$out"/cert.pem "$out"/syncthing.cert
+      cat "$out"/config.xml | grep -oP '(?<=<device id=")[^"]+' | uniq > "$out"/syncthing.pub
     '';
   };
 
