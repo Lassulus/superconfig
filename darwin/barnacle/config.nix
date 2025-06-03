@@ -26,16 +26,12 @@
     };
   };
 
-  homebrew = {
-    enable = true;
-    casks = [
-      "firefox"
-      "element"
-      "gpg-suite"
-      "tunnelblick"
-      "microsoft-remote-desktop"
-    ];
-  };
+  # homebrew = {
+  #   enable = true;
+  #   casks = [
+  #     "gpg-suite"
+  #   ];
+  # };
 
   system.defaults = {
     # minimal dock
