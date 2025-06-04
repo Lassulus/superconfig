@@ -174,5 +174,12 @@
       flake.darwinConfigurations.barnacle = inputs.nix-darwin.lib.darwinSystem {
         modules = [ ./darwin/barnacle/config.nix ];
       };
+      flake.keys = {
+        pgp.yubi = {
+          key = ./keys/yubi.pgp;
+          id = "DBCD757846069B392EA9401D6657BE8A8D1EE807";
+        };
+        ssh = builtins.readFile ./keys/yubi.ssh;
+      };
     };
 }
