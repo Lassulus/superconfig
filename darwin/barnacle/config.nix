@@ -10,6 +10,7 @@
     pkgs.neovim
     pkgs.lazygit
     pkgs.sshuttle
+    pkgs.git
   ];
 
   # Use a custom configuration.nix location.
