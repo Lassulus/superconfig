@@ -131,6 +131,7 @@
         ./tools/zsh.nix
         ./tools/wifi-qr.nix
         ./tools/get-spora-hosts.nix
+        ./tools/pass.nix
         ./formatter.nix
       ];
       flake.nixosConfigurations = clan.nixosConfigurations;
