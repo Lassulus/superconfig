@@ -2,8 +2,8 @@
 
 {
   users.users.mainUser.packages = with pkgs; [
-    self.packages.${pkgs.system}.pass
     self.packages.${pkgs.system}.passmenu
+    self.packages.${pkgs.system}.pass
     gnupg
     (pkgs.writers.writeDashBin "unlock" ''
       set -efu
