@@ -52,6 +52,7 @@
   # keyboard settings
   system.keyboard = {
     remapCapsLockToControl = true;
+    enableKeyMapping = true;
   };
 
   # Add skhd for keyboard shortcuts
@@ -59,7 +60,7 @@
     enable = true;
     skhdConfig = ''
       # Open passmenu with Command+Shift+P
-      cmd + shift - p : ${self.packages.${pkgs.system}.passmenu}/bin/passmenu
+      cmd + shift - p : /run/current-system/sw/bin/passmenu
     '';
   };
 
