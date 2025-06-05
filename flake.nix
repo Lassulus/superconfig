@@ -133,6 +133,7 @@
         ./tools/get-spora-hosts.nix
         ./tools/pass.nix
         ./tools/menu.nix
+        ./tools/passmenu.nix
         ./formatter.nix
       ];
       flake.nixosConfigurations = clan.nixosConfigurations;
