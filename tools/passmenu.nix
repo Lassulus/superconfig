@@ -25,7 +25,12 @@
 
           password=$(printf '%s\n' "''${password_files[@]}" | menu "$@")
 
-          pass show -c "$password" 2>/dev/null
+          filename=$(basename "$password")
+          if [[ "$filename" == "otp" ]]; then
+            pass otp -c "$password" 2>/dev/null
+          else
+            pass show -c "$password" 2>/dev/null
+          fi
         '';
       };
     };
