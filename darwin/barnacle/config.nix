@@ -23,7 +23,7 @@
     pkgs.git
     pkgs.element-desktop
     pkgs.iterm2
-    pkgs.firefox-devedition-bin
+    pkgs.firefox-devedition
     pkgs.ripgrep
     pkgs.alt-tab-macos
   ];
