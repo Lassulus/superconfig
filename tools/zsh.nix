@@ -188,15 +188,14 @@
       '';
     in
     {
-      packages.shell = pkgs.writeScriptBin "shell" ''
-        #!/bin/sh
-        export ZDOTDIR=${pkgs.writeTextDir "/.zshrc" zshrc}
-        exec ${pkgs.zsh}/bin/zsh "$@"
-      '';
-      packages.zsh = pkgs.writeScriptBin "zsh" ''
-        #!/bin/sh
-        export ZDOTDIR=${pkgs.writeTextDir "/.zshrc" zshrc}
-        exec ${pkgs.zsh}/bin/zsh "$@"
-      '';
+      packages.zsh =
+        (pkgs.writeScriptBin "zsh" ''
+          #!/bin/sh
+          export ZDOTDIR=${pkgs.writeTextDir "/.zshrc" zshrc}
+          exec ${pkgs.zsh}/bin/zsh "$@"
+        '')
+        // {
+          zshrc = zshrc;
+        };
     };
 }
