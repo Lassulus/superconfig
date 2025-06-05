@@ -175,6 +175,7 @@
           };
         };
       flake.darwinConfigurations.barnacle = inputs.nix-darwin.lib.darwinSystem {
+        specialArgs.self = self;
         modules = [ ./darwin/barnacle/config.nix ];
       };
       flake.keys = {

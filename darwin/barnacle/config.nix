@@ -1,16 +1,31 @@
-{ pkgs, ... }:
+{ pkgs, self, ... }:
 
 {
   imports = [
     # ./rosetta.nix
+    self.inputs.nix-index-database.darwinModules.nix-index
   ];
+  programs.nix-index-database.comma.enable = true;
 
   nixpkgs.hostPlatform = "aarch64-darwin";
   environment.systemPackages = [
-    pkgs.neovim
+    self.packages.${pkgs.system}.nvim
+    self.packages.${pkgs.system}.pass
+    self.packages.${pkgs.system}.passmenu
+
+    # zsh dependencies
+    pkgs.fzf
+    pkgs.atuin
+
+    pkgs.gnupg
     pkgs.lazygit
     pkgs.sshuttle
     pkgs.git
+    pkgs.element-desktop
+    pkgs.iterm2
+    pkgs.firefox-devedition-bin
+    pkgs.ripgrep
+    pkgs.alt-tab-macos
   ];
 
   # Use a custom configuration.nix location.
@@ -56,12 +71,17 @@
     };
   };
 
-  # nix.linux-builder.enable = true;
+  nix.linux-builder.enable = true;
 
   # Create /etc/zshrc that loads the nix-darwin environment.
   programs.zsh.enable = true; # default shell on catalina
-  # programs.fish.enable = true;
+  programs.zsh.shellInit = self.packages.${pkgs.system}.zsh.zshrc;
 
+  # enable sudo touch
+  security.pam.services.sudo_local.touchIdAuth = true;
+
+  # disable natural scrolling
+  system.defaults.NSGlobalDomain."com.apple.swipescrolldirection" = false;
   programs.direnv.enable = true;
   programs.nix-index.enable = true;
   programs.gnupg.agent = {
