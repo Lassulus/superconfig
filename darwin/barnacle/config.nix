@@ -49,6 +49,20 @@
   #   ];
   # };
 
+  # keyboard settings
+  system.keyboard = {
+    remapCapsLockToControl = true;
+  };
+
+  # Add skhd for keyboard shortcuts
+  services.skhd = {
+    enable = true;
+    skhdConfig = ''
+      # Open passmenu with Command+Shift+P
+      cmd + shift - p : ${self.packages.${pkgs.system}.passmenu}/bin/passmenu
+    '';
+  };
+
   system.defaults = {
     # minimal dock
     dock = {
