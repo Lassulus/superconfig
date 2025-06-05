@@ -2,37 +2,7 @@
 {
   perSystem =
     { pkgs, ... }:
-    let
-      # Function to detect if we're running in a terminal environment
-      terminalDetectionFunction = ''
-        is_terminal_environment() {
-          # Check if we're running in a TTY
-          if [ -t 0 ] || [ -t 1 ]; then
-            return 0  # True, we're in a terminal
-          fi
-          
-          # Check if our parent process is a terminal
-          parent_process=$(ps -o comm= $PPID 2>/dev/null || true)
-          terminal_programs="bash zsh fish sh ksh csh tcsh dash xterm konsole gnome-terminal alacritty kitty terminal terminator urxvt rxvt xfce4-terminal iterm2 Terminal"
-          for term in $terminal_programs; do
-            if echo "$parent_process" | grep -q "$term"; then
-              return 0  # True, parent is a terminal
-            fi
-          done
-          
-          # Check if we're in an interactive environment
-          if [ -n "$TERM" ] && [ "$TERM" != "dumb" ]; then
-            # Check if we're in an SSH session
-            if [ -n "$SSH_TTY" ] || [ -n "$SSH_CONNECTION" ] || [ -n "$SSH_CLIENT" ]; then
-              return 0  # True, SSH session implies terminal
-            fi
-          fi
-          
-          return 1  # False, not in a terminal
-        }
-      '';
-    in
-    {
+     {
       packages.menu =
         if pkgs.stdenv.hostPlatform.isDarwin then
           (pkgs.writeShellApplication {
@@ -40,22 +10,42 @@
             runtimeInputs = [
               pkgs.choose-gui
               pkgs.fzf
-              pkgs.procps
             ];
             text = ''
               set -efu
-              
-              # Terminal detection function
-              ${terminalDetectionFunction}
-              
-              # Decide which menu program to use
-              if is_terminal_environment; then
-                # Use terminal-based menu
-                cat | fzf "$@"
-              else
-                # Use GUI-based menu
-                cat | choose "$@"
+
+              # Create temporary files for input and output
+              TEMP_DIR=$(mktemp -d)
+              INPUT_FILE="$TEMP_DIR/input"
+              OUTPUT_FILE="$TEMP_DIR/output"
+
+              # Set up trap to clean up temp dir on exit
+              trap 'rm -rf "$TEMP_DIR"' EXIT
+
+              # Save stdin to file
+              cat > "$INPUT_FILE"
+
+              # Try fzf first with terminal UI - explicitly store exit code
+              # This avoids issues with losing the exit code in a pipe
+              set +e
+              fzf "$@" < "$INPUT_FILE" > "$OUTPUT_FILE" 2>/dev/null
+              FZF_EXIT=$?
+              set -e
+
+              # Handle fzf results based on exit code
+              if [ $FZF_EXIT -eq 0 ]; then
+                # Success - output result and exit
+                cat "$OUTPUT_FILE"
+                exit 0
+              elif [ $FZF_EXIT -eq 130 ]; then
+                # User pressed Escape - honor the cancellation
+                exit 130
               fi
+
+              # If we get here, fzf failed with error (not cancellation)
+
+              # Fall back to GUI
+              choose "$@" < "$INPUT_FILE"
             '';
           })
         else if pkgs.stdenv.hostPlatform.isLinux then
@@ -65,30 +55,46 @@
               pkgs.rofi
               pkgs.wofi
               pkgs.fzf
-              pkgs.procps
             ];
             text = ''
               set -efu
-              
-              # Terminal detection function
-              ${terminalDetectionFunction}
-              
-              # Decide which menu program to use
-              if is_terminal_environment; then
-                # Use terminal-based menu
-                cat | fzf "$@"
-              elif [[ -n $WAYLAND_DISPLAY ]]; then
-                # Use wofi in Wayland
-                cat | wofi -d "$@"
-              elif [[ -n $DISPLAY ]]; then
-                # Use rofi in X11
-                cat | rofi -dmenu "$@"
+              # Create temporary files for input and output
+              TEMP_DIR=$(mktemp -d)
+              INPUT_FILE="$TEMP_DIR/input"
+              OUTPUT_FILE="$TEMP_DIR/output"
+
+              # Save stdin to file
+              cat > "$INPUT_FILE"
+
+              # Try fzf first with terminal UI - explicitly store exit code
+              # This avoids issues with losing the exit code in a pipe
+              set +e
+              fzf "$@" < "$INPUT_FILE" > "$OUTPUT_FILE" 2>/dev/null
+              FZF_EXIT=$?
+              set -e
+
+              # Handle fzf results based on exit code
+              if [ $FZF_EXIT -eq 0 ]; then
+                # Success - output result and exit
+                cat "$OUTPUT_FILE"
+                exit 0
+              elif [ $FZF_EXIT -eq 130 ]; then
+                # User pressed Escape - honor the cancellation
+                exit 130
+              fi
+
+              # If we get here, fzf failed with error (not cancellation)
+
+              # Fall back to GUI based on available display environment
+              if [ -n "''${WAYLAND_DISPLAY:-}" ]; then
+                wofi -d "$@" < "$INPUT_FILE"
+              elif [ -n "''${DISPLAY:-}" ]; then
+                rofi -dmenu "$@" < "$INPUT_FILE"
               else
-                # No terminal or GUI environment, fallback to fzf
-                cat | fzf "$@"
+                echo "Error: No suitable display environment available" >&2
+                exit 1
               fi
             '';
-
           })
         else
           throw "unsupported system";
