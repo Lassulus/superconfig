@@ -146,7 +146,7 @@ keys = [
     Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
     Key([mod], "F1", lazy.group["scratchpad"].dropdown_toggle("term")),
     Key([mod], "i", lazy.spawn("screenshot")),
-    Key([mod], "p", lazy.spawn("pass_menu")),
+    Key([mod], "p", lazy.spawn("passmenu")),
     Key([mod], "Insert", lazy.spawn("type_paste")),
     Key([mod, "shift"], "p", lazy.spawn("otpmenu")),
     Key([mod], "v", goto_workspace, desc="Switch to group"),

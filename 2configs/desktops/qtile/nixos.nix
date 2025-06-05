@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, self, ... }:
 let
   # qtile =
   #   (pkgs.python3.pkgs.qtile.override {
@@ -67,6 +67,7 @@ in
   environment.systemPackages = [
     pkgs.copyq
     pkgs.coreutils
+    self.packages.${pkgs.system}.passmenu
     (pkgs.writers.writeDashBin "qtile-debug-shell" { } ''
       ${pyEnv}/bin/ipython "$@"
     '')
