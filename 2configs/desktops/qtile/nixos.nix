@@ -66,8 +66,6 @@ in
 
   environment.systemPackages = [
     pkgs.copyq
-    pkgs.coreutils
-    self.packages.${pkgs.system}.passmenu
     (pkgs.writers.writeDashBin "qtile-debug-shell" { } ''
       ${pyEnv}/bin/ipython "$@"
     '')

@@ -1,8 +1,9 @@
-{ pkgs, ... }:
+{ pkgs, self, ... }:
 
 {
   users.users.mainUser.packages = with pkgs; [
-    (pass.withExtensions (ext: [ ext.pass-otp ]))
+    self.packages.${pkgs.system}.pass
+    self.packages.${pkgs.system}.passmenu
     gnupg
     (pkgs.writers.writeDashBin "unlock" ''
       set -efu
