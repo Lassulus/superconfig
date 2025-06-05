@@ -127,13 +127,11 @@
 
         myKeyMap :: [([Char], X ())]
         myKeyMap =
-            [ ("M4-p", forkFile "${pkgs.writers.writeDash "passmenu-wrapped" ''
+            [ ("M4-p", forkFile "${pkgs.writers.writeDashBin "passmenu" ''
               set -efux
               export TERM=dumb
               ${pkgs.pass}/bin/passmenu --type
             ''}" [] Nothing)
-
-            , ("M4-S-p", forkFile "${self.packages.${pkgs.system}.otpmenu}/bin/otpmenu" [] Nothing)
 
             , ("M4-S-q", restart "xmonad" True)
 

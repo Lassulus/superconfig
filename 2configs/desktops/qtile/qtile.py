@@ -148,7 +148,6 @@ keys = [
     Key([mod], "i", lazy.spawn("screenshot")),
     Key([mod], "p", lazy.spawn("passmenu")),
     Key([mod], "Insert", lazy.spawn("type_paste")),
-    Key([mod, "shift"], "p", lazy.spawn("otpmenu")),
     Key([mod], "v", goto_workspace, desc="Switch to group"),
     Key([mod, "shift"], "v", moveto_workspace, desc="move window to group"),
     Key(

@@ -241,10 +241,7 @@ in
         tr -d '\n' |
         ${pkgs.wtype}/bin/wtype -s 1 -
     ''}
-    bindsym $mod+Shift+p exec ${pkgs.writers.writeDash "otpmenu" ''
-      unset TERM
-      ${pkgs.otpmenu}/bin/otpmenu
-    ''}
+
 
     # screenlock
     bindsym $mod+F11 exec ${pkgs.swaylock}/bin/swaylock -f -c 000000
