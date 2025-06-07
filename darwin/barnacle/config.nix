@@ -51,8 +51,14 @@
 
   # keyboard settings
   system.keyboard = {
-    remapCapsLockToControl = true;
     enableKeyMapping = true;
+    userKeyMapping = [
+      {
+        # Map Caps Lock to Hyper (Control+Option+Command+Shift)
+        HIDKeyboardModifierMappingSrc = 30064771129; # Caps Lock
+        HIDKeyboardModifierMappingDst = 1095216660480; # Control+Option+Command+Shift
+      }
+    ];
   };
 
   # Add skhd for keyboard shortcuts
