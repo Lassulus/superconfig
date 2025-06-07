@@ -26,6 +26,7 @@
     pkgs.firefox-devedition
     pkgs.ripgrep
     pkgs.alt-tab-macos
+    pkgs.zed-editor
   ];
 
   # Use a custom configuration.nix location.
