@@ -65,8 +65,8 @@
   services.skhd = {
     enable = true;
     skhdConfig = ''
-      # Open passmenu with Command+Shift+P
-      cmd + shift - p : /run/current-system/sw/bin/passmenu
+      # Open passmenu with Hyper-P
+      ctrl + shift + alt + cmd - p : /run/current-system/sw/bin/passmenu
     '';
   };
 
