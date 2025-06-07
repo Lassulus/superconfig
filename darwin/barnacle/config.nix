@@ -55,8 +55,8 @@
     userKeyMapping = [
       {
         # Map Caps Lock to Hyper (Control+Option+Command+Shift)
-        HIDKeyboardModifierMappingSrc = 30064771129; # Caps Lock
-        HIDKeyboardModifierMappingDst = 1095216660480; # Control+Option+Command+Shift
+        HIDKeyboardModifierMappingSrc = 0x700000039; # Caps Lock
+        HIDKeyboardModifierMappingDst = 0x7000000E7; # Control+Option+Command+Shift
       }
     ];
   };
