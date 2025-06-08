@@ -7,7 +7,7 @@
         name = "passmenu";
         runtimeInputs = with pkgs; [
           self.packages.${pkgs.system}.menu
-          pass
+          self.packages.${pkgs.system}.pass
         ] ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
           wtype
           xdotool
@@ -43,7 +43,7 @@
                 echo -n "$otp_code" | xdotool type --clearmodifiers --file -
               fi
             else
-              pass otp -c "$password" 2>/dev/null
+              pass otp --clip "$password" 2>/dev/null
             fi
           else
             if [[ $typeit -eq 1 ]]; then
@@ -58,7 +58,7 @@
                 echo -n "$pw" | xdotool type --clearmodifiers --file -
               fi
             else
-              pass show -c "$password" 2>/dev/null
+              pass show --clip "$password" 2>/dev/null
             fi
           fi
         '';
