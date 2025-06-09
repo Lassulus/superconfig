@@ -27,6 +27,8 @@
     pkgs.ripgrep
     pkgs.alt-tab-macos
     pkgs.zed-editor
+    pkgs.nixd
+    pkgs.nil
   ];
 
   # Use a custom configuration.nix location.
