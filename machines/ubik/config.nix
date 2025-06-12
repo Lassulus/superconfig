@@ -39,7 +39,7 @@
   services.nextcloud = {
     enable = true;
     hostName = "c.apanowicz.de";
-    package = pkgs.nextcloud29;
+    package = pkgs.nextcloud30;
     config.dbtype = "sqlite";
     config.adminpassFile = "/run/nextcloud.pw";
     https = true;
