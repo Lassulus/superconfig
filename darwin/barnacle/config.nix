@@ -23,7 +23,11 @@
     pkgs.git
     pkgs.element-desktop
     pkgs.iterm2
-    pkgs.firefox-devedition
+    (pkgs.firefox-devedition-bin-unwrapped.overrideAttrs (o: {
+      meta = o.meta // {
+        license = pkgs.lib.licenses.free;
+      };
+    }))
     pkgs.ripgrep
     pkgs.alt-tab-macos
     pkgs.zed-editor
