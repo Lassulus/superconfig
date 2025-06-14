@@ -84,3 +84,8 @@ Secrets are managed via password-store and uploaded to `/etc/secrets` on deploym
 - VM tests: `./5pkgs/init/test.sh`
 - Container tests are configured in `2configs/container-tests.nix`
 
+## Commit Message Guidelines
+
+- Use simple, descriptive commit messages without attribution footers
+- For flake.lock updates, use: "flake.lock: update"
+- Follow existing patterns seen in git log
