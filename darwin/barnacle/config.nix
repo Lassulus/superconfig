@@ -18,6 +18,7 @@
     pkgs.atuin
 
     pkgs.gnupg
+    pkgs.pinentry_mac
     pkgs.lazygit
     pkgs.sshuttle
     pkgs.git
