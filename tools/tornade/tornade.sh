@@ -17,26 +17,26 @@ ControlPort 127.0.0.1:$CONTROL_PORT
 Log notice file $TOR_DIR/tor.log
 RunAsDaemon 0
 
-# Performance optimizations
-CircuitBuildTimeout 10
+# Performance and reliability optimizations
+CircuitBuildTimeout 15
 LearnCircuitBuildTimeout 0
-NumEntryGuards 3
+NumEntryGuards 8
 KeepalivePeriod 60
-SocksTimeout 60
+SocksTimeout 120
 
-# Don't wait for descriptor downloads
-UseMicroDescriptors 0
+# Reliability settings
+MaxCircuitDirtiness 600
+NewCircuitPeriod 30
+UseEntryGuards 1
 EOF
 
-# Start tor in background
-echo "Starting isolated Tor instance on port $SOCKS_PORT..." >&2
-tor -f "$TOR_DIR/torrc" &
+# Start tor in background - suppress output to avoid protocol interference
+tor -f "$TOR_DIR/torrc" >/dev/null 2>&1 &
 TOR_PID=$!
 
 # Function to cleanup tor process
 cleanup() {
   if kill -0 "$TOR_PID" 2>/dev/null; then
-    echo "Stopping Tor instance..." >&2
     kill "$TOR_PID" 2>/dev/null || true
     wait "$TOR_PID" 2>/dev/null || true
   fi
@@ -44,24 +44,36 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
-# Wait for tor to be ready
-echo "Waiting for Tor to establish circuits..." >&2
-# Check frequently at first, then slow down
-for i in {1..60}; do
-  if grep -q "Bootstrapped 100%" "$TOR_DIR/tor.log" 2>/dev/null; then
-    echo "Tor is ready!" >&2
-    break
+# Retry up to 5 times to establish circuits
+for attempt in 1 2 3 4 5; do
+  
+  if [ $attempt -gt 1 ]; then
+    # Kill previous tor instance and restart
+    kill "$TOR_PID" 2>/dev/null || true
+    wait "$TOR_PID" 2>/dev/null || true
+    tor -f "$TOR_DIR/torrc" >/dev/null 2>&1 &
+    TOR_PID=$!
   fi
-  # Check every 0.1s for first 2 seconds, then every 0.5s
-  if [ "$i" -le 20 ]; then
-    sleep 0.1
-  else
-    sleep 0.5
-  fi
+  
+  # Check frequently at first, then slow down - longer timeout per attempt
+  for i in {1..120}; do
+    if grep -q "Bootstrapped 100%" "$TOR_DIR/tor.log" 2>/dev/null; then
+      # Success - exit both loops
+      break 2
+    fi
+    # Check every 0.1s for first 2 seconds, then every 0.5s
+    if [ "$i" -le 20 ]; then
+      sleep 0.1
+    else
+      sleep 0.5
+    fi
+  done
+  
+  # This attempt failed, continue to next attempt
 done
 
+# Final check - if still not ready after all attempts, exit
 if ! grep -q "Bootstrapped 100%" "$TOR_DIR/tor.log" 2>/dev/null; then
-  echo "Error: Tor failed to establish circuits" >&2
   exit 1
 fi
 
