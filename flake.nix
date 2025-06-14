@@ -126,16 +126,16 @@
         "x86_64-darwin"
       ];
       imports = [
-        ./tools/nvim.nix
-        ./tools/astronvim/flake-module.nix
-        ./tools/zsh.nix
-        ./tools/wifi-qr.nix
-        ./tools/get-spora-hosts.nix
-        ./tools/pass.nix
-        ./tools/menu.nix
-        ./tools/passmenu.nix
         ./formatter.nix
-      ];
+      ] ++ (
+        # Auto-import all flake-module.nix files from tools subdirectories
+        let
+          toolDirs = builtins.attrNames (nixpkgs.lib.filterAttrs 
+            (_: type: type == "directory") 
+            (builtins.readDir ./tools));
+        in
+          map (dir: ./tools + "/${dir}/flake-module.nix") toolDirs
+      );
       flake.nixosConfigurations = clan.nixosConfigurations;
       flake.clanInternals = clan.clanInternals;
       perSystem =
