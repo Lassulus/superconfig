@@ -51,6 +51,9 @@ nix build .#nixosConfigurations.<machine-name>.config.system.build.toplevel
 # Build Darwin configuration
 nix build .#darwinConfigurations.barnacle.system
 
+# Deploy/rebuild Darwin configuration (for barnacle)
+sudo darwin-rebuild switch --flake .#barnacle
+
 # Access machines via SSH
 ssh <machine-name>.r  # via retiolum
 ssh <machine-name>.s  # via spora
@@ -80,3 +83,4 @@ Secrets are managed via password-store and uploaded to `/etc/secrets` on deploym
 
 - VM tests: `./5pkgs/init/test.sh`
 - Container tests are configured in `2configs/container-tests.nix`
+
