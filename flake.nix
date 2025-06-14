@@ -165,6 +165,7 @@
                   debug.run = "env";
                 };
               };
+              clan-cli = clan-core.packages.${system}.clan-cli;
             };
           devShells.default = pkgs.mkShell {
             packages = [
