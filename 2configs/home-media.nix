@@ -1,7 +1,6 @@
 { self, pkgs, ... }:
 {
   imports = [
-    ./mpv.nix
   ];
   users.users.media = {
     isNormalUser = true;

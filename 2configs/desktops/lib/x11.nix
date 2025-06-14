@@ -7,7 +7,6 @@
 {
   imports = [
     ../../alacritty.nix
-    ../../mpv.nix
     ../../power-action.nix
     ../../xdg-open.nix
     ../../yubikey.nix
@@ -18,6 +17,7 @@
     {
       users.users.mainUser.packages = [
         pkgs.sshuttle
+        self.packages.${pkgs.system}.mpv
       ];
       security.sudo.extraConfig = ''
         lass ALL= (root) NOPASSWD:SETENV: ${pkgs.sshuttle}/bin/.sshuttle-wrapped
