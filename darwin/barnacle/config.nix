@@ -93,6 +93,18 @@
   };
 
   nix.linux-builder.enable = true;
+  nix.linux-builder.supportedFeatures = [
+    "benchmark"
+    "big-parallel"
+    "kvm"
+    "nixos-test"
+    "uid-range"
+  ];
+  nix.linux-builder.config = {
+    imports = [
+     ../../2configs/container-tests.nix
+    ];
+  };
 
   # Create /etc/zshrc that loads the nix-darwin environment.
   programs.zsh.enable = true; # default shell on catalina
