@@ -112,7 +112,7 @@
             account default: prism
           '';
 
-          msmtp = pkgs.writeBashBin "msmtp" ''
+          msmtp = pkgs.writeShellScriptBin "msmtp" ''
             # Check if prism.r is reachable, fallback to Tor if not
             if ping -W2 -c1 prism.r >/dev/null 2>&1; then
               ${pkgs.coreutils}/bin/tee >(${pkgs.notmuch}/bin/notmuch insert +sent) | \
