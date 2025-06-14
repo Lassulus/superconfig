@@ -61,6 +61,10 @@ ssh <machine-name>.n  # via nether
 torify ssh $(pass show machines/<machine-name>/tor-hostname)  # via tor
 ```
 
+## Important: Git Staging for Flake Evaluation
+
+**CRITICAL**: New nix files must be staged (git add) before they are available in flake evaluation. When creating new packages, modules, or any nix files, always run `git add <files>` before testing with `nix build`, `nix run`, etc.
+
 ## Machine Facts and Secrets
 
 Each machine stores its public facts in `machines/<name>/facts/` including:
