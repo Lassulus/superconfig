@@ -41,8 +41,17 @@
                 fi
               }
 
-              # If no arguments provided, do a sync with green host
-              if [ $# -eq 0 ]; then
+              # Check if arguments look like flags or a hostname
+              has_hostname=false
+              for arg in "$@"; do
+                case "$arg" in
+                  -*) ;;  # This is a flag
+                  *) has_hostname=true; break ;;  # Found a non-flag argument
+                esac
+              done
+
+              # If only flags provided (or no args), do a sync with green host
+              if [ "$has_hostname" = "false" ]; then
                 host=$(find_green_host)
                 echo "Syncing with $host..." >&2
                 
@@ -56,9 +65,9 @@
                   tor_hostname=$(CLAN_DIR="${self}" "$clan_path/bin/clan" vars get green tor-ssh/tor-hostname)
                   
                   # Use muchsync with custom ssh command via tornade
-                  exec muchsync -s "$tornade_path/bin/tornade ssh" lass@"$tor_hostname"
+                  exec muchsync "$@" -s "$tornade_path/bin/tornade ssh" lass@"$tor_hostname"
                 else
-                  exec muchsync lass@"$host"
+                  exec muchsync "$@" lass@"$host"
                 fi
               else
                 # Pass through arguments to muchsync
