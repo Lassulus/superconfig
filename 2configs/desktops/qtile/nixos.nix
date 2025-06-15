@@ -94,14 +94,16 @@ in
   environment.etc."qtile.py".source = ./qtile.py;
 
   programs.xwayland.enable = true;
-  # systemd.user.services.xwayland-satellite = {
-  #   wantedBy = [ "graphical-session.target" ];
-  #   after = [ "qtile.service" ];
-  #   serviceConfig = {
-  #     RestartSec = 5;
-  #     ExecStart = "${pkgs.xwayland-satellite}/bin/xwayland-satellite";
-  #   };
-  # };
+  environment.variables.DISPLAY = ":1";
+  systemd.user.services.xwayland-satellite = {
+    wantedBy = [ "graphical-session.target" ];
+    after = [ "qtile.service" ];
+    serviceConfig = {
+      RestartSec = 5;
+      Restart = "always";
+      ExecStart = "${pkgs.xwayland-satellite}/bin/xwayland-satellite";
+    };
+  };
 
   systemd.user.services.copyq = {
     wantedBy = [ "graphical-session.target" ];
