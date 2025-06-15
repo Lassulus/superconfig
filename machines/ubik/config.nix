@@ -41,27 +41,13 @@
     hostName = "c.apanowicz.de";
     package = pkgs.nextcloud30;
     config.dbtype = "sqlite";
-    config.adminpassFile = "/run/nextcloud.pw";
+    config.adminpassFile = config.clan.core.vars.generators.nextcloud-pw.files.nextcloud-pw.path;
     https = true;
     maxUploadSize = "9001M";
   };
-  clanCore.facts.services.nextcloud-pw = {
-    secret."nextcloud.pw" = { };
-    generator.script = ''
-      echo "$prompt_value" > "$secrets"/nextcloud.pw
-    '';
-    generator.prompt = ''
-      please enter the nextcloud admin password:
-    '';
+  clan.core.vars.generators.nextcloud-pw = {
+    prompts.nextcloud-pw.persist = true;
   };
-  systemd.services.nextcloud-setup.serviceConfig.ExecStartPre = [
-    "+${pkgs.writeDash "copy-pw" ''
-      ${pkgs.rsync}/bin/rsync \
-        --chown nextcloud:nextcloud \
-        --chmod 0700 \
-        ${config.clanCore.facts.services.nextcloud-pw.secret."nextcloud.pw".path} /run/nextcloud.pw
-    ''}"
-  ];
 
   # mail
   lass.usershadow.enable = true;
