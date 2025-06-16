@@ -94,26 +94,8 @@
           };
         };
         machines = nixpkgs.lib.mapAttrs (machineName: _: {
-
           imports = [
             ./machines/${machineName}/physical.nix
-            (
-              { config, ... }:
-              {
-                clan.core.facts.secretStore = "password-store";
-                clan.core.facts.secretUploadDirectory = nixpkgs.lib.mkDefault "/etc/secrets";
-                clan.core.vars.settings.secretStore = "password-store";
-                clan.core.networking.targetHost = "root@${machineName}";
-                krebs.secret.directory = config.clan.core.facts.secretUploadDirectory;
-                nixpkgs.overlays = [
-                  self.inputs.stockholm.overlays.default
-                  (import (self.inputs.stockholm.inputs.nix-writers + "/pkgs")) # TODO get rid of that overlay
-                ];
-              }
-            )
-            ./2configs
-            ./3modules
-            self.inputs.stockholm.nixosModules.krebs
           ];
         }) (builtins.readDir ./machines);
       };

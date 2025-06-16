@@ -6,7 +6,29 @@
   ...
 }:
 {
+  # Clan core configuration
+  clan.core.facts.secretStore = "password-store";
+  clan.core.facts.secretUploadDirectory = lib.mkDefault "/etc/secrets";
+  clan.core.vars.settings.secretStore = "password-store";
+  clan.core.networking.targetHost = "root@${config.networking.hostName}";
+  
+  # Stockholm configuration
+  krebs.secret.directory = config.clan.core.facts.secretUploadDirectory;
+  
+  # Nixpkgs overlays
+  nixpkgs.overlays = [
+    self.inputs.stockholm.overlays.default
+    (import (self.inputs.stockholm.inputs.nix-writers + "/pkgs")) # TODO get rid of that overlay
+  ];
+
   imports = [
+    # Import 3modules
+    ../3modules
+    
+    # Import stockholm krebs module
+    self.inputs.stockholm.nixosModules.krebs
+    
+    # Import individual configurations
     ./security-workarounds.nix
     # ./binary-cache/client.nix
     ./gc.nix
@@ -22,6 +44,8 @@
     ./nether.nix
     ./spora.nix
     ./nix.nix
+    
+    # Import stockholm modules
     self.inputs.stockholm.nixosModules.users
     self.inputs.stockholm.nixosModules.hosts
     self.inputs.stockholm.nixosModules.kartei

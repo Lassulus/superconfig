@@ -12,6 +12,7 @@ in
 
   system.stateVersion = "23.05";
   imports = [
+    ../../2configs
     {
       # helsinki migration
       users.users.root.openssh.authorizedKeys.keys = [

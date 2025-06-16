@@ -1,6 +1,7 @@
 { config, pkgs, ... }:
 {
   imports = [
+    ../../2configs
     ../../2configs/retiolum.nix
     ../../2configs/network-manager.nix
     ../../2configs/syncthing.nix

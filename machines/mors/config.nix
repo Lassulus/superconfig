@@ -7,6 +7,7 @@
 
 {
   imports = [
+    ../../2configs
     ../../2configs/mouse.nix
     ../../2configs/retiolum.nix
     ../../2configs/desktops/qtile/nixos.nix
