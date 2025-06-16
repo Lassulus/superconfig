@@ -100,11 +100,18 @@
             ];
           };
         };
-        machines = nixpkgs.lib.mapAttrs (machineName: _: {
-          imports = [
-            ./machines/${machineName}/physical.nix
-          ];
-        }) (nixpkgs.lib.filterAttrs (machineName: _: builtins.pathExists ./machines/${machineName}/physical.nix) (builtins.readDir ./machines));
+        machines =
+          nixpkgs.lib.mapAttrs
+            (machineName: _: {
+              imports = [
+                ./machines/${machineName}/physical.nix
+              ];
+            })
+            (
+              nixpkgs.lib.filterAttrs (
+                machineName: _: builtins.pathExists ./machines/${machineName}/physical.nix
+              ) (builtins.readDir ./machines)
+            );
       };
     in
     flake-parts.lib.mkFlake { inherit inputs; } {
@@ -114,17 +121,19 @@
         "aarch64-darwin"
         "x86_64-darwin"
       ];
-      imports = [
-        ./formatter.nix
-      ] ++ (
-        # Auto-import all flake-module.nix files from tools subdirectories
-        let
-          toolDirs = builtins.attrNames (nixpkgs.lib.filterAttrs 
-            (_: type: type == "directory") 
-            (builtins.readDir ./tools));
-        in
+      imports =
+        [
+          ./formatter.nix
+        ]
+        ++ (
+          # Auto-import all flake-module.nix files from tools subdirectories
+          let
+            toolDirs = builtins.attrNames (
+              nixpkgs.lib.filterAttrs (_: type: type == "directory") (builtins.readDir ./tools)
+            );
+          in
           map (dir: ./tools + "/${dir}/flake-module.nix") toolDirs
-      );
+        );
       flake.nixosConfigurations = clan.nixosConfigurations;
       flake.clanInternals = clan.clanInternals;
       flake.darwinConfigurations = clan.darwinConfigurations;

@@ -8,15 +8,19 @@
         paths = [
           (pkgs.writeShellApplication {
             name = "muchsync";
-            runtimeInputs = [
-              pkgs.muchsync
-              pkgs.notmuch
-            ] ++ lib.optionals pkgs.stdenv.isLinux [
-              pkgs.iputils
-            ];
+            runtimeInputs =
+              [
+                pkgs.muchsync
+                pkgs.notmuch
+              ]
+              ++ lib.optionals pkgs.stdenv.isLinux [
+                pkgs.iputils
+              ];
             text = ''
-              export NOTMUCH_CONFIG=${pkgs.writeText "notmuch-config" self.packages.${pkgs.system}.mutt.passthru.notmuchConfig}
-              
+              export NOTMUCH_CONFIG=${
+                pkgs.writeText "notmuch-config" self.packages.${pkgs.system}.mutt.passthru.notmuchConfig
+              }
+
               set -efu
 
               # Create Maildir structure if it doesn't exist

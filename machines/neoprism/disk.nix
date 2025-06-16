@@ -69,9 +69,8 @@
         type = "zpool";
         mode = "mirror";
         mountpoint = "/";
-        rootFsOptions =
-          {
-          };
+        rootFsOptions = {
+        };
         datasets = {
           reserved = {
             type = "zfs_fs";

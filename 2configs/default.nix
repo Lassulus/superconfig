@@ -11,10 +11,10 @@
   clan.core.facts.secretUploadDirectory = lib.mkDefault "/etc/secrets";
   clan.core.vars.settings.secretStore = "password-store";
   clan.core.networking.targetHost = "root@${config.networking.hostName}";
-  
+
   # Stockholm configuration
   krebs.secret.directory = config.clan.core.facts.secretUploadDirectory;
-  
+
   # Nixpkgs overlays
   nixpkgs.overlays = [
     self.inputs.stockholm.overlays.default
@@ -24,10 +24,10 @@
   imports = [
     # Import 3modules
     ../3modules
-    
+
     # Import stockholm krebs module
     self.inputs.stockholm.nixosModules.krebs
-    
+
     # Import individual configurations
     ./security-workarounds.nix
     # ./binary-cache/client.nix
@@ -44,7 +44,7 @@
     ./nether.nix
     ./spora.nix
     ./nix.nix
-    
+
     # Import stockholm modules
     self.inputs.stockholm.nixosModules.users
     self.inputs.stockholm.nixosModules.hosts
@@ -64,7 +64,8 @@
     self.inputs.stockholm.nixosModules.xresources
     self.inputs.stockholm.nixosModules.ssh
     self.inputs.stockholm.nixosModules.sync-containers3
-    { # nix-index
+    {
+      # nix-index
       imports = [
         self.inputs.nix-index-database.nixosModules.nix-index
       ];
@@ -345,7 +346,6 @@
       ];
     };
   };
-
 
   networking.extraHosts = ''
     10.42.0.1 styx.gg23
