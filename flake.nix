@@ -83,6 +83,13 @@
               "laptop"
               "focus"
             ];
+            barnacle = {
+              machineClass = "darwin";
+              tags = [
+                "laptop"
+                "focus"
+              ];
+            };
             icarus.tags = [ "laptop" ];
             prism.tags = [ "server" ];
             neoprism.tags = [ "server" ];
@@ -120,6 +127,7 @@
       );
       flake.nixosConfigurations = clan.nixosConfigurations;
       flake.clanInternals = clan.clanInternals;
+      flake.darwinConfigurations = clan.darwinConfigurations;
       perSystem =
         {
           lib,
@@ -157,10 +165,6 @@
             ];
           };
         };
-      flake.darwinConfigurations.barnacle = inputs.nix-darwin.lib.darwinSystem {
-        specialArgs.self = self;
-        modules = [ ./darwin/barnacle/config.nix ];
-      };
       flake.keys = {
         pgp.yubi = {
           key = ./keys/yubi.pgp;
