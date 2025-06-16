@@ -97,7 +97,7 @@
           imports = [
             ./machines/${machineName}/physical.nix
           ];
-        }) (builtins.readDir ./machines);
+        }) (nixpkgs.lib.filterAttrs (machineName: _: builtins.pathExists ./machines/${machineName}/physical.nix) (builtins.readDir ./machines));
       };
     in
     flake-parts.lib.mkFlake { inherit inputs; } {
