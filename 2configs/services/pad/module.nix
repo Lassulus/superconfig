@@ -58,7 +58,7 @@
       config.clan.core.vars.generators.hedgedoc.files."hedgedoc.env".path
     ];
     clan.core.vars.generators.hedgedoc = {
-      files."hedgedoc.env" = {};
+      files."hedgedoc.env" = { };
       runtimeInputs = [ pkgs.pwgen ];
       script = ''
         pwgen -s 64 1 > session_secret

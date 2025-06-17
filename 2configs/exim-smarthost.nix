@@ -288,10 +288,8 @@ in
       config.krebs.hosts.mors
       config.krebs.hosts.xerxes
     ];
-    internet-aliases =
-      map (from: { inherit from to; }) mails
-      ++ [
-      ];
+    internet-aliases = map (from: { inherit from to; }) mails ++ [
+    ];
     system-aliases = [
       {
         from = "mailer-daemon";

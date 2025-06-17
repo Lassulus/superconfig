@@ -23,7 +23,7 @@
             };
           };
         };
-        globals =  {
+        globals = {
           mapleader = " ";
           lumen_light_colorscheme = "everforest";
           lumen_dark_colorscheme = "ayu";

@@ -1,4 +1,4 @@
-{ self, modulesPath, pkgs, ... }:
+{ self, modulesPath, ... }:
 {
   imports = [
     ./config.nix
@@ -20,7 +20,6 @@
   # }) {
   #   inherit (pkgs) system;
   # }).fwupd;
-
 
   krebs.power-action.battery = "BAT1";
 

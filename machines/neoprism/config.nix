@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ../../2configs
     ../../2configs/ssh-redirect.nix
     ../../2configs/retiolum.nix
     ../../2configs/mail/internet-gateway.nix

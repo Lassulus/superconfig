@@ -1,8 +1,8 @@
-
 { ... }:
 {
   perSystem =
-    { pkgs, ... }: {
+    { pkgs, ... }:
+    {
       packages.wifi-qr = pkgs.writeShellApplication {
         name = "wifi-qr";
         runtimeInputs = [

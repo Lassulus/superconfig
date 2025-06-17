@@ -172,8 +172,6 @@ in
 
       NIX_CFLAGS_COMPILE = "-Wno-error=implicit-function-declaration";
 
-
-
       buildInputs = old.buildInputs ++ [ pkgs.pkg-config ];
     });
   };

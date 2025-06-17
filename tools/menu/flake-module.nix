@@ -2,7 +2,7 @@
 {
   perSystem =
     { pkgs, ... }:
-     {
+    {
       packages.menu =
         if pkgs.stdenv.hostPlatform.isDarwin then
           (pkgs.writeShellApplication {

@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ../../2configs
     ../../2configs/retiolum.nix
     ../../2configs/exim-retiolum.nix
     # ../../2configs/desktops/xmonad

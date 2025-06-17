@@ -3,7 +3,7 @@
   perSystem =
     { pkgs, lib, ... }:
     {
-      packages.mutt = 
+      packages.mutt =
         let
           # Mailboxes configuration from mail.nix
           mailboxes = {
@@ -257,24 +257,27 @@
           '';
 
         in
-          (pkgs.writeShellApplication {
-            name = "mutt";
-            runtimeInputs = [
+        (pkgs.writeShellApplication {
+          name = "mutt";
+          runtimeInputs =
+            [
               pkgs.neomutt
               pkgs.elinks
               pkgs.msmtp
               pkgs.notmuch
               pkgs.urlscan
-            ] ++ lib.optionals pkgs.stdenv.isLinux [
+            ]
+            ++ lib.optionals pkgs.stdenv.isLinux [
               pkgs.iputils
             ];
-            text = ''
-              export NOTMUCH_CONFIG_FILE=${pkgs.writeText "notmuch-config" notmuchConfig}
-              export MUTTRC=${muttrc}
-              ${builtins.readFile ./mutt.sh}
-            '';
-          }) // {
-            passthru.notmuchConfig = notmuchConfig;
-          };
+          text = ''
+            export NOTMUCH_CONFIG_FILE=${pkgs.writeText "notmuch-config" notmuchConfig}
+            export MUTTRC=${muttrc}
+            ${builtins.readFile ./mutt.sh}
+          '';
+        })
+        // {
+          passthru.notmuchConfig = notmuchConfig;
+        };
     };
 }

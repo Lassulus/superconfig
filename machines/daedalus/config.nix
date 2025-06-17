@@ -7,6 +7,7 @@
 
 {
   imports = [
+    ../../2configs
     ../../2configs/retiolum.nix
     ../../2configs/pipewire.nix
     ../../2configs/autoupdate.nix

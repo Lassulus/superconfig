@@ -1,4 +1,4 @@
-{ pkgs, lib, self, ... }:
+{ pkgs, lib, ... }:
 let
   # qtile =
   #   (pkgs.python3.pkgs.qtile.override {

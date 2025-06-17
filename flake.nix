@@ -83,6 +83,13 @@
               "laptop"
               "focus"
             ];
+            barnacle = {
+              machineClass = "darwin";
+              tags = [
+                "laptop"
+                "focus"
+              ];
+            };
             icarus.tags = [ "laptop" ];
             prism.tags = [ "server" ];
             neoprism.tags = [ "server" ];
@@ -93,29 +100,18 @@
             ];
           };
         };
-        machines = nixpkgs.lib.mapAttrs (machineName: _: {
-
-          imports = [
-            ./machines/${machineName}/physical.nix
+        machines =
+          nixpkgs.lib.mapAttrs
+            (machineName: _: {
+              imports = [
+                ./machines/${machineName}/physical.nix
+              ];
+            })
             (
-              { config, ... }:
-              {
-                clan.core.facts.secretStore = "password-store";
-                clan.core.facts.secretUploadDirectory = nixpkgs.lib.mkDefault "/etc/secrets";
-                clan.core.vars.settings.secretStore = "password-store";
-                clan.core.networking.targetHost = "root@${machineName}";
-                krebs.secret.directory = config.clan.core.facts.secretUploadDirectory;
-                nixpkgs.overlays = [
-                  self.inputs.stockholm.overlays.default
-                  (import (self.inputs.stockholm.inputs.nix-writers + "/pkgs")) # TODO get rid of that overlay
-                ];
-              }
-            )
-            ./2configs
-            ./3modules
-            self.inputs.stockholm.nixosModules.krebs
-          ];
-        }) (builtins.readDir ./machines);
+              nixpkgs.lib.filterAttrs (
+                machineName: _: builtins.pathExists ./machines/${machineName}/physical.nix
+              ) (builtins.readDir ./machines)
+            );
       };
     in
     flake-parts.lib.mkFlake { inherit inputs; } {
@@ -125,19 +121,22 @@
         "aarch64-darwin"
         "x86_64-darwin"
       ];
-      imports = [
-        ./formatter.nix
-      ] ++ (
-        # Auto-import all flake-module.nix files from tools subdirectories
-        let
-          toolDirs = builtins.attrNames (nixpkgs.lib.filterAttrs 
-            (_: type: type == "directory") 
-            (builtins.readDir ./tools));
-        in
+      imports =
+        [
+          ./formatter.nix
+        ]
+        ++ (
+          # Auto-import all flake-module.nix files from tools subdirectories
+          let
+            toolDirs = builtins.attrNames (
+              nixpkgs.lib.filterAttrs (_: type: type == "directory") (builtins.readDir ./tools)
+            );
+          in
           map (dir: ./tools + "/${dir}/flake-module.nix") toolDirs
-      );
+        );
       flake.nixosConfigurations = clan.nixosConfigurations;
       flake.clanInternals = clan.clanInternals;
+      flake.darwinConfigurations = clan.darwinConfigurations;
       perSystem =
         {
           lib,
@@ -175,10 +174,6 @@
             ];
           };
         };
-      flake.darwinConfigurations.barnacle = inputs.nix-darwin.lib.darwinSystem {
-        specialArgs.self = self;
-        modules = [ ./darwin/barnacle/config.nix ];
-      };
       flake.keys = {
         pgp.yubi = {
           key = ./keys/yubi.pgp;

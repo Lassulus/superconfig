@@ -67,22 +67,20 @@ in
 
         #run the chosen script
         case $script in
-          ${
-            concatMapStringsSep "\n" (
-              script:
-              slib.indent ''
-                ${script.label})
-                  target=$(${pkgs.xclip}/bin/xclip -selection clipboard -target TARGETS -out \
-                    | ${pkgs.gnugrep}/bin/grep '${script.target}' \
-                    | ${pkgs.gnugrep}/bin/grep -v TARGETS \
-                    | ${pkgs.coreutils}/bin/head -1)
-                  ${pkgs.xclip}/bin/xclip -selection clipboard -target "$target" -out \
-                  | ${script.script} \
-                  | ${pkgs.xclip}/bin/xclip -selection clipboard -in
-                ;;
-              ''
-            ) (attrValues cfg)
-          }
+          ${concatMapStringsSep "\n" (
+            script:
+            slib.indent ''
+              ${script.label})
+                target=$(${pkgs.xclip}/bin/xclip -selection clipboard -target TARGETS -out \
+                  | ${pkgs.gnugrep}/bin/grep '${script.target}' \
+                  | ${pkgs.gnugrep}/bin/grep -v TARGETS \
+                  | ${pkgs.coreutils}/bin/head -1)
+                ${pkgs.xclip}/bin/xclip -selection clipboard -target "$target" -out \
+                | ${script.script} \
+                | ${pkgs.xclip}/bin/xclip -selection clipboard -in
+              ;;
+            ''
+          ) (attrValues cfg)}
         esac
       '';
     in

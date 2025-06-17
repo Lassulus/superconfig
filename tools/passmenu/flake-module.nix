@@ -5,13 +5,16 @@
     {
       packages.passmenu = pkgs.writeShellApplication {
         name = "passmenu";
-        runtimeInputs = with pkgs; [
-          self.packages.${pkgs.system}.menu
-          self.packages.${pkgs.system}.pass
-        ] ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
-          wtype
-          xdotool
-        ];
+        runtimeInputs =
+          with pkgs;
+          [
+            self.packages.${pkgs.system}.menu
+            self.packages.${pkgs.system}.pass
+          ]
+          ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
+            wtype
+            xdotool
+          ];
         text = ''
           set -eu
           shopt -s nullglob globstar
