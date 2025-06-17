@@ -254,6 +254,12 @@
             # forward with attachment
             set mime_forward = no
             set forward_attachments = yes
+
+            # better handling of long URLs
+            set wrap = 0  # don't wrap lines in the pager
+            set markers = no  # don't show + markers for wrapped lines
+            set smart_wrap = yes  # wrap at word boundaries when displaying
+            set pager_stop = yes  # don't jump to next message at end of pager
           '';
 
         in
