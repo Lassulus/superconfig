@@ -186,8 +186,19 @@
         # Auto-start tmux for new sessions
         # Check if we're already in tmux (even through sudo)
         if [[ "$TERM" != "linux" && -z "$TMUX" && "$TERM" != "dumb" ]]; then
-          # Additional check: see if we're in a tmux pane even if $TMUX is unset
-          if [[ -z "$(tmux list-panes -F '#{pane_pid}' 2>/dev/null | grep -w $$)" ]]; then
+          # Check if we're inside tmux by looking for tmux in the process tree
+          in_tmux=false
+          pid=$$
+          while [[ $pid -ne 1 ]]; do
+            if ps -p $pid -o comm= 2>/dev/null | grep -q '^tmux'; then
+              in_tmux=true
+              break
+            fi
+            # Get parent PID
+            pid=$(ps -p $pid -o ppid= 2>/dev/null | tr -d ' ') || break
+          done
+          
+          if [[ "$in_tmux" == "false" ]]; then
             # Preserve SSH_AUTH_SOCK for tmux
             if [[ -n "$SSH_AUTH_SOCK" ]]; then
               tmux set-environment -g SSH_AUTH_SOCK "$SSH_AUTH_SOCK" 2>/dev/null
