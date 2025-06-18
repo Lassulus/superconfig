@@ -18,6 +18,7 @@
     pkgs.fzf
     pkgs.atuin
 
+    pkgs.tmux
     pkgs.gnupg
     pkgs.pinentry_mac
     pkgs.lazygit
