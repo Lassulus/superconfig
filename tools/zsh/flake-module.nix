@@ -178,6 +178,25 @@
         esac
 
 
+        # Auto-start tmux for new sessions
+        if [[ "$TERM" != "linux" && -z "$TMUX" && "$TERM" != "dumb" ]]; then
+          # Preserve SSH_AUTH_SOCK for tmux
+          if [[ -n "$SSH_AUTH_SOCK" ]]; then
+            tmux set-environment -g SSH_AUTH_SOCK "$SSH_AUTH_SOCK" 2>/dev/null
+          fi
+
+          # Start tmux with a new session
+          exec tmux -u new-session
+        fi
+
+        # Set tmux status bar color based on hostname for SSH sessions
+        if [[ -n "$TMUX" && "$__host__" != "$HOST" ]]; then
+          # Generate a color based on hostname hash
+          color=$(( $(echo -n "$HOST" | od -An -N4 -tu4) % 255 ))
+          tmux set -g status-bg "colour$color" 2>/dev/null || true
+          export __host__="$HOST"
+        fi
+
         # Disable some features to support TRAMP.
         if [ "$TERM" = dumb ]; then
             unsetopt zle prompt_cr prompt_subst
@@ -188,14 +207,28 @@
       '';
     in
     {
-      packages.zsh =
-        (pkgs.writeScriptBin "zsh" ''
-          #!/bin/sh
-          export ZDOTDIR=${pkgs.writeTextDir "/.zshrc" zshrc}
-          exec ${pkgs.zsh}/bin/zsh "$@"
-        '')
-        // {
-          zshrc = zshrc;
+      packages.zsh = pkgs.symlinkJoin {
+        name = "zsh-with-config";
+        paths = [
+          (pkgs.writeShellApplication {
+            name = "zsh";
+            runtimeInputs = with pkgs; [
+              tmux
+              fzf
+              direnv
+              atuin
+              nix-index
+            ];
+            text = ''
+              export ZDOTDIR=${pkgs.writeTextDir "/.zshrc" zshrc}
+              exec ${pkgs.zsh}/bin/zsh "$@"
+            '';
+          })
+          pkgs.zsh
+        ];
+        passthru = {
+          inherit zshrc;
         };
+      };
     };
 }
