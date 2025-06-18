@@ -1,4 +1,4 @@
-{ pkgs, self, ... }:
+{ pkgs, self, lib, ... }:
 
 {
   imports = [
@@ -104,6 +104,11 @@
 
   # enable sudo touch
   security.pam.services.sudo_local.touchIdAuth = true;
+  
+  # Enable Touch ID in tmux sessions with pam_reattach
+  security.pam.services.sudo_local.text = lib.mkBefore ''
+    auth       optional       ${pkgs.pam-reattach}/lib/pam/pam_reattach.so ignore_ssh
+  '';
 
   # disable natural scrolling
   system.defaults.NSGlobalDomain."com.apple.swipescrolldirection" = false;
