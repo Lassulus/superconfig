@@ -246,6 +246,7 @@
               nix-index
             ];
             text = ''
+              unset IN_NIX_SHELL
               export ZDOTDIR=${pkgs.writeTextDir "/.zshrc" zshrc}
               exec ${pkgs.zsh}/bin/zsh "$@"
             '';
