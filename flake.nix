@@ -46,6 +46,9 @@
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
 
+    nix-rosetta-builder.url = "github:cpick/nix-rosetta-builder";
+    nix-rosetta-builder.inputs.nixpkgs.follows = "nixpkgs";
+
     nixos-facter.url = "github:numtide/nixos-facter-modules";
 
     treefmt-nix.url = "github:numtide/treefmt-nix";

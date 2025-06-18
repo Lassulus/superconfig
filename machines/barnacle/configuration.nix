@@ -2,8 +2,8 @@
 
 {
   imports = [
-    # ./rosetta.nix
     self.inputs.nix-index-database.darwinModules.nix-index
+    self.inputs.nix-rosetta-builder.darwinModules.default
   ];
   clan.core.networking.targetHost = "root@localhost";
   programs.nix-index-database.comma.enable = true;
@@ -107,6 +107,9 @@
       ../../2configs/container-tests.nix
     ];
   };
+
+  # Enable Rosetta builder for x86_64 builds
+  nix-rosetta-builder.enable = true;
 
   # Create /etc/zshrc that loads the nix-darwin environment.
   programs.zsh.enable = true; # default shell on catalina
