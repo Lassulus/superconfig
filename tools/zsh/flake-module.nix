@@ -81,6 +81,11 @@
         # direnv integration
         eval "$(${pkgs.direnv}/bin/direnv hook zsh)"
 
+        # Use nvim as MANPAGER if available
+        if command -v nvim >/dev/null 2>&1; then
+          export MANPAGER="nvim +Man!"
+        fi
+
         # This function is called whenever a command is not found.
         command_not_found_handler() {
           local p='${pkgs.nix-index}/etc/profile.d/command-not-found.sh'
