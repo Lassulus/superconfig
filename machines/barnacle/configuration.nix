@@ -95,20 +95,6 @@
     };
   };
 
-  nix.linux-builder.enable = true;
-  nix.linux-builder.supportedFeatures = [
-    "benchmark"
-    "big-parallel"
-    "kvm"
-    "nixos-test"
-    "uid-range"
-  ];
-  nix.linux-builder.config = {
-    imports = [
-      ../../2configs/container-tests.nix
-    ];
-  };
-
   # Enable Rosetta builder for x86_64 builds
   nix-rosetta-builder.enable = true;
 
