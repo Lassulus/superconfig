@@ -183,7 +183,9 @@
             bind index \Cr noop
             macro index \Cr \
             "<enter-command>unset wait_key<enter> \
-            <shell-escape>${self.packages.${pkgs.system}.muchsync}/bin/muchsync -vv<enter>
+            <sync-mailbox> \
+            <shell-escape>${self.packages.${pkgs.system}.muchsync}/bin/muchsync -vv<enter> \
+            <sync-mailbox>
 
             #killed
             bind index d noop
