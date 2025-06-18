@@ -184,14 +184,18 @@
 
 
         # Auto-start tmux for new sessions
+        # Check if we're already in tmux (even through sudo)
         if [[ "$TERM" != "linux" && -z "$TMUX" && "$TERM" != "dumb" ]]; then
-          # Preserve SSH_AUTH_SOCK for tmux
-          if [[ -n "$SSH_AUTH_SOCK" ]]; then
-            tmux set-environment -g SSH_AUTH_SOCK "$SSH_AUTH_SOCK" 2>/dev/null
-          fi
+          # Additional check: see if we're in a tmux pane even if $TMUX is unset
+          if [[ -z "$(tmux list-panes -F '#{pane_pid}' 2>/dev/null | grep -w $$)" ]]; then
+            # Preserve SSH_AUTH_SOCK for tmux
+            if [[ -n "$SSH_AUTH_SOCK" ]]; then
+              tmux set-environment -g SSH_AUTH_SOCK "$SSH_AUTH_SOCK" 2>/dev/null
+            fi
 
-          # Start tmux with a new session
-          exec tmux -u new-session
+            # Start tmux with a new session
+            exec tmux -u new-session
+          fi
         fi
 
         # Set tmux status bar color based on hostname for SSH sessions
