@@ -67,6 +67,7 @@
     self.packages.${pkgs.system}.bank
     pkgs.mycelium
     pkgs.tmate
+    pkgs.claude-code
   ];
 
   krebs.hosts.styx.nets.retiolum.tinc.extraConfig = "Address = 10.42.0.1 655";
