@@ -217,6 +217,12 @@
           export __host__="$HOST"
         fi
 
+        # Configure tmux for better mouse support
+        if [[ -n "$TMUX" ]]; then
+          # Enable mouse mode for scrolling
+          tmux set -g mouse on 2>/dev/null || true
+        fi
+
         # Disable some features to support TRAMP.
         if [ "$TERM" = dumb ]; then
             unsetopt zle prompt_cr prompt_subst
