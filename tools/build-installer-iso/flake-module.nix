@@ -3,7 +3,6 @@ let
   # Shared installer configuration module
   installerModule = { modulesPath, pkgs, ... }: {
     imports = [
-      # ../../2configs/installer-tor.nix
       (modulesPath + "/image/images.nix")
     ];
 
