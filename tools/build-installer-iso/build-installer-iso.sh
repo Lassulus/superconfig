@@ -53,7 +53,7 @@ done
 
 # Build the base ISO
 echo "Building base ISO for $ARCH..."
-BASE_ISO=$(nix build -L --no-link --print-out-paths "$FLAKE_ROOT#clanInternals.machines.$ARCH.installer.config.system.build.images.iso-installer")
+BASE_ISO=$(nix build -L --no-link --print-out-paths "$FLAKE_ROOT#nixosConfigurations.installer-$ARCH.config.system.build.images.iso-installer")
 
 if [ -z "$VARS_DIR" ]; then
   # No vars specified, just copy the base ISO
