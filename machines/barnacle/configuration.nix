@@ -96,7 +96,13 @@
   };
 
   # Enable Rosetta builder for x86_64 builds
-  nix-rosetta-builder.enable = true;
+  nix-rosetta-builder = {
+    enable = true;
+    potentiallyInsecureExtraNixosModule = {
+      # Fix DNS resolution in the VM
+      networking.nameservers = [ "8.8.8.8" "1.1.1.1" ];
+    };
+  };
 
   # Create /etc/zshrc that loads the nix-darwin environment.
   programs.zsh.enable = true; # default shell on catalina
