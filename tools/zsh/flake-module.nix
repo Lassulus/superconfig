@@ -1,4 +1,4 @@
-{ ... }:
+{ self, ... }:
 {
   perSystem =
     { pkgs, ... }:
@@ -204,8 +204,10 @@
               tmux set-environment -g SSH_AUTH_SOCK "$SSH_AUTH_SOCK" 2>/dev/null
             fi
 
-            # Start tmux with a new session
-            exec tmux -u new-session
+            # Generate a readable session name using name-generator
+            session_name=$(${self.packages.${pkgs.system}.name-generator}/bin/name-generator 2>/dev/null || echo "session-$$")
+            # Start tmux with the generated session name
+            exec tmux -u new-session -s "$session_name"
           fi
         fi
 
@@ -244,6 +246,7 @@
               direnv
               atuin
               nix-index
+              self.packages.${pkgs.system}.name-generator
             ];
             text = ''
               export ZDOTDIR=${pkgs.writeTextDir "/.zshrc" zshrc}
