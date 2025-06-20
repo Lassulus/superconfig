@@ -18,12 +18,11 @@
     self.packages.${pkgs.system}.nvim
     self.packages.${pkgs.system}.pass
     self.packages.${pkgs.system}.passmenu
+    self.packages.${pkgs.system}.tmux
 
     # zsh dependencies
     pkgs.fzf
     pkgs.atuin
-
-    pkgs.tmux
     pkgs.gnupg
     pkgs.pinentry_mac
     pkgs.lazygit
