@@ -205,7 +205,9 @@
             fi
 
             # Generate a readable session name using name-generator
-            session_name=$(${self.packages.${pkgs.system}.name-generator}/bin/name-generator 2>/dev/null || echo "session-$$")
+            session_name=$(${
+              self.packages.${pkgs.system}.name-generator
+            }/bin/name-generator 2>/dev/null || echo "session-$$")
             # Start tmux with the generated session name
             exec tmux -u new-session -s "$session_name"
           fi
