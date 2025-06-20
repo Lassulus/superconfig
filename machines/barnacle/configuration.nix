@@ -115,6 +115,7 @@
   # Create /etc/zshrc that loads the nix-darwin environment.
   programs.zsh.enable = true; # default shell on catalina
   programs.zsh.shellInit = self.packages.${pkgs.system}.zsh.zshrc;
+  programs.zsh.promptInit = ""; # Disable default prompt
 
   # enable sudo touch
   security.pam.services.sudo_local.touchIdAuth = true;
