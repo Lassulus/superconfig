@@ -12,7 +12,6 @@
     ../../xdg-open.nix
     ../../yubikey.nix
     ../../pipewire.nix
-    ../../tmux.nix
     ../../themes.nix
     ../../fonts.nix
     {
