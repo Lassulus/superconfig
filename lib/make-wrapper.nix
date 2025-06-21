@@ -9,8 +9,9 @@
     - `runtimeInputs`: List of packages to add to PATH (optional)
     - `env`: Attribute set of environment variables to export (optional)
     - `flags`: Attribute set of command-line flags to add (optional)
+    - `preHook`: Shell script to run before executing the command (optional)
     - `wrapper`: Custom wrapper function (optional, defaults to exec'ing the original binary with flags)
-      - Called with { env, flags, envString, flagsString, exePath }
+      - Called with { env, flags, envString, flagsString, exePath, preHook }
 
     # Example
 
@@ -24,9 +25,17 @@
         "--silent" = { }; # becomes --silent
         "--connect-timeout" = "30"; # becomes --connect-timeout 30
       };
-      wrapper = { exePath, flagsString, envString, ... }: ''
-        ${envString}
+      preHook = ''
         echo "Making request..." >&2
+      '';
+    }
+
+    # Or with custom wrapper:
+    makeWrapper pkgs.someProgram {
+      wrapper = { exePath, flagsString, envString, preHook, ... }: ''
+        ${envString}
+        ${preHook}
+        echo "Custom logic here"
         exec ${exePath} ${flagsString} "$@"
       '';
     }
@@ -38,15 +47,18 @@
       runtimeInputs ? [ ],
       env ? { },
       flags ? { },
+      preHook ? "",
       wrapper ? (
         {
           exePath,
           flagsString,
           envString,
+          preHook,
           ...
         }:
         ''
           ${envString}
+          ${preHook}
           exec ${exePath}${flagsString} "$@"
         ''
       ),
@@ -85,6 +97,7 @@
           envString
           flagsString
           exePath
+          preHook
           ;
       };
     in
@@ -99,7 +112,7 @@
         package
       ];
       passthru = (package.passthru or { }) // {
-        inherit env flags;
+        inherit env flags preHook;
       };
     };
 }
