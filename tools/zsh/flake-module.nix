@@ -237,29 +237,24 @@
       '';
     in
     {
-      packages.zsh = pkgs.symlinkJoin {
-        name = "zsh-with-config";
-        paths = [
-          (pkgs.writeShellApplication {
-            name = "zsh";
-            runtimeInputs = with pkgs; [
-              tmux
-              fzf
-              direnv
-              atuin
-              nix-index
-              self.packages.${pkgs.system}.name-generator
-            ];
-            text = ''
-              export ZDOTDIR=${pkgs.writeTextDir "/.zshrc" zshrc}
-              exec ${pkgs.zsh}/bin/zsh "$@"
-            '';
-          })
-          pkgs.zsh
-        ];
-        passthru = {
-          inherit zshrc;
-        };
-      };
+      packages.zsh =
+        (self.libWithPkgs.${pkgs.system}.makeWrapper pkgs.zsh {
+          runtimeInputs = with pkgs; [
+            tmux
+            fzf
+            direnv
+            atuin
+            nix-index
+            self.packages.${pkgs.system}.name-generator
+          ];
+          env = {
+            ZDOTDIR = pkgs.writeTextDir "/.zshrc" zshrc;
+          };
+        }).overrideAttrs
+          (old: {
+            passthru = (old.passthru or { }) // {
+              inherit zshrc;
+            };
+          });
     };
 }

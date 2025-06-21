@@ -1,4 +1,4 @@
-{ lib, superlib, pkgs, ... }:
+{ lib, pkgs, ... }:
 {
   /**
     Create a wrapped application that preserves all original outputs (man pages, completions, etc.)
@@ -25,11 +25,13 @@
     }
     ```
   */
-  makeWrapper = package: args@{
-    runtimeInputs ? [],
-    env ? {},
-    wrapper ? ''exec ${lib.getExe package} "$@"''
-  }:
+  makeWrapper =
+    package:
+    {
+      runtimeInputs ? [ ],
+      env ? { },
+      wrapper ? ''exec ${lib.getExe package} "$@"'',
+    }:
     let
       # Extract binary name from the exe path
       exePath = lib.getExe package;

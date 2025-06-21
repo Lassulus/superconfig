@@ -1,8 +1,10 @@
 { pkgs, ... }:
 let
-  python = pkgs.python3.withPackages (ps: with ps; [
-    mcp
-  ]);
+  python = pkgs.python3.withPackages (
+    ps: with ps; [
+      mcp
+    ]
+  );
 in
 pkgs.writeShellApplication {
   name = "git-mcp";
