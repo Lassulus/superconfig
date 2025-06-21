@@ -14,9 +14,9 @@
     {
       packages.tmux =
         (self.libWithPkgs.${system}.makeWrapper pkgs.tmux {
-          wrapper = ''
-            exec ${pkgs.lib.getExe pkgs.tmux} -f ${tmuxConfigFile} "$@"
-          '';
+          flags = {
+            "-f" = tmuxConfigFile;
+          };
         }).overrideAttrs
           (old: {
             passthru = (old.passthru or { }) // {

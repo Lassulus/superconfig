@@ -8,7 +8,9 @@
     - `package`: The package to wrap
     - `runtimeInputs`: List of packages to add to PATH (optional)
     - `env`: Attribute set of environment variables to export (optional)
-    - `wrapper`: Custom wrapper script (optional, defaults to exec'ing the original binary)
+    - `flags`: Attribute set of command-line flags to add (optional)
+    - `wrapper`: Custom wrapper function (optional, defaults to exec'ing the original binary with flags)
+      - Called with { env, flags, envString, flagsString, exePath }
 
     # Example
 
@@ -18,9 +20,14 @@
       env = {
         CURL_CA_BUNDLE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
       };
-      wrapper = ''
+      flags = {
+        "--silent" = { }; # becomes --silent
+        "--connect-timeout" = "30"; # becomes --connect-timeout 30
+      };
+      wrapper = { exePath, flagsString, envString, ... }: ''
+        ${envString}
         echo "Making request..." >&2
-        exec ${lib.getExe pkgs.curl} "$@"
+        exec ${exePath} ${flagsString} "$@"
       '';
     }
     ```
@@ -30,12 +37,56 @@
     {
       runtimeInputs ? [ ],
       env ? { },
-      wrapper ? ''exec ${lib.getExe package} "$@"'',
+      flags ? { },
+      wrapper ? (
+        {
+          exePath,
+          flagsString,
+          envString,
+          ...
+        }:
+        ''
+          ${envString}
+          exec ${exePath}${flagsString} "$@"
+        ''
+      ),
     }:
     let
       # Extract binary name from the exe path
       exePath = lib.getExe package;
       binName = baseNameOf exePath;
+
+      # Generate environment variable exports
+      envString =
+        if env == { } then
+          ""
+        else
+          lib.concatStringsSep "\n" (
+            lib.mapAttrsToList (name: value: ''export ${name}="${toString value}"'') env
+          )
+          + "\n";
+
+      # Generate flag arguments with proper line breaks and indentation
+      flagsString =
+        if flags == { } then
+          ""
+        else
+          " \\\n  "
+          + lib.concatStringsSep " \\\n  " (
+            lib.mapAttrsToList (
+              name: value: if value == { } then "${name}" else "${name} ${lib.escapeShellArg (toString value)}"
+            ) flags
+          );
+
+      finalWrapper = wrapper {
+        inherit
+          env
+          flags
+          envString
+          flagsString
+          exePath
+          ;
+      };
     in
     pkgs.symlinkJoin {
       name = package.pname or package.name;
@@ -43,14 +94,12 @@
         (pkgs.writeShellApplication {
           name = binName;
           runtimeInputs = runtimeInputs;
-          text = ''
-            ${lib.concatStringsSep "\n" (
-              lib.mapAttrsToList (name: value: ''export ${name}="${toString value}"'') env
-            )}
-            ${wrapper}
-          '';
+          text = finalWrapper;
         })
         package
       ];
+      passthru = (package.passthru or { }) // {
+        inherit env flags;
+      };
     };
 }
