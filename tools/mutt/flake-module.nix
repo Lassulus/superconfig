@@ -270,7 +270,7 @@
           '';
 
         in
-        (self.libWithPkgs.${pkgs.system}.makeWrapper pkgs.neomutt {
+        self.libWithPkgs.${pkgs.system}.makeWrapper pkgs.neomutt {
           runtimeInputs =
             [
               pkgs.elinks
@@ -287,9 +287,9 @@
           flags = {
             "-F" = "${muttrc}";
           };
-        })
-        // {
-          passthru.notmuchConfig = notmuchConfig;
+          passthru = {
+            notmuchConfig = notmuchConfig;
+          };
         };
     };
 }

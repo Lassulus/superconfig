@@ -9,7 +9,9 @@
     - `runtimeInputs`: List of packages to add to PATH (optional)
     - `env`: Attribute set of environment variables to export (optional)
     - `flags`: Attribute set of command-line flags to add (optional)
+    - `flagSeparator`: Separator between flag names and values (optional, defaults to " ")
     - `preHook`: Shell script to run before executing the command (optional)
+    - `passthru`: Attribute set to pass through to the wrapped derivation (optional)
     - `wrapper`: Custom wrapper function (optional, defaults to exec'ing the original binary with flags)
       - Called with { env, flags, envString, flagsString, exePath, preHook }
 
@@ -49,6 +51,7 @@
       flags ? { },
       flagSeparator ? " ", # " " for "--flag value" or "=" for "--flag=value"
       preHook ? "",
+      passthru ? { },
       wrapper ? (
         {
           exePath,
@@ -87,7 +90,8 @@
           " \\\n  "
           + lib.concatStringsSep " \\\n  " (
             lib.mapAttrsToList (
-              name: value: if value == { } then "${name}" else "${name}${flagSeparator}${lib.escapeShellArg (toString value)}"
+              name: value:
+              if value == { } then "${name}" else "${name}${flagSeparator}${lib.escapeShellArg (toString value)}"
             ) flags
           );
 
@@ -101,27 +105,33 @@
           preHook
           ;
       };
+      # Create the wrapper derivation
+      wrappedPackage =
+        pkgs.symlinkJoin {
+          name = package.pname or package.name;
+          paths = [
+            (pkgs.writeShellApplication {
+              name = binName;
+              runtimeInputs = runtimeInputs;
+              text = finalWrapper;
+            })
+            package
+          ];
+          passthru =
+            (package.passthru or { })
+            // passthru
+            // {
+              inherit env flags preHook;
+            };
+          # Pass through original attributes
+          inherit (package) meta;
+        }
+        // lib.optionalAttrs (package ? version) {
+          inherit (package) version;
+        }
+        // lib.optionalAttrs (package ? pname) {
+          inherit (package) pname;
+        };
     in
-    pkgs.symlinkJoin {
-      name = package.pname or package.name;
-      paths = [
-        (pkgs.writeShellApplication {
-          name = binName;
-          runtimeInputs = runtimeInputs;
-          text = finalWrapper;
-        })
-        package
-      ];
-      passthru = (package.passthru or { }) // {
-        inherit env flags preHook;
-      };
-      # Pass through original attributes
-      inherit (package) meta;
-    }
-    // lib.optionalAttrs (package ? version) {
-      inherit (package) version;
-    }
-    // lib.optionalAttrs (package ? pname) {
-      inherit (package) pname;
-    };
+    wrappedPackage;
 }
