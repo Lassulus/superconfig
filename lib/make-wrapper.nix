@@ -105,9 +105,72 @@
           preHook
           ;
       };
-      # Create the wrapper derivation
-      wrappedPackage =
-        pkgs.symlinkJoin {
+
+      # Multi-output aware symlink join function
+      multiOutputSymlinkJoin =
+        {
+          name,
+          paths,
+          outputs ? [ "out" ],
+          originalOutputs ? { },
+          passthru ? { },
+          meta ? { },
+          ...
+        }@args:
+        pkgs.stdenv.mkDerivation (
+          {
+            inherit name outputs;
+
+            buildCommand = ''
+              # Symlink all paths to the main output
+              mkdir -p $out
+              for path in ${lib.concatStringsSep " " (map toString paths)}; do
+                ${pkgs.lndir}/bin/lndir -silent "$path" $out
+              done
+
+              # Handle additional outputs by symlinking from the original package's outputs
+              ${lib.concatMapStringsSep "\n" (
+                output:
+                if output != "out" && originalOutputs ? ${output} && originalOutputs.${output} != null then
+                  ''
+                    if [[ -n "''${${output}:-}" ]]; then
+                      mkdir -p ${"$" + output}
+                      # Only symlink from the original package's corresponding output
+                      ${pkgs.lndir}/bin/lndir -silent "${originalOutputs.${output}}" ${"$" + output}
+                    fi
+                  ''
+                else
+                  ""
+              ) outputs}
+            '';
+
+            inherit passthru meta;
+          }
+          // (removeAttrs args [
+            "name"
+            "paths"
+            "outputs"
+            "originalOutputs"
+            "passthru"
+            "meta"
+          ])
+        );
+
+      # Get original package outputs for symlinking
+      originalOutputs =
+        if package ? outputs then
+          lib.listToAttrs (
+            map (output: {
+              name = output;
+              value = if package ? ${output} then package.${output} else null;
+            }) package.outputs
+          )
+        else
+          { };
+
+      # Create the wrapper derivation using our multi-output aware symlink join
+      wrappedPackage = multiOutputSymlinkJoin (
+        {
           name = package.pname or package.name;
           paths = [
             (pkgs.writeShellApplication {
@@ -117,6 +180,8 @@
             })
             package
           ];
+          outputs = if package ? outputs then package.outputs else [ "out" ];
+          inherit originalOutputs;
           passthru =
             (package.passthru or { })
             // passthru
@@ -124,14 +189,15 @@
               inherit env flags preHook;
             };
           # Pass through original attributes
-          inherit (package) meta;
+          meta = package.meta or { };
         }
         // lib.optionalAttrs (package ? version) {
           inherit (package) version;
         }
         // lib.optionalAttrs (package ? pname) {
           inherit (package) pname;
-        };
+        }
+      );
     in
     wrappedPackage;
 }
