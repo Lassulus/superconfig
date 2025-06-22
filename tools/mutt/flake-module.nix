@@ -1,7 +1,12 @@
 { self, ... }:
 {
   perSystem =
-    { pkgs, lib, ... }:
+    {
+      pkgs,
+      lib,
+      system,
+      ...
+    }:
     {
       packages.mutt =
         let
@@ -265,11 +270,9 @@
           '';
 
         in
-        (pkgs.writeShellApplication {
-          name = "mutt";
+        (self.libWithPkgs.${pkgs.system}.makeWrapper pkgs.neomutt {
           runtimeInputs =
             [
-              pkgs.neomutt
               pkgs.elinks
               pkgs.msmtp
               pkgs.notmuch
@@ -278,11 +281,12 @@
             ++ lib.optionals pkgs.stdenv.isLinux [
               pkgs.iputils
             ];
-          text = ''
-            export NOTMUCH_CONFIG_FILE=${pkgs.writeText "notmuch-config" notmuchConfig}
-            export MUTTRC=${muttrc}
-            ${builtins.readFile ./mutt.sh}
-          '';
+          env = {
+            NOTMUCH_CONFIG = "${pkgs.writeText "notmuch-config" notmuchConfig}";
+          };
+          flags = {
+            "-F" = "${muttrc}";
+          };
         })
         // {
           passthru.notmuchConfig = notmuchConfig;
