@@ -1,7 +1,7 @@
 { self, ... }:
 {
   perSystem =
-    { pkgs, ... }:
+    { pkgs, system, ... }:
     {
       packages.mpv =
         let
@@ -65,27 +65,19 @@
           };
 
         in
-        pkgs.writeShellApplication {
-          name = "mpv";
-          runtimeInputs = [
-            mpvPackage
-            pkgs.yt-dlp
-          ];
-          text = ''
-            Y_RES=1081
-            # we need to disable sponsorblock local database because of
-            # https://github.com/po5/mpv_sponsorblock/issues/31
-            exec mpv \
-             --no-config \
-             --input-conf=${mpvInput} \
-             --include=${mpvConfig} \
-             --script=${autosub} \
-             --ytdl-format="best[height<$Y_RES]" \
-             --script-opts=ytdl_hook-ytdl_path=${pkgs.yt-dlp}/bin/yt-dlp \
-             --script-opts-append=sponsorblock-local_database=no \
-             --audio-channels=2 \
-             "$@"
-          '';
+        self.libWithPkgs.${system}.makeWrapper mpvPackage {
+          runtimeInputs = [ pkgs.yt-dlp ];
+          flagSeparator = "=";
+          flags = {
+            "--no-config" = {};
+            "--input-conf" = "${mpvInput}";
+            "--include" = "${mpvConfig}";
+            "--script" = "${autosub}";
+            "--ytdl-format" = "best[height<1081]";
+            "--script-opts" = "ytdl_hook-ytdl_path=${pkgs.yt-dlp}/bin/yt-dlp";
+            "--script-opts-append" = "sponsorblock-local_database=no";
+            "--audio-channels" = "2";
+          };
         };
 
       # Separate package for subtitle downloader
