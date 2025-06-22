@@ -116,9 +116,11 @@
       };
       # Pass through original attributes
       inherit (package) meta;
-    } // lib.optionalAttrs (package ? version) {
+    }
+    // lib.optionalAttrs (package ? version) {
       inherit (package) version;
-    } // lib.optionalAttrs (package ? pname) {
+    }
+    // lib.optionalAttrs (package ? pname) {
       inherit (package) pname;
     };
 }
