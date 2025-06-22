@@ -47,6 +47,7 @@
       runtimeInputs ? [ ],
       env ? { },
       flags ? { },
+      flagSeparator ? " ", # " " for "--flag value" or "=" for "--flag=value"
       preHook ? "",
       wrapper ? (
         {
@@ -86,7 +87,7 @@
           " \\\n  "
           + lib.concatStringsSep " \\\n  " (
             lib.mapAttrsToList (
-              name: value: if value == { } then "${name}" else "${name} ${lib.escapeShellArg (toString value)}"
+              name: value: if value == { } then "${name}" else "${name}${flagSeparator}${lib.escapeShellArg (toString value)}"
             ) flags
           );
 
