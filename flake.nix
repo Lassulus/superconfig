@@ -190,7 +190,7 @@
           key = ./keys/yubi.pgp;
           id = "DBCD757846069B392EA9401D6657BE8A8D1EE807";
         };
-        ssh = builtins.readFile ./keys/yubi.ssh;
+        ssh.yubi = builtins.readFile ./keys/yubi.ssh;
       };
     };
 }

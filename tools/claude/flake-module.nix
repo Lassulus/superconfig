@@ -7,32 +7,19 @@
       gitMcpPath = "${self.packages.${system}.git-mcp}/bin/git-mcp";
       tmuxMcpPath = "${self.packages.${system}.tmux-mcp}/bin/tmux-mcp";
 
-      # Claude configuration
-      claudeConfig = pkgs.writeText "claude-config.json" (builtins.toJSON {
-        mcpServers = {
-          "git-mcp" = {
-            command = gitMcpPath;
-            args = [];
-          };
-          "tmux-mcp" = {
-            command = tmuxMcpPath;
-            args = [];
-          };
-        };
-      });
-
       # Path to CLAUDE.md
       claudeMd = ./CLAUDE.md;
     in
     {
-      packages.claude = self.libWithPkgs.${system}.makeWrapper pkgs.claude {
+      packages.claude = self.libWithPkgs.${system}.makeWrapper (self.lib.halalify pkgs.claude-code) {
         preHook = ''
-          # Set up Claude config directory
-          export CLAUDE_CONFIG_DIR="$HOME/Library/Application Support/Claude"
-          mkdir -p "$CLAUDE_CONFIG_DIR"
-
-          # Copy our config to Claude's config location
-          cp ${claudeConfig} "$CLAUDE_CONFIG_DIR/claude_desktop_config.json"
+          # Configure MCP servers using Claude CLI
+          if claude mcp add git-mcp "${gitMcpPath}" 2>/dev/null && \
+             claude mcp add tmux-mcp "${tmuxMcpPath}" 2>/dev/null; then
+            echo "MCP servers configured successfully" >&2
+          else
+            echo "Warning: Could not configure MCP servers" >&2
+          fi
 
           # Set up CLAUDE.md if it doesn't exist
           CLAUDE_MD_DIR="''${CLAUDE_MD_DIR:-$HOME/.claude}"
