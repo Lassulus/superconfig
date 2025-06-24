@@ -10,7 +10,6 @@
     ../../power-action.nix
     ../../xdg-open.nix
     ../../yubikey.nix
-    ../../tmux.nix
     ../../themes.nix
     ../../fonts.nix
     # ../pipewire.nix

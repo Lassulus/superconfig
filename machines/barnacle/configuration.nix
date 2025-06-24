@@ -1,4 +1,9 @@
-{ pkgs, self, lib, ... }:
+{
+  pkgs,
+  self,
+  lib,
+  ...
+}:
 
 {
   imports = [
@@ -13,12 +18,11 @@
     self.packages.${pkgs.system}.nvim
     self.packages.${pkgs.system}.pass
     self.packages.${pkgs.system}.passmenu
+    self.packages.${pkgs.system}.tmux
 
     # zsh dependencies
     pkgs.fzf
     pkgs.atuin
-
-    pkgs.tmux
     pkgs.gnupg
     pkgs.pinentry_mac
     pkgs.lazygit
@@ -26,11 +30,7 @@
     pkgs.git
     pkgs.element-desktop
     pkgs.iterm2
-    (pkgs.firefox-devedition-bin-unwrapped.overrideAttrs (o: {
-      meta = o.meta // {
-        license = pkgs.lib.licenses.free;
-      };
-    }))
+    (self.lib.halalify pkgs.firefox-bin-unwrapped)
     pkgs.ripgrep
     pkgs.alt-tab-macos
     pkgs.zed-editor
@@ -96,15 +96,25 @@
   };
 
   # Enable Rosetta builder for x86_64 builds
-  nix-rosetta-builder.enable = true;
+  nix-rosetta-builder = {
+    enable = true;
+    potentiallyInsecureExtraNixosModule = {
+      # Fix DNS resolution in the VM
+      networking.nameservers = [
+        "8.8.8.8"
+        "1.1.1.1"
+      ];
+    };
+  };
 
   # Create /etc/zshrc that loads the nix-darwin environment.
   programs.zsh.enable = true; # default shell on catalina
   programs.zsh.shellInit = self.packages.${pkgs.system}.zsh.zshrc;
+  programs.zsh.promptInit = ""; # Disable default prompt
 
   # enable sudo touch
   security.pam.services.sudo_local.touchIdAuth = true;
-  
+
   # Enable Touch ID in tmux sessions with pam_reattach
   security.pam.services.sudo_local.text = lib.mkBefore ''
     auth       optional       ${pkgs.pam-reattach}/lib/pam/pam_reattach.so ignore_ssh

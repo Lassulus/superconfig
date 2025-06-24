@@ -1,4 +1,4 @@
-{ ... }:
+{ self, ... }:
 {
   perSystem =
     { pkgs, ... }:
@@ -204,8 +204,12 @@
               tmux set-environment -g SSH_AUTH_SOCK "$SSH_AUTH_SOCK" 2>/dev/null
             fi
 
-            # Start tmux with a new session
-            exec tmux -u new-session
+            # Generate a readable session name using name-generator
+            session_name=$(${
+              self.packages.${pkgs.system}.name-generator
+            }/bin/name-generator 2>/dev/null || echo "session-$$")
+            # Start tmux with the generated session name
+            exec tmux -u new-session -s "$session_name"
           fi
         fi
 
@@ -233,29 +237,24 @@
       '';
     in
     {
-      packages.zsh = pkgs.symlinkJoin {
-        name = "zsh-with-config";
-        paths = [
-          (pkgs.writeShellApplication {
-            name = "zsh";
-            runtimeInputs = with pkgs; [
-              tmux
-              fzf
-              direnv
-              atuin
-              nix-index
-            ];
-            text = ''
-              unset IN_NIX_SHELL
-              export ZDOTDIR=${pkgs.writeTextDir "/.zshrc" zshrc}
-              exec ${pkgs.zsh}/bin/zsh "$@"
-            '';
-          })
-          pkgs.zsh
-        ];
-        passthru = {
-          inherit zshrc;
-        };
-      };
+      packages.zsh =
+        (self.libWithPkgs.${pkgs.system}.makeWrapper pkgs.zsh {
+          runtimeInputs = with pkgs; [
+            tmux
+            fzf
+            direnv
+            atuin
+            nix-index
+            self.packages.${pkgs.system}.name-generator
+          ];
+          env = {
+            ZDOTDIR = pkgs.writeTextDir "/.zshrc" zshrc;
+          };
+        }).overrideAttrs
+          (old: {
+            passthru = (old.passthru or { }) // {
+              inherit zshrc;
+            };
+          });
     };
 }

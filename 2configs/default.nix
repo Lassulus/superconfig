@@ -36,7 +36,6 @@
     ./zsh.nix
     ./htop.nix
     ./wiregrill.nix
-    ./tmux.nix
     ./tor-ssh.nix
     ./networkd.nix
     ./pinned-registry.nix
@@ -185,6 +184,7 @@
 
   environment.systemPackages = with pkgs; [
     self.packages.${pkgs.system}.nvim
+    self.packages.${pkgs.system}.tmux
 
     git
     git-absorb

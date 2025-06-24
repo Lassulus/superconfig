@@ -2,7 +2,7 @@
   description = "lassulus superconfig";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/08f22084e6085d19bcfb4be30d1ca76ecb96fe54?shallow=1";
     # nixpkgs.url = "path:/home/lass/tmp/nixpkgs-disk-debug";
     # nixpkgs.url = "git+file:/home/lass/src/nixpkgs";
 
@@ -177,12 +177,20 @@
             ];
           };
         };
+      flake.lib = import ./lib { inherit (nixpkgs) lib; };
+      flake.libWithPkgs = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed (
+        system:
+        import ./lib/pkgs.nix {
+          inherit (nixpkgs) lib;
+          pkgs = nixpkgs.legacyPackages.${system};
+        }
+      );
       flake.keys = {
         pgp.yubi = {
           key = ./keys/yubi.pgp;
           id = "DBCD757846069B392EA9401D6657BE8A8D1EE807";
         };
-        ssh = builtins.readFile ./keys/yubi.ssh;
+        ssh.yubi = builtins.readFile ./keys/yubi.ssh;
       };
     };
 }
