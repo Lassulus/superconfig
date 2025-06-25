@@ -20,6 +20,8 @@
     self.packages.${pkgs.system}.passmenu
     self.packages.${pkgs.system}.tmux
 
+    self.packages.${pkgs.system}.secretive
+
     # zsh dependencies
     pkgs.fzf
     pkgs.atuin
@@ -111,6 +113,9 @@
   programs.zsh.enable = true; # default shell on catalina
   programs.zsh.shellInit = self.packages.${pkgs.system}.zsh.zshrc;
   programs.zsh.promptInit = ""; # Disable default prompt
+  programs.zsh.interactiveShellInit = ''
+    export SSH_AUTH_SOCK=/Users/lassulus/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh
+  '';
 
   # enable sudo touch
   security.pam.services.sudo_local.touchIdAuth = true;
