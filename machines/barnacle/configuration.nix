@@ -32,7 +32,7 @@
     pkgs.git
     pkgs.element-desktop
     pkgs.iterm2
-    (self.lib.halalify pkgs.firefox-bin-unwrapped)
+    pkgs.firefox-devedition
     pkgs.ripgrep
     pkgs.alt-tab-macos
     pkgs.zed-editor
