@@ -127,6 +127,7 @@
       imports =
         [
           ./formatter.nix
+          ./5pkgs/flake-module.nix
         ]
         ++ (
           # Auto-import all flake-module.nix files from tools subdirectories
@@ -148,9 +149,7 @@
           ...
         }:
         {
-          packages =
-            (lib.mapAttrs (name: _v_: pkgs.callPackage ./5pkgs/${name} { }) (builtins.readDir ./5pkgs))
-            // {
+          packages = {
               default = inputs.le_menu.lib.buildMenu {
                 inherit pkgs;
                 menuConfig = {
