@@ -38,6 +38,7 @@
     pkgs.zed-editor
     pkgs.nixd
     pkgs.nil
+    pkgs.age-plugin-se
   ];
 
   # Use a custom configuration.nix location.

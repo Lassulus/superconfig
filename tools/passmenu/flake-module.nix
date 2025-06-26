@@ -25,10 +25,10 @@
             shift
           fi
 
-          prefix=''${PASSWORD_STORE_DIR-~/.password-store}
-          password_files=( "$prefix"/**/*.gpg )
+          prefix=''${PASSWORD_STORE_DIR-~/.passage/store}
+          password_files=( "$prefix"/**/*.age )
           password_files=( "''${password_files[@]#"$prefix"/}" )
-          password_files=( "''${password_files[@]%.gpg}" )
+          password_files=( "''${password_files[@]%.age}" )
 
           password=$(printf '%s\n' "''${password_files[@]}" | menu "$@")
 
