@@ -1,10 +1,10 @@
 { lib, ... }:
 let
-  # Helper to read all files from a subdirectory
-  readKeysFromDir =
-    baseDir: subDir:
+  # Helper to read age keys (public keys only)
+  readAgeKeys =
+    baseDir:
     let
-      dir = baseDir + "/${subDir}";
+      dir = baseDir + "/age";
     in
     if builtins.pathExists dir then
       lib.mapAttrs' (
@@ -18,11 +18,45 @@ let
     else
       { };
 
+  # Helper to read SSH keys (handle key pairs and encrypted private keys)
+  readSshKeys =
+    baseDir:
+    let
+      dir = baseDir + "/ssh";
+    in
+    if builtins.pathExists dir then
+      let
+        allFiles = builtins.readDir dir;
+        # Group files by their base name (remove all suffixes)
+        keyNames = lib.unique (
+          map (name: builtins.head (lib.splitString "." name)) (builtins.attrNames allFiles)
+        );
+      in
+      lib.listToAttrs (
+        map (
+          keyName:
+          let
+            publicKeyFile = dir + "/${keyName}.pub";
+            encryptedPrivateKeyFile = dir + "/${keyName}.age";
+            hasPublicKey = builtins.pathExists publicKeyFile;
+            hasEncryptedPrivateKey = builtins.pathExists encryptedPrivateKeyFile;
+          in
+          lib.nameValuePair keyName {
+            public = if hasPublicKey then builtins.readFile publicKeyFile else null;
+            # Expose encrypted private keys (safe), but never unencrypted ones
+            private = if hasEncryptedPrivateKey then encryptedPrivateKeyFile else null;
+            encrypted = hasEncryptedPrivateKey;
+          }
+        ) keyNames
+      )
+    else
+      { };
+
 in
 {
   flake.keys = {
-    # SSH keys (any format: rsa, ed25519, ecdsa)
-    ssh = readKeysFromDir ./. "ssh";
+    # SSH keys (handle both public and private key files)
+    ssh = readSshKeys ./.;
 
     # PGP/GPG keys - define directly with metadata
     pgp = {
@@ -32,7 +66,7 @@ in
       };
     };
 
-    # Age keys
-    age = readKeysFromDir ./. "age";
+    # Age keys (public keys only)
+    age = readAgeKeys ./.;
   };
 }
