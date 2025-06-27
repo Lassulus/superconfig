@@ -24,8 +24,8 @@
     rm -f $HOME/.gnupg/scdaemon.conf
   '';
   systemd.user.services.gpg-agent.serviceConfig.ExecStartPost = pkgs.writers.writeDash "init_gpg" ''
-    ${pkgs.gnupg}/bin/gpg --import ${self.keys.pgp.yubi.key} &>/dev/null
-    echo '${self.keys.pgp.yubi.id}:6:' | ${pkgs.gnupg}/bin/gpg --import-ownertrust &>/dev/null
+    ${pkgs.gnupg}/bin/gpg --import ${self.keys.pgp.yubi_pgp.key} &>/dev/null
+    echo '${self.keys.pgp.yubi_pgp.id}:6:' | ${pkgs.gnupg}/bin/gpg --import-ownertrust &>/dev/null
   '';
 
   security.polkit.extraConfig = ''

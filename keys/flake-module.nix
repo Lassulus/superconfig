@@ -103,8 +103,8 @@ in
 
     # PGP/GPG keys - define directly with metadata
     pgp = {
-      yubi = {
-        key = ./pgp/yubi.pgp;
+      yubi_pgp = {
+        key = ./pgp/yubi_pgp.pgp;
         id = "DBCD757846069B392EA9401D6657BE8A8D1EE807";
       };
     };

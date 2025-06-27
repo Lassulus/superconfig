@@ -71,6 +71,8 @@
   services.skhd = {
     enable = true;
     skhdConfig = ''
+      # Test with simpler combo first
+      cmd - f12 : /usr/bin/say "test works"
       # Open passmenu with Hyper-P
       ctrl + shift + alt + cmd - p : /run/current-system/sw/bin/passmenu
     '';
@@ -142,8 +144,8 @@
   system.primaryUser = "lassulus";
 
   services.openssh.enable = true;
-  users.users.lassulus.openssh.authorizedKeys.keys = [ self.keys.ssh ];
-  users.users.root.openssh.authorizedKeys.keys = [ self.keys.ssh ];
+  users.users.lassulus.openssh.authorizedKeys.keys = [ self.keys.ssh.yubi_pgp ];
+  users.users.root.openssh.authorizedKeys.keys = [ self.keys.ssh.yubi_pgp ];
 
   users.users.root.shell = pkgs.zsh;
   users.users.root.uid = 0;
