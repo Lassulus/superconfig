@@ -1,20 +1,63 @@
 { lib, ... }:
 let
-  # Helper to read age keys (public keys only)
+  # Helper to read age keys with different types
   readAgeKeys =
     baseDir:
     let
       dir = baseDir + "/age";
     in
     if builtins.pathExists dir then
-      lib.mapAttrs' (
-        name: _:
-        let
-          # Remove everything after the first dot
-          keyName = builtins.head (lib.splitString "." name);
-        in
-        lib.nameValuePair keyName (builtins.readFile (dir + "/${name}"))
-      ) (builtins.readDir dir)
+      let
+        allFiles = builtins.readDir dir;
+        # Group files by base name and type
+        processFile =
+          name: type:
+          if type == "regular" then
+            let
+              parts = lib.splitString "." name;
+              baseName = builtins.head parts;
+              extension = if builtins.length parts > 1 then lib.last parts else "";
+            in
+            {
+              name = baseName;
+              value =
+                if extension == "age" then
+                  {
+                    public = builtins.readFile (dir + "/${name}");
+                    identity = null;
+                  }
+                else if extension == "identity" then
+                  {
+                    public = null;
+                    identity = builtins.readFile (dir + "/${name}");
+                  }
+                else
+                  null;
+            }
+          else
+            null;
+
+        # Process all files and merge by base name
+        fileAttrs = lib.filterAttrs (_n: v: v != null) (lib.mapAttrs processFile allFiles);
+
+        # Merge entries with same base name
+        mergeEntries = lib.foldl' (
+          acc: entry:
+          let
+            existing =
+              acc.${entry.name} or {
+                public = null;
+                identity = null;
+              };
+            merged = {
+              public = if entry.value.public != null then entry.value.public else existing.public;
+              identity = if entry.value.identity != null then entry.value.identity else existing.identity;
+            };
+          in
+          acc // { ${entry.name} = merged; }
+        ) { } (lib.attrValues fileAttrs);
+      in
+      mergeEntries
     else
       { };
 
