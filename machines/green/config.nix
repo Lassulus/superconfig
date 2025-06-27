@@ -66,9 +66,7 @@
     "L+ /var/lib/zerotier-one - - - - ../../var/state/zerotier-one"
   ];
 
-  users.users.mainUser.openssh.authorizedKeys.keys = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKgpZwye6yavIs3gUIYvSi70spDa0apL2yHR0ASW74z8" # weechat ssh tunnel
-  ];
+  users.users.mainUser.openssh.authorizedKeys.keys = [ ];
 
   krebs.iptables.tables.nat.PREROUTING.rules = [
     {
