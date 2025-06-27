@@ -25,6 +25,7 @@
           pkgs.openssh
           pkgs.age
           pkgs.age-plugin-se
+          pkgs.age-plugin-yubikey
           pkgs.libfido2
         ];
         text = ''
@@ -84,15 +85,14 @@
 
             echo "Trying key: $key_name..."
             
-            # Try to decrypt with repository age keys
+            # Try to decrypt with hardware plugins
             decrypted=false
-            for age_key in ${toString (builtins.attrValues self.keys.age)}; do
-              if age -d -j fido2-hmac "$encrypted_key" > "$temp_key" 2>/dev/null || \
-                 age -d -j se "$encrypted_key" > "$temp_key" 2>/dev/null; then
-                decrypted=true
-                break
-              fi
-            done
+            # Try each hardware plugin method
+            if age -d -j fido2-hmac "$encrypted_key" > "$temp_key" 2>/dev/null || \
+               age -d -j se "$encrypted_key" > "$temp_key" 2>/dev/null || \
+               age -d -j yubikey "$encrypted_key" > "$temp_key" 2>/dev/null; then
+              decrypted=true
+            fi
             
             if [[ "$decrypted" == "true" ]]; then
               
