@@ -97,8 +97,12 @@ in
       description = "radio manager";
       home = "/home/${name}";
       useDefaultShell = true;
-      openssh.authorizedKeys.keys = with config.krebs.users; [
-        lass.pubkey
+      openssh.authorizedKeys.keys = [
+        self.keys.ssh.barnacle.public
+        self.keys.ssh.yubi_pgp.public
+        self.keys.ssh.yubi1.public
+        self.keys.ssh.yubi2.public
+        self.keys.ssh.solo2.public
       ];
       packages = [
         good_track

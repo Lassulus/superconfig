@@ -10,7 +10,11 @@
     createHome = true;
     isNormalUser = true;
     openssh.authorizedKeys.keys = [
-      config.krebs.users.lass.pubkey
+      self.keys.ssh.barnacle.public
+      self.keys.ssh.yubi_pgp.public
+      self.keys.ssh.yubi1.public
+      self.keys.ssh.yubi2.public
+      self.keys.ssh.solo2.public
       config.krebs.users.mic92.pubkey
       "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIJ4yq7oHBO2iPs4xj797a//0ypnBr27sSadKUeL2NsK6AAAABHNzaDo=" # janik
       "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIOYg513QZsVzoyVycXZjg4F3T3+OwtcY3WAhrlfyLgLTAAAABHNzaDo=" # janik

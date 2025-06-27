@@ -120,7 +120,11 @@
       users.extraUsers = {
         root = {
           openssh.authorizedKeys.keys = [
-            config.krebs.users.lass.pubkey
+            self.keys.ssh.barnacle.public
+            self.keys.ssh.yubi_pgp.public
+            self.keys.ssh.yubi1.public
+            self.keys.ssh.yubi2.public
+            self.keys.ssh.solo2.public
           ];
         };
         mainUser = {
@@ -140,7 +144,11 @@
             "dialout"
           ];
           openssh.authorizedKeys.keys = [
-            config.krebs.users.lass.pubkey
+            self.keys.ssh.barnacle.public
+            self.keys.ssh.yubi_pgp.public
+            self.keys.ssh.yubi1.public
+            self.keys.ssh.yubi2.public
+            self.keys.ssh.solo2.public
           ];
         };
       };
