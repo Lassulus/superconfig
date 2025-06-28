@@ -69,7 +69,7 @@
           runtimeInputs = [ pkgs.yt-dlp ];
           flagSeparator = "=";
           flags = {
-            "--no-config" = {};
+            "--no-config" = { };
             "--input-conf" = "${mpvInput}";
             "--include" = "${mpvConfig}";
             "--script" = "${autosub}";

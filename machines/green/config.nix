@@ -66,8 +66,6 @@
     "L+ /var/lib/zerotier-one - - - - ../../var/state/zerotier-one"
   ];
 
-  users.users.mainUser.openssh.authorizedKeys.keys = [ ];
-
   krebs.iptables.tables.nat.PREROUTING.rules = [
     {
       predicate = "-i eth0 -p tcp -m tcp --dport 22";
