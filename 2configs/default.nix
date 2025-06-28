@@ -366,11 +366,6 @@
   # disable doc usually
   documentation.nixos.enable = lib.mkDefault false;
 
-  # use new rebuild switch
-  system.switch = {
-    enable = false;
-    enableNg = true;
-  };
 
   # use latest nix to hunt all the bugs
   nix.package = pkgs.nixVersions.latest;
