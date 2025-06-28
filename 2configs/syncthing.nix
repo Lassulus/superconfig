@@ -72,7 +72,8 @@ in
           cleanoutDays = "30";
         };
       };
-      devices = devices;
+      # Filter devices to only include those that exist in all_peers
+      devices = lib.filter (device: all_peers ? ${device}) devices;
     }) shares;
     user = "lass";
   };
