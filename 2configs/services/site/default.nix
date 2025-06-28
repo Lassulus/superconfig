@@ -43,9 +43,6 @@
       ''
         alias ${initscript}/bin/init;
       '';
-    locations."= /blue.pub".extraConfig = ''
-      alias ${pkgs.writeText "pub" config.krebs.users.lass-blue.pubkey};
-    '';
     locations."= /ssh.pub".extraConfig = ''
       alias ${pkgs.writeText "pub" config.krebs.users.lass-yubikey.pubkey};
     '';
