@@ -1,11 +1,12 @@
-{ lib, ... }:
+{ config, lib, ... }:
 let
   hosts = lib.mapAttrs (machine: _: {
     ip =
-      if builtins.pathExists ../machines/${machine}/facts/zerotier-ip then
-        builtins.readFile ../machines/${machine}/facts/zerotier-ip
-      else
-        null;
+      let
+        zerotier_ip_path =
+          config.clan.core.clanDir + "/vars/per-machine/${machine}/zerotier/zerotier-ip/value";
+      in
+      if builtins.pathExists zerotier_ip_path then builtins.readFile zerotier_ip_path else null;
   }) (builtins.readDir ../machines);
 
   filteredHosts = lib.filterAttrs (_name: host: host.ip != null) hosts;

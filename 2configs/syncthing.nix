@@ -29,10 +29,14 @@ let
 
   machine_peers = lib.foldr (
     host: acc:
-    if builtins.pathExists ../machines/${host}/facts/syncthing.pub then
+    let
+      syncthing_id_path =
+        config.clan.core.clanDir + "/vars/per-machine/${host}/syncthing/syncthing.pub/value";
+    in
+    if builtins.pathExists syncthing_id_path then
       acc
       // {
-        ${host}.id = lib.removeSuffix "\n" (builtins.readFile ../machines/${host}/facts/syncthing.pub);
+        ${host}.id = lib.removeSuffix "\n" (builtins.readFile syncthing_id_path);
       }
     else
       acc
@@ -55,8 +59,8 @@ in
     enable = true;
     group = "syncthing";
     configDir = "/var/lib/syncthing";
-    key = "${config.krebs.secret.directory}/syncthing.key";
-    cert = "${config.krebs.secret.directory}/syncthing.cert";
+    key = config.clan.core.vars.generators.syncthing.files."syncthing.key".path;
+    cert = config.clan.core.vars.generators.syncthing.files."syncthing.cert".path;
     settings.devices = used_peers;
     settings.folders = lib.mapAttrs (share: devices: {
       enable = lib.elem config.networking.hostName devices;
