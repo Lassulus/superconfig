@@ -151,24 +151,24 @@
         }:
         {
           packages = {
-              default = inputs.le_menu.lib.buildMenu {
-                inherit pkgs;
-                menuConfig = {
-                  vim.run = "nix run ${self}#nvim";
-                  shell.run = "nix run ${self}#shell";
-                  machines.submenu = lib.mapAttrs (name: _machine: {
-                    submenu.ssh.submenu = {
-                      retiolum.run = "ssh -t ${name}.r";
-                      spora.run = "ssh ${name}.s";
-                      nether.run = "ssh ${name}.n";
-                      tor.run = "torify ssh $(pass show machines/${name}/tor-hostname)";
-                    };
-                  }) self.nixosConfigurations;
-                  debug.run = "env";
-                };
+            default = inputs.le_menu.lib.buildMenu {
+              inherit pkgs;
+              menuConfig = {
+                vim.run = "nix run ${self}#nvim";
+                shell.run = "nix run ${self}#shell";
+                machines.submenu = lib.mapAttrs (name: _machine: {
+                  submenu.ssh.submenu = {
+                    retiolum.run = "ssh -t ${name}.r";
+                    spora.run = "ssh ${name}.s";
+                    nether.run = "ssh ${name}.n";
+                    tor.run = "torify ssh $(pass show machines/${name}/tor-hostname)";
+                  };
+                }) self.nixosConfigurations;
+                debug.run = "env";
               };
-              clan-cli = clan-core.packages.${system}.clan-cli;
             };
+            clan-cli = clan-core.packages.${system}.clan-cli;
+          };
           devShells.default = pkgs.mkShell {
             packages = [
               clan-core.packages.${system}.clan-cli
