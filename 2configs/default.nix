@@ -366,7 +366,6 @@
   # disable doc usually
   documentation.nixos.enable = lib.mkDefault false;
 
-
   # use latest nix to hunt all the bugs
   nix.package = pkgs.nixVersions.latest;
 
