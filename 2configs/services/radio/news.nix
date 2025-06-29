@@ -59,7 +59,11 @@ in
     };
   };
 
+  security.acme.certs."radio-news.r".server = config.krebs.ssl.acmeURL;
+
   services.nginx.virtualHosts."radio-news.r" = {
+    enableACME = true;
+    addSSL = true;
     locations."/" = {
       proxyPass = "http://localhost:7999";
       proxyWebsockets = true;
