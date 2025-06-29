@@ -10,7 +10,12 @@
   imports = [
     self.inputs.stockholm.nixosModules.htgen
   ];
+
+  security.acme.certs."cyberlocker".server = config.krebs.ssl.acmeURL;
+  security.acme.certs."paste".server = config.krebs.ssl.acmeURL;
   services.nginx.virtualHosts.cyberlocker = {
+    enableACME = true;
+    addSSL = true;
     serverAliases = [ "c.r" ];
     locations."/".extraConfig = ''
       client_max_body_size 4G;
@@ -23,6 +28,8 @@
     '';
   };
   services.nginx.virtualHosts.paste = {
+    enableACME = true;
+    addSSL = true;
     serverAliases = [ "p.r" ];
     locations."/".extraConfig = ''
       client_max_body_size 4G;
