@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  eval-machines:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Fetch all history for git-based operations
+          fetch-depth: 0
+
+      - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Check flake
+        run: nix flake check --no-build
+
+      - name: Evaluate all NixOS configurations
+        run: |
+          echo "Evaluating NixOS configurations..."
+          failed=0
+          for machine in $(nix eval --json .#nixosConfigurations --apply builtins.attrNames | jq -r '.[]'); do
+            echo "Evaluating $machine..."
+            if ! nix eval .#nixosConfigurations.$machine.config.system.build.toplevel --raw; then
+              echo "❌ Failed to evaluate $machine"
+              failed=1
+            else
+              echo "✅ $machine evaluated successfully"
+            fi
+          done
+          exit $failed
+
+      - name: Evaluate all Darwin configurations
+        run: |
+          echo "Evaluating Darwin configurations..."
+          failed=0
+          for machine in $(nix eval --json .#darwinConfigurations --apply builtins.attrNames 2>/dev/null | jq -r '.[]' 2>/dev/null || echo ""); do
+            if [ -n "$machine" ]; then
+              echo "Evaluating $machine..."
+              if ! nix eval .#darwinConfigurations.$machine.system --raw; then
+                echo "❌ Failed to evaluate $machine"
+                failed=1
+              else
+                echo "✅ $machine evaluated successfully"
+              fi
+            fi
+          done
+          exit $failed
+
+      - name: Check formatter
+        run: |
+          nix fmt -- --check
