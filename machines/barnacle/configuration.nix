@@ -19,12 +19,16 @@
     self.packages.${pkgs.system}.pass
     self.packages.${pkgs.system}.passmenu
     self.packages.${pkgs.system}.tmux
+    self.packages.${pkgs.system}.mutt
+    self.packages.${pkgs.system}.claude
+    self.packages.${pkgs.system}.mpv
 
     self.packages.${pkgs.system}.secretive
 
     # zsh dependencies
     pkgs.fzf
     pkgs.atuin
+
     pkgs.gnupg
     pkgs.pinentry_mac
     pkgs.lazygit
@@ -39,6 +43,8 @@
     pkgs.nixd
     pkgs.nil
     pkgs.age-plugin-se
+    pkgs.gh
+    pkgs.tea
   ];
 
   # Use a custom configuration.nix location.
@@ -144,8 +150,20 @@
   system.primaryUser = "lassulus";
 
   services.openssh.enable = true;
-  users.users.lassulus.openssh.authorizedKeys.keys = [ self.keys.ssh.yubi_pgp ];
-  users.users.root.openssh.authorizedKeys.keys = [ self.keys.ssh.yubi_pgp ];
+  users.users.lassulus.openssh.authorizedKeys.keys = [
+    self.keys.ssh.barnacle.public
+    self.keys.ssh.yubi_pgp.public
+    self.keys.ssh.yubi1.public
+    self.keys.ssh.yubi2.public
+    self.keys.ssh.solo2.public
+  ];
+  users.users.root.openssh.authorizedKeys.keys = [
+    self.keys.ssh.barnacle.public
+    self.keys.ssh.yubi_pgp.public
+    self.keys.ssh.yubi1.public
+    self.keys.ssh.yubi2.public
+    self.keys.ssh.solo2.public
+  ];
 
   users.users.root.shell = pkgs.zsh;
   users.users.root.uid = 0;
