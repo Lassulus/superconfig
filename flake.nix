@@ -97,10 +97,14 @@
             prism.tags = [ "server" ];
             neoprism.tags = [ "server" ];
           };
-          services = {
-            state-version.x.roles.default.tags = [
-              "all"
-            ];
+          instances = {
+            state-version = {
+              module = {
+                name = "state-version";
+                input = "clan";
+              };
+              roles.default.tags.all = { };
+            };
           };
         };
         machines =
