@@ -308,10 +308,14 @@ in
     '';
   };
 
+  security.acme.certs."radio.r".server = config.krebs.ssl.acmeURL;
+
   networking.firewall.allowedTCPPorts = [ 80 ];
   services.nginx = {
     enable = true;
     virtualHosts."radio.r" = {
+      enableACME = true;
+      addSSL = true;
       locations."/".extraConfig = ''
         # https://github.com/aswild/icecast-notes#core-nginx-config
         proxy_pass http://localhost:8000;
