@@ -2,7 +2,7 @@
   description = "lassulus superconfig";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/08f22084e6085d19bcfb4be30d1ca76ecb96fe54?shallow=1";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     # nixpkgs.url = "path:/home/lass/tmp/nixpkgs-disk-debug";
     # nixpkgs.url = "git+file:/home/lass/src/nixpkgs";
 
@@ -15,7 +15,7 @@
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
 
     clan-core.url = "git+https://git.clan.lol/clan/clan-core";
-    # clan-core.url = "path:///home/lass/src/clan/clan-core";
+    # clan-core.url = "path:/Users/lassulus/src/clan/clan-core";
     # clan-core.url = "git+file:/home/lass/src/clan/clan-core";
     clan-core.inputs.nixpkgs.follows = "nixpkgs";
     clan-core.inputs.flake-parts.follows = "flake-parts";
