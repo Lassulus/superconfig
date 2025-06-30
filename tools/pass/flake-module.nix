@@ -14,6 +14,7 @@
           pkgs.age-plugin-yubikey
           self.packages.${system}.pass-otp
         ];
+        aliases = [ "pass" ];
         wrapper =
           {
             exePath,
