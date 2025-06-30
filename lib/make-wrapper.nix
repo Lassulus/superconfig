@@ -12,6 +12,7 @@
     - `flagSeparator`: Separator between flag names and values (optional, defaults to " ")
     - `preHook`: Shell script to run before executing the command (optional)
     - `passthru`: Attribute set to pass through to the wrapped derivation (optional)
+    - `aliases`: List of additional names to symlink to the wrapped executable (optional)
     - `wrapper`: Custom wrapper function (optional, defaults to exec'ing the original binary with flags)
       - Called with { env, flags, envString, flagsString, exePath, preHook }
 
@@ -52,6 +53,7 @@
       flagSeparator ? " ", # " " for "--flag value" or "=" for "--flag=value"
       preHook ? "",
       passthru ? { },
+      aliases ? [ ],
       wrapper ? (
         {
           exePath,
@@ -115,6 +117,8 @@
           originalOutputs ? { },
           passthru ? { },
           meta ? { },
+          aliases ? [ ],
+          binName ? null,
           ...
         }@args:
         pkgs.stdenv.mkDerivation (
@@ -127,6 +131,14 @@
               for path in ${lib.concatStringsSep " " (map toString paths)}; do
                 ${pkgs.lndir}/bin/lndir -silent "$path" $out
               done
+
+              # Create symlinks for aliases
+              ${lib.optionalString (aliases != [ ] && binName != null) ''
+                mkdir -p $out/bin
+                for alias in ${lib.concatStringsSep " " (map lib.escapeShellArg aliases)}; do
+                  ln -sf ${lib.escapeShellArg binName} $out/bin/$alias
+                done
+              ''}
 
               # Handle additional outputs by symlinking from the original package's outputs
               ${lib.concatMapStringsSep "\n" (
@@ -153,6 +165,8 @@
             "originalOutputs"
             "passthru"
             "meta"
+            "aliases"
+            "binName"
           ])
         );
 
@@ -181,12 +195,17 @@
             package
           ];
           outputs = if package ? outputs then package.outputs else [ "out" ];
-          inherit originalOutputs;
+          inherit originalOutputs aliases binName;
           passthru =
             (package.passthru or { })
             // passthru
             // {
-              inherit env flags preHook;
+              inherit
+                env
+                flags
+                preHook
+                aliases
+                ;
             };
           # Pass through original attributes
           meta = package.meta or { };
