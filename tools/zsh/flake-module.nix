@@ -240,6 +240,7 @@
       packages.zsh =
         (self.libWithPkgs.${pkgs.system}.makeWrapper pkgs.zsh {
           runtimeInputs = with pkgs; [
+            gnugrep
             tmux
             fzf
             direnv
