@@ -99,11 +99,13 @@
           };
           instances = {
             state-version = {
-              module = {
-                name = "state-version";
-                input = "clan";
-              };
+              module.name = "importer";
               roles.default.tags.all = { };
+              roles.default.settings.extraModules = [
+                {
+                  clan.core.state-version.enable = true;
+                }
+              ];
             };
           };
         };
