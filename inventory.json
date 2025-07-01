@@ -1,11 +1,2 @@
 {
-  "machines": {
-    "gui-machine": {
-      "name": "gui-machine",
-      "description": "a test machine created in the gui",
-      "tags": [
-        "all"
-      ]
-    }
-  }
 }
