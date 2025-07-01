@@ -8,6 +8,10 @@
         colorschemes = {
           ayu = {
             enable = true;
+            settings = {
+              mirage = false;
+              dark = true;
+            };
             settings.overrides = {
               EoLSpace = {
                 bg = "#883333";
@@ -23,10 +27,82 @@
             };
           };
         };
+        extraConfigLua = ''
+          -- Cross-platform background detection and colorscheme switching
+          local last_theme = nil
+
+          local function detect_and_set_theme()
+            local is_dark = false
+
+            if vim.fn.has("mac") == 1 then
+              -- macOS: check system appearance
+              local result = vim.fn.system("defaults read -g AppleInterfaceStyle 2>/dev/null")
+              is_dark = result:match("Dark") ~= nil
+            elseif vim.fn.has("unix") == 1 then
+              -- Linux: check if running under a dark theme
+              -- Try multiple methods to detect dark theme
+              local methods = {
+                -- GNOME/GTK
+                "gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null",
+                "gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null",
+                -- KDE
+                "kreadconfig5 --file kdeglobals --group General --key ColorScheme 2>/dev/null",
+                -- Check if COLORFGBG suggests dark background
+                function()
+                  local colorfgbg = vim.env.COLORFGBG
+                  if colorfgbg then
+                    local fg, bg = colorfgbg:match("(%d+);(%d+)")
+                    if fg and bg then
+                      -- If foreground is lighter than background, likely dark theme
+                      return tonumber(fg) > tonumber(bg)
+                    end
+                  end
+                  return false
+                end
+              }
+
+              for _, method in ipairs(methods) do
+                if type(method) == "function" then
+                  is_dark = method()
+                  if is_dark then break end
+                else
+                  local result = vim.fn.system(method)
+                  if result:match("[Dd]ark") or result:match("prefer%-dark") then
+                    is_dark = true
+                    break
+                  end
+                end
+              end
+            end
+
+            local new_theme = is_dark and "dark" or "light"
+
+            if new_theme ~= last_theme then
+              last_theme = new_theme
+              vim.o.background = new_theme
+
+              if is_dark then
+                vim.cmd("colorscheme ayu")
+                print("Switched to dark theme (ayu)")
+              else
+                vim.cmd("colorscheme everforest")
+                print("Switched to light theme (everforest)")
+              end
+            end
+          end
+
+          -- Set initial theme
+          vim.defer_fn(detect_and_set_theme, 100)
+
+          -- Check for theme changes every 3 seconds (less frequent to be less resource intensive)
+          local timer = vim.loop.new_timer()
+          timer:start(3000, 3000, vim.schedule_wrap(detect_and_set_theme))
+
+          -- Create a command to manually refresh theme
+          vim.api.nvim_create_user_command("RefreshTheme", detect_and_set_theme, {})
+        '';
         globals = {
           mapleader = " ";
-          lumen_light_colorscheme = "everforest";
-          lumen_dark_colorscheme = "ayu";
         };
         opts = {
           mouse = "a";
@@ -51,26 +127,9 @@
           " need to use lua to expand $HOME
           lua vim.o.undodir = vim.fs.normalize('$HOME/.vim/undodir')
         '';
-        extraPackages = [
-          pkgs.glib # for vim-lumen
-        ];
         extraPlugins = [
           pkgs.vimPlugins.vim-fetch
-          (pkgs.vimUtils.buildVimPlugin {
-            name = "vim-lumen";
-            src = pkgs.fetchFromGitHub {
-              owner = "vimpostor";
-              repo = "vim-lumen";
-              rev = "ac13c32c3e309f6c6a84ff6cad8dbb135e75f0e4";
-              hash = "sha256-rsDUDI9lh4CEX1upMBjeyBOm99GAXWGPQ9vSCN8cmFo=";
-            };
-          })
         ];
-        # not ready yet, we are waiting for none-ls to get updated
-        # extraConfigLua = ''
-        #   local null_ls = require("null-ls")
-        #   null_ls.register(null_ls.builtins.formatting.nix_flake_fmt)
-        # '';
         keymaps = [
           {
             mode = "i";
@@ -91,16 +150,6 @@
             mode = "n";
             key = "<Space>";
             action = "<Nop>";
-          }
-          {
-            mode = "n";
-            key = "<leader>sd";
-            action = ":colorscheme ayu-dark<cr>";
-          }
-          {
-            mode = "n";
-            key = "<leader>sw";
-            action = ":colorscheme ayu-light<cr>";
           }
           {
             mode = [
