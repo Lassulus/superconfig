@@ -6,4 +6,6 @@ in
 {
   # Import functions that need pkgs
   makeWrapper = (import ./make-wrapper.nix { inherit lib superlib pkgs; }).makeWrapper;
+  makeWrapperModule =
+    (import ./make-wrapper-module.nix { inherit lib superlib pkgs; }).makeWrapperModule;
 }
