@@ -4,7 +4,7 @@ let
     ip =
       let
         zerotier_ip_path =
-          config.clan.core.clanDir + "/vars/per-machine/${machine}/zerotier/zerotier-ip/value";
+          config.clan.core.settings.directory + "/vars/per-machine/${machine}/zerotier/zerotier-ip/value";
       in
       if builtins.pathExists zerotier_ip_path then builtins.readFile zerotier_ip_path else null;
   }) (builtins.readDir ../machines);

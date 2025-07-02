@@ -31,7 +31,7 @@ let
     host: acc:
     let
       syncthing_id_path =
-        config.clan.core.clanDir + "/vars/per-machine/${host}/syncthing/syncthing.pub/value";
+        config.clan.core.settings.directory + "/vars/per-machine/${host}/syncthing/syncthing.pub/value";
     in
     if builtins.pathExists syncthing_id_path then
       acc
