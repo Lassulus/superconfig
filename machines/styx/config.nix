@@ -8,26 +8,19 @@
 {
   imports = [
     ../../2configs
-    ../../2configs/mouse.nix
     ../../2configs/retiolum.nix
-    ../../2configs/desktops/xmonad
     ../../2configs/pipewire.nix
     ../../2configs/exim-retiolum.nix
-    ../../2configs/browsers.nix
-    ../../2configs/programs.nix
     ../../2configs/nfs-dl.nix
     ../../2configs/yellow-mounts/samba.nix
     ../../2configs/gg23.nix
     ../../2configs/hass
     ../../2configs/green-host.nix
-    ../../2configs/fetchWallpaper.nix
-    ../../2configs/home-media.nix
     ../../2configs/syncthing.nix
     ../../2configs/ppp/umts-stick.nix
     ../../2configs/snapserver.nix
     ../../2configs/snapclient.nix
     ../../2configs/consul.nix
-    # ../../2configs/news-host.nix
   ];
 
   krebs.build.host = config.krebs.hosts.styx;
