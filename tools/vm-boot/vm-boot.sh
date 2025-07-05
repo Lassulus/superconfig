@@ -7,6 +7,7 @@ ISO_FILE=""
 MEMORY="2048"
 CPUS="2"
 ARCH=""
+NOGRAPHIC=false
 
 usage() {
   cat <<EOF
@@ -18,6 +19,7 @@ OPTIONS:
   -m, --memory SIZE     Memory in MB (default: 2048)
   -c, --cpus COUNT      Number of CPU cores (default: 2)
   -a, --arch ARCH       Force architecture (x86_64 or aarch64)
+  -n, --nographic       Run in text mode without graphics
   -h, --help            Show this help message
 
 EXAMPLE:
@@ -41,6 +43,10 @@ while [[ $# -gt 0 ]]; do
     -a|--arch)
       ARCH="$2"
       shift 2
+      ;;
+    -n|--nographic)
+      NOGRAPHIC=true
+      shift
       ;;
     -h|--help)
       usage
@@ -115,17 +121,29 @@ if [ "$ARCH" = "x86_64" ]; then
     exit 1
   fi
   echo "Using UEFI firmware: $UEFI_FW"
-  exec qemu-system-x86_64 \
-    -machine q35 \
-    -cpu qemu64 \
-    -m "$MEMORY" \
-    -smp "$CPUS" \
-    -accel tcg \
-    -bios "$UEFI_FW" \
-    -cdrom "$ISO_FILE" \
-    -boot d \
-    -nographic \
-    -serial mon:stdio
+  if [ "$NOGRAPHIC" = true ]; then
+    exec qemu-system-x86_64 \
+      -machine q35 \
+      -cpu qemu64 \
+      -m "$MEMORY" \
+      -smp "$CPUS" \
+      -accel tcg \
+      -bios "$UEFI_FW" \
+      -cdrom "$ISO_FILE" \
+      -boot d \
+      -nographic \
+      -serial mon:stdio
+  else
+    exec qemu-system-x86_64 \
+      -machine q35 \
+      -cpu qemu64 \
+      -m "$MEMORY" \
+      -smp "$CPUS" \
+      -accel tcg \
+      -bios "$UEFI_FW" \
+      -cdrom "$ISO_FILE" \
+      -boot d
+  fi
 elif [ "$ARCH" = "aarch64" ]; then
   echo "Starting aarch64 VM..."
   # Get the aarch64-linux UEFI firmware
@@ -142,16 +160,28 @@ elif [ "$ARCH" = "aarch64" ]; then
     exit 1
   fi
   echo "Using UEFI firmware: $UEFI_FW"
-  exec qemu-system-aarch64 \
-    -machine virt \
-    -cpu cortex-a57 \
-    -m "$MEMORY" \
-    -smp "$CPUS" \
-    -accel tcg \
-    -bios "$UEFI_FW" \
-    -cdrom "$ISO_FILE" \
-    -boot d \
-    -nographic
+  if [ "$NOGRAPHIC" = true ]; then
+    exec qemu-system-aarch64 \
+      -machine virt \
+      -cpu cortex-a57 \
+      -m "$MEMORY" \
+      -smp "$CPUS" \
+      -accel tcg \
+      -bios "$UEFI_FW" \
+      -cdrom "$ISO_FILE" \
+      -boot d \
+      -nographic
+  else
+    exec qemu-system-aarch64 \
+      -machine virt \
+      -cpu cortex-a57 \
+      -m "$MEMORY" \
+      -smp "$CPUS" \
+      -accel tcg \
+      -bios "$UEFI_FW" \
+      -cdrom "$ISO_FILE" \
+      -boot d
+  fi
 else
   echo "Error: Unsupported architecture '$ARCH'"
   echo "Supported architectures: x86_64, aarch64"
