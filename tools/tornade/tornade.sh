@@ -77,13 +77,25 @@ if ! grep -q "Bootstrapped 100%" "$TOR_DIR/tor.log" 2>/dev/null; then
   exit 1
 fi
 
-# Check if we're trying to run SSH on macOS
-if [[ "$1" == "ssh" ]] && [[ "$(uname)" == "Darwin" ]]; then
-  # On macOS, use ProxyCommand instead of torsocks due to SIP
-  shift # remove 'ssh' from arguments
-  exec ssh -o ProxyCommand="nc -x 127.0.0.1:$SOCKS_PORT %h %p" "$@"
-else
-  # For other commands or non-macOS systems, use torsocks
-  export TORSOCKS_TOR_PORT=$SOCKS_PORT
-  exec torsocks "$@"
+# Check if we're on Darwin
+if [[ "$(uname)" == "Darwin" ]]; then
+  if [[ "$1" == "ssh" ]]; then
+    # Direct SSH call - use old behavior
+    shift # remove 'ssh' from arguments
+    exec ssh -o ProxyCommand="nc -x 127.0.0.1:$SOCKS_PORT %h %p" "$@"
+  else
+    # Other commands - create SSH wrapper and add to PATH
+    SSH_WRAPPER="$TOR_DIR/ssh"
+    cat > "$SSH_WRAPPER" <<EOF
+#!/usr/bin/env bash
+# SSH wrapper that routes through Tor on Darwin
+exec /usr/bin/ssh -o ProxyCommand="nc -x 127.0.0.1:$SOCKS_PORT %h %p" "\$@"
+EOF
+    chmod +x "$SSH_WRAPPER"
+    export PATH="$TOR_DIR:$PATH"
+  fi
 fi
+
+# Execute the command
+export TORSOCKS_TOR_PORT=$SOCKS_PORT
+exec torsocks "$@"
