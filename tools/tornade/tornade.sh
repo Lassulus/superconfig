@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+set -x
 
 # Create temporary directory for this tor instance
 TOR_DIR=$(mktemp -d -t tornade.XXXXXX)
