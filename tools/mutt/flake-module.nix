@@ -271,6 +271,7 @@
 
         in
         self.libWithPkgs.${pkgs.system}.makeWrapper pkgs.neomutt {
+          aliases = [ "mutt" ];
           runtimeInputs =
             [
               pkgs.elinks
