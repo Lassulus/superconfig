@@ -152,7 +152,7 @@ in
     enableACME = true;
     forceSSL = true;
     locations."/".extraConfig = ''
-      return 301 https://weirdwednesday.de/weirdweekender/;
+      return 301 https://wonderl.ink/@weird0711;
     '';
   };
   services.nginx.virtualHosts."shop.weirdwednesday.de" = {
