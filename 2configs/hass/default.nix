@@ -45,7 +45,7 @@
       ${pkgs.podman}/bin/podman pull ${config.virtualisation.oci-containers.containers.homeassistant.image}
       ${pkgs.podman}/bin/podman stop homeassistant
       ${pkgs.podman}/bin/podman start homeassistant
-      ${pkgs.podman}/bin/podman system prune
+      ${pkgs.podman}/bin/podman system prune -a --volumes -f
     '';
   };
 
