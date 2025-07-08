@@ -49,52 +49,69 @@ if [[ "$STREAM_MODE" == "true" ]]; then
         echo "Error: mpv is not installed. Stream mode requires mpv."
         exit 1
     fi
-    
+
     # Stream mode: start aria2c in background to download all files
     # while playing them sequentially as they become available
-    
+
     # Create a temporary file with URLs for aria2c
     TMPFILE=$(mktemp)
     trap 'rm -f "$TMPFILE"' EXIT
-    
+
     # Store filenames in an array for playback
     declare -a FILES_ARRAY=()
     while IFS= read -r file; do
         if [[ -n "$file" ]]; then
             # Extract just the filename from the path
             filename=$(basename "$file")
-            echo "$FLAX_URL/$file" >> "$TMPFILE"
+            if [[ -f "$filename" ]]; then
+                echo "File already exists: $filename (skipping download)"
+            else
+                echo "$FLAX_URL/$file" >> "$TMPFILE"
+            fi
             FILES_ARRAY+=("$filename")
         fi
     done <<< "$SELECTED"
-    
-    echo "Starting background downloads..."
-    # Start aria2c in background with progress bar
-    aria2c --http-user="$FLAX_USER" --http-passwd="$FLAX_PASS" -i "$TMPFILE" --console-log-level=warn &
-    ARIA_PID=$!
-    
+
+    # Only start downloads if there are files to download
+    if [[ -s "$TMPFILE" ]]; then
+        echo "Starting background downloads..."
+        # Start aria2c in background with progress bar
+        aria2c --http-user="$FLAX_USER" --http-passwd="$FLAX_PASS" -i "$TMPFILE" --console-log-level=warn &
+        ARIA_PID=$!
+    else
+        echo "All selected files already exist, nothing to download."
+        ARIA_PID=""
+    fi
+
     # Play files as they download
     for file in "${FILES_ARRAY[@]}"; do
-        echo "Waiting for $file to start downloading..."
-        # Wait for file to exist and have some content
-        while [[ ! -f "$file" ]] || [[ ! -s "$file" ]]; do
-            sleep 0.5
-            # Check if aria2c is still running
-            if ! kill -0 $ARIA_PID 2>/dev/null; then
-                echo "Download process ended unexpectedly"
-                break 2
-            fi
-        done
-        
-        # Give it a moment to buffer
-        sleep 1
-        
-        echo "Playing: $file"
-        mpv "$file"
+        if [[ -f "$file" ]]; then
+            echo "Playing existing file: $file"
+            mpv "$file"
+        else
+            echo "Waiting for $file to start downloading..."
+            # Wait for file to exist and have some content
+            while [[ ! -f "$file" ]] || [[ ! -s "$file" ]]; do
+                sleep 0.5
+                # Check if aria2c is still running (only if we started it)
+                if [[ -n "$ARIA_PID" ]] && ! kill -0 $ARIA_PID 2>/dev/null; then
+                    echo "Download process ended unexpectedly"
+                    break 2
+                fi
+            done
+
+            # Give it a moment to buffer
+            sleep 1
+
+            echo "Playing: $file"
+            mpv "$file"
+        fi
     done
-    
-    # Wait for all downloads to complete
-    wait $ARIA_PID
+
+    # Wait for all downloads to complete (only if we started downloads)
+    if [[ -n "$ARIA_PID" ]]; then
+        wait $ARIA_PID
+    fi
 else
     # Normal mode: download all files with aria2c
     # Create a temporary file with URLs for aria2c
@@ -103,12 +120,23 @@ else
 
     while IFS= read -r file; do
         if [[ -n "$file" ]]; then
-            echo "$FLAX_URL/$file" >> "$TMPFILE"
+            # Extract just the filename from the path
+            filename=$(basename "$file")
+            if [[ -f "$filename" ]]; then
+                echo "File already exists: $filename (skipping download)"
+            else
+                echo "$FLAX_URL/$file" >> "$TMPFILE"
+            fi
         fi
     done <<< "$SELECTED"
 
-    echo "Downloading selected files..."
-    aria2c --http-user="$FLAX_USER" --http-passwd="$FLAX_PASS" -i "$TMPFILE"
+    # Only download if there are files to download
+    if [[ -s "$TMPFILE" ]]; then
+        echo "Downloading selected files..."
+        aria2c --http-user="$FLAX_USER" --http-passwd="$FLAX_PASS" -i "$TMPFILE"
+    else
+        echo "All selected files already exist, nothing to download."
+    fi
 fi
 
 echo "Download complete!"
