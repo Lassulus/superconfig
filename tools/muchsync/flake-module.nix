@@ -51,7 +51,9 @@
               all_sync_flags=true
               for arg in "$@"; do
                 case "$arg" in
-                  -v|-vv|-vvv|--verbose) ;;  # Verbose flags
+                  -v|-vv|-vvv|--verbose)
+                    set -x  # Enable shell debugging for verbose mode
+                    ;;  # Verbose flags
                   --config|--config=*) ;;     # Config flags
                   -*) all_sync_flags=false; break ;;  # Unknown flag, don't auto-sync
                   *) all_sync_flags=false; break ;;   # Non-flag argument, don't auto-sync
