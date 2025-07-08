@@ -143,6 +143,7 @@
               };
             };
           };
+        modules = import ./clan_modules { inherit nixpkgs; };
         inventory = {
           meta.name = "superconfig";
           machines = {
