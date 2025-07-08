@@ -81,9 +81,9 @@
         # direnv integration
         eval "$(${pkgs.direnv}/bin/direnv hook zsh)"
 
-        # Use nvim as MANPAGER if available
+        # Use nvim as MANPAGER if available and output is not piped
         if command -v nvim >/dev/null 2>&1; then
-          export MANPAGER="nvim +Man!"
+          export MANPAGER='sh -c "if [ -t 1 ]; then nvim +Man!; else cat; fi"'
         fi
 
         # This function is called whenever a command is not found.
