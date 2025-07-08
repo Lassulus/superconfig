@@ -1,4 +1,9 @@
-{ config, pkgs, ... }:
+{
+  self,
+  config,
+  pkgs,
+  ...
+}:
 {
   imports = [
     ../../2configs
@@ -15,7 +20,6 @@
 
     ../../2configs/git-brain.nix
     ../../2configs/et-server.nix
-    ../../2configs/consul.nix
 
     ../../2configs/atuin-server.nix
     ../../2configs/autoupdate.nix
