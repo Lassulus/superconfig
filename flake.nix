@@ -171,6 +171,11 @@
             neoprism.tags = [ "server" ];
           };
           instances = {
+            tor = {
+              module.name = "tor";
+              module.input = "self";
+              roles.default.tags.all = { };
+            };
             state-version = {
               module.name = "importer";
               roles.default.tags.all = { };
