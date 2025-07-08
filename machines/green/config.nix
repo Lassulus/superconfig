@@ -89,4 +89,8 @@
   };
 
   networking.firewall.allowedTCPPorts = [ 143 ];
+
+  environment.systemPackages = [
+    self.packages.${pkgs.system}.muchsync
+  ];
 }
