@@ -3,18 +3,11 @@
 {
   imports = [
     ../../2configs
-    ../../2configs/mouse.nix
     ../../2configs/retiolum.nix
     ../../2configs/desktops/qtile/nixos.nix
     ../../2configs/pipewire.nix
-    ../../2configs/exim-retiolum.nix
-    ../../2configs/browsers.nix
     ../../2configs/network-manager.nix
-    ../../2configs/programs.nix
-    ../../2configs/wine.nix
-    ../../2configs/bitcoin.nix
     ../../2configs/yellow-mounts/samba.nix
-    ../../2configs/fetchWallpaper.nix
     ../../2configs/consul.nix
     ../../2configs/snapclient.nix
   ];
