@@ -75,10 +75,10 @@
                 clan_path=$(nix build --no-link --print-out-paths "${self}#clan-cli")
 
                 # Get tor hostname using clan CLI
-                tor_hostname=$(CLAN_DIR="${self}" "$clan_path/bin/clan" vars get green tor-ssh/tor-hostname)
+                tor_hostname=$(CLAN_DIR="${self}" "$clan_path/bin/clan" vars get green tor-ssh/hostname)
 
                 # Use muchsync with custom ssh command via tornade
-                exec ${exePath} "$@" -s "$tornade_path/bin/tornade ssh" lass@"$tor_hostname"
+                exec ${exePath} -s "$tornade_path/bin/tornade ssh" "$@" lass@"$tor_hostname"
               else
                 exec ${exePath} "$@" lass@"$host"
               fi
