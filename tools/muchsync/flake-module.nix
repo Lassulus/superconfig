@@ -41,17 +41,28 @@
               fi
             }
 
-            # Check if arguments look like flags or a hostname
-            has_hostname=false
-            for arg in "$@"; do
-              case "$arg" in
-                -*) ;;  # This is a flag
-                *) has_hostname=true; break ;;  # Found a non-flag argument
-              esac
-            done
+            # Check if we should do auto-sync
+            # Auto-sync if no args or only verbose/config flags
+            auto_sync=false
+            if [ $# -eq 0 ]; then
+              auto_sync=true
+            else
+              # Check if all args are sync-compatible flags
+              all_sync_flags=true
+              for arg in "$@"; do
+                case "$arg" in
+                  -v|-vv|-vvv|--verbose) ;;  # Verbose flags
+                  --config|--config=*) ;;     # Config flags
+                  -*) all_sync_flags=false; break ;;  # Unknown flag, don't auto-sync
+                  *) all_sync_flags=false; break ;;   # Non-flag argument, don't auto-sync
+                esac
+              done
+              if [ "$all_sync_flags" = true ]; then
+                auto_sync=true
+              fi
+            fi
 
-            # If only flags provided (or no args), do a sync with green host
-            if [ "$has_hostname" = "false" ]; then
+            if [ "$auto_sync" = true ]; then
               host=$(find_green_host)
               echo "Syncing with $host..." >&2
 
