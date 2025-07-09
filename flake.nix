@@ -108,7 +108,12 @@
                           type = lib.types.str;
                           default = name;
                         };
+                        SSHOptions = lib.mkOption {
+                          type = lib.types.listOf lib.types.str;
+                          default = [ ];
+                        };
                         host = lib.mkOption {
+                          description = '''';
                           type = lib.types.attrTag {
                             plain = lib.mkOption {
                               type = lib.types.str;
@@ -175,6 +180,14 @@
               module.name = "tor";
               module.input = "self";
               roles.default.tags.all = { };
+            };
+            internet = {
+              module.name = "internet";
+              module.input = "self";
+              roles.default.machines = {
+                prism.settings.host = "prism.lassul.us";
+                neoprism.settings.host = "neoprism.lassul.us";
+              };
             };
             state-version = {
               module.name = "importer";
