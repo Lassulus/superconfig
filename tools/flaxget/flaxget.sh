@@ -63,11 +63,7 @@ if [[ "$STREAM_MODE" == "true" ]]; then
         if [[ -n "$file" ]]; then
             # Extract just the filename from the path
             filename=$(basename "$file")
-            if [[ -f "$filename" ]]; then
-                echo "File already exists: $filename (skipping download)"
-            else
-                echo "$FLAX_URL/$file" >> "$TMPFILE"
-            fi
+            echo "$FLAX_URL/$file" >> "$TMPFILE"
             FILES_ARRAY+=("$filename")
         fi
     done <<< "$SELECTED"
@@ -76,10 +72,10 @@ if [[ "$STREAM_MODE" == "true" ]]; then
     if [[ -s "$TMPFILE" ]]; then
         echo "Starting background downloads..."
         # Start aria2c in background with progress bar
-        aria2c --http-user="$FLAX_USER" --http-passwd="$FLAX_PASS" -i "$TMPFILE" --console-log-level=warn &
+        aria2c --continue=true --http-user="$FLAX_USER" --http-passwd="$FLAX_PASS" -i "$TMPFILE" --console-log-level=warn &
         ARIA_PID=$!
     else
-        echo "All selected files already exist, nothing to download."
+        echo "No files to download."
         ARIA_PID=""
     fi
 
@@ -120,22 +116,16 @@ else
 
     while IFS= read -r file; do
         if [[ -n "$file" ]]; then
-            # Extract just the filename from the path
-            filename=$(basename "$file")
-            if [[ -f "$filename" ]]; then
-                echo "File already exists: $filename (skipping download)"
-            else
-                echo "$FLAX_URL/$file" >> "$TMPFILE"
-            fi
+            echo "$FLAX_URL/$file" >> "$TMPFILE"
         fi
     done <<< "$SELECTED"
 
     # Only download if there are files to download
     if [[ -s "$TMPFILE" ]]; then
         echo "Downloading selected files..."
-        aria2c --http-user="$FLAX_USER" --http-passwd="$FLAX_PASS" -i "$TMPFILE"
+        aria2c --continue=true --http-user="$FLAX_USER" --http-passwd="$FLAX_PASS" -i "$TMPFILE"
     else
-        echo "All selected files already exist, nothing to download."
+        echo "No files to download."
     fi
 fi
 
