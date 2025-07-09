@@ -1,17 +1,17 @@
-{ self, modulesPath, ... }:
+{ self, modulesPath, pkgs, ... }:
 {
   imports = [
     ./config.nix
     (modulesPath + "/installer/scan/not-detected.nix")
     ./disk.nix
-    self.inputs.nixos-hardware.nixosModules.framework-13th-gen-intel
+    self.inputs.nixos-hardware.nixosModules.framework-amd-ai-300-series
   ];
 
   services.fprintd.enable = true;
   services.fwupd.enable = true;
   services.fwupd.extraRemotes = [ "lvfs-testing" ];
   # Might be necessary once to make the update succeed
-  services.fwupd.uefiCapsuleSettings.DisableCapsuleUpdateOnDisk = true;
+  # services.fwupd.uefiCapsuleSettings.DisableCapsuleUpdateOnDisk = true;
   # we need fwupd 1.9.7 to downgrade the fingerprint sensor firmware
   # we only need to downgrade the firmware once, so we can remove this once we have done that
   # services.fwupd.package = (import (builtins.fetchTarball {
@@ -33,6 +33,7 @@
   };
 
   hardware.graphics.enable = true;
+  hardware.acpilight.enable = true;
 
   boot.initrd.availableKernelModules = [
     "nvme"
