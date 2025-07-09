@@ -16,7 +16,6 @@
     ../../2configs/yubikey.nix
     ../../2configs/pipewire.nix
     ../../2configs/browsers.nix
-    ../../2configs/programs.nix
     ../../2configs/network-manager.nix
     ../../2configs/syncthing.nix
     # ../../2configs/games.nix
