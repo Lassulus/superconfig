@@ -270,9 +270,12 @@
           };
           devShells.default = pkgs.mkShell {
             packages = [
-              clan-core.packages.${system}.clan-cli
               nixpkgs.legacyPackages.${system}.nil
               nixpkgs.legacyPackages.${system}.nixd
+              (self.legacyPackages.${system}.bin_shim {
+                name = "clan";
+                pkg_name = "clan-cli";
+              })
             ];
           };
         };
