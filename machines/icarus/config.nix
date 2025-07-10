@@ -9,7 +9,6 @@
     ../../2configs/desktops/xmonad
     ../../2configs/pipewire.nix
     ../../2configs/browsers.nix
-    ../../2configs/programs.nix
     ../../2configs/fetchWallpaper.nix
     ../../2configs/games.nix
     ../../2configs/bitcoin.nix
