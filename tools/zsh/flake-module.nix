@@ -60,6 +60,71 @@
         #enable automatic rehashing of $PATH
         zstyle ':completion:*' rehash true
 
+        # Lazy load completions for commands based on their installation path
+        _lazy_completion_loader() {
+          local cmd="$words[1]"
+          [[ -n "$ZSH_COMP_DEBUG" ]] && echo "DEBUG: _lazy_completion_loader called for cmd: $cmd" >&2
+
+          if command -v "$cmd" >/dev/null 2>&1; then
+            local cmd_path="$(which "$cmd" 2>/dev/null)"
+            [[ -n "$ZSH_COMP_DEBUG" ]] && echo "DEBUG: initial cmd_path: $cmd_path" >&2
+
+            local found_zsh_completions=false
+
+            # Follow absolute symlinks and check each level
+            while [[ -n "$cmd_path" ]]; do
+              local share_dir="$(dirname "$cmd_path")/../share"
+              [[ -n "$ZSH_COMP_DEBUG" ]] && echo "DEBUG: checking share_dir: $share_dir" >&2
+
+              # Check zsh completion directories
+              for dir in "$share_dir/zsh/site-functions" "$share_dir/zsh/vendor-completions"; do
+                if [[ -d "$dir" ]]; then
+                  [[ ! " ''${fpath[@]} " =~ " $dir " ]] && fpath=("$dir" $fpath)
+                  if [[ -f "$dir/_$cmd" ]]; then
+                    found_zsh_completions=true
+                    [[ -n "$ZSH_COMP_DEBUG" ]] && echo "DEBUG: found zsh completion: $dir/_$cmd" >&2
+                  fi
+                fi
+              done
+
+              # Follow absolute symlink or stop
+              if [[ -L "$cmd_path" ]]; then
+                cmd_path="$(readlink "$cmd_path" 2>/dev/null)"
+                [[ "$cmd_path" == /* ]] || cmd_path=""  # Only follow absolute symlinks
+                [[ -n "$ZSH_COMP_DEBUG" ]] && echo "DEBUG: following symlink to: $cmd_path" >&2
+              else
+                break
+              fi
+            done
+
+            # Load completions if found
+            if [[ "$found_zsh_completions" == true ]]; then
+              [[ -n "$ZSH_COMP_DEBUG" ]] && echo "DEBUG: reinitializing completions" >&2
+              compinit &>/dev/null
+            fi
+          fi
+
+          # Save completion function before removing lazy loader
+          local completion_function="''${_comps[$cmd]:-}"
+          compdef -d "$cmd" 2>/dev/null
+
+          # Use loaded completion or fall back to normal
+          if [[ -n "$completion_function" ]]; then
+            $completion_function "$@"
+          else
+            _normal
+          fi
+        }
+
+        # Set as default completer for commands without completions
+        zstyle -e ':completion:*' completer '
+          if [[ -z $_comps[$words[1]] ]]; then
+            reply=(_lazy_completion_loader _complete)
+          else
+            reply=(_complete)
+          fi
+        '
+
         # fancy mv which interactively gets the second argument if not given
         function mv() {
           if [[ "$#" -ne 1 ]] || [[ ! -e "$1" ]]; then
