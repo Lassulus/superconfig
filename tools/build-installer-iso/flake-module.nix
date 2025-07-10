@@ -1,4 +1,4 @@
-{ self, inputs, ... }:
+{ self, ... }:
 let
   # Shared installer configuration module
   installerModule =
