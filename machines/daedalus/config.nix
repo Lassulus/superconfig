@@ -38,7 +38,7 @@
       #   ];
       # };
       environment.systemPackages = with pkgs; [
-        ark
+        kdePackages.ark
         pavucontrol
         #firefox
         chromium
@@ -47,7 +47,6 @@
         libreoffice
         audacity
         zathura
-        skypeforlinux
         wine
         geeqie
         vlc
