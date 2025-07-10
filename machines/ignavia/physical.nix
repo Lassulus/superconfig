@@ -1,4 +1,4 @@
-{ self, modulesPath, pkgs, ... }:
+{ self, modulesPath, ... }:
 {
   imports = [
     ./config.nix

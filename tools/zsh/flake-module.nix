@@ -197,7 +197,7 @@
             # Get parent PID
             pid=$(ps -p $pid -o ppid= 2>/dev/null | tr -d ' ') || break
           done
-          
+
           if [[ "$in_tmux" == "false" ]]; then
             # Preserve SSH_AUTH_SOCK for tmux
             if [[ -n "$SSH_AUTH_SOCK" ]]; then
