@@ -1,3 +1,4 @@
+#!/bin/sh
 set -efu
 # set -x
 FLAKE=${FLAKE:-.}

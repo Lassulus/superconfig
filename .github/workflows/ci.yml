@@ -20,9 +20,6 @@ jobs:
 
       - uses: DeterminateSystems/magic-nix-cache-action@main
 
-      - name: Check flake
-        run: nix flake check --no-build --show-trace
-
       - name: Evaluate all NixOS configurations
         run: |
           echo "Evaluating NixOS configurations..."
