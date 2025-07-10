@@ -163,19 +163,6 @@ in
   flake = {
     # Export the installer module for reuse
     nixosModules.installer = installerModule;
-
-    # Define installer configurations for each architecture
-    nixosConfigurations = {
-      installer-x86_64-linux = inputs.nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [ installerModule ];
-      };
-
-      installer-aarch64-linux = inputs.nixpkgs.lib.nixosSystem {
-        system = "aarch64-linux";
-        modules = [ installerModule ];
-      };
-    };
   };
 
   perSystem =
