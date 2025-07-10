@@ -54,4 +54,4 @@ jobs:
 
       - name: Check formatter
         run: |
-          nix fmt -- --check
+          nix fmt -- --fail-on-change
