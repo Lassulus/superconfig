@@ -63,57 +63,60 @@
         # Lazy load completions for commands based on their installation path
         _lazy_completion_loader() {
           local cmd="$words[1]"
-          [[ -n "$ZSH_COMP_DEBUG" ]] && echo "DEBUG: _lazy_completion_loader called for cmd: $cmd" >&2
+          local basename_cmd="$cmd"
+          local cmd_path=""
 
-          if command -v "$cmd" >/dev/null 2>&1; then
-            local cmd_path="$(which "$cmd" 2>/dev/null)"
-            [[ -n "$ZSH_COMP_DEBUG" ]] && echo "DEBUG: initial cmd_path: $cmd_path" >&2
+          [[ -n "$ZSH_COMP_DEBUG" ]] && echo "DEBUG: _lazy_completion_loader called for: $cmd" >&2
 
-            local found_zsh_completions=false
+          # Get command path and basename
+          if [[ "$cmd" == /* ]] && [[ -x "$cmd" ]]; then
+            cmd_path="$cmd"
+            basename_cmd="$(basename "$cmd")"
+          elif command -v "$cmd" >/dev/null 2>&1; then
+            cmd_path="$(which "$cmd" 2>/dev/null)"
+            basename_cmd="$(basename "$cmd_path")"
+          fi
 
-            # Follow absolute symlinks and check each level
-            while [[ -n "$cmd_path" ]]; do
-              local share_dir="$(dirname "$cmd_path")/../share"
-              [[ -n "$ZSH_COMP_DEBUG" ]] && echo "DEBUG: checking share_dir: $share_dir" >&2
+          [[ -n "$ZSH_COMP_DEBUG" ]] && echo "DEBUG: cmd_path=$cmd_path, basename_cmd=$basename_cmd" >&2
 
-              # Check zsh completion directories
-              for dir in "$share_dir/zsh/site-functions" "$share_dir/zsh/vendor-completions"; do
-                if [[ -d "$dir" ]]; then
-                  [[ ! " ''${fpath[@]} " =~ " $dir " ]] && fpath=("$dir" $fpath)
-                  if [[ -f "$dir/_$cmd" ]]; then
-                    found_zsh_completions=true
-                    [[ -n "$ZSH_COMP_DEBUG" ]] && echo "DEBUG: found zsh completion: $dir/_$cmd" >&2
-                  fi
-                fi
-              done
-
-              # Follow absolute symlink or stop
-              if [[ -L "$cmd_path" ]]; then
-                cmd_path="$(readlink "$cmd_path" 2>/dev/null)"
-                [[ "$cmd_path" == /* ]] || cmd_path=""  # Only follow absolute symlinks
-                [[ -n "$ZSH_COMP_DEBUG" ]] && echo "DEBUG: following symlink to: $cmd_path" >&2
-              else
-                break
+          # Find and load completion file
+          local current="$cmd_path"
+          while [[ -n "$current" ]]; do
+            local share_dir="$(dirname "$current")/../share"
+            for subdir in zsh/site-functions zsh/vendor-completions; do
+              local dir="$share_dir/$subdir"
+              if [[ -f "$dir/_$basename_cmd" ]]; then
+                [[ -n "$ZSH_COMP_DEBUG" ]] && echo "DEBUG: found completion: $dir/_$basename_cmd" >&2
+                [[ ! " ''${fpath[@]} " =~ " $dir " ]] && fpath=("$dir" $fpath)
+                source "$dir/_$basename_cmd"
+                [[ -n "$ZSH_COMP_DEBUG" ]] && echo "DEBUG: after sourcing, _comps[$basename_cmd]=''${_comps[$basename_cmd]:-not set}" >&2
+                break 2
               fi
             done
+            # Follow absolute symlinks only
+            [[ -L "$current" ]] || break
+            current="$(readlink "$current" 2>/dev/null)"
+            [[ "$current" == /* ]] || break
+          done
 
-            # Load completions if found
-            if [[ "$found_zsh_completions" == true ]]; then
-              [[ -n "$ZSH_COMP_DEBUG" ]] && echo "DEBUG: reinitializing completions" >&2
-              compinit &>/dev/null
+          # Register completion for the original command if needed
+          if [[ -n "''${_comps[$basename_cmd]:-}" ]]; then
+            if [[ "$cmd" != "$basename_cmd" ]]; then
+              _comps[$cmd]="''${_comps[$basename_cmd]}"
+              [[ -n "$ZSH_COMP_DEBUG" ]] && echo "DEBUG: registered ''${_comps[$basename_cmd]} for $cmd" >&2
             fi
           fi
 
-          # Save completion function before removing lazy loader
-          local completion_function="''${_comps[$cmd]:-}"
-          compdef -d "$cmd" 2>/dev/null
-
-          # Use loaded completion or fall back to normal
-          if [[ -n "$completion_function" ]]; then
-            $completion_function "$@"
-          else
-            _normal
+          # Remove lazy loader only if it's still set
+          if [[ "''${_comps[$cmd]:-}" == "_lazy_completion_loader" ]]; then
+            compdef -d "$cmd" 2>/dev/null
           fi
+
+          # Run the appropriate completion
+          local comp="''${_comps[$cmd]:-}"
+          [[ -z "$comp" ]] && comp="''${_comps[$basename_cmd]:-_normal}"
+          [[ -n "$ZSH_COMP_DEBUG" ]] && echo "DEBUG: using completion: $comp" >&2
+          $comp "$@"
         }
 
         # Set as default completer for commands without completions
