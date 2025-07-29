@@ -9,6 +9,8 @@
             : script-binding console/enable
             x add audio-delay -0.050
             X add audio-delay 0.050
+            F     script-binding quality_menu/video_formats_toggle
+            Alt+f script-binding quality_menu/audio_formats_toggle
           '';
 
           mpvConfig = pkgs.writeText "mpv.conf" ''
@@ -29,7 +31,7 @@
             function download()
                 log('Searching subtitles ...', 10)
                 path = mp.get_property('path')
-                
+
                 -- Build dl_subs lazily when needed
                 log('Building subtitle downloader...', 5)
                 result = utils.subprocess({ args = {"nix", "build", "--no-link", "--print-out-paths", "${self}#mpv-dl-subs"} })
@@ -37,9 +39,9 @@
                     log('Failed to build subtitle downloader')
                     return
                 end
-                
+
                 dl_subs_path = string.gsub(result.stdout, "\n", "") .. "/bin/dl_subs"
-                
+
                 -- Download subtitles
                 result = utils.subprocess({ args = {dl_subs_path, path} })
                 if result.error == nil then
