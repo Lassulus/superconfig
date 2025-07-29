@@ -58,9 +58,16 @@ for attempt in 1 2 3 4 5; do
   
   # Check frequently at first, then slow down - longer timeout per attempt
   for i in {1..120}; do
-    if grep -q "Bootstrapped 100%" "$TOR_DIR/tor.log" 2>/dev/null; then
+    # Check if log file exists and contains the success message
+    if [ -f "$TOR_DIR/tor.log" ] && grep -q "Bootstrapped 100%" "$TOR_DIR/tor.log" 2>/dev/null; then
       # Success - exit both loops
       break 2
+    fi
+    # If log file doesn't exist after 2 seconds, tor likely failed to start
+    if [ "$i" -eq 20 ] && [ ! -f "$TOR_DIR/tor.log" ]; then
+      # Log file wasn't created after 2 seconds - tor likely failed completely
+      # Exit with failure immediately rather than retrying
+      break
     fi
     # Check every 0.1s for first 2 seconds, then every 0.5s
     if [ "$i" -le 20 ]; then
@@ -99,4 +106,5 @@ fi
 
 # Execute the command
 export TORSOCKS_TOR_PORT=$SOCKS_PORT
+export TOR_CONTROL_PORT=$CONTROL_PORT
 exec torsocks "$@"
