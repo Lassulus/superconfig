@@ -100,7 +100,23 @@ if [[ "$STREAM_MODE" == "true" ]]; then
             sleep 1
 
             echo "Playing: $file"
-            mpv "$file"
+            # Try to play the file with retries
+            MAX_RETRIES=3
+            RETRY_DELAY=2
+            for ((retry=1; retry<=MAX_RETRIES; retry++)); do
+                if mpv "$file"; then
+                    # mpv exited successfully
+                    break
+                else
+                    exit_code=$?
+                    if [[ $retry -lt $MAX_RETRIES ]]; then
+                        echo "Failed to open $file (attempt $retry/$MAX_RETRIES, exit code: $exit_code). Retrying in ${RETRY_DELAY}s..."
+                        sleep $RETRY_DELAY
+                    else
+                        echo "Failed to open $file after $MAX_RETRIES attempts. Skipping."
+                    fi
+                fi
+            done
         fi
     done
 
