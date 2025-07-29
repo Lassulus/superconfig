@@ -243,6 +243,7 @@ let
     "nzbgeek@lassul.us"
     "bonify@lassul.us"
     "bitpanda@lassul.us"
+    "schufa@lassul.us"
   ];
 
 in
