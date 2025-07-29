@@ -1,0 +1,6 @@
+{ ... }:
+{
+  imports = [
+    ./mpv/default.nix
+  ];
+}
