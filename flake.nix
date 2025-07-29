@@ -227,6 +227,7 @@
           ./formatter.nix
           ./5pkgs/flake-module.nix
           ./keys/flake-module.nix
+          ./wrapperModules/flake-module.nix
         ]
         ++ (
           # Auto-import all flake-module.nix files from tools subdirectories
