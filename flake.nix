@@ -72,83 +72,6 @@
       clan = clan-core.lib.buildClan {
         self = self;
         specialArgs.self = self;
-        exportsModule =
-          { lib, ... }:
-          {
-            options.networking = {
-              priority = lib.mkOption {
-                type = lib.types.int;
-                default = 1000;
-                description = ''
-                  priority with which this network should be tried.
-                  higher priority means it gets used earlier in the chain
-                '';
-              };
-              technology = lib.mkOption {
-                # addding more technologies requires code in the clan-cli to handle that technology
-                # at least for userspace networking
-                # maybe we can do a fallback mode for vpns where we don't need userspace networking?
-                type = lib.types.enum [
-                  "direct"
-                  "tor"
-                ];
-                description = ''
-                  the technology this network uses to connect to the target
-                  This is used for userspace networking with socks proxies.
-                '';
-              };
-              # should we call this machines? hosts?
-              peers = lib.mkOption {
-                # <name>
-                type = lib.types.attrsOf (
-                  lib.types.submodule (
-                    { name, ... }:
-                    {
-                      options = {
-                        name = lib.mkOption {
-                          type = lib.types.str;
-                          default = name;
-                        };
-                        SSHOptions = lib.mkOption {
-                          type = lib.types.listOf lib.types.str;
-                          default = [ ];
-                        };
-                        host = lib.mkOption {
-                          description = '''';
-                          type = lib.types.attrTag {
-                            plain = lib.mkOption {
-                              type = lib.types.str;
-                              description = ''
-                                a plain value, which can be read directly from the config
-                              '';
-                            };
-                            var = lib.mkOption {
-                              type = lib.types.submodule {
-                                options = {
-                                  machine = lib.mkOption {
-                                    type = lib.types.str;
-                                    example = "jon";
-                                  };
-                                  generator = lib.mkOption {
-                                    type = lib.types.str;
-                                    example = "tor-ssh";
-                                  };
-                                  file = lib.mkOption {
-                                    type = lib.types.str;
-                                    example = "hostname";
-                                  };
-                                };
-                              };
-                            };
-                          };
-                        };
-                      };
-                    }
-                  )
-                );
-              };
-            };
-          };
         modules = import ./clan_modules { inherit nixpkgs; };
         inventory = {
           meta.name = "superconfig";
@@ -178,16 +101,12 @@
           };
           instances = {
             tor = {
-              module.name = "tor";
-              module.input = "self";
               roles.default.tags.all = { };
             };
             internet = {
-              module.name = "internet";
-              module.input = "self";
               roles.default.machines = {
-                prism.settings.host = "prism.lassul.us";
-                neoprism.settings.host = "neoprism.lassul.us";
+                prism.settings.host = "ssh://prism.lassul.us:45621";
+                neoprism.settings.host = "ssh://neoprism.lassul.us:45621";
               };
             };
             state-version = {
