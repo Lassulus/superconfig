@@ -101,7 +101,7 @@
           };
           instances = {
             tor = {
-              roles.default.tags.all = { };
+              roles.server.tags.all = { };
             };
             internet = {
               roles.default.machines = {
