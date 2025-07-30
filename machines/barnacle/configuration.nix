@@ -36,7 +36,7 @@
     pkgs.git
     pkgs.element-desktop
     pkgs.iterm2
-    pkgs.firefox-devedition
+    pkgs.firefox
     pkgs.ripgrep
     pkgs.alt-tab-macos
     pkgs.zed-editor
