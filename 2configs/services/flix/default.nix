@@ -330,7 +330,7 @@
     ];
     startAt = "daily";
     serviceConfig = {
-      Restart = "always";
+      Type = "oneshot";
       ExecStart = pkgs.writers.writeDash "flix-index" ''
         set -efu
         index(){
