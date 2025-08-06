@@ -11,90 +11,8 @@
       packages.mutt =
         let
           # Mailboxes configuration from mail.nix
-          mailboxes = {
-            afra = [ "to:afra@afra-berlin.de" ];
-            c-base = [ "to:c-base.org" ];
-            coins = [
-              "to:btce@lassul.us"
-              "to:coinbase@lassul.us"
-              "to:polo@lassul.us"
-              "to:bitwala@lassul.us"
-              "to:payeer@lassul.us"
-              "to:gatehub@lassul.us"
-              "to:bitfinex@lassul.us"
-              "to:binance@lassul.us"
-              "to:bitcoin.de@lassul.us"
-              "to:robinhood@lassul.us"
-            ];
-            dezentrale = [ "to:dezentrale.space" ];
-            dhl = [ "to:dhl@lassul.us" ];
-            dn42 = [ "to:dn42@lists.nox.tf" ];
-            eloop = [ "to:eloop.org" ];
-            github = [ "to:github@lassul.us" ];
-            gmail = [
-              "to:gmail@lassul.us"
-              "to:lassulus@gmail.com"
-              "lassulus@googlemail.com"
-            ];
-            india = [
-              "to:hillhackers@lists.hillhacks.in"
-              "to:hackbeach@lists.hackbeach.in"
-              "to:hackbeach@mail.hackbeach.in"
-            ];
-            kaosstuff = [
-              "to:gearbest@lassul.us"
-              "to:banggood@lassul.us"
-              "to:tomtop@lassul.us"
-            ];
-            lugs = [ "to:lugs@lug-s.org" ];
-            meetup = [ "to:meetup@lassul.us" ];
-            nix = [
-              "to:nix-devel@googlegroups.com"
-              "to:nix@lassul.us"
-            ];
-            patreon = [ "to:patreon@lassul.us" ];
-            paypal = [ "to:paypal@lassul.us" ];
-            ptl = [ "to:ptl@posttenebraslab.ch" ];
-            retiolum = [ "to:lass@mors.r" ];
-            security = [
-              "to:seclists.org"
-              "to:bugtraq"
-              "to:securityfocus@lassul.us"
-              "to:security-announce@lists.apple.com"
-            ];
-            shack = [ "to:shackspace.de" ];
-            steam = [ "to:steam@lassul.us" ];
-            tinc = [
-              "to:tinc@tinc-vpn.org"
-              "to:tinc-devel@tinc-vpn.org"
-            ];
-            wireguard = [ "to:wireguard@lists.zx2c4" ];
-            zzz = [
-              "to:pizza@lassul.us"
-              "to:spam@krebsco.de"
-            ];
-          };
-
-          notmuchConfig = ''
-            [database]
-            path=Maildir
-            mail_root=Maildir
-
-            [user]
-            name=lassulus
-            primary_email=lassulus@lassul.us
-            other_email=lass@mors.r;${lib.concatStringsSep ";" (lib.flatten (lib.attrValues mailboxes))}
-
-            [new]
-            tags=unread;inbox;
-            ignore=
-
-            [search]
-            exclude_tags=deleted;spam;
-
-            [maildir]
-            synchronize_flags=true
-          '';
+          mailboxes = self.packages.${system}.notmuch.mailboxes;
+          notmuchConfig = self.packages.${system}.notmuch.notmuchConfig;
 
           mailcap = pkgs.writeText "mailcap" ''
             text/html; ${pkgs.elinks}/bin/elinks -dump ; copiousoutput;
@@ -272,16 +190,15 @@
         in
         self.libWithPkgs.${pkgs.system}.makeWrapper pkgs.neomutt {
           aliases = [ "mutt" ];
-          runtimeInputs =
-            [
-              pkgs.elinks
-              pkgs.msmtp
-              pkgs.notmuch
-              pkgs.urlscan
-            ]
-            ++ lib.optionals pkgs.stdenv.isLinux [
-              pkgs.iputils
-            ];
+          runtimeInputs = [
+            pkgs.elinks
+            pkgs.msmtp
+            pkgs.notmuch
+            pkgs.urlscan
+          ]
+          ++ lib.optionals pkgs.stdenv.isLinux [
+            pkgs.iputils
+          ];
           env = {
             NOTMUCH_CONFIG = "${pkgs.writeText "notmuch-config" notmuchConfig}";
           };
