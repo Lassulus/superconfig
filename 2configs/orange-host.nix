@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 {
   krebs.sync-containers3.containers.orange = {
-    sshKey = "${config.krebs.secret.directory}/orange.sync.key";
+    sshKey = config.clan.core.vars.generators.orange-container.files."orange.sync.key".path;
     startCommand = ''
       export PATH=$PATH:${pkgs.git}/bin
       until ${pkgs.dig.host}/bin/host github.com; do sleep 1; done
@@ -21,11 +21,15 @@
       proxyPass = "http://orange.r";
     };
   };
-  clan.core.facts.services.orange-container = {
-    secret."orange.sync.key" = { };
-    generator.script = ";";
-    generator.prompt = ''
-      copy or reference the secret key from the container into here, so we can actually start/sync the container
+  clan.core.vars.generators.orange-container = {
+    files."orange.sync.key" = { };
+    migrateFact = "orange-container";
+    prompts.key = {
+      description = "copy or reference the secret key from the container into here, so we can actually start/sync the container";
+      type = "hidden";
+    };
+    script = ''
+      cp "$prompts"/key "$out"/orange.sync.key
     '';
   };
 }
