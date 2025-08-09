@@ -43,20 +43,23 @@
   systemd.services.matrix-synapse.serviceConfig.ExecStartPre = [
     "+${pkgs.writeScript "copy_registration_shared_secret" ''
       #!/bin/sh
-      cp ${config.clan.core.facts.services.matrix-synapse.secret.synapse-registration_shared_secret.path} /var/lib/matrix-synapse/registration_shared_secret.yaml
+      cp ${
+        config.clan.core.vars.generators.matrix-synapse.files."synapse-registration_shared_secret".path
+      } /var/lib/matrix-synapse/registration_shared_secret.yaml
       chown matrix-synapse:matrix-synapse /var/lib/matrix-synapse/registration_shared_secret.yaml
       chmod 600 /var/lib/matrix-synapse/registration_shared_secret.yaml
     ''}"
   ];
 
-  clan.core.facts.services."matrix-synapse" = {
-    secret."synapse-registration_shared_secret" = { };
-    generator.path = with pkgs; [
+  clan.core.vars.generators.matrix-synapse = {
+    files."synapse-registration_shared_secret" = { };
+    migrateFact = "matrix-synapse";
+    runtimeInputs = with pkgs; [
       coreutils
       pwgen
     ];
-    generator.script = ''
-      echo "registration_shared_secret: $(pwgen -s 32 1)" > "$secrets"/synapse-registration_shared_secret
+    script = ''
+      echo "registration_shared_secret: $(pwgen -s 32 1)" > "$out"/synapse-registration_shared_secret
     '';
   };
 
