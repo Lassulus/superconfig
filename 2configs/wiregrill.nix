@@ -49,16 +49,17 @@ mkIf (hasAttr "wiregrill" config.krebs.build.host.nets) {
     }
   ]);
 
-  clan.core.facts.services.wiregrill = {
-    secret."wiregrill.key" = { };
-    public."wiregrill.pub" = { };
-    generator.path = with pkgs; [
+  clan.core.vars.generators.wiregrill = {
+    files."wiregrill.key" = { };
+    files."wiregrill.pub" = { };
+    migrateFact = "wiregrill";
+    runtimeInputs = with pkgs; [
       coreutils
       wireguard-tools
     ];
-    generator.script = ''
-      wg genkey > "$secrets"/wiregrill.key
-      cat "$secrets"/wiregrill.key | wg pubkey > "$facts"/wiregrill.pub
+    script = ''
+      wg genkey > "$out"/wiregrill.key
+      cat "$out"/wiregrill.key | wg pubkey > "$out"/wiregrill.pub
     '';
   };
 
@@ -77,7 +78,7 @@ mkIf (hasAttr "wiregrill" config.krebs.build.host.nets) {
       (optional (!isNull self.ip4 && !config.systemd.network.enable) self.ip4.addr)
       ++ (optional (!isNull self.ip6 && !config.systemd.network.enable) self.ip6.addr);
     listenPort = 51820;
-    privateKeyFile = "${config.krebs.secret.directory}/wiregrill.key";
+    privateKeyFile = config.clan.core.vars.generators.wiregrill.files."wiregrill.key".path;
     allowedIPsAsRoutes = true;
     peers = mapAttrsToList (_name: host: {
       # inherit name;
