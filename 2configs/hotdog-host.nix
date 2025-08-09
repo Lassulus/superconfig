@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 {
   krebs.sync-containers3.containers.hotdog = {
-    sshKey = "${config.krebs.secret.directory}/hotdog.sync.key";
+    sshKey = config.clan.core.vars.generators.hotdog-container.files."hotdog.sync.key".path;
     startCommand = ''
       export PATH=$PATH:${pkgs.git}/bin
       ln -sfrT /var/lib/var_src /var/src
@@ -13,16 +13,17 @@
     hostPath = "/var/lib/sync-containers3/hotdog/state";
     isReadOnly = false;
   };
-  clan.core.facts.services.hotdog-container = {
-    secret."hotdog.sync.key" = { };
-    public."hotdog.sync.pub" = { };
-    generator.path = with pkgs; [
+  clan.core.vars.generators.hotdog-container = {
+    files."hotdog.sync.key" = { };
+    files."hotdog.sync.pub" = { };
+    migrateFact = "hotdog-container";
+    runtimeInputs = with pkgs; [
       coreutils
       openssh
     ];
-    generator.script = ''
-      ssh-keygen -t ed25519 -N "" -f "$secrets"/hotdog.sync.key
-      mv "$secrets"/hotdog.sync.key.pub "$facts"/hotdog.sync.pub
+    script = ''
+      ssh-keygen -t ed25519 -N "" -f "$out"/hotdog.sync.key
+      mv "$out"/hotdog.sync.key.pub "$out"/hotdog.sync.pub
     '';
   };
 }
