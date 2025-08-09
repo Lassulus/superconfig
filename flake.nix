@@ -142,22 +142,21 @@
         "aarch64-darwin"
         "x86_64-darwin"
       ];
-      imports =
-        [
-          ./formatter.nix
-          ./5pkgs/flake-module.nix
-          ./keys/flake-module.nix
-          ./wrapperModules/flake-module.nix
-        ]
-        ++ (
-          # Auto-import all flake-module.nix files from tools subdirectories
-          let
-            toolDirs = builtins.attrNames (
-              nixpkgs.lib.filterAttrs (_: type: type == "directory") (builtins.readDir ./tools)
-            );
-          in
-          map (dir: ./tools + "/${dir}/flake-module.nix") toolDirs
-        );
+      imports = [
+        ./formatter.nix
+        ./5pkgs/flake-module.nix
+        ./keys/flake-module.nix
+        ./wrapperModules/flake-module.nix
+      ]
+      ++ (
+        # Auto-import all flake-module.nix files from tools subdirectories
+        let
+          toolDirs = builtins.attrNames (
+            nixpkgs.lib.filterAttrs (_: type: type == "directory") (builtins.readDir ./tools)
+          );
+        in
+        map (dir: ./tools + "/${dir}/flake-module.nix") toolDirs
+      );
       flake.nixosConfigurations = clan.nixosConfigurations;
       flake.clanInternals = clan.clanInternals;
       flake.darwinConfigurations = clan.darwinConfigurations;
