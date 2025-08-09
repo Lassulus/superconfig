@@ -196,7 +196,8 @@ let
           )}
           ${cgit-clear-cache}/bin/cgit-clear-cache
         '';
-      } // hooks;
+      }
+      // hooks;
     };
 
   make-rules =
