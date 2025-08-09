@@ -20,19 +20,21 @@
       mkdir -p /var/lib/nextcloud
       chown nextcloud:nextcloud /var/lib/nextcloud
       install -o nextcloud -g nextcloud -Dm0600 \
-        ${config.clan.core.facts.services.nextcloud.secret.nextcloud_adminpass.path} \
+        ${config.clan.core.vars.generators.nextcloud.files."nextcloud_adminpass".path} \
         /var/lib/nextcloud/admin.pass
     ''}"
   ];
 
-  clan.core.facts.services."nextcloud" = {
-    secret."nextcloud_adminpass" = { };
-    generator.path = with pkgs; [ coreutils ];
-    generator.prompt = ''
-      please enter the admin password for nextcloud_adminpass:
-    '';
-    generator.script = ''
-      echo "$prompt_value" > "$secrets"/adminpass
+  clan.core.vars.generators.nextcloud = {
+    files."nextcloud_adminpass" = { };
+    migrateFact = "nextcloud";
+    prompts.password = {
+      description = "please enter the admin password for nextcloud";
+      type = "hidden";
+    };
+    runtimeInputs = with pkgs; [ coreutils ];
+    script = ''
+      echo "$prompts/password" > "$out"/nextcloud_adminpass
     '';
   };
 }
