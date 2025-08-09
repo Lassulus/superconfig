@@ -32,19 +32,19 @@
 
   krebs.sync-containers3.inContainer = {
     enable = true;
-    pubkey = config.clanCore.facts.services.green-container.public."green.sync.pub".value;
+    pubkey = config.clan.core.vars.generators.green-container.files."green.sync.pub".path;
   };
 
-  clanCore.facts.services.green-container = {
-    secret."green.sync.key" = { };
-    public."green.sync.pub" = { };
-    generator.path = with pkgs; [
+  clanCore.vars.generators.green-container = {
+    files."green.sync.key" = { };
+    files."green.sync.pub".secret = false;
+    runtimeInputs = with pkgs; [
       coreutils
       openssh
     ];
-    generator.script = ''
-      ssh-keygen -t ed25519 -N "" -f "$secrets"/green.sync.key
-      mv "$secrets"/green.sync.key "$facts"/green.sync.pub
+    script = ''
+      ssh-keygen -t ed25519 -N "" -f "$out"/green.sync.key
+      mv "$out"/green.sync.key.pub "$out"/green.sync.pub
     '';
   };
 
