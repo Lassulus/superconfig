@@ -5,20 +5,21 @@
   # };
   # generate private key with:
   # nix-store --generate-binary-cache-key my-secret-key my-public-key
-  clan.core.facts.services."nix-serve" = {
-    secret."nix-serve.key" = { };
-    public."nix-serve.pub" = { };
-    generator.path = with pkgs; [
+  clan.core.vars.generators.nix-serve = {
+    files."nix-serve.key" = { };
+    files."nix-serve.pub" = { };
+    migrateFact = "nix-serve";
+    runtimeInputs = with pkgs; [
       coreutils
       nix
     ];
-    generator.script = ''
-      nix-store --generate-binary-cache-key "$secrets"/nix-serve.key "$facts"/nix-serve.pub
+    script = ''
+      nix-store --generate-binary-cache-key "$out"/nix-serve.key "$out"/nix-serve.pub
     '';
   };
   services.nix-serve = {
     enable = true;
-    secretKeyFile = "${config.krebs.secret.directory}/nix-serve.key";
+    secretKeyFile = config.clan.core.vars.generators.nix-serve.files."nix-serve.key".path;
     port = 5005;
   };
 
