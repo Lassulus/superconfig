@@ -9,16 +9,17 @@
     "nginx"
   ];
 
-  clan.core.facts.services."lassul.us-dkim" = {
-    secret."lassul.us.dkim.priv" = { };
-    public."lassul.us.dkim.pub" = { };
-    generator.path = with pkgs; [
+  clan.core.vars.generators.lassul-us-dkim = {
+    files."lassul.us.dkim.priv" = { };
+    files."lassul.us.dkim.pub" = { };
+    migrateFact = "lassul.us-dkim";
+    runtimeInputs = with pkgs; [
       coreutils
       openssl
     ];
-    generator.script = ''
-      openssl genrsa -out "$secrets"/lassul.us.dkim.priv 2048
-      openssl rsa -in "$secrets"/lassul.us.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$facts"/lassul.us.dkim.pub
+    script = ''
+      openssl genrsa -out "$out"/lassul.us.dkim.priv 2048
+      openssl rsa -in "$out"/lassul.us.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$out"/lassul.us.dkim.pub
     '';
   };
 
