@@ -58,10 +58,11 @@ in
   };
 
   services.prosody.package = pkgs.prosody.override {
-    withExtraLuaPackages = p: with p; [
-      # required for muc_breakout_rooms
-      cjson
-    ];
+    withExtraLuaPackages =
+      p: with p; [
+        # required for muc_breakout_rooms
+        cjson
+      ];
   };
 
   services.prosody.extraPluginPaths = [ "${prosody-contrib-plugins}/event_sync" ];
