@@ -39,7 +39,6 @@
     (self.lib.halalify pkgs.firefox-bin-unwrapped)
     pkgs.ripgrep
     pkgs.alt-tab-macos
-    pkgs.zed-editor
     pkgs.nixd
     pkgs.nil
     pkgs.age-plugin-se
