@@ -39,11 +39,17 @@
           default = "xft:Iosevka Term SS15:style=italic";
         };
       };
-      config.krebs.xresources.resources.X = ''
-        *.font:       ${config.lass.fonts.regular}
-        *.boldFont:   ${config.lass.fonts.bold}
-        *.italicFont: ${config.lass.fonts.italic}
-      '';
+      config.services.xserver.displayManager.sessionCommands =
+        let
+          xres = pkgs.writeText "xreources" ''
+            *.font:       ${config.lass.fonts.regular}
+            *.boldFont:   ${config.lass.fonts.bold}
+            *.italicFont: ${config.lass.fonts.italic}
+          '';
+        in
+        ''
+          ${pkgs.xorg.xrdb}/bin/xrdb -merge ${xres}
+        '';
     }
   ];
 
@@ -146,8 +152,6 @@
       ${pkgs.fzfmenu}/bin/fzfmenu "$@"
     '';
   };
-
-  krebs.xresources.enable = true;
 
   lass.klem = {
     kpaste.script = pkgs.writeDash "kpaste-wrapper" ''
