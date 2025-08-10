@@ -11,13 +11,10 @@
   clan.core.vars.generators.ubik-container = {
     files."ubik.sync.key" = { };
     migrateFact = "ubik-container";
-    prompts.key = {
+    prompts.warn = {
       description = "copy or reference the secret key from the container into here, so we can actually start/sync the container";
       type = "hidden";
     };
-    script = ''
-      cp "$prompts"/key "$out"/ubik.sync.key
-    '';
   };
   containers.ubik.bindMounts."/var/lib" = {
     hostPath = "/var/lib/sync-containers3/ubik/state";

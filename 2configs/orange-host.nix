@@ -24,12 +24,9 @@
   clan.core.vars.generators.orange-container = {
     files."orange.sync.key" = { };
     migrateFact = "orange-container";
-    prompts.key = {
+    prompts.warn = {
       description = "copy or reference the secret key from the container into here, so we can actually start/sync the container";
       type = "hidden";
     };
-    script = ''
-      cp "$prompts"/key "$out"/orange.sync.key
-    '';
   };
 }

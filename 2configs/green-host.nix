@@ -11,8 +11,11 @@
   clan.core.vars.generators.green-container = {
     files."green.sync.key" = { };
     script = ":";
-    prompt = ''
-      copy or reference the secret key from the container into here, so we can actually start/sync the container
-    '';
+    prompts.warn = {
+      description = ''
+        copy or reference the secret key from the container into here, so we can actually start/sync the container
+      '';
+      type = "hidden";
+    };
   };
 }
