@@ -5,7 +5,7 @@
   clan.core.vars.generators.hedgedoc-github-auth = {
     files."hedgedoc.env" = { };
     migrateFact = "hedgedoc-github-auth";
-    prompts.env = {
+    prompts."hedgedoc.env" = {
       description = ''
         goto https://github.com/settings/applications/2352617 and paste the data in the following format:
         GITHUB_CLIENT_ID=...
@@ -13,9 +13,6 @@
       '';
       type = "multiline";
     };
-    script = ''
-      cp "$prompts"/env "$out"/hedgedoc.env
-    '';
   };
   # https://github.com/settings/applications/2352617
   systemd.services.hedgedoc.serviceConfig.EnvironmentFile = [
