@@ -69,32 +69,18 @@
     acpi
     acpilight
     ripgrep
-    cabal2nix
     dic
     dmenu
-    font-size
     fzfmenu
-    gimp
-    gitAndTools.gh
-    git-crypt
-    git-preview
     dconf
-    iodine
     libarchive
-    lm_sensors
     ncdu
     nix-index
     nixpkgs-review
     nmap
     pavucontrol
-    ponymix
-    powertop
-    rxvt-unicode
     sxiv
     nsxiv
-    taskwarrior
-    termite
-    transgui
     wirelesstools
     x11vnc
     xclip
