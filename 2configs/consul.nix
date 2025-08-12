@@ -41,9 +41,6 @@
 
       # Leave on terminate for cleaner shutdowns
       leave_on_terminate = true;
-
-      # Disable leave intent to prevent stuck "leaving" state
-      disable_leave_intent = true;
     };
   };
 
