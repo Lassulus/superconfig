@@ -183,6 +183,12 @@ in
           ];
           dnssec-signing = true;
           dnssec-policy = "rsa2k";
+          # Disable zone file syncing since the zone file is in the read-only Nix store
+          # This prevents "flush event failed" errors when knot tries to write DNSSEC updates
+          zonefile-sync = "-1";
+          # Load zone changes from journal instead of rewriting the zone file
+          # Required when DNSSEC signing is enabled with read-only zone files
+          zonefile-load = "difference";
         }
       ];
     };
