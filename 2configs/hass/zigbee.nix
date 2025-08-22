@@ -24,6 +24,7 @@
       };
       serial = {
         port = "/dev/cc2652";
+        adapter = "zstack";
         # disable_led = true;
       };
       advanced = {
