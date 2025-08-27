@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# age-detect: Detects connected age-compatible security keys
+# Returns identity file path and detected key information
+
+# Function to detect connected security keys and their age identities
+detect_age_keys() {
+    local temp_identities
+    temp_identities=$(mktemp)
+
+    # Check for Secure Enclave on macOS (highest priority)
+    if [[ "$(uname)" == "Darwin" ]] && command -v age-plugin-se >/dev/null 2>&1; then
+        echo "AGE-PLUGIN-SE-15FM0MYMDXM39K8EKG0TNG" > "$temp_identities"
+        echo "IDENTITY_FILE=$temp_identities"
+        echo "DETECTED_KEY=se"
+        echo "KEY_TYPE=se"
+        return
+    fi
+
+    # Check for YubiKeys (second priority)
+    if command -v ykman >/dev/null 2>&1; then
+        local yubikey_serial
+        yubikey_serial=$(ykman info 2>/dev/null | grep "Serial number:" | cut -d: -f2 | tr -d ' ' || true)
+        if [[ -n "$yubikey_serial" ]]; then
+            echo "AGE-PLUGIN-YUBIKEY-1M2PLUQYZ242EPUSSHDFWJ" > "$temp_identities"
+            echo "IDENTITY_FILE=$temp_identities"
+            case "$yubikey_serial" in
+                "16679898")
+                    echo "DETECTED_KEY=yubi1"
+                    ;;
+                "11342136")
+                    echo "DETECTED_KEY=yubi2"
+                    ;;
+                *)
+                    echo "DETECTED_KEY=yubikey-${yubikey_serial}"
+                    ;;
+            esac
+            echo "KEY_TYPE=yubikey"
+            return
+        fi
+    fi
+
+    # Check for Solo2 (lowest priority)
+    if command -v fido2-token >/dev/null 2>&1; then
+        if fido2-token -L 2>/dev/null | grep -q "Solo 2"; then
+            # FIDO2-HMAC doesn't use identity file
+            rm -f "$temp_identities"
+            echo "IDENTITY_FILE="
+            echo "DETECTED_KEY=solo2"
+            echo "KEY_TYPE=solo2"
+            return
+        fi
+    fi
+
+    # No keys detected
+    rm -f "$temp_identities"
+    echo "IDENTITY_FILE="
+    echo "DETECTED_KEY="
+    echo "KEY_TYPE="
+}
+
+# Parse command line arguments
+case "${1:-detect}" in
+    detect)
+        detect_age_keys
+        ;;
+    --help|-h)
+        echo "Usage: age-detect [detect]"
+        echo ""
+        echo "Detects the first available age-compatible security key and outputs:"
+        echo "  IDENTITY_FILE=<path>  - Path to temporary identity file for age (empty for Solo2)"
+        echo "  DETECTED_KEY=<name>   - Name of the detected key (e.g., yubi1, solo2, se)"
+        echo "  KEY_TYPE=<type>       - Type of key (yubikey, solo2, se)"
+        echo ""
+        echo "Priority order: se > yubikey > solo2"
+        ;;
+    *)
+        echo "Unknown command: $1" >&2
+        echo "Use --help for usage information" >&2
+        exit 1
+        ;;
+esac
