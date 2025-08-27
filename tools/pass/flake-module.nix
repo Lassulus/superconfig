@@ -13,6 +13,7 @@
           pkgs.age-plugin-fido2-hmac
           pkgs.age-plugin-yubikey
           self.packages.${system}.pass-otp
+          self.packages.${system}.age-detect
         ];
         aliases = [ "pass" ];
         wrapper =
@@ -23,6 +24,7 @@
             ...
           }:
           ''
+            set -x
             ${envString}
             ${preHook}
 
@@ -31,6 +33,21 @@
               if [[ ! -f "$PASS_BULK_KEY_FILE" ]] || [[ ! -s "$PASS_BULK_KEY_FILE" ]]; then
                 mkdir -p "$(dirname "$PASS_BULK_KEY_FILE")"
                 ${exePath} show bulk-operations/age-key > "$PASS_BULK_KEY_FILE" 2>/dev/null || true
+              fi
+            fi
+
+            # Set up identities for age decryption
+            if [[ -n "''${PASS_BULK_KEY_FILE:-}" ]] && [[ -f "$PASS_BULK_KEY_FILE" ]] && [[ -s "$PASS_BULK_KEY_FILE" ]]; then
+              # Use bulk key if available
+              export PASSAGE_IDENTITIES_FILE="$PASS_BULK_KEY_FILE"
+            else
+              # Detect available age keys
+              eval "$(age-detect)"
+
+              # Set up identity file if detected
+              if [[ -n "''${IDENTITY_FILE:-}" ]]; then
+                export PASSAGE_IDENTITIES_FILE="$IDENTITY_FILE"
+                trap 'rm -f "$IDENTITY_FILE"' EXIT
               fi
             fi
 
@@ -56,21 +73,10 @@
                 exit 1
               fi
 
-              # Use bulk key for decryption if available
-              if [[ -n "''${PASS_BULK_KEY_FILE:-}" ]] && [[ -f "$PASS_BULK_KEY_FILE" ]] && [[ -s "$PASS_BULK_KEY_FILE" ]]; then
-                PASSAGE_IDENTITIES_FILE="$PASS_BULK_KEY_FILE" ${exePath} show "$pass_name" | pass-otp $clip_arg
-              else
-                ${exePath} show "$pass_name" | pass-otp $clip_arg
-              fi
-            # Handle show commands with bulk key optimization
-            elif [[ "''${1:-}" == "show" ]]; then
-              if [[ -n "''${PASS_BULK_KEY_FILE:-}" ]] && [[ -f "$PASS_BULK_KEY_FILE" ]] && [[ -s "$PASS_BULK_KEY_FILE" ]]; then
-                PASSAGE_IDENTITIES_FILE="$PASS_BULK_KEY_FILE" ${exePath} "$@"
-              else
-                ${exePath} "$@"
-              fi
+              # Show pass and pipe to OTP (identities already set up by age-detect)
+              ${exePath} show "$pass_name" | pass-otp $clip_arg
             else
-              # Pass all other commands directly to passage
+              # Pass all other commands directly to passage (identities already set up)
               ${exePath} "$@"
             fi
           '';
