@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+set -euo pipefail
+set -x
+
+# SSH wrapper that automatically uses the correct YubiKey/Solo2 key
+# based on which device is currently connected
+
+SSH="${SSH:-ssh}"
+
+# Find keys directory - either from KEYS_DIR env var or relative to script
+if [[ -z "${KEYS_DIR:-}" ]]; then
+    # Get the real script location (resolving symlinks)
+    SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+    KEYS_DIR="$SCRIPT_DIR/../../keys"
+    if [[ ! -d "$KEYS_DIR" ]]; then
+        echo "Error: Keys directory not found at $KEYS_DIR. Set KEYS_DIR environment variable." >&2
+        exit 1
+    fi
+fi
+TMPDIR="${TMPDIR:-/tmp}"
+
+# Function to detect connected security key
+detect_key() {
+    # Use age-detect to find connected key
+    eval "$(age-detect)"
+
+    # Clean up identity file if created
+    [[ -n "${IDENTITY_FILE:-}" ]] && rm -f "$IDENTITY_FILE"
+
+    # Return detected key name
+    echo "${DETECTED_KEY:-}"
+}
+
+# Function to decrypt key
+decrypt_key() {
+    local key_name="$1"
+    local tmp_key="$TMPDIR/ssh-${key_name}-$$"
+
+    case "$key_name" in
+        yubi1|yubi2)
+            # Decrypt with YubiKey age plugin
+            echo "AGE-PLUGIN-YUBIKEY-1M2PLUQYZ242EPUSSHDFWJ" | \
+                age --decrypt -i - "$KEYS_DIR/ssh/${key_name}.age" > "$tmp_key" || {
+                    echo "Failed to decrypt $key_name" >&2
+                    rm -f "$tmp_key"
+                    return 1
+                }
+            ;;
+        solo2)
+            # Decrypt with Solo2 FIDO2-HMAC
+            age -d -j fido2-hmac "$KEYS_DIR/ssh/${key_name}.age" > "$tmp_key" || {
+                    echo "Failed to decrypt $key_name" >&2
+                    rm -f "$tmp_key"
+                    return 1
+                }
+            ;;
+        *)
+            echo "Unknown key type: $key_name" >&2
+            return 1
+            ;;
+    esac
+
+    chmod 600 "$tmp_key"
+    echo "$tmp_key"
+}
+
+# Main logic
+main() {
+    local detected_key
+    detected_key=$(detect_key)
+
+    if [[ -z "$detected_key" ]]; then
+        # No security key detected, fallback to normal SSH
+        exec "$SSH" "$@"
+    fi
+
+    echo "Using security key: $detected_key" >&2
+
+    # Decrypt the key
+    local decrypted_key
+    if decrypted_key=$(decrypt_key "$detected_key"); then
+        # Clean up on exit
+        trap 'rm -f '"$decrypted_key"'' EXIT
+
+        # Execute SSH with the decrypted key
+        exec "$SSH" -i "$decrypted_key" "$@"
+    else
+        echo "Failed to decrypt key, falling back to normal SSH" >&2
+        exec "$SSH" "$@"
+    fi
+}
+
+main "$@"
