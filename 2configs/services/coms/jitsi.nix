@@ -22,6 +22,7 @@
       SHOW_WATERMARK_FOR_GUESTS = false;
       GENERATE_ROOMNAMES_ON_WELCOME_PAGE = false;
       DISABLE_PRESENCE_STATUS = true;
+      DEFAULT_REMOTE_DISPLAY_NAME = "Fellow Nixer";
     };
   };
 
