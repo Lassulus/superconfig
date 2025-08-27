@@ -17,6 +17,7 @@
           ];
         text = ''
           set -eu
+          set -x
           shopt -s nullglob globstar
 
           typeit=0
@@ -46,7 +47,7 @@
                 echo -n "$otp_code" | xdotool type --clearmodifiers --file -
               fi
             else
-              pass otp --clip "$password" 2>/dev/null
+              pass otp --clip "$password"
             fi
           else
             if [[ $typeit -eq 1 ]]; then
