@@ -7,8 +7,11 @@
         name = "pass-otp";
         runtimeInputs = [
           pkgs.oath-toolkit
+          pkgs.xclip
+          pkgs.wl-clipboard
         ];
         text = ''
+          set -euo pipefail
           # Tool-agnostic OTP generator that accepts secret via stdin or args
 
           show_usage() {
@@ -79,9 +82,16 @@
             if [[ "$(uname)" == "Darwin" ]]; then
               echo -n "$otp_code" | pbcopy
               echo "Copied OTP code to clipboard."
-            else
+            elif [[ -n "''${WAYLAND_DISPLAY:-}" ]] && command -v wl-copy >/dev/null 2>&1; then
+              echo -n "$otp_code" | wl-copy
+              echo "Copied OTP code to clipboard (Wayland)."
+            elif [[ -n "''${DISPLAY:-}" ]] && command -v xclip >/dev/null 2>&1; then
               echo -n "$otp_code" | xclip -selection clipboard
-              echo "Copied OTP code to clipboard."
+              echo "Copied OTP code to clipboard (X11)."
+            else
+              echo "Error: No clipboard tool found (tried pbcopy, wl-copy, xclip)"
+              echo "$otp_code"
+              exit 1
             fi
           else
             echo "$otp_code"
