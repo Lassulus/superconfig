@@ -62,7 +62,7 @@
                 echo -n "$pw" | xdotool type --clearmodifiers --file -
               fi
             else
-              pass show --clip "$password" 2>/dev/null
+              pass show --clip "$password"
             fi
           fi
         '';
