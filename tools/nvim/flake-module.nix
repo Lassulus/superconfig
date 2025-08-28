@@ -40,36 +40,44 @@
               is_dark = result:match("Dark") ~= nil
             elseif vim.fn.has("unix") == 1 then
               -- Linux: check if running under a dark theme
-              -- Try multiple methods to detect dark theme
-              local methods = {
-                -- GNOME/GTK
-                "gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null",
-                "gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null",
-                -- KDE
-                "kreadconfig5 --file kdeglobals --group General --key ColorScheme 2>/dev/null",
-                -- Check if COLORFGBG suggests dark background
-                function()
-                  local colorfgbg = vim.env.COLORFGBG
-                  if colorfgbg then
-                    local fg, bg = colorfgbg:match("(%d+);(%d+)")
-                    if fg and bg then
-                      -- If foreground is lighter than background, likely dark theme
-                      return tonumber(fg) > tonumber(bg)
+              -- Check NixOS theme system first (always check this fresh)
+              local f = io.open("/var/theme/current_theme", "r")
+              if f then
+                local content = f:read("*all"):gsub("^%s+", ""):gsub("%s+$", "")
+                f:close()
+                is_dark = (content == "dark")
+              else
+                -- Fallback to other methods if theme file doesn't exist
+                local methods = {
+                  -- GNOME/GTK
+                  "gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null",
+                  "gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null",
+                  -- KDE
+                  "kreadconfig5 --file kdeglobals --group General --key ColorScheme 2>/dev/null",
+                  -- Check if COLORFGBG suggests dark background
+                  function()
+                    local colorfgbg = vim.env.COLORFGBG
+                    if colorfgbg then
+                      local fg, bg = colorfgbg:match("(%d+);(%d+)")
+                      if fg and bg then
+                        -- If foreground is lighter than background, likely dark theme
+                        return tonumber(fg) > tonumber(bg)
+                      end
                     end
+                    return false
                   end
-                  return false
-                end
-              }
+                }
 
-              for _, method in ipairs(methods) do
-                if type(method) == "function" then
-                  is_dark = method()
-                  if is_dark then break end
-                else
-                  local result = vim.fn.system(method)
-                  if result:match("[Dd]ark") or result:match("prefer%-dark") then
-                    is_dark = true
-                    break
+                for _, method in ipairs(methods) do
+                  if type(method) == "function" then
+                    is_dark = method()
+                    if is_dark then break end
+                  else
+                    local result = vim.fn.system(method)
+                    if result:match("[Dd]ark") or result:match("prefer%-dark") then
+                      is_dark = true
+                      break
+                    end
                   end
                 end
               end
@@ -83,10 +91,8 @@
 
               if is_dark then
                 vim.cmd("colorscheme ayu")
-                print("Switched to dark theme (ayu)")
               else
                 vim.cmd("colorscheme everforest")
-                print("Switched to light theme (everforest)")
               end
             end
           end
