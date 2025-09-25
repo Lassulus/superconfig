@@ -1,22 +1,10 @@
 { self, ... }:
 {
   perSystem =
-    { pkgs, system, ... }:
+    { self', pkgs, ... }:
     {
       packages.mpv =
         let
-          mpvInput = pkgs.writeText "mpv.input" ''
-            : script-binding console/enable
-            x add audio-delay -0.050
-            X add audio-delay 0.050
-            F     script-binding quality_menu/video_formats_toggle
-            Alt+f script-binding quality_menu/audio_formats_toggle
-          '';
-
-          mpvConfig = pkgs.writeText "mpv.conf" ''
-            osd-font-size=20
-          '';
-
           # Lazy-loaded autosub script
           autosub = pkgs.writeText "autosub.lua" ''
             utils = require 'mp.utils'
@@ -57,29 +45,31 @@
             mp.add_key_binding('S', "download_subs", download)
           '';
 
-          mpvPackage = pkgs.mpv.override {
-            scripts = with pkgs.mpvScripts; [
-              sponsorblock
-              quality-menu
-              vr-reversal
-              visualizer
-            ];
-          };
-
         in
-        self.libWithPkgs.${system}.makeWrapper mpvPackage {
-          runtimeInputs = [ pkgs.yt-dlp ];
-          flagSeparator = "=";
-          flags = {
-            "--no-config" = { };
-            "--input-conf" = "${mpvInput}";
-            "--include" = "${mpvConfig}";
-            "--script" = "${autosub}";
+        self'.legacyPackages.wrappers.mpv {
+          scripts = with pkgs.mpvScripts; [
+            sponsorblock
+            quality-menu
+            vr-reversal
+            visualizer
+          ];
+          extraFlags = {
             "--ytdl-format" = "best[height<1081]";
             "--script-opts" = "ytdl_hook-ytdl_path=${pkgs.yt-dlp}/bin/yt-dlp";
             "--script-opts-append" = "sponsorblock-local_database=no";
             "--audio-channels" = "2";
+            "--script" = autosub;
           };
+          "mpv.input".content = ''
+            : script-binding console/enable
+            x add audio-delay -0.050
+            X add audio-delay 0.050
+            F     script-binding quality_menu/video_formats_toggle
+            Alt+f script-binding quality_menu/audio_formats_toggle
+          '';
+          "mpv.conf".content = ''
+            osd-font-size=20
+          '';
         };
 
       # Separate package for subtitle downloader
