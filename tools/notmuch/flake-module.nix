@@ -2,9 +2,8 @@
 {
   perSystem =
     {
-      pkgs,
       lib,
-      system,
+      pkgs,
       ...
     }:
     {
@@ -75,34 +74,24 @@
             ];
           };
 
-          notmuchConfig = ''
-            [database]
-            path=Maildir
-            mail_root=Maildir
-
-            [user]
-            name=lassulus
-            primary_email=lassulus@lassul.us
-            other_email=lass@mors.r;${lib.concatStringsSep ";" (lib.flatten (lib.attrValues mailboxes))}
-
-            [new]
-            tags=unread;inbox;
-            ignore=
-
-            [search]
-            exclude_tags=deleted;spam;
-
-            [maildir]
-            synchronize_flags=true
-          '';
-
         in
-        self.libWithPkgs.${pkgs.system}.makeWrapper pkgs.notmuch {
-          env = {
-            NOTMUCH_CONFIG = "${pkgs.writeText "notmuch-config" notmuchConfig}";
+        self.wrapperModules.notmuch.apply {
+          pkgs = pkgs;
+          config = {
+            database = {
+              path = "Maildir";
+              mail_root = "Maildir";
+            };
+            new.tags = "unread;inbox;";
+            search.exclude_tags = "deleted;spam;";
+            maildir.synchronize_flags = true;
+            user = {
+              name = "lassulus";
+              primary_email = "lassulus@lassul.us";
+              other_email = lib.concatStringsSep ";" (lib.flatten (lib.attrValues mailboxes));
+            };
           };
           passthru = {
-            notmuchConfig = notmuchConfig;
             mailboxes = mailboxes;
           };
         };

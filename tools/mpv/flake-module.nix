@@ -1,7 +1,7 @@
 { self, ... }:
 {
   perSystem =
-    { self', pkgs, ... }:
+    { pkgs, ... }:
     {
       packages.mpv =
         let
@@ -46,7 +46,8 @@
           '';
 
         in
-        self'.legacyPackages.wrappers.mpv {
+        self.wrapperModules.mpv.apply {
+          pkgs = pkgs;
           scripts = with pkgs.mpvScripts; [
             sponsorblock
             quality-menu
