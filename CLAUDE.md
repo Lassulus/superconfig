@@ -16,7 +16,6 @@ This is lassulus's personal NixOS/nix-darwin configuration repository, built on 
 - **Clan-core**: Primary framework for managing multiple machines
 - **Inventory**: Machines are tagged in `flake.nix` (laptop/server tags)
 - **Secrets**: Uses password-store for secrets management via clan.core.facts
-- **Deployment**: Uses krops (via stockholm) for deployment
 
 ### Network Overlays
 The repository manages multiple overlay networks:
