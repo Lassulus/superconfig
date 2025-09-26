@@ -61,7 +61,6 @@
     self.inputs.stockholm.nixosModules.sitemap
     self.inputs.stockholm.nixosModules.ssl
     self.inputs.stockholm.nixosModules.systemd
-    self.inputs.stockholm.nixosModules.xresources
     self.inputs.stockholm.nixosModules.ssh
     self.inputs.stockholm.nixosModules.sync-containers3
     {
