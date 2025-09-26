@@ -12,8 +12,7 @@
         package = pkgs.muchsync;
         runtimeInputs = [ pkgs.notmuch ] ++ lib.optionals pkgs.stdenv.isLinux [ pkgs.iputils ];
         env = {
-          NOTMUCH_CONFIG =
-              self.packages.${pkgs.system}.notmuch.passthru.config.configFile.path;
+          NOTMUCH_CONFIG = self.packages.${pkgs.system}.notmuch.passthru.config.configFile.path;
         };
         wrapper =
           { exePath, envString, ... }:
