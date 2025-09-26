@@ -1,7 +1,7 @@
 { self, ... }:
 {
   perSystem =
-    { pkgs, system, ... }:
+    { pkgs, ... }:
     let
       tmuxConfigText = ''
         set-option -g default-terminal screen-256color
@@ -13,7 +13,9 @@
     in
     {
       packages.tmux =
-        (self.libWithPkgs.${system}.makeWrapper pkgs.tmux {
+        (self.wrapLib.makeWrapper {
+          pkgs = pkgs;
+          package = pkgs.tmux;
           flags = {
             "-f" = tmuxConfigFile;
           };

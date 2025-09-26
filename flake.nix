@@ -200,12 +200,5 @@
           };
         };
       flake.lib = import ./lib { inherit (nixpkgs) lib; };
-      flake.libWithPkgs = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed (
-        system:
-        import ./lib/pkgs.nix {
-          inherit (nixpkgs) lib;
-          pkgs = nixpkgs.legacyPackages.${system};
-        }
-      );
     };
 }

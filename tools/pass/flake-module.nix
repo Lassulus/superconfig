@@ -7,7 +7,9 @@
       ...
     }:
     {
-      packages.pass = self.libWithPkgs.${system}.makeWrapper pkgs.passage {
+      packages.pass = self.wrapLib.makeWrapper {
+        pkgs = pkgs;
+        package = pkgs.passage;
         runtimeInputs = [
           pkgs.age-plugin-se
           pkgs.age-plugin-fido2-hmac

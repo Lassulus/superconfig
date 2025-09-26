@@ -12,7 +12,7 @@
         let
           # Mailboxes configuration from mail.nix
           mailboxes = self.packages.${system}.notmuch.mailboxes;
-          notmuchConfig = self.packages.${system}.notmuch.notmuchConfig;
+          notmuchConfig = self.packages.${system}.notmuch.passthru.config.configFile.path;
 
           mailcap = pkgs.writeText "mailcap" ''
             text/html; ${pkgs.elinks}/bin/elinks -dump ; copiousoutput;
@@ -188,7 +188,9 @@
           '';
 
         in
-        self.libWithPkgs.${pkgs.system}.makeWrapper pkgs.neomutt {
+        self.wrapLib.makeWrapper {
+          pkgs = pkgs;
+          package = pkgs.neomutt;
           aliases = [ "mutt" ];
           runtimeInputs = [
             pkgs.elinks
@@ -200,13 +202,10 @@
             pkgs.iputils
           ];
           env = {
-            NOTMUCH_CONFIG = "${pkgs.writeText "notmuch-config" notmuchConfig}";
+            NOTMUCH_CONFIG = notmuchConfig;
           };
           flags = {
             "-F" = "${muttrc}";
-          };
-          passthru = {
-            notmuchConfig = notmuchConfig;
           };
         };
     };

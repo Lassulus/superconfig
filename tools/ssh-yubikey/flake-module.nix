@@ -3,7 +3,9 @@
   perSystem =
     { pkgs, ... }:
     {
-      packages.ssh-yubikey = self.libWithPkgs.${pkgs.system}.makeWrapper pkgs.openssh {
+      packages.ssh-yubikey = self.wrapLib.makeWrapper {
+        pkgs = pkgs;
+        package = pkgs.openssh;
         env = {
           KEYS_DIR = "${self}/keys";
           SSH = "${pkgs.openssh}/bin/ssh";
@@ -16,10 +18,12 @@
           libfido2
           self.packages.${pkgs.system}.age-detect
         ];
-        wrapper = { exePath, envString, ... }: ''
-          ${envString}
-          ${builtins.readFile ./ssh-yubikey}
-        '';
+        wrapper =
+          { envString, ... }:
+          ''
+            ${envString}
+            ${builtins.readFile ./ssh-yubikey}
+          '';
       };
     };
 }

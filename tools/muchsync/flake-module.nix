@@ -4,16 +4,16 @@
     {
       pkgs,
       lib,
-      system,
       ...
     }:
     {
-      packages.muchsync = self.libWithPkgs.${system}.makeWrapper pkgs.muchsync {
+      packages.muchsync = self.wrapLib.makeWrapper {
+        pkgs = pkgs;
+        package = pkgs.muchsync;
         runtimeInputs = [ pkgs.notmuch ] ++ lib.optionals pkgs.stdenv.isLinux [ pkgs.iputils ];
         env = {
           NOTMUCH_CONFIG =
-            pkgs.writeText "notmuch-config"
-              self.packages.${pkgs.system}.mutt.passthru.notmuchConfig;
+              self.packages.${pkgs.system}.notmuch.passthru.config.configFile.path;
         };
         wrapper =
           { exePath, envString, ... }:

@@ -11,7 +11,9 @@
       claudeMd = ./CLAUDE.md;
     in
     {
-      packages.claude = self.libWithPkgs.${system}.makeWrapper (self.lib.halalify pkgs.claude-code) {
+      packages.claude = self.wrapLib.makeWrapper {
+        pkgs = pkgs;
+        package = (self.lib.halalify pkgs.claude-code);
         wrapper =
           { exePath, ... }:
           ''

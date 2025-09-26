@@ -306,7 +306,9 @@
     in
     {
       packages.zsh =
-        (self.libWithPkgs.${pkgs.system}.makeWrapper pkgs.zsh {
+        (self.wrapLib.makeWrapper {
+          pkgs = pkgs;
+          package = pkgs.zsh;
           runtimeInputs = with pkgs; [
             gnugrep
             tmux
