@@ -1,12 +1,14 @@
 { ... }:
 {
   perSystem =
-    { pkgs, ... }:
+    { pkgs, lib, ... }:
     {
       packages.pass-otp = pkgs.writeShellApplication {
         name = "pass-otp";
         runtimeInputs = [
           pkgs.oath-toolkit
+        ]
+        ++ lib.optionals (!pkgs.stdenv.isDarwin) [
           pkgs.xclip
           pkgs.wl-clipboard
         ];
