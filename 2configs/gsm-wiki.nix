@@ -6,7 +6,7 @@
     locations."/".extraConfig = ''
       auth_basic "Restricted Content";
       auth_basic_user_file ${pkgs.writeText "c3gsm-user-pass" ''
-        c3gsm:$apr1$q9OrPI4C$7AY4EIp3J2Xc4eLMbPGE21
+        c3gsm:$2y$05$GS87dXPIqbAVb3bOIFMj7.gX.D7c3AEYPrkeIG5s113F22/0p.LD2
       ''};
       root /srv/http/docs.c3gsm.de;
     '';
