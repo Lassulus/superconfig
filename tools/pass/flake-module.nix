@@ -11,12 +11,13 @@
         pkgs = pkgs;
         package = pkgs.passage;
         runtimeInputs = [
-          pkgs.age-plugin-se
           pkgs.age-plugin-fido2-hmac
           pkgs.age-plugin-yubikey
           self.packages.${system}.pass-otp
           self.packages.${system}.age-detect
-        ];
+        ] ++ (pkgs.lib.optionals pkgs.stdenv.isDarwin [
+          pkgs.age-plugin-se
+        ]);
         aliases = [ "pass" ];
         wrapper =
           {
