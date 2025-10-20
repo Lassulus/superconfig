@@ -9,10 +9,11 @@
           age
           age-plugin-yubikey
           age-plugin-fido2-hmac
-          age-plugin-se
           yubikey-manager
           libfido2
-        ];
+        ] ++ (pkgs.lib.optionals pkgs.stdenv.isDarwin [
+          pkgs.age-plugin-se
+        ]);
         text = builtins.readFile ./age-detect;
       };
     };
