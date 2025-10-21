@@ -32,6 +32,21 @@ tracks = blank.eat(tracks)
 
 last_metadata = ref([])
 def on_metadata(m) =
+  # Extract YouTube ID from filename and add youtube_url to metadata
+  m = if list.assoc.mem("filename", m) then
+    filename = list.assoc("filename", m)
+    # Match filename with pattern: anything followed by 11 chars followed by .ogg
+    matches = string.extract(pattern='.*(.{11})\\.ogg', filename)
+    if list.length(matches) > 0 then
+      youtube_id = list.nth(matches, 0)
+      list.append(m, [("youtube_url", "https://youtu.be/#{youtube_id}")])
+    else
+      m
+    end
+  else
+    m
+  end
+
   last_metadata := m
   print("changing tracks")
   out = process.read(env["HOOK_TRACK_CHANGE"], env = m, timeout = 5.0)
