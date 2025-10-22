@@ -57,35 +57,13 @@ let
     echo "$file": "$link"
   '';
 
-  set_irc_topic = pkgs.writeDash "set_irc_topic" ''
-    ${pkgs.curl}/bin/curl -fsS --unix-socket /home/radio/reaktor.sock http://z/ \
-      -H content-type:application/json \
-      -d "$(${pkgs.jq}/bin/jq -n \
-        --arg text "$1" '{
-          command:"TOPIC",
-          params:["#the_playlist",$text]
-        }'
-      )"
-  '';
-
-  write_to_irc = pkgs.writeDash "write_to_irc" ''
-    ${pkgs.curl}/bin/curl -fsSv --unix-socket /home/radio/reaktor.sock http://z/ \
-      -H content-type:application/json \
-      -d "$(${pkgs.jq}/bin/jq -n \
-        --arg text "$1" '{
-          command:"PRIVMSG",
-          params:["#the_playlist",$text]
-        }'
-      )"
-  '';
-
 in
 {
   imports = [
     ./news.nix
     ./weather.nix
     self.inputs.stockholm.nixosModules.acl
-    self.inputs.stockholm.nixosModules.reaktor2
+    # self.inputs.stockholm.nixosModules.reaktor2
   ];
 
   users.users = {
@@ -145,7 +123,6 @@ in
           ${pkgs.jq}/bin/jq '[.icestats.source[].listeners] | add' || echo 0)
         echo "$(${pkgs.coreutils}/bin/date -Is)" "$filename" | ${pkgs.coreutils}/bin/tee -a "$HISTORY_FILE"
         echo "$(${pkgs.coreutils}/bin/tail -$LIMIT "$HISTORY_FILE")" > "$HISTORY_FILE"
-        ${set_irc_topic} "playing: $filename listeners: $listeners stream: https://radio.lassul.us/radio.ogg"
       '';
       MUSIC = "${music_dir}/the_playlist";
       ICECAST_HOST = "localhost";
@@ -221,64 +198,6 @@ in
     };
   };
 
-  # allow reaktor2 to modify files
-  systemd.services."reaktor2-the_playlist".serviceConfig.DynamicUser = lib.mkForce false;
-  systemd.services."reaktor2-the_playlist".serviceConfig.Group = lib.mkForce "radio";
-
-  krebs.reaktor2.the_playlist = {
-    hostname = "irc.hackint.org";
-    port = "6697";
-    useTLS = true;
-    nick = "the_playlist";
-    username = "radio";
-    API.listen = "unix:/home/radio/reaktor.sock";
-    plugins = [
-      {
-        plugin = "register";
-        config = {
-          channels = [
-            "#the_playlist"
-            "#krebs"
-          ];
-        };
-      }
-      {
-        plugin = "system";
-        config = {
-          workdir = config.krebs.reaktor2.the_playlist.stateDir;
-          hooks.PRIVMSG = [
-            {
-              activate = "match";
-              pattern = "^(?:.*\\s)?\\s*the_playlist:\\s*([0-9A-Za-z._][0-9A-Za-z._-]*)(?:\\s+(.*\\S))?\\s*$";
-              command = 1;
-              arguments = [ 2 ];
-              commands = {
-                skip.filename = "${skip_track}/bin/skip_track";
-                next.filename = "${skip_track}/bin/skip_track";
-                bad.filename = "${skip_track}/bin/skip_track";
-
-                good.filename = "${good_track}/bin/good_track";
-                nice.filename = "${good_track}/bin/good_track";
-                like.filename = "${good_track}/bin/good_track";
-
-                current.filename = "${print_current}/bin/print_current";
-                wish.filename = pkgs.writeDash "wish" ''
-                  echo "youtube-dl:$1" | ${pkgs.curl}/bin/curl -fSs http://localhost:8002/wish -d @- > /dev/null
-                '';
-                wishlist.filename = pkgs.writeDash "wishlist" ''
-                  ${pkgs.curl}/bin/curl -fSs http://localhost:8002/wish | ${pkgs.jq}/bin/jq -r '.[]'
-                '';
-                suggest.filename = pkgs.writeDash "suggest" ''
-                  echo "$@" >> playlist_suggest
-                '';
-              };
-            }
-          ];
-        };
-      }
-    ];
-  };
-
   krebs.htgen.radio = {
     port = 8001;
     user = {
@@ -291,7 +210,6 @@ in
           printf 'Connection: close\r\n'
           printf '\r\n'
           msg=$(${skip_track}/bin/skip_track)
-          ${write_to_irc} "$msg"
           echo "$msg"
           exit
         ;;
@@ -300,7 +218,6 @@ in
           printf 'Connection: close\r\n'
           printf '\r\n'
           msg=$(${good_track}/bin/good_track)
-          ${write_to_irc} "$msg"
           echo "$msg"
           exit
         ;;
