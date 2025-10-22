@@ -41,7 +41,7 @@ def on_metadata(m) =
       youtube_id = list.nth(matches, 0)
       list.append(m, [("youtube_url", "https://youtu.be/#{youtube_id}")])
     else
-      m
+      list.append(m, [("youtube_url", "failed")])
     end
   else
     m
