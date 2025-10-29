@@ -8,8 +8,6 @@
     # nixpkgs.url = "git+file:/home/lass/src/nixpkgs";
     # nixpkgs.url = "git+file:/Users/lassulus/src/nixpkgs";
 
-    flake-parts.url = "github:hercules-ci/flake-parts";
-
     nix-index-database.url = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -20,7 +18,6 @@
     # clan-core.url = "path:/Users/lassulus/src/clan/clan-core";
     # clan-core.url = "git+file:/home/lass/src/clan/clan-core";
     clan-core.inputs.nixpkgs.follows = "nixpkgs";
-    clan-core.inputs.flake-parts.follows = "flake-parts";
     clan-core.inputs.disko.follows = "disko";
 
     stockholm.url = "git+https://github.com/krebs/stockholm?submodules=1";
@@ -135,7 +132,7 @@
             );
       };
     in
-    flake-parts.lib.mkFlake { inherit inputs; } {
+    clan-core.inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [
         "x86_64-linux"
         "aarch64-linux"

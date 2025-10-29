@@ -6,9 +6,7 @@
         "disko": [
           "disko"
         ],
-        "flake-parts": [
-          "flake-parts"
-        ],
+        "flake-parts": "flake-parts",
         "nix-darwin": "nix-darwin",
         "nix-select": "nix-select",
         "nixos-facter-modules": "nixos-facter-modules",
@@ -82,7 +80,10 @@
     },
     "flake-parts": {
       "inputs": {
-        "nixpkgs-lib": "nixpkgs-lib"
+        "nixpkgs-lib": [
+          "clan-core",
+          "nixpkgs"
+        ]
       },
       "locked": {
         "lastModified": 1760948891,
@@ -99,6 +100,23 @@
       }
     },
     "flake-parts_2": {
+      "inputs": {
+        "nixpkgs-lib": "nixpkgs-lib"
+      },
+      "locked": {
+        "lastModified": 1760948891,
+        "narHash": "sha256-TmWcdiUUaWk8J4lpjzu4gCGxWY6/Ok7mOK4fIFfBuU4=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "864599284fc7c0ba6357ed89ed5e2cd5040f0c04",
+        "type": "github"
+      },
+      "original": {
+        "id": "flake-parts",
+        "type": "indirect"
+      }
+    },
+    "flake-parts_3": {
       "inputs": {
         "nixpkgs-lib": [
           "le_menu",
@@ -119,7 +137,7 @@
         "type": "github"
       }
     },
-    "flake-parts_3": {
+    "flake-parts_4": {
       "inputs": {
         "nixpkgs-lib": [
           "nether",
@@ -140,7 +158,7 @@
         "type": "github"
       }
     },
-    "flake-parts_4": {
+    "flake-parts_5": {
       "inputs": {
         "nixpkgs-lib": [
           "nixvim",
@@ -209,7 +227,7 @@
     },
     "le_menu": {
       "inputs": {
-        "flake-parts": "flake-parts_2",
+        "flake-parts": "flake-parts_3",
         "nixpkgs": [
           "nixpkgs"
         ],
@@ -235,7 +253,7 @@
           "clan-core"
         ],
         "data-mesher": [],
-        "flake-parts": "flake-parts_3",
+        "flake-parts": "flake-parts_4",
         "nixpkgs": [
           "nixpkgs"
         ],
@@ -481,7 +499,7 @@
     },
     "nixvim": {
       "inputs": {
-        "flake-parts": "flake-parts_4",
+        "flake-parts": "flake-parts_5",
         "nixpkgs": [
           "nixpkgs"
         ],
@@ -529,7 +547,7 @@
       "inputs": {
         "clan-core": "clan-core",
         "disko": "disko",
-        "flake-parts": "flake-parts",
+        "flake-parts": "flake-parts_2",
         "le_menu": "le_menu",
         "nether": "nether",
         "nix-darwin": "nix-darwin_2",
