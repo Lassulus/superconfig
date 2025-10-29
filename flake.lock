@@ -20,11 +20,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1761567239,
-        "narHash": "sha256-JCdq4VBizaUW8mUQTcPEbrko3ORlJH/xtBjG14kSkyA=",
+        "lastModified": 1761750374,
+        "narHash": "sha256-qggETlEp/W88cHgvyw/6/Z7LiiKM618r6PHnomJlzmw=",
         "ref": "refs/heads/main",
-        "rev": "9e9208e699d69929eae26c49ce556e7d4a4b8bae",
-        "revCount": 10892,
+        "rev": "0b1a330cc2615edb01109a31ce88a4e62e585548",
+        "revCount": 10922,
         "type": "git",
         "url": "https://git.clan.lol/clan/clan-core"
       },
@@ -435,11 +435,11 @@
     },
     "nixos-hardware": {
       "locked": {
-        "lastModified": 1760958188,
-        "narHash": "sha256-2m1S4jl+GEDtlt2QqeHil8Ny456dcGSKJAM7q3j/BFU=",
+        "lastModified": 1761759700,
+        "narHash": "sha256-zuiwvKAPwtMmwf44tb7Q7Y5d7JkBeuaF89PISUnkWA8=",
         "owner": "nixos",
         "repo": "nixos-hardware",
-        "rev": "d6645c340ef7d821602fd2cd199e8d1eed10afbc",
+        "rev": "2379bc40992ec29feb1933bb4acd224fa055f3f8",
         "type": "github"
       },
       "original": {
@@ -489,11 +489,11 @@
         "systems": "systems_3"
       },
       "locked": {
-        "lastModified": 1761534198,
-        "narHash": "sha256-yZq2tC5GYqfDBYK97Yx+950ZbMJNI2j0AbPE/wz+FkM=",
+        "lastModified": 1761744315,
+        "narHash": "sha256-OknzyEoI+VEYgk/FWMyx3tvjb/MPPyqS+G/aemDz51w=",
         "owner": "nix-community",
         "repo": "nixvim",
-        "rev": "5da380555961da4f06fd88cccea218db3558def4",
+        "rev": "6233fc6b2c3f203d8a5970f4a2c1df5777902717",
         "type": "github"
       },
       "original": {
@@ -512,11 +512,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1760652422,
-        "narHash": "sha256-C88Pgz38QIl9JxQceexqL2G7sw9vodHWx1Uaq+NRJrw=",
+        "lastModified": 1761730856,
+        "narHash": "sha256-t1i5p/vSWwueZSC0Z2BImxx3BjoUDNKyC2mk24krcMY=",
         "owner": "NuschtOS",
         "repo": "search",
-        "rev": "3ebeebe8b6a49dfb11f771f761e0310f7c48d726",
+        "rev": "e29de6db0cb3182e9aee75a3b1fd1919d995d85b",
         "type": "github"
       },
       "original": {
@@ -594,11 +594,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1761231910,
-        "narHash": "sha256-QCQsA78RwvWLlwbFmQHKK1nmwCdlbSpIMJq6YELULbA=",
+        "lastModified": 1761732195,
+        "narHash": "sha256-XO5F/0ZWxN0SevaByzxvnLzcxUe6G9s1VaRWjAWvVnA=",
         "ref": "refs/heads/master",
-        "rev": "ffeeb1ab1cf41ab5d080c3e1b19600716d90eb18",
-        "revCount": 12117,
+        "rev": "e9697da7b95dcfc1d398dd6c26bf92cb41bcc8fc",
+        "revCount": 12118,
         "submodules": true,
         "type": "git",
         "url": "https://github.com/krebs/stockholm"
