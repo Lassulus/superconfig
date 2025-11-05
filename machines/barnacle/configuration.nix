@@ -171,4 +171,8 @@
   users.users.root.shell = pkgs.zsh;
   users.users.root.uid = 0;
   users.knownUsers = [ "root" ];
+
+  system.activationScripts.postActivation.text = ''
+    install ${./US_INTL.keylayout} /Library/Keyboard\ Layouts/US_INTL.keylayout
+  '';
 }
