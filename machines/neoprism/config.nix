@@ -10,7 +10,6 @@
     ../../2configs/monitoring/telegraf.nix
     ../../2configs/pair-programming.nix
     ../../2configs/nginx.nix
-    ../../2configs/shadowsocks.nix
 
     ../../2configs/services/matrix
     ../../2configs/services/matrix/proxy.nix
@@ -34,7 +33,6 @@
     ../../2configs/services/radio/proxy.nix
     ../../2configs/services/flix/proxy.nix
     ../../2configs/services/coms/jitsi.nix
-    ../../2configs/nextcloud.nix
 
     # dns
     ../../2configs/dns/knot.nix
