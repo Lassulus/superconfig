@@ -11,8 +11,7 @@ detect_age_keys() {
 
     # Check for Secure Enclave on macOS (highest priority)
     if [[ "$(uname)" == "Darwin" ]] && command -v age-plugin-se >/dev/null 2>&1; then
-        echo "AGE-PLUGIN-SE-15FM0MYMDXM39K8EKG0TNG" > "$temp_identities"
-        echo "IDENTITY_FILE=$temp_identities"
+        rm -f "$temp_identities"
         echo "DETECTED_KEY=se"
         echo "KEY_TYPE=se"
         return
