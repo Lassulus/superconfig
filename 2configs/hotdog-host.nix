@@ -6,7 +6,7 @@
       export PATH=$PATH:${pkgs.git}/bin
       ln -sfrT /var/lib/var_src /var/src
       until ${pkgs.dig.host}/bin/host github.com; do sleep 1; done
-      ${pkgs.nixos-rebuild}/bin/nixos-rebuild --refresh --flake 'git+https://cgit.lassul.us/stockholm#hotdog' switch --no-write-lock-file
+      ${pkgs.nixos-rebuild}/bin/nixos-rebuild --refresh --flake 'github:krebs/stockholm#hotdog' switch --no-write-lock-file
     '';
   };
   containers.hotdog.bindMounts."/var/lib" = {
@@ -15,7 +15,7 @@
   };
   clan.core.vars.generators.hotdog-container = {
     files."hotdog.sync.key" = { };
-    files."hotdog.sync.pub" = { };
+    files."hotdog.sync.pub".secret = false;
     migrateFact = "hotdog-container";
     runtimeInputs = with pkgs; [
       coreutils
