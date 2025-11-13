@@ -48,6 +48,9 @@
 
     # autoupdates
     ../../2configs/autoupdate.nix
+
+    # vaultwarden
+    ../../2configs/vaultwarden.nix
   ];
 
   krebs.build.host = config.krebs.hosts.neoprism;
