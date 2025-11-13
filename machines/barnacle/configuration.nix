@@ -34,7 +34,6 @@
     pkgs.lazygit
     pkgs.sshuttle
     pkgs.git
-    pkgs.element-desktop
     pkgs.iterm2
     (self.lib.halalify pkgs.firefox-bin-unwrapped)
     pkgs.ripgrep
@@ -44,6 +43,7 @@
     pkgs.age-plugin-se
     pkgs.gh
     pkgs.tea
+    pkgs.rbw
   ];
 
   environment.variables = {
