@@ -4,6 +4,21 @@ set -euo pipefail
 # Default recording duration in seconds
 DURATION=${1:-5}
 
+# Model cache directory
+MODEL_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/whisper-models"
+mkdir -p "$MODEL_DIR"
+
+# Default model
+MODEL_NAME="${WHISPER_MODEL:-base.en}"
+MODEL_FILE="$MODEL_DIR/ggml-$MODEL_NAME.bin"
+
+# Download model if not present
+if [ ! -f "$MODEL_FILE" ]; then
+    echo "Downloading $MODEL_NAME model (first run only)..." >&2
+    MODEL_URL="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-$MODEL_NAME.bin"
+    curl -L -o "$MODEL_FILE.tmp" "$MODEL_URL" && mv "$MODEL_FILE.tmp" "$MODEL_FILE"
+fi
+
 # Temporary file for audio recording
 TEMP_AUDIO=$(mktemp /tmp/mic-to-text-XXXXXX.wav)
 trap 'rm -f "$TEMP_AUDIO"' EXIT
@@ -24,5 +39,4 @@ fi
 echo "Transcribing locally..." >&2
 
 # Transcribe using whisper.cpp (runs locally, no API calls)
-# Uses the base model by default, you can override with WHISPER_MODEL env var
-whisper-cpp -m "${WHISPER_MODEL:-base.en}" -f "$TEMP_AUDIO" --no-timestamps --output-txt
+whisper-cli -m "$MODEL_FILE" -f "$TEMP_AUDIO" -np
