@@ -36,11 +36,8 @@ get_bic_from_iban() {
     iban="${iban// /}"
     iban="${iban^^}"
 
-    # Extract country code (first 2 characters)
-    local country="${iban:0:2}"
-
     # For now, we'll use NOTPROVIDED as fallback
-    # A real implementation would query a BIC database
+    # A real implementation would query a BIC database based on country code (${iban:0:2})
     echo "NOTPROVIDED"
 }
 
@@ -161,7 +158,7 @@ EPC_DATA+="${IBAN}"$'\n'                # IBAN
 if [ -n "$AMOUNT" ]; then
     EPC_DATA+="EUR${AMOUNT}"$'\n'       # Amount
 else
-    EPC_DATA+=$'\n'                     # Empty amount
+    EPC_DATA+="EUR0"$'\n'               # Amount (0 when not specified)
 fi
 
 EPC_DATA+=$'\n'                         # Purpose (empty)
