@@ -24,22 +24,22 @@
     hostPath = "/var/ubik";
     isReadOnly = false;
   };
-  services.nginx.virtualHosts."c.apanowicz.de" = {
-    enableACME = true;
-    acmeFallbackHost = "ubik.r";
-    forceSSL = true;
-    locations."/" = {
-      recommendedProxySettings = true;
-      proxyWebsockets = true;
-      proxyPass = "https://ubik.r";
-      extraConfig = ''
-        client_max_body_size 9001M;
-        # fix abort after 1GB download
-        # https://trac.nginx.org/nginx/ticket/1472
-        proxy_max_temp_file_size 0;
-      '';
-    };
-  };
+  # services.nginx.virtualHosts."c.apanowicz.de" = {
+  #   enableACME = true;
+  #   acmeFallbackHost = "ubik.r";
+  #   forceSSL = true;
+  #   locations."/" = {
+  #     recommendedProxySettings = true;
+  #     proxyWebsockets = true;
+  #     proxyPass = "https://ubik.r";
+  #     extraConfig = ''
+  #       client_max_body_size 9001M;
+  #       # fix abort after 1GB download
+  #       # https://trac.nginx.org/nginx/ticket/1472
+  #       proxy_max_temp_file_size 0;
+  #     '';
+  #   };
+  # };
   # services.nginx.virtualHosts."mail.ubikmedia.eu" = {
   #   enableACME = true;
   #   forceSSL = true;
