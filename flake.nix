@@ -61,7 +61,6 @@
   outputs =
     inputs@{
       self,
-      flake-parts,
       nixpkgs,
       clan-core,
       ...
