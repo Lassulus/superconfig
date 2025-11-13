@@ -188,7 +188,10 @@ in
           zonefile-sync = "-1";
           # Load zone changes from journal instead of rewriting the zone file
           # Required when DNSSEC signing is enabled with read-only zone files
-          zonefile-load = "difference";
+          # Use difference-no-serial to auto-increment serial based on serial-policy
+          zonefile-load = "difference-no-serial";
+          serial-policy = "dateserial";
+          journal-content = "all";
         }
       ];
     };
