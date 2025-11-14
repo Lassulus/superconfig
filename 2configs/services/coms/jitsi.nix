@@ -2,7 +2,7 @@
 {
 
   nixpkgs.config.permittedInsecurePackages = [
-    "jitsi-meet-1.0.8043"
+    "jitsi-meet-1.0.8792"
   ];
   services.jitsi-meet = {
     enable = true;
