@@ -75,7 +75,7 @@
     swaylock-effects # lockscreen
     pavucontrol
     swayidle
-    rofi-wayland
+    rofi
     rofi-rbw
     eog
     libnotify
