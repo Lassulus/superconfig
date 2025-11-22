@@ -42,7 +42,6 @@
     ./pinned-registry.nix
     ./zerotier.nix
     ./nether.nix
-    ./spora.nix
     ./nix.nix
 
     # Import stockholm modules
