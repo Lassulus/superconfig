@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ lib, pkgs, ... }:
 {
   nix.settings.connect-timeout = 5;
 
@@ -9,6 +9,9 @@
     "impure-derivations"
     "auto-allocate-uids"
   ];
+
+  # use latest nix to hunt all the bugs
+  nix.package = pkgs.nixVersions.latest;
 
   nix.settings.flake-registry = "";
 
