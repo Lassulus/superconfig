@@ -1,13 +1,25 @@
 {
-  self,
+  lib,
   config,
   pkgs,
   ...
 }:
 {
-  imports = [
-    (self.inputs.stockholm + "/krebs/2configs/hw/x220.nix")
+  # Hardware configuration from krebs/stockholm x220.nix, with updated package names
+  networking.wireless.enable = lib.mkDefault true;
+
+  hardware.enableRedistributableFirmware = true;
+
+  hardware.cpu.intel.updateMicrocode = true;
+
+  hardware.graphics.enable = true;
+
+  hardware.graphics.extraPackages = [
+    pkgs.intel-vaapi-driver
+    pkgs.libva-vdpau-driver
   ];
+
+  services.xserver.videoDriver = "intel";
 
   boot = {
     initrd.luks.devices.luksroot.device = "/dev/sda3";
@@ -22,9 +34,12 @@
       config.boot.kernelPackages.acpi_call
     ];
     kernelModules = [
+      "kvm-intel"
       "acpi_call"
       "tp_smapi"
+      "tpm-rng"
     ];
+    kernelParams = [ "acpi_backlight=none" ];
   };
 
   environment.systemPackages = [

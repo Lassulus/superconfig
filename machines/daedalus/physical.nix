@@ -1,8 +1,7 @@
-{ self, config, ... }:
+{ config, ... }:
 {
   imports = [
     ./config.nix
-    (self.inputs.stockholm + "/krebs/2configs/hw/x220.nix")
     ../../2configs/boot/coreboot.nix
   ];
 

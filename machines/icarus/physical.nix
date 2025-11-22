@@ -1,5 +1,4 @@
 {
-  self,
   modulesPath,
   lib,
   ...
@@ -8,7 +7,6 @@
   imports = [
     ./config.nix
     (modulesPath + "/installer/scan/not-detected.nix")
-    (self.inputs.stockholm + "/krebs/2configs/hw/x220.nix")
   ];
 
   boot.loader.grub.enable = true;
