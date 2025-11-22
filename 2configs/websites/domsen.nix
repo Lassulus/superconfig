@@ -137,7 +137,7 @@ in
   services.nextcloud = {
     enable = true;
     hostName = "o.xanf.org";
-    package = pkgs.nextcloud30;
+    package = pkgs.nextcloud31;
     settings.overwriteProtocol = "https";
     config.dbtype = "sqlite";
     config.adminpassFile = "/run/nextcloud.pw";

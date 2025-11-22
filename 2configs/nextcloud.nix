@@ -3,7 +3,7 @@
   services.nextcloud = {
     enable = true;
     hostName = "c.lassul.us";
-    package = pkgs.nextcloud30;
+    package = pkgs.nextcloud31;
     database.createLocally = true;
     config.dbtype = "pgsql";
     config.adminpassFile = "/var/lib/nextcloud/admin.pass";
