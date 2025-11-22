@@ -36,22 +36,26 @@
           '';
 
           msmtp = pkgs.writeShellScriptBin "msmtp" ''
-            # Check if prism.r is reachable, fallback to Tor if not
-            if ping -W2 -c1 prism.r >/dev/null 2>&1; then
+            # Check if using c-base account (either explicit -a c-base or via From: header)
+            using_cbase=0
+            for arg in "$@"; do
+              if [[ "$arg" == "c-base" ]] || [[ "$arg" =~ @c-base\.org ]]; then
+                using_cbase=1
+                break
+              fi
+            done
+
+            # For c-base account, always send directly (no Tor needed)
+            if [ "$using_cbase" -eq 1 ]; then
+              ${pkgs.coreutils}/bin/tee >(${pkgs.notmuch}/bin/notmuch insert +sent) | \
+                ${pkgs.msmtp}/bin/msmtp -C ${msmtprc} "$@"
+            # For prism account, check if prism.r is reachable
+            elif ping -W2 -c1 prism.r >/dev/null 2>&1; then
               ${pkgs.coreutils}/bin/tee >(${pkgs.notmuch}/bin/notmuch insert +sent) | \
                 ${pkgs.msmtp}/bin/msmtp -C ${msmtprc} "$@"
             else
-              # Build dependencies lazily for Tor fallback
-              echo "Building tornade and clan-cli for Tor fallback..." >&2
-              tornade_path=$(nix build --no-link --print-out-paths "${self}#tornade")
-              clan_path=$(nix build --no-link --print-out-paths "${self}#clan-cli")
-              
-              # Get tor hostname using clan CLI
-              tor_hostname=$(CLAN_DIR="${self}" "$clan_path/bin/clan" vars get prism tor-ssh/tor-hostname)
-              
-              # Use tornade to send via Tor
-              ${pkgs.coreutils}/bin/tee >(${pkgs.notmuch}/bin/notmuch insert +sent) | \
-                "$tornade_path/bin/tornade" ssh -T lass@"$tor_hostname" "cat | msmtp -C /etc/msmtprc $*"
+              echo "Error: prism.r is not reachable" >&2
+              exit 1
             fi
           '';
 

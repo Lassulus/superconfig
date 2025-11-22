@@ -1,9 +1,3 @@
-{ config, pkgs, ... }:
-
-let
-  mainUser = config.users.extraUsers.mainUser;
-
-in
 {
   users.extraUsers = {
     games = {
@@ -19,20 +13,6 @@ in
       ];
       createHome = true;
       useDefaultShell = true;
-      packages = with pkgs; [
-        # minecraft
-        # ftb
-        # steam-run
-        # scummvm
-        # dolphinEmu
-        # doom1
-        # doom2
-        # protontricks
-        # vdoom1
-        # vdoom2
-        # vdoomserver
-        retroarchBare
-      ];
       isNormalUser = true;
     };
   };
