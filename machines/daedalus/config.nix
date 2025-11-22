@@ -111,9 +111,11 @@
     emulateWheel = true;
   };
 
-  services.logind.extraConfig = ''
-    HandleLidSwitch=ignore
-  '';
+  services.logind.settings.Login.HandleLidSwitch = "ignore";
+
+  nixpkgs.config.permittedInsecurePackages = [
+    "python3.13-ecdsa-0.19.1"
+  ];
 
   krebs.build.host = config.krebs.hosts.daedalus;
 }
