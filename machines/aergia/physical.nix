@@ -86,9 +86,6 @@
   hardware.cpu.amd.updateMicrocode = true;
 
   hardware.graphics.enable = true;
-  hardware.graphics.extraPackages = [
-    pkgs.amdvlk
-  ];
 
   # suspend to disk
   swapDevices = [
