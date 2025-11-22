@@ -8,6 +8,7 @@
   users.groups.download.members = [ "transmission" ];
   services.transmission = {
     enable = true;
+    package = pkgs.transmission_4;
     home = "/var/state/transmission";
     group = "download";
     downloadDirPermissions = "775";
