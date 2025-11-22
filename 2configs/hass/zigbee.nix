@@ -11,7 +11,7 @@
   services.zigbee2mqtt = {
     enable = true;
     settings = {
-      homeassistant = true;
+      homeassistant.enabled = true;
       frontend.port = 1337;
       experimental.new_api = true;
       permit_join = false;
