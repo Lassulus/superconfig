@@ -1,4 +1,4 @@
-{ pkgs, modulesPath, ... }:
+{ modulesPath, ... }:
 {
   imports = [
     ./config.nix
@@ -21,9 +21,6 @@
   ];
 
   boot.initrd.kernelModules = [ "amdgpu" ];
-
-  hardware.opengl.extraPackages = [ pkgs.amdvlk ];
-  hardware.opengl.extraPackages32 = [ pkgs.driversi686Linux.amdvlk ];
 
   boot.initrd.availableKernelModules = [
     "nvme"
