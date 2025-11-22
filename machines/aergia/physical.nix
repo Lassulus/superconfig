@@ -95,9 +95,6 @@
   ];
   boot.resumeDevice = "/dev/mapper/aergia1";
   services.logind.lidSwitch = "suspend-then-hibernate";
-  services.logind.extraConfig = ''
-    HandlePowerKey=hibernate
-  '';
   # systemd.sleep.extraConfig = ''
   #   HibernateDelaySec=1800
   # '';
