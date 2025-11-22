@@ -32,7 +32,7 @@
           priority = lib.mkDefault 10;
           # TODO add user space network support to clan-cli
           technology = "tor";
-          peers = lib.mapAttrs (name: machine: {
+          peers = lib.mapAttrs (name: _machine: {
             host.var = {
               machine = name;
               generator = "tor-ssh";

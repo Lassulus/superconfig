@@ -15,7 +15,8 @@
           pkgs.age-plugin-yubikey
           self.packages.${system}.pass-otp
           self.packages.${system}.age-detect
-        ] ++ (pkgs.lib.optionals pkgs.stdenv.isDarwin [
+        ]
+        ++ (pkgs.lib.optionals pkgs.stdenv.isDarwin [
           pkgs.age-plugin-se
         ]);
         aliases = [ "pass" ];

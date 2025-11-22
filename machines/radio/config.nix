@@ -21,19 +21,20 @@
 
   krebs.sync-containers3.inContainer = {
     enable = true;
-    pubkey = builtins.readFile ./facts/radio.sync.pub;
+    pubkey = config.clan.core.vars.generators.radio-sync.files."radio.sync.pub".value;
   };
 
-  clanCore.facts.services.radio-container = {
-    secret."radio.sync.key" = { };
-    public."radio.sync.pub" = { };
-    generator.path = with pkgs; [
+  clan.core.vars.generators.radio-sync = {
+    files."radio.sync.key" = { };
+    files."radio.sync.pub".secret = false;
+    migrateFact = "radio-container";
+    runtimeInputs = with pkgs; [
       coreutils
       openssh
     ];
-    generator.script = ''
-      ssh-keygen -t ed25519 -N "" -f "$secrets"/radio.sync.key
-      mv "$secrets"/radio.sync.key "$facts"/radio.sync.pub
+    script = ''
+      ssh-keygen -t ed25519 -N "" -f "$out"/radio.sync.key
+      mv "$out"/radio.sync.key.pub "$out"/radio.sync.pub
     '';
   };
 }
