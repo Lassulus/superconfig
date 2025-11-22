@@ -239,77 +239,32 @@
       };
     };
 
+  networking.firewall.allowedTCPPorts = [
+    80 # nginx
+    443 # nginx
+    9091 # transmission web
+    8096 # jellyfin
+    8920 # jellyfin
+    51413 # transmission traffic
+    445 # smbd
+    111 # smbd
+    2049 # smbd
+    4000 # smbd
+    4001 # smbd
+    4002 # smbd
+  ];
+  networking.firewall.allowedUDPPorts = [
+    51413 # transmission traffic
+    1900 # jellyfin
+    7359 # jellyfin
+    111 # smbd
+    2049 # smbd
+    4000 # smbd
+    4001 # smbd
+    4002 # smbd
+  ];
   krebs.iptables = {
     enable = true;
-    tables.filter.INPUT.rules = [
-      {
-        predicate = "-p tcp --dport 80";
-        target = "ACCEPT";
-      } # nginx web dir
-      {
-        predicate = "-p tcp --dport 443";
-        target = "ACCEPT";
-      } # nginx web dir
-      {
-        predicate = "-p tcp --dport 9091";
-        target = "ACCEPT";
-      } # transmission-web
-      {
-        predicate = "-p tcp --dport 51413";
-        target = "ACCEPT";
-      } # transmission-traffic
-      {
-        predicate = "-p udp --dport 51413";
-        target = "ACCEPT";
-      } # transmission-traffic
-      {
-        predicate = "-p tcp --dport 8096";
-        target = "ACCEPT";
-      } # jellyfin
-      {
-        predicate = "-p tcp --dport 8920";
-        target = "ACCEPT";
-      } # jellyfin
-      {
-        predicate = "-p udp --dport 1900";
-        target = "ACCEPT";
-      } # jellyfin
-      {
-        predicate = "-p udp --dport 7359";
-        target = "ACCEPT";
-      } # jellyfin
-
-      # smbd
-      {
-        predicate = "-p tcp --dport 445";
-        target = "ACCEPT";
-      }
-      {
-        predicate = "-p tcp --dport 111";
-        target = "ACCEPT";
-      }
-      {
-        predicate = "-p udp --dport 111";
-        target = "ACCEPT";
-      }
-      {
-        predicate = "-p tcp --dport 2049";
-        target = "ACCEPT";
-      }
-      {
-        predicate = "-p udp --dport 2049";
-        target = "ACCEPT";
-      }
-      {
-        predicate = "-p tcp --dport 4000:4002";
-        target = "ACCEPT";
-      }
-      {
-        predicate = "-p udp --dport 4000:4002";
-        target = "ACCEPT";
-      }
-    ];
-
     tables.nat.PREROUTING.rules = [
       # transmission rpc port
       {
@@ -328,7 +283,7 @@
       pkgs.findutils
       pkgs.inotify-tools
     ];
-    startAt = "daily";
+    startAt = "hourly";
     serviceConfig = {
       Type = "oneshot";
       ExecStart = pkgs.writers.writeDash "flix-index" ''

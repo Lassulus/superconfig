@@ -315,45 +315,18 @@
             predicate = "-i lo";
             target = "ACCEPT";
           }
-          {
-            predicate = "-p tcp --dport 22";
-            target = "ACCEPT";
-          }
-        ])
-        (lib.mkOrder 1000 [
-          {
-            predicate = "-p udp --dport 60000:61000";
-            target = "ACCEPT";
-          } # mosh
-          {
-            predicate = "-i retiolum -p udp -m udp --dport 53";
-            target = "ACCEPT";
-          }
-          {
-            predicate = "-i retiolum -p tcp --dport 19999";
-            target = "ACCEPT";
-          }
-        ])
-        (lib.mkAfter [
-          {
-            predicate = "-p tcp -i retiolum";
-            target = "REJECT --reject-with tcp-reset";
-          }
-          {
-            predicate = "-p udp -i retiolum";
-            target = "REJECT --reject-with icmp-port-unreachable";
-            v6 = false;
-          }
-          {
-            predicate = "-i retiolum";
-            target = "REJECT --reject-with icmp-proto-unreachable";
-            v6 = false;
-          }
         ])
       ];
     };
   };
 
+  networking.firewall.allowedTCPPorts = [ 22 ]; # ssh
+  networking.firewall.allowedUDPPortRanges = [
+    {
+      from = 60000;
+      to = 61000;
+    }
+  ]; # mosh
   networking.extraHosts = ''
     10.42.0.1 styx.gg23
   '';
@@ -364,8 +337,4 @@
 
   # disable doc usually
   documentation.nixos.enable = lib.mkDefault false;
-
-  # use latest nix to hunt all the bugs
-  nix.package = pkgs.nixVersions.latest;
-
 }

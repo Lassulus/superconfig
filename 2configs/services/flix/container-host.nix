@@ -16,14 +16,6 @@
     hostPath = "/var/download";
     isReadOnly = false;
   };
-  # krebs.iptables.tables.filter.FORWARD.rules = [
-  #   { predicate = "-d ${config.krebs.hosts.yellow.nets.retiolum.ip4.addr} -p tcp --dport 8000 -m state --state NEW,ESTABLISHED,RELATED"; target = "ACCEPT"; v6 = false; }
-  #   { predicate = "-d ${config.krebs.hosts.yellow.nets.retiolum.ip6.addr} -p tcp --dport 8000 -m state --state NEW,ESTABLISHED,RELATED"; target = "ACCEPT"; v4 = false; }
-  # ];
-  # krebs.iptables.tables.nat.PREROUTING.rules = [
-  #   { predicate = "-p tcp --dport 2"; target = "DNAT --to-destination ${config.krebs.hosts.radio.nets.retiolum.ip4.addr}:8000"; v6 = false; }
-  #   { predicate = "-p tcp --dport 2"; target = "DNAT --to-destination ${config.krebs.hosts.radio.nets.retiolum.ip6.addr}:8000"; v4 = false; }
-  # ];
   networking.firewall.allowedTCPPorts = [
     8096
     8920

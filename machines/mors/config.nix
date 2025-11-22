@@ -30,24 +30,6 @@
     ../../2configs/autotether.nix
     ../../2configs/autoupdate.nix
     {
-      krebs.iptables.tables.filter.INPUT.rules = [
-        #risk of rain
-        {
-          predicate = "-p tcp --dport 11100";
-          target = "ACCEPT";
-        }
-        #quake3
-        {
-          predicate = "-p tcp --dport 27950:27965";
-          target = "ACCEPT";
-        }
-        {
-          predicate = "-p udp --dport 27950:27965";
-          target = "ACCEPT";
-        }
-      ];
-    }
-    {
       services.nginx = {
         enable = true;
         virtualHosts.default = {

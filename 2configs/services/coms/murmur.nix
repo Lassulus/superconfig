@@ -13,26 +13,8 @@
       # rememberchannelduration=10000
     '';
   };
-  krebs.iptables.tables.filter.INPUT.rules = [
-    {
-      predicate = "-p tcp --dport 64738";
-      target = "ACCEPT";
-    }
-    {
-      predicate = "-p udp --dport 64738";
-      target = "ACCEPT";
-    }
-  ];
-
-  # services.botamusique = {
-  #   enable = true;
-  #   settings = {
-  #     server.host = "lassul.us";
-  #     bot.auto_check_updates = false;
-  #     bot.max_track_duration = 360;
-  #     webinterface.enabled = true;
-  #   };
-  # };
+  networking.firewall.allowedTCPPorts = [ 64738 ];
+  networking.firewall.allowedUDPPorts = [ 64738 ];
 
   services.nginx.virtualHosts."lassul.us" = {
     enableACME = true;
@@ -44,10 +26,4 @@
     "nginx"
     "murmur"
   ];
-
-  # services.nginx.virtualHosts."bota.r" = {
-  #   locations."/" = {
-  #     proxyPass = "http://localhost:8181";
-  #   };
-  # };
 }

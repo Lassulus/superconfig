@@ -42,15 +42,4 @@
       root /var/realwallpaper/archive;
     '';
   };
-
-  krebs.iptables = {
-    tables = {
-      filter.INPUT.rules = [
-        {
-          predicate = "-i retiolum -p tcp --dport 80";
-          target = "ACCEPT";
-        }
-      ];
-    };
-  };
 }

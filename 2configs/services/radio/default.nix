@@ -179,24 +179,10 @@ in
     '';
   };
 
-  krebs.iptables = {
-    tables = {
-      filter.INPUT.rules = [
-        {
-          predicate = "-p tcp --dport 8000";
-          target = "ACCEPT";
-        }
-        {
-          predicate = "-i retiolum -p tcp --dport 8001";
-          target = "ACCEPT";
-        }
-        {
-          predicate = "-i retiolum -p tcp --dport 8002";
-          target = "ACCEPT";
-        }
-      ];
-    };
-  };
+  networking.firewall.interfaces.retiolum.allowedTCPPorts = [
+    8001
+    8002
+  ];
 
   krebs.htgen.radio = {
     port = 8001;
@@ -227,7 +213,10 @@ in
 
   security.acme.certs."radio.r".server = config.krebs.ssl.acmeURL;
 
-  networking.firewall.allowedTCPPorts = [ 80 ];
+  networking.firewall.allowedTCPPorts = [
+    80
+    8000
+  ];
   services.nginx = {
     enable = true;
     virtualHosts."radio.r" = {

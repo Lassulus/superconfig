@@ -181,16 +181,6 @@ in
     sslServerCert = "/var/lib/acme/lassul.us/fullchain.pem";
     sslServerKey = "/var/lib/acme/lassul.us/key.pem";
   };
-  krebs.iptables.tables.filter.INPUT.rules = [
-    {
-      predicate = "-p tcp --dport pop3s";
-      target = "ACCEPT";
-    }
-    {
-      predicate = "-p tcp --dport imaps";
-      target = "ACCEPT";
-    }
-  ];
 
   environment.systemPackages = [
     (pkgs.writers.writeDashBin "debug_exim" ''

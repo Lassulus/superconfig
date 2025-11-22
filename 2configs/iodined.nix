@@ -13,11 +13,6 @@ in
     extraConfig = "-c -l ${config.krebs.build.host.nets.internet.ip4.addr}";
   };
 
-  krebs.iptables.tables.filter.INPUT.rules = [
-    {
-      predicate = "-p udp --dport 53";
-      target = "ACCEPT";
-    }
-  ];
+  networking.firewall.allowedUDPPorts = [ 53 ];
 
 }
