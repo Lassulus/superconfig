@@ -96,6 +96,7 @@
     }
     {
       services.openssh.enable = true;
+      services.openssh.settings.PasswordAuthentication = false;
       services.openssh.hostKeys = [
         {
           path = config.clanCore.vars.generators.ssh.files."ssh.id_ed25519".path;
