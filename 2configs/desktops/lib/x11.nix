@@ -55,7 +55,6 @@
 
   users.users.mainUser.extraGroups = [
     "audio"
-    "pipewire"
     "video"
   ];
 

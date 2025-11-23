@@ -14,6 +14,11 @@
     bluetuith
   ];
 
+  users.users.mainUser.extraGroups = [
+    "bluetooth"
+    "pipewire"
+  ];
+
   services.pipewire = {
     enable = true;
     systemWide = true;
