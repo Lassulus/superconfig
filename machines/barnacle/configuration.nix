@@ -159,6 +159,7 @@
     self.keys.ssh.yubi1.public
     self.keys.ssh.yubi2.public
     self.keys.ssh.solo2.public
+    self.keys.ssh.xerxes.public
   ];
   users.users.root.openssh.authorizedKeys.keys = [
     self.keys.ssh.barnacle.public
@@ -166,6 +167,7 @@
     self.keys.ssh.yubi1.public
     self.keys.ssh.yubi2.public
     self.keys.ssh.solo2.public
+    self.keys.ssh.xerxes.public
   ];
 
   users.users.root.shell = pkgs.zsh;
