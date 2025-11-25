@@ -19,5 +19,6 @@
     pkgs.retroarch-free
     pkgs.pavucontrol
     pkgs.claude-code
+    pkgs.ripgrep
   ];
 }
