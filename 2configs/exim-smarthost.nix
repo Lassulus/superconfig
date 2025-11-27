@@ -286,7 +286,6 @@ in
       config.krebs.hosts.coaxmetal
       config.krebs.hosts.green
       config.krebs.hosts.mors
-      config.krebs.hosts.xerxes
     ];
     internet-aliases = map (from: { inherit from to; }) mails ++ [
     ];

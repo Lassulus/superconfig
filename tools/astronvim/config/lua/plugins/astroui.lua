@@ -1,3 +1,0 @@
-return {
-	"AstroNvim/astroui",
-}
