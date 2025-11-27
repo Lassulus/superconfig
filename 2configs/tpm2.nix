@@ -1,13 +1,13 @@
 { pkgs, lib, ... }:
 let
   pinentry-askpass = pkgs.writeShellScriptBin "pinentry-askpass" ''
-    result=$(cat <<EOF | ${pkgs.pinentry-gtk2}/bin/pinentry
-SETDESC $1
-SETPROMPT Passphrase:
-GETPIN
-EOF
-    )
-    echo "$result" | grep '^D ' | cut -d' ' -f2-
+        result=$(cat <<EOF | ${pkgs.pinentry-gtk2}/bin/pinentry
+    SETDESC $1
+    SETPROMPT Passphrase:
+    GETPIN
+    EOF
+        )
+        echo "$result" | grep '^D ' | cut -d' ' -f2-
   '';
 in
 {
