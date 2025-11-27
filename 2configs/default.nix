@@ -10,7 +10,6 @@
   clan.core.facts.secretStore = "password-store";
   clan.core.facts.secretUploadDirectory = lib.mkDefault "/etc/secrets";
   clan.core.vars.settings.secretStore = "password-store";
-  clan.core.vars.password-store.passPackage = self.packages.${pkgs.system}.pass;
   clan.core.networking.targetHost = "root@${config.networking.hostName}";
 
   # Stockholm configuration
