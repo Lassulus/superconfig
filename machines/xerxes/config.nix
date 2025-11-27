@@ -20,5 +20,6 @@
     pkgs.pavucontrol
     pkgs.claude-code
     pkgs.ripgrep
+    self.packages.${pkgs.system}.mpv
   ];
 }
