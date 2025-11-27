@@ -22,4 +22,7 @@
     pkgs.ripgrep
     self.packages.${pkgs.system}.mpv
   ];
+
+  documentation.nixos.enable = true;
+
 }
