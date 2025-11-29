@@ -8,8 +8,6 @@
   networking.wireless.enable = lib.mkForce false;
 
   networking.networkmanager = {
-    ethernet.macAddress = "random";
-    wifi.macAddress = "random";
     enable = true;
     unmanaged = [
       "docker*"
