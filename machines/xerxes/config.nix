@@ -6,12 +6,12 @@
     ../../2configs/pipewire.nix
     ../../2configs/yubikey.nix
     ../../2configs/tpm2.nix
+    ../../2configs/desktops/sway/default.nix
   ];
   system.stateVersion = "25.05";
 
   krebs.build.host = self.inputs.stockholm.kartei.hosts.xerxes;
 
-  programs.sway.enable = true;
   programs.firefox.enable = true;
   environment.systemPackages = [
     pkgs.bitwarden-desktop

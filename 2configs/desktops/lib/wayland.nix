@@ -99,21 +99,10 @@
     # polkit agent
     polkit_gnome
 
-    self.packages.${pkgs.system}.wifi-qr
+    self.packages.${pkgs.system}.menu
 
     # gtk3 themes
     gsettings-desktop-schemas
-    (pkgs.writers.writeDashBin "pass_menu" ''
-      set -efux
-      password=$(
-        (cd $HOME/.password-store; find -type f -name '*.gpg') |
-          sed -e 's/\.gpg$//' |
-          rofi -dmenu -p 'Password: ' |
-          xargs -I{} pass show {} |
-          tr -d '\n'
-      )
-      echo -n "$password" | ${pkgs.wtype}/bin/wtype -d 10 -s 400 -
-    '')
     (pkgs.writers.writeDashBin "screenshot" ''
       ${pkgs.grim}/bin/grim -g "$(${pkgs.slurp}/bin/slurp)" - | ${pkgs.wl-clipboard}/bin/wl-copy
     '')
@@ -128,9 +117,6 @@
   ];
 
   qt.platformTheme = "qt5ct";
-
-  security.pam.services.swaylock = { };
-  security.pam.services.swaylock.fprintAuth = true;
 
   # from nixpkgs/nixos/modules/services/system/systemd-lock-handler.md
   services.systemd-lock-handler.enable = true;

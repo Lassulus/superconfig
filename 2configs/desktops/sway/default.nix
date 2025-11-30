@@ -34,7 +34,7 @@ in
     # Your preferred application launcher
     # Note: pass the final command to swaymsg so that the resulting window can be opened
     # on the original workspace that the command was run on.
-    set $menu ${pkgs.dmenu}/bin/dmenu_path | fzfmenu | xargs swaymsg exec --
+    set $menu ${pkgs.dmenu}/bin/dmenu_path | menu | xargs swaymsg exec --
 
     ### Output configuration
     #
@@ -64,12 +64,9 @@ in
     #
     # Example configuration:
     #
-    #   input "2:14:SynPS/2_Synaptics_TouchPad" {
-    #       dwt enabled
-    #       tap enabled
-    #       natural_scroll enabled
-    #       middle_emulation enabled
-    #   }
+      input "2321:21128:HTIX5288:00_0911:5288_Touchpad" {
+          tap enabled
+      }
     #
     # You can get the names of your inputs by running: swaymsg -t get_inputs
     # Read `man 5 sway-input` for more information about this section.
@@ -198,12 +195,10 @@ in
 
     bindsym $mod+q exec ${pkgs.writers.writeDash "goto_workspace" ''
       set -efux
-      unset TERM # we want fzfmenu to start a new terminal
       CURRENT_OUTPUT=$(swaymsg -r -t get_outputs | jq '.[] | select(.focused == true).name')
-      FZFMENU_FZF_DEFAULT_OPTS="--select-1"
       WS=$(swaymsg -r -t get_workspaces |
         jq -r '.[].name' |
-        fzfmenu -p 'Workspace name: '
+        menu -p 'Workspace name: '
       )
       if [ -n "$WS" ]; then
         swaymsg workspace "$WS"
@@ -213,35 +208,19 @@ in
 
     bindsym $mod+Shift+q exec ${pkgs.writers.writeDash "moveto_workspace" ''
       set -efux
-      unset TERM # we want fzfmenu to start a new terminal
-      FZFMENU_FZF_DEFAULT_OPTS="--select-1"
       WS=$(swaymsg -r -t get_workspaces |
         jq -r '.[].name' |
-        fzfmenu -p 'Workspace name: '
+        menu -p 'Workspace name: '
       )
       if [ -n "$WS" ]; then
         swaymsg move container to workspace "$WS"
       fi
     ''}
 
-    bindsym $mod+x exec ${./starter} floating enable -- ${pkgs.alacritty}/bin/alacritty --config-file /var/theme/config/alacritty.yaml
     bindsym $mod+y exec /run/current-system/sw/bin/switch-theme toggle
 
-    for_window [title="fzfmenu"] floating enable
     bindsym $mod+Tab focus next
     bindsym $mod+Escape workspace back_and_forth
-
-    bindsym $mod+p exec ${pkgs.writers.writeDash "passmenu" ''
-      set -efux
-      unset TERM # we want fzfmenu to start a new terminal
-      (cd $HOME/.password-store; find -type f -name '*.gpg') |
-        sed -e 's/\.gpg$//' |
-        fzfmenu -p 'Password: ' |
-        xargs -I{} pass show {} |
-        tr -d '\n' |
-        ${pkgs.wtype}/bin/wtype -s 1 -
-    ''}
-
 
     # screenlock
     bindsym $mod+F11 exec ${pkgs.swaylock}/bin/swaylock -f -c 000000
@@ -250,8 +229,6 @@ in
     bindsym XF86AudioMute exec ${pkgs.pulseaudio.out}/bin/pactl -- set-sink-mute @DEFAULT_SINK@ toggle
     bindsym XF86AudioRaiseVolume exec ${pkgs.pulseaudio.out}/bin/pactl -- set-sink-volume @DEFAULT_SINK@ +4%
     bindsym XF86AudioLowerVolume exec ${pkgs.pulseaudio.out}/bin/pactl -- set-sink-volume @DEFAULT_SINK@ -4%
-    bindsym XF86MonBrightnessDown exec ${pkgs.acpilight}/bin/xbacklight -time 0 -dec 1
-    bindsym XF86MonBrightnessUp exec ${pkgs.acpilight}/bin/xbacklight -time 0 -inc 1
 
     # background programs
     exec ydotoold
@@ -260,9 +237,11 @@ in
     # theme and env specific stuff
     exec_always ${pkgs.writers.writeDash "dbus-sway-environment" ''
       set -efux
-      dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
-       systemctl --user stop xdg-desktop-portal xdg-desktop-portal-wlr
-       systemctl --user start xdg-desktop-portal xdg-desktop-portal-wlr
+      dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
+      systemctl --user import-environment DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+      systemctl --user start --no-block sway-session.target
+      systemctl --user stop xdg-desktop-portal xdg-desktop-portal-wlr
+      systemctl --user start xdg-desktop-portal xdg-desktop-portal-wlr
     ''}
 
     exec_always ${pkgs.writers.writeDash "gsettings" ''
