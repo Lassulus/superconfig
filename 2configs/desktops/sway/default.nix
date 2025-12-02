@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
 
   term = "/run/current-system/sw/bin/alacritty";
@@ -121,6 +121,22 @@ in
   programs.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
+    extraSessionCommands = ''
+      export SWAYSOCK=/run/user/$(id -u)/sway-ipc.sock
+    '';
+  };
+
+  systemd.user.services.waybar = {
+    description = "Highly customizable Wayland bar for Sway";
+    documentation = [ "man:waybar(5)" ];
+    partOf = [ "sway-session.target" ];
+    wantedBy = [ "sway-session.target" ];
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = "${pkgs.waybar}/bin/waybar -c ${waybarConfig} -s ${waybarStyle}";
+      Restart = "on-failure";
+      RestartSec = 1;
+    };
   };
 
   environment.etc."sway/config".text = ''
@@ -281,11 +297,6 @@ in
     }
     bindsym $mod+r mode "resize"
 
-    #
-    # Status Bar:
-    #
-    exec_always pkill waybar; exec ${pkgs.waybar}/bin/waybar -c ${waybarConfig} -s ${waybarStyle}
-
     default_border pixel 1
     default_floating_border none
     smart_borders on
@@ -338,9 +349,9 @@ in
     # theme and env specific stuff
     exec_always ${pkgs.writers.writeDash "dbus-sway-environment" ''
       set -efux
-      dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
-      systemctl --user import-environment DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
-      systemctl --user start --no-block sway-session.target
+      dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP=sway
+      systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP
+      systemctl --user restart --no-block sway-session.target
       systemctl --user stop xdg-desktop-portal xdg-desktop-portal-wlr
       systemctl --user start xdg-desktop-portal xdg-desktop-portal-wlr
     ''}
