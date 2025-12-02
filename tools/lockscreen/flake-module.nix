@@ -1,6 +1,6 @@
 {
   perSystem =
-    { pkgs, lib, ... }:
+    { pkgs, ... }:
     {
       packages.lockscreen = pkgs.writeShellApplication {
         name = "lockscreen";

@@ -3,108 +3,141 @@ let
 
   term = "/run/current-system/sw/bin/alacritty";
 
-  waybarConfig = pkgs.writeText "waybar-config.json" (builtins.toJSON {
-    height = 30;
-    spacing = 4;
-    modules-left = [ "sway/workspaces" "sway/mode" "sway/scratchpad" ];
-    modules-center = [ "sway/window" ];
-    modules-right = [
-      "idle_inhibitor"
-      "pulseaudio"
-      "network"
-      "cpu"
-      "memory"
-      "temperature"
-      "backlight"
-      "battery"
-      "clock"
-      "tray"
-    ];
+  waybarConfig = pkgs.writeText "waybar-config.json" (
+    builtins.toJSON {
+      height = 30;
+      spacing = 4;
+      modules-left = [
+        "sway/workspaces"
+        "sway/mode"
+        "sway/scratchpad"
+      ];
+      modules-center = [ "sway/window" ];
+      modules-right = [
+        "idle_inhibitor"
+        "pulseaudio"
+        "network"
+        "cpu"
+        "memory"
+        "temperature"
+        "backlight"
+        "battery"
+        "clock"
+        "tray"
+      ];
 
-    "sway/mode".format = "<span style=\"italic\">{}</span>";
+      "sway/mode".format = "<span style=\"italic\">{}</span>";
 
-    "sway/scratchpad" = {
-      format = "{icon} {count}";
-      show-empty = false;
-      format-icons = [ "" "󰏃" ];
-      tooltip = true;
-      tooltip-format = "{app}: {title}";
-    };
-
-    idle_inhibitor = {
-      format = "{icon}";
-      format-icons = {
-        activated = "󰅶";
-        deactivated = "󰾪";
+      "sway/scratchpad" = {
+        format = "{icon} {count}";
+        show-empty = false;
+        format-icons = [
+          ""
+          "󰏃"
+        ];
+        tooltip = true;
+        tooltip-format = "{app}: {title}";
       };
-    };
 
-    tray.spacing = 10;
-
-    clock = {
-      tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
-      format-alt = "{:%Y-%m-%d}";
-    };
-
-    cpu = {
-      format = "{usage}% 󰍛";
-      tooltip = false;
-    };
-
-    memory.format = "{}% 󰘚";
-
-    temperature = {
-      critical-threshold = 80;
-      format = "{temperatureC}°C {icon}";
-      format-icons = [ "󰔏" "󰔏" "󰔏" ];
-    };
-
-    backlight = {
-      format = "{percent}% {icon}";
-      format-icons = [ "󰃞" "󰃟" "󰃠" ];
-    };
-
-    battery = {
-      states = {
-        warning = 30;
-        critical = 15;
+      idle_inhibitor = {
+        format = "{icon}";
+        format-icons = {
+          activated = "󰅶";
+          deactivated = "󰾪";
+        };
       };
-      format = "{capacity}% {icon}";
-      format-full = "{capacity}% {icon}";
-      format-charging = "{capacity}% 󰂄";
-      format-plugged = "{capacity}% 󰚥";
-      format-alt = "{time} {icon}";
-      format-icons = [ "󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
-    };
 
-    network = {
-      format-wifi = "{essid} ({signalStrength}%) 󰖩";
-      format-ethernet = "{ipaddr}/{cidr} 󰈀";
-      tooltip-format = "{ifname} via {gwaddr} 󰛳";
-      format-linked = "{ifname} (No IP) 󰈀";
-      format-disconnected = "Disconnected 󰖪";
-      format-alt = "{ifname}: {ipaddr}/{cidr}";
-    };
+      tray.spacing = 10;
 
-    pulseaudio = {
-      format = "{volume}% {icon} {format_source}";
-      format-bluetooth = "{volume}% {icon}󰂯 {format_source}";
-      format-bluetooth-muted = "󰖁 {icon}󰂯 {format_source}";
-      format-muted = "󰖁 {format_source}";
-      format-source = "{volume}% 󰍬";
-      format-source-muted = "󰍭";
-      format-icons = {
-        headphone = "󰋋";
-        hands-free = "󰋎";
-        headset = "󰋎";
-        phone = "󰏲";
-        portable = "󰏲";
-        car = "󰄋";
-        default = [ "󰕿" "󰖀" "󰕾" ];
+      clock = {
+        tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
+        format-alt = "{:%Y-%m-%d}";
       };
-      on-click = "pavucontrol";
-    };
-  });
+
+      cpu = {
+        format = "{usage}% 󰍛";
+        tooltip = false;
+      };
+
+      memory.format = "{}% 󰘚";
+
+      temperature = {
+        critical-threshold = 80;
+        format = "{temperatureC}°C {icon}";
+        format-icons = [
+          "󰔏"
+          "󰔏"
+          "󰔏"
+        ];
+      };
+
+      backlight = {
+        format = "{percent}% {icon}";
+        format-icons = [
+          "󰃞"
+          "󰃟"
+          "󰃠"
+        ];
+      };
+
+      battery = {
+        states = {
+          warning = 30;
+          critical = 15;
+        };
+        format = "{capacity}% {icon}";
+        format-full = "{capacity}% {icon}";
+        format-charging = "{capacity}% 󰂄";
+        format-plugged = "{capacity}% 󰚥";
+        format-alt = "{time} {icon}";
+        format-icons = [
+          "󰂎"
+          "󰁺"
+          "󰁻"
+          "󰁼"
+          "󰁽"
+          "󰁾"
+          "󰁿"
+          "󰂀"
+          "󰂁"
+          "󰂂"
+          "󰁹"
+        ];
+      };
+
+      network = {
+        format-wifi = "{essid} ({signalStrength}%) 󰖩";
+        format-ethernet = "{ipaddr}/{cidr} 󰈀";
+        tooltip-format = "{ifname} via {gwaddr} 󰛳";
+        format-linked = "{ifname} (No IP) 󰈀";
+        format-disconnected = "Disconnected 󰖪";
+        format-alt = "{ifname}: {ipaddr}/{cidr}";
+      };
+
+      pulseaudio = {
+        format = "{volume}% {icon} {format_source}";
+        format-bluetooth = "{volume}% {icon}󰂯 {format_source}";
+        format-bluetooth-muted = "󰖁 {icon}󰂯 {format_source}";
+        format-muted = "󰖁 {format_source}";
+        format-source = "{volume}% 󰍬";
+        format-source-muted = "󰍭";
+        format-icons = {
+          headphone = "󰋋";
+          hands-free = "󰋎";
+          headset = "󰋎";
+          phone = "󰏲";
+          portable = "󰏲";
+          car = "󰄋";
+          default = [
+            "󰕿"
+            "󰖀"
+            "󰕾"
+          ];
+        };
+        on-click = "pavucontrol";
+      };
+    }
+  );
 
   waybarStyle = pkgs.writeText "waybar-style.css" ''
     @import "${pkgs.waybar}/etc/xdg/waybar/style.css";
