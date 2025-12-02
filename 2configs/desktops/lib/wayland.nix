@@ -47,6 +47,7 @@
 
   security.polkit.enable = true;
   security.pam.services.swaylock = { };
+  security.pam.services.swaylock-plugin = { };
 
   programs.dconf.enable = lib.mkDefault true;
   services.gnome.gnome-keyring.enable = lib.mkDefault true;
@@ -125,6 +126,10 @@
     description = "Screen locker for Wayland";
     documentation = [ "man:swaylock(1)" ];
 
+    # Requires graphical session
+    requisite = [ "graphical-session.target" ];
+    after = [ "graphical-session.target" ];
+
     # If swaylock exits cleanly, unlock the session:
     onSuccess = [ "unlock.target" ];
 
@@ -136,15 +141,14 @@
     wantedBy = [ "lock.target" ];
 
     serviceConfig = {
-      # systemd will consider this service started when swaylock forks...
-      Type = "forking";
-
-      # ... and swaylock will fork only after it has locked the screen.
-      ExecStart = "${lib.getExe pkgs.swaylock} --image /var/lib/wallpaper/wallpaper -f";
-
+      Type = "simple";
       # If swaylock crashes, always restart it immediately:
       Restart = "on-failure";
       RestartSec = 0;
     };
+
+    path = [ pkgs.bash ];
+
+    serviceConfig.ExecStart = lib.getExe self.packages.${pkgs.system}.lockscreen;
   };
 }

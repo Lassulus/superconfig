@@ -320,7 +320,7 @@ in
     bindsym $mod+Escape workspace back_and_forth
 
     # screenlock
-    bindsym $mod+F11 exec ${pkgs.swaylock}/bin/swaylock -f -c 000000
+    bindsym $mod+F11 exec ${lib.getExe' pkgs.systemd "systemctl"} --user start lock.target
 
     # media buttons
     bindsym XF86AudioMute exec ${pkgs.pulseaudio.out}/bin/pactl -- set-sink-mute @DEFAULT_SINK@ toggle
