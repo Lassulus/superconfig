@@ -378,6 +378,11 @@ in
     # background programs
     exec ydotoold
     exec_always pkill kanshi; exec ${pkgs.kanshi}/bin/kanshi
+    exec_always pkill swayidle; exec ${pkgs.swayidle}/bin/swayidle -w \
+      timeout 120 '${lib.getExe' pkgs.systemd "systemctl"} --user start lock.target' \
+      timeout 300 '${lib.getExe' pkgs.systemd "systemctl"} suspend' \
+      before-sleep '${lib.getExe' pkgs.systemd "systemctl"} --user start lock.target'
+    exec_always pkill sway-audio-idle-inhibit; exec ${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit
 
     # theme and env specific stuff
     exec_always ${pkgs.writers.writeDash "dbus-sway-environment" ''
