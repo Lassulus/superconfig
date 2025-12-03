@@ -3,9 +3,15 @@
   perSystem =
     { lib, pkgs, ... }:
     {
-      packages = lib.packagesFromDirectoryRecursive {
-        inherit (pkgs) callPackage;
-        directory = ./.;
-      };
+      packages =
+        let
+          allPackages = lib.packagesFromDirectoryRecursive {
+            inherit (pkgs) callPackage;
+            directory = ./.;
+          };
+        in
+        lib.filterAttrs (
+          name: pkg: name != "flake-module" && lib.meta.availableOn pkgs.stdenv.hostPlatform pkg
+        ) allPackages;
     };
 }
