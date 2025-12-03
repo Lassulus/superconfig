@@ -99,11 +99,9 @@
             # clan.lol IMAP
             set imap_user = "infra@clan.lol"
             set imap_pass = "`SOPS_AGE_KEY=$(rbw get --folder clan.lol clan-infra --field age-key) nix develop git+https://git.clan.lol/clan/clan-infra -c clan vars get --flake git+https://git.clan.lol/clan/clan-infra web01 infra-mail/infra-password`"
-            named-mailboxes "clan-infra/INBOX" "imaps://mail.clan.lol/INBOX"
-            named-mailboxes "clan-infra/Sent" "imaps://mail.clan.lol/Sent"
-            named-mailboxes "clan-infra/Drafts" "imaps://mail.clan.lol/Drafts"
-            named-mailboxes "clan-infra/Trash" "imaps://mail.clan.lol/Trash"
-            named-mailboxes "clan-infra/Junk" "imaps://mail.clan.lol/Junk"
+            set imap_check_subscribed = yes
+            virtual-mailboxes "─── clan-infra ───" "notmuch://?query=tag:nonexistent-separator-tag"
+            mailboxes "imaps://mail.clan.lol"
 
             tag-transforms "junk"     "k" \
                            "unread"   "u" \
