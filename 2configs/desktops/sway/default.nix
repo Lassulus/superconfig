@@ -376,6 +376,7 @@ in
     bindsym --locked XF86MonBrightnessUp exec brightnessctl set 5%+
 
     # background programs
+    exec ${pkgs.copyq}/bin/copyq --start-server
     exec ydotoold
     exec_always pkill kanshi; exec ${pkgs.kanshi}/bin/kanshi
     exec_always pkill swayidle; exec ${pkgs.swayidle}/bin/swayidle -w \
