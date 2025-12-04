@@ -35,7 +35,6 @@
     ./mc.nix
     ./zsh.nix
     ./htop.nix
-    ./wiregrill.nix
     ./tor-ssh.nix
     ./networkd.nix
     ./pinned-registry.nix
