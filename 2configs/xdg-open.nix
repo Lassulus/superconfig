@@ -39,9 +39,9 @@ let
       special/mailaddress)
         alacritty --execute vim "$FILE" ;;
       text/html)
-        firefox-devedition "$FILE" ;;
+        { firefox-devedition "$FILE" || firefox "$FILE"; } ;;
       text/xml)
-        firefox-devedition "$FILE" ;;
+        { firefox-devedition "$FILE" || firefox "$FILE"; } ;;
       text/*)
         alacritty --execute vim "$FILE" ;;
       image/*)
