@@ -1,4 +1,9 @@
-{ pkgs, lib, self, ... }:
+{
+  pkgs,
+  lib,
+  self,
+  ...
+}:
 let
 
   term = "/run/current-system/sw/bin/alacritty";
@@ -177,22 +182,30 @@ in
     partOf = [ "sway-session.target" ];
     wantedBy = [ "sway-session.target" ];
     unitConfig = {
-      ConditionPathExists = "/dev/input/event2";
-      ConditionPathExists = "/sys/class/input/event2/device/capabilities/ff";
+      ConditionPathExists = [
+        "/dev/input/event2"
+        "/sys/class/input/event2/device/capabilities/ff"
+      ];
     };
     serviceConfig = {
       Type = "simple";
-      ExecStart = lib.getExe (pkgs.writeShellApplication {
-        name = "sway-urgent-rumble";
-        runtimeInputs = [ pkgs.sway pkgs.jq self.packages.${pkgs.system}.gpd-rumble ];
-        text = ''
-          swaymsg -t subscribe -m '["window"]' | \
-          jq --unbuffered -r 'select(.change == "urgent" and .container.urgent == true) | "urgent"' | \
-          while read -r _; do
-            gpd-rumble 200 100 &
-          done
-        '';
-      });
+      ExecStart = lib.getExe (
+        pkgs.writeShellApplication {
+          name = "sway-urgent-rumble";
+          runtimeInputs = [
+            pkgs.sway
+            pkgs.jq
+            self.packages.${pkgs.system}.gpd-rumble
+          ];
+          text = ''
+            swaymsg -t subscribe -m '["window"]' | \
+            jq --unbuffered -r 'select(.change == "urgent" and .container.urgent == true) | "urgent"' | \
+            while read -r _; do
+              gpd-rumble 200 100 &
+            done
+          '';
+        }
+      );
       Restart = "on-failure";
       RestartSec = 1;
     };
