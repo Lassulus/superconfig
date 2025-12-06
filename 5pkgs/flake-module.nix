@@ -5,19 +5,17 @@
     {
       packages =
         let
-          # Wrapper that handles platform-incompatible packages by catching eval errors.
-          # This breaks laziness (evaluates all packages upfront) but ensures:
-          # - Platform-incompatible packages are filtered out for `nix flake check`
-          # - Real errors in package definitions are still caught and reported
-          #
-          # Note: tryEval catches both platform errors AND real errors. However, real errors
-          # will still surface when the package is evaluated on platforms where dependencies exist.
+          # Wrapper that handles platform-incompatible packages by:
+          # 1. Catching eval errors during callPackage
+          # 2. Filtering based on meta.platforms
           platformAwareCallPackage =
             path: args:
             let
               result = builtins.tryEval (pkgs.callPackage path args);
+              pkg = result.value;
+              isSupported = result.success && lib.meta.availableOn pkgs.stdenv.hostPlatform pkg;
             in
-            if result.success then result.value else null;
+            if isSupported then pkg else null;
 
           allPackages = lib.packagesFromDirectoryRecursive {
             callPackage = platformAwareCallPackage;
