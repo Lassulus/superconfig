@@ -6,13 +6,13 @@
     pkgs.cifs-utils
   ];
 
-  clanCore.facts.services.c-base = {
-    secret."c-base.txt" = { };
-    generator.prompt = ''
-      Please enter your username in the first line and your c-base password in the next line
-    '';
-    generator.script = ''
-      echo "$prompt_value" > "$secrets"/c-base.txt
+  clan.core.vars.generators.c-base = {
+    files."c-base.txt" = { };
+    prompts.user.description = "c-base nickname";
+    prompts.pass.description = "c-base password";
+    script = ''
+      cat "$prompts"/user > "$out/c-base.txt"
+      cat "$prompts"/pass >> "$out/c-base.txt"
     '';
   };
 
