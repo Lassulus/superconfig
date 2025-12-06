@@ -1,6 +1,6 @@
 { pkgs, lib, ... }:
 
-pkgs.writers.writeDashBin "nm-dmenu" ''
+(pkgs.writers.writeDashBin "nm-dmenu" ''
   export PATH=$PATH:${
     lib.makeBinPath [
       (pkgs.writers.writeDashBin "dmenu" ''
@@ -11,4 +11,7 @@ pkgs.writers.writeDashBin "nm-dmenu" ''
     ]
   }
   exec ${pkgs.networkmanager_dmenu}/bin/networkmanager_dmenu "$@"
-''
+'')
+// {
+  meta.platforms = lib.platforms.linux;
+}
