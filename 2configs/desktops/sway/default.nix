@@ -8,147 +8,342 @@ let
 
   term = "/run/current-system/sw/bin/alacritty";
 
-  waybarConfig = pkgs.writeText "waybar-config.json" (
-    builtins.toJSON {
-      height = 30;
-      spacing = 4;
-      modules-left = [
-        "sway/workspaces"
-        "sway/mode"
-        "sway/scratchpad"
-      ];
-      modules-center = [ "sway/window" ];
-      modules-right = [
-        "idle_inhibitor"
-        "pulseaudio"
-        "network"
-        "cpu"
-        "memory"
-        "temperature"
-        "backlight"
-        "battery"
-        "clock"
-        "tray"
-      ];
+  # eww configuration
+  ewwYuck = pkgs.writeText "eww.yuck" ''
+    ; Variables with polling - set initial values to avoid empty string errors
+    (defpoll time :interval "1s" :initial "00:00" "date '+%H:%M'")
+    (defpoll date :interval "60s" :initial "0000-00-00" "date '+%Y-%m-%d'")
+    (defpoll cpu :interval "2s" :initial 0 "${lib.getExe cpuScript}")
+    (defpoll memory :interval "2s" :initial 0 "${lib.getExe memScript}")
+    (defpoll temperature :interval "2s" :initial 0 "${lib.getExe tempScript}")
+    (defpoll battery :interval "10s" :initial '{"capacity": "100", "icon": "󰁹", "watts": "0", "time_remaining": "--", "status": "Full"}' "${lib.getExe batteryScript}")
+    (defpoll volume :interval "1s" :initial '{"level": "0", "icon": "󰕿"}' "${lib.getExe volumeScript}")
+    (defpoll network :interval "5s" :initial "󰖪 ..." "${lib.getExe networkScript}")
+    (deflisten workspaces :initial '[]' "${lib.getExe workspacesScript}")
 
-      "sway/mode".format = "<span style=\"italic\">{}</span>";
+    ; Widget definitions
+    (defwidget bar []
+      (centerbox :orientation "h"
+        (left)
+        (center)
+        (right)))
 
-      "sway/scratchpad" = {
-        format = "{icon} {count}";
-        show-empty = false;
-        format-icons = [
-          ""
-          "󰏃"
-        ];
-        tooltip = true;
-        tooltip-format = "{app}: {title}";
-      };
+    (defwidget left []
+      (box :class "left" :orientation "h" :space-evenly false :halign "start"
+        (workspaces-widget)))
 
-      idle_inhibitor = {
-        format = "{icon}";
-        format-icons = {
-          activated = "󰅶";
-          deactivated = "󰾪";
-        };
-      };
+    (defwidget center []
+      (box :class "center" :orientation "h" :space-evenly false :halign "center"
+        (label :text "''${time}")))
 
-      tray.spacing = 10;
+    (defwidget right []
+      (box :class "right" :orientation "h" :space-evenly false :halign "end" :spacing 8
+        (network-widget)
+        (volume-widget)
+        (graph-widget :value cpu :icon "󰍛" :class "cpu" :unit "%")
+        (graph-widget :value memory :icon "󰘚" :class "memory" :unit "%")
+        (graph-widget :value temperature :icon "󰔏" :class "temp" :unit "°")
+        (battery-widget)
+        (label :class "date" :text "''${date}")
+        (systray :class "systray" :icon-size 18 :spacing 4)))
 
-      clock = {
-        tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
-        format-alt = "{:%Y-%m-%d}";
-      };
+    (defwidget workspaces-widget []
+      (box :class "workspaces" :orientation "h" :space-evenly false :spacing 0
+        (for ws in workspaces
+          (button :class {ws.urgent ? "workspace urgent" : (ws.focused ? "workspace focused" : "workspace")}
+                  :onclick "swaymsg workspace ''${ws.name}"
+            {ws.name}))))
 
-      cpu = {
-        format = "{usage}% 󰍛";
-        tooltip = false;
-      };
+    (defwidget graph-widget [value icon class unit]
+      (box :class "graph-module ''${class}" :orientation "h" :space-evenly false :spacing 4
+        (graph :class "graph"
+               :value value
+               :thickness 3
+               :time-range "60s"
+               :min 0
+               :max 100
+               :dynamic true
+               :line-style "round"
+               :width 75)
+        (label :text "''${value}''${unit} ''${icon}")))
 
-      memory.format = "{}% 󰘚";
+    (defwidget battery-widget []
+      (box :class "battery" :orientation "h" :space-evenly false
+           :tooltip "''${battery.watts}W | ''${battery.time_remaining} ''${battery.status == 'Charging' ? 'to full' : 'remaining'}"
+        (label :text "''${battery.capacity}% ''${battery.icon}")))
 
-      temperature = {
-        critical-threshold = 80;
-        format = "{temperatureC}°C {icon}";
-        format-icons = [
-          "󰔏"
-          "󰔏"
-          "󰔏"
-        ];
-      };
+    (defwidget volume-widget []
+      (box :class "volume" :orientation "h" :space-evenly false
+        (label :text "''${volume.level}% ''${volume.icon}")))
 
-      backlight = {
-        format = "{percent}% {icon}";
-        format-icons = [
-          "󰃞"
-          "󰃟"
-          "󰃠"
-        ];
-      };
+    (defwidget network-widget []
+      (box :class "network" :orientation "h" :space-evenly false
+        (label :text "''${network}")))
 
-      battery = {
-        states = {
-          warning = 30;
-          critical = 15;
-        };
-        format = "{capacity}% {icon}";
-        format-full = "{capacity}% {icon}";
-        format-charging = "{capacity}% 󰂄";
-        format-plugged = "{capacity}% 󰚥";
-        format-alt = "{time} {icon}";
-        format-icons = [
-          "󰂎"
-          "󰁺"
-          "󰁻"
-          "󰁼"
-          "󰁽"
-          "󰁾"
-          "󰁿"
-          "󰂀"
-          "󰂁"
-          "󰂂"
-          "󰁹"
-        ];
-      };
+    ; Window definition - screen name passed as argument
+    (defwindow bar [screen]
+      :monitor screen
+      :geometry (geometry :x "0%"
+                          :y "0%"
+                          :width "100%"
+                          :height "36px"
+                          :anchor "top center")
+      :stacking "fg"
+      :exclusive true
+      :focusable false
+      (bar))
+  '';
 
-      network = {
-        format-wifi = "{essid} ({signalStrength}%) 󰖩";
-        format-ethernet = "{ipaddr}/{cidr} 󰈀";
-        tooltip-format = "{ifname} via {gwaddr} 󰛳";
-        format-linked = "{ifname} (No IP) 󰈀";
-        format-disconnected = "Disconnected 󰖪";
-        format-alt = "{ifname}: {ipaddr}/{cidr}";
-      };
-
-      pulseaudio = {
-        format = "{volume}% {icon} {format_source}";
-        format-bluetooth = "{volume}% {icon}󰂯 {format_source}";
-        format-bluetooth-muted = "󰖁 {icon}󰂯 {format_source}";
-        format-muted = "󰖁 {format_source}";
-        format-source = "{volume}% 󰍬";
-        format-source-muted = "󰍭";
-        format-icons = {
-          headphone = "󰋋";
-          hands-free = "󰋎";
-          headset = "󰋎";
-          phone = "󰏲";
-          portable = "󰏲";
-          car = "󰄋";
-          default = [
-            "󰕿"
-            "󰖀"
-            "󰕾"
-          ];
-        };
-        on-click = "pavucontrol";
-      };
-    }
-  );
-
-  waybarStyle = pkgs.writeText "waybar-style.css" ''
-    @import "${pkgs.waybar}/etc/xdg/waybar/style.css";
+  ewwScss = pkgs.writeText "eww.scss" ''
     * {
+      all: unset;
       font-family: "Iosevka Nerd Font", monospace;
+      font-size: 14px;
     }
+
+    window {
+      background-color: #1a1b26;
+      color: #c0caf5;
+    }
+
+    .left, .center, .right {
+      margin: 4px 8px;
+    }
+
+    .workspaces {
+      button {
+        padding: 0 4px;
+        margin: 0 1px;
+        border-radius: 2px;
+        min-width: 24px;
+        background-color: #24283b;
+        &.focused {
+          background-color: #7aa2f7;
+          color: #1a1b26;
+        }
+        &.urgent {
+          background-color: #f7768e;
+          color: #1a1b26;
+        }
+        &:hover {
+          background-color: #414868;
+        }
+      }
+    }
+
+    .graph-module {
+      padding: 0 8px;
+      margin: 0 2px;
+      border-radius: 4px;
+      &.cpu {
+        background-color: #9ece6a;
+        color: #1a1b26;
+      }
+      &.memory {
+        background-color: #7dcfff;
+        color: #1a1b26;
+      }
+      &.temp {
+        background-color: #ff9e64;
+        color: #1a1b26;
+      }
+    }
+
+    .graph {
+      min-height: 20px;
+    }
+
+    .battery, .volume, .network, .date {
+      padding: 0 8px;
+      margin: 0 2px;
+      border-radius: 4px;
+      background-color: #24283b;
+    }
+
+    .systray {
+      padding: 0 8px;
+      margin: 0 2px;
+    }
+
+    tooltip {
+      background-color: #1a1b26;
+      color: #c0caf5;
+      border: 1px solid #414868;
+      border-radius: 4px;
+      padding: 4px 8px;
+    }
+  '';
+
+  cpuScript = pkgs.writeShellApplication {
+    name = "eww-cpu";
+    text = ''
+      STATE_FILE="/tmp/eww-cpu-state"
+      read -r _cpu user nice system idle _rest < /proc/stat
+      total=$((user + nice + system + idle))
+
+      if [ -f "$STATE_FILE" ]; then
+        read -r prev_total prev_idle < "$STATE_FILE"
+        diff_total=$((total - prev_total))
+        diff_idle=$((idle - prev_idle))
+        if [ "$diff_total" -gt 0 ]; then
+          echo $((100 * (diff_total - diff_idle) / diff_total))
+        else
+          echo 0
+        fi
+      else
+        echo 0
+      fi
+      echo "$total $idle" > "$STATE_FILE"
+    '';
+  };
+
+  memScript = pkgs.writeShellApplication {
+    name = "eww-mem";
+    runtimeInputs = [ pkgs.gawk ];
+    text = ''
+      awk '/MemTotal/ {total=$2} /MemAvailable/ {available=$2} END {printf "%d", (total-available)*100/total}' /proc/meminfo
+    '';
+  };
+
+  tempScript = pkgs.writeShellApplication {
+    name = "eww-temp";
+    text = ''
+      temp_raw=$(cat /sys/class/thermal/thermal_zone0/temp)
+      echo $((temp_raw / 1000))
+    '';
+  };
+
+  batteryScript = pkgs.writeShellApplication {
+    name = "eww-battery";
+    runtimeInputs = [
+      pkgs.jq
+      pkgs.bc
+    ];
+    text = ''
+      # Find battery device dynamically
+      bat_path=""
+      for p in /sys/class/power_supply/BAT* /sys/class/power_supply/BATT*; do
+        if [ -f "$p/capacity" ]; then
+          bat_path="$p"
+          break
+        fi
+      done
+
+      if [ -z "$bat_path" ]; then
+        echo '{"capacity": "N/A", "icon": "󰂃", "watts": "0", "time_remaining": "N/A"}'
+        exit 0
+      fi
+
+      capacity=$(cat "$bat_path/capacity" 2>/dev/null || echo 100)
+      status=$(cat "$bat_path/status" 2>/dev/null || echo "Full")
+      power_now=$(cat "$bat_path/power_now" 2>/dev/null || echo 0)
+      energy_now=$(cat "$bat_path/energy_now" 2>/dev/null || echo 0)
+      energy_full=$(cat "$bat_path/energy_full" 2>/dev/null || echo 0)
+
+      # Convert microwatts to watts
+      watts=$(echo "scale=1; $power_now / 1000000" | bc)
+
+      # Calculate time remaining
+      if [ "$power_now" -gt 0 ]; then
+        if [ "$status" = "Charging" ]; then
+          # Time to full
+          remaining_energy=$((energy_full - energy_now))
+          hours=$(echo "scale=2; $remaining_energy / $power_now" | bc)
+        else
+          # Time to empty
+          hours=$(echo "scale=2; $energy_now / $power_now" | bc)
+        fi
+        # Convert to hours:minutes
+        h=$(echo "$hours" | cut -d. -f1)
+        m=$(echo "scale=0; ($hours - $h) * 60 / 1" | bc)
+        time_remaining="''${h}h ''${m}m"
+      else
+        time_remaining="--"
+      fi
+
+      if [ "$status" = "Charging" ]; then
+        icon="󰂄"
+      elif [ "$status" = "Full" ]; then
+        icon="󰁹"
+      elif [ "$capacity" -gt 80 ]; then
+        icon="󰂂"
+      elif [ "$capacity" -gt 60 ]; then
+        icon="󰂀"
+      elif [ "$capacity" -gt 40 ]; then
+        icon="󰁾"
+      elif [ "$capacity" -gt 20 ]; then
+        icon="󰁼"
+      else
+        icon="󰁺"
+      fi
+      jq -n --arg cap "$capacity" --arg icon "$icon" --arg watts "$watts" --arg time "$time_remaining" --arg status "$status" \
+        '{capacity: $cap, icon: $icon, watts: $watts, time_remaining: $time, status: $status}'
+    '';
+  };
+
+  volumeScript = pkgs.writeShellApplication {
+    name = "eww-volume";
+    runtimeInputs = [
+      pkgs.pulseaudio
+      pkgs.jq
+      pkgs.gnugrep
+    ];
+    text = ''
+      vol=$(pactl get-sink-volume @DEFAULT_SINK@ | grep -oP '\d+%' | head -1 | tr -d '%')
+      muted=$(pactl get-sink-mute @DEFAULT_SINK@ | grep -oP '(yes|no)')
+      if [ "$muted" = "yes" ]; then
+        icon="󰖁"
+      elif [ "$vol" -gt 50 ]; then
+        icon="󰕾"
+      elif [ "$vol" -gt 0 ]; then
+        icon="󰖀"
+      else
+        icon="󰕿"
+      fi
+      jq -n --arg level "$vol" --arg icon "$icon" '{level: $level, icon: $icon}'
+    '';
+  };
+
+  networkScript = pkgs.writeShellApplication {
+    name = "eww-network";
+    runtimeInputs = [ pkgs.networkmanager ];
+    text = ''
+      connection=$(nmcli -t -f NAME,TYPE,DEVICE connection show --active 2>/dev/null | head -1)
+      if [ -z "$connection" ]; then
+        echo "󰖪 Disconnected"
+      else
+        name=$(echo "$connection" | cut -d: -f1)
+        type=$(echo "$connection" | cut -d: -f2)
+        if [ "$type" = "802-11-wireless" ]; then
+          echo "󰖩 $name"
+        else
+          echo "󰈀 $name"
+        fi
+      fi
+    '';
+  };
+
+  workspacesScript = pkgs.writeShellApplication {
+    name = "sway-workspaces";
+    runtimeInputs = [
+      pkgs.sway
+      pkgs.jq
+    ];
+    text = ''
+      # Output initial state
+      swaymsg -t get_workspaces | jq -c '[.[] | {name: .name, focused: .focused, urgent: .urgent}]'
+
+      # Subscribe to workspace events and output updated state
+      swaymsg -t subscribe -m '["workspace"]' | while read -r _; do
+        swaymsg -t get_workspaces | jq -c '[.[] | {name: .name, focused: .focused, urgent: .urgent}]'
+      done
+    '';
+  };
+
+  ewwConfigDir = pkgs.runCommand "eww-config" { } ''
+    mkdir -p $out
+    cp ${ewwYuck} $out/eww.yuck
+    cp ${ewwScss} $out/eww.scss
   '';
 
 in
@@ -164,14 +359,95 @@ in
     '';
   };
 
-  systemd.user.services.waybar = {
-    description = "Highly customizable Wayland bar for Sway";
-    documentation = [ "man:waybar(5)" ];
+  # Enable realtime scheduling for sway
+  security.pam.loginLimits = [
+    {
+      domain = "@users";
+      item = "rtprio";
+      type = "-";
+      value = 1;
+    }
+  ];
+
+  # eww daemon
+  systemd.user.services.eww = {
+    description = "ElKowars Wacky Widgets daemon";
     partOf = [ "sway-session.target" ];
     wantedBy = [ "sway-session.target" ];
+    path = [
+      pkgs.bash
+      pkgs.sway
+    ];
     serviceConfig = {
       Type = "simple";
-      ExecStart = "${pkgs.waybar}/bin/waybar -c ${waybarConfig} -s ${waybarStyle}";
+      ExecStart = "${pkgs.eww}/bin/eww daemon --config ${ewwConfigDir} --no-daemonize";
+      ExecStop = "${pkgs.eww}/bin/eww --config ${ewwConfigDir} kill";
+      Restart = "on-failure";
+      RestartSec = 1;
+    };
+  };
+
+  # eww bar per output - template unit using output name (e.g. eww-bar@eDP-1.service)
+  systemd.user.services."eww-bar@" = {
+    description = "Eww bar on output %i";
+    partOf = [ "sway-session.target" ];
+    after = [ "eww.service" ];
+    requires = [ "eww.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.eww}/bin/eww --config ${ewwConfigDir} open bar --id bar-%i --arg screen=%i";
+      ExecStop = "${pkgs.eww}/bin/eww --config ${ewwConfigDir} close bar-%i";
+    };
+  };
+
+  # Watches for output changes and starts/stops eww-bar@ instances
+  systemd.user.services.eww-output-watcher = {
+    description = "Watch for output changes and manage eww bars";
+    partOf = [ "sway-session.target" ];
+    wantedBy = [ "sway-session.target" ];
+    after = [ "eww.service" ];
+    requires = [ "eww.service" ];
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = lib.getExe (
+        pkgs.writeShellApplication {
+          name = "eww-output-watcher";
+          runtimeInputs = [
+            pkgs.sway
+            pkgs.jq
+            pkgs.systemd
+            pkgs.gawk
+            pkgs.gnused
+            pkgs.gnugrep
+          ];
+          text = ''
+            update_bars() {
+              # Get current outputs
+              outputs=$(swaymsg -t get_outputs | jq -r '.[].name')
+
+              # Start bars for connected outputs
+              for output in $outputs; do
+                systemctl --user start "eww-bar@$output.service" || true
+              done
+
+              # Stop bars for disconnected outputs
+              running=$(systemctl --user list-units --type=service --state=running --plain --no-legend 'eww-bar@*' | awk '{print $1}' | sed 's/eww-bar@\(.*\)\.service/\1/')
+              for output in $running; do
+                if ! echo "$outputs" | grep -qx "$output"; then
+                  systemctl --user stop "eww-bar@$output.service" || true
+                fi
+              done
+            }
+
+            update_bars
+            swaymsg -t subscribe -m '["output"]' | while read -r _; do
+              sleep 0.5
+              update_bars
+            done
+          '';
+        }
+      );
       Restart = "on-failure";
       RestartSec = 1;
     };
@@ -401,6 +677,62 @@ in
 
     bindsym $mod+Tab focus next
     bindsym $mod+Escape workspace back_and_forth
+
+    # Focus primary output
+    bindsym $mod+F1 exec ${
+      lib.getExe (
+        pkgs.writeShellApplication {
+          name = "focus-primary-output";
+          runtimeInputs = [
+            pkgs.sway
+            pkgs.jq
+          ];
+          text = ''
+            PRIMARY=$(swaymsg -r -t get_outputs | jq -r 'sort_by(.x, .y) | .[0].name')
+            swaymsg focus output "$PRIMARY"
+          '';
+        }
+      )
+    }
+
+    # Cycle through secondary outputs
+    bindsym $mod+F2 exec ${
+      lib.getExe (
+        pkgs.writeShellApplication {
+          name = "cycle-secondary-outputs";
+          runtimeInputs = [
+            pkgs.sway
+            pkgs.jq
+            pkgs.gnugrep
+            pkgs.coreutils
+          ];
+          text = ''
+            OUTPUTS=$(swaymsg -r -t get_outputs | jq -r 'sort_by(.x, .y)')
+            PRIMARY=$(echo "$OUTPUTS" | jq -r '.[0].name')
+            CURRENT=$(echo "$OUTPUTS" | jq -r '.[] | select(.focused == true).name')
+            SECONDARIES=$(echo "$OUTPUTS" | jq -r '.[1:] | .[].name')
+
+            if [ -z "$SECONDARIES" ]; then
+              exit 0
+            fi
+
+            if [ "$CURRENT" = "$PRIMARY" ]; then
+              # Focus first secondary
+              NEXT=$(echo "$SECONDARIES" | head -n1)
+            else
+              # Find next secondary in the list
+              NEXT=$(echo "$SECONDARIES" | grep -A1 "^$CURRENT$" | tail -n1)
+              # If we're at the end, wrap to first secondary
+              if [ "$NEXT" = "$CURRENT" ]; then
+                NEXT=$(echo "$SECONDARIES" | head -n1)
+              fi
+            fi
+
+            swaymsg focus output "$NEXT"
+          '';
+        }
+      )
+    }
 
     # screenlock
     bindsym $mod+F11 exec ${lib.getExe' pkgs.systemd "systemctl"} --user start lock.target
