@@ -737,6 +737,15 @@ in
     # screenlock
     bindsym $mod+F11 exec ${lib.getExe' pkgs.systemd "systemctl"} --user start lock.target
 
+    # kill window (xkill-like)
+    mode "kill" {
+        bindsym --whole-window button1 kill, mode "default"
+        bindsym --whole-window button2 mode "default"
+        bindsym --whole-window button3 mode "default"
+        bindsym Escape mode "default"
+    }
+    bindsym $mod+x mode "kill"
+
     # media buttons
     bindsym XF86AudioMute exec ${pkgs.pulseaudio.out}/bin/pactl -- set-sink-mute @DEFAULT_SINK@ toggle
     bindsym XF86AudioRaiseVolume exec ${pkgs.pulseaudio.out}/bin/pactl -- set-sink-volume @DEFAULT_SINK@ +4%
