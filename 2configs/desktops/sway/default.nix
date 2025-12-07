@@ -13,12 +13,14 @@ let
     ; Variables with polling - set initial values to avoid empty string errors
     (defpoll time :interval "1s" :initial "00:00" "date '+%H:%M'")
     (defpoll date :interval "60s" :initial "0000-00-00" "date '+%Y-%m-%d'")
-    (defpoll cpu :interval "2s" :initial 0 "${lib.getExe cpuScript}")
+    (defpoll cpu :interval "2s" :initial '{"usage": 0, "load": "0.00", "freq": 0}' "${lib.getExe cpuScript}")
     (defpoll memory :interval "2s" :initial 0 "${lib.getExe memScript}")
-    (defpoll temperature :interval "2s" :initial 0 "${lib.getExe tempScript}")
+    (defpoll temperature :interval "2s" :initial '{"temp": 0, "fan": 0}' "${lib.getExe tempScript}")
     (defpoll battery :interval "10s" :initial '{"capacity": "100", "icon": "󰁹", "watts": "0", "time_remaining": "--", "status": "Full"}' "${lib.getExe batteryScript}")
     (defpoll volume :interval "1s" :initial '{"level": "0", "icon": "󰕿"}' "${lib.getExe volumeScript}")
     (defpoll network :interval "5s" :initial "󰖪 ..." "${lib.getExe networkScript}")
+    (defpoll brightness :interval "1s" :initial 100 "${lib.getExe brightnessScript}")
+    (defpoll idle-inhibited :interval "0.5s" :initial "false" "${lib.getExe idleStatusScript}")
     (deflisten workspaces :initial '[]' "${lib.getExe workspacesScript}")
 
     ; Widget definitions
@@ -40,10 +42,12 @@ let
       (box :class "right" :orientation "h" :space-evenly false :halign "end" :spacing 8
         (network-widget)
         (volume-widget)
-        (graph-widget :value cpu :icon "󰍛" :class "cpu" :unit "%")
+        (graph-widget :value {cpu.usage} :icon "󰍛" :class "cpu" :unit "%" :tooltip "Load: ''${cpu.load} | ''${cpu.freq} MHz")
         (graph-widget :value memory :icon "󰘚" :class "memory" :unit "%")
-        (graph-widget :value temperature :icon "󰔏" :class "temp" :unit "°")
+        (graph-widget :value {temperature.temp} :icon "󰔏" :class "temp" :unit "°" :tooltip "Fan: ''${temperature.fan} RPM")
+        (brightness-widget)
         (battery-widget)
+        (idle-inhibitor)
         (label :class "date" :text "''${date}")
         (systray :class "systray" :icon-size 18 :spacing 4)))
 
@@ -54,8 +58,9 @@ let
                   :onclick "swaymsg workspace ''${ws.name}"
             {ws.name}))))
 
-    (defwidget graph-widget [value icon class unit]
+    (defwidget graph-widget [value icon class unit ?tooltip]
       (box :class "graph-module ''${class}" :orientation "h" :space-evenly false :spacing 4
+           :tooltip {tooltip ?: ""}
         (graph :class "graph"
                :value value
                :thickness 3
@@ -79,6 +84,15 @@ let
     (defwidget network-widget []
       (box :class "network" :orientation "h" :space-evenly false
         (label :text "''${network}")))
+
+    (defwidget brightness-widget []
+      (button :class "brightness" :onclick "/run/current-system/sw/bin/switch-theme toggle"
+        (label :text "''${brightness}% 󰃟")))
+
+    (defwidget idle-inhibitor []
+      (button :class {idle-inhibited == "true" ? "idle-inhibitor active" : "idle-inhibitor"}
+              :onclick "${lib.getExe idleToggleScript}"
+        {idle-inhibited == "true" ? "󰅶" : "󰾪"}))
 
     ; Window definition - screen name passed as argument
     (defwindow bar [screen]
@@ -153,11 +167,25 @@ let
       min-height: 20px;
     }
 
-    .battery, .volume, .network, .date {
+    .battery, .volume, .network, .date, .brightness {
       padding: 0 8px;
       margin: 0 2px;
       border-radius: 4px;
       background-color: #24283b;
+    }
+
+    .idle-inhibitor {
+      padding: 0 8px;
+      margin: 0 2px;
+      border-radius: 4px;
+      background-color: #24283b;
+      &.active {
+        background-color: #bb9af7;
+        color: #1a1b26;
+      }
+      &:hover {
+        background-color: #414868;
+      }
     }
 
     .systray {
@@ -176,6 +204,7 @@ let
 
   cpuScript = pkgs.writeShellApplication {
     name = "eww-cpu";
+    runtimeInputs = [ pkgs.jq ];
     text = ''
       STATE_FILE="/tmp/eww-cpu-state"
       read -r _cpu user nice system idle _rest < /proc/stat
@@ -186,14 +215,34 @@ let
         diff_total=$((total - prev_total))
         diff_idle=$((idle - prev_idle))
         if [ "$diff_total" -gt 0 ]; then
-          echo $((100 * (diff_total - diff_idle) / diff_total))
+          usage=$((100 * (diff_total - diff_idle) / diff_total))
         else
-          echo 0
+          usage=0
         fi
       else
-        echo 0
+        usage=0
       fi
       echo "$total $idle" > "$STATE_FILE"
+
+      # Get load average (1 min)
+      load=$(cut -d' ' -f1 /proc/loadavg)
+
+      # Get average CPU frequency in MHz
+      freq=0
+      count=0
+      for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq; do
+        if [ -f "$f" ]; then
+          val=$(cat "$f")
+          freq=$((freq + val))
+          count=$((count + 1))
+        fi
+      done
+      if [ "$count" -gt 0 ]; then
+        freq=$((freq / count / 1000))
+      fi
+
+      jq -n --argjson usage "$usage" --arg load "$load" --argjson freq "$freq" \
+        '{usage: $usage, load: $load, freq: $freq}'
     '';
   };
 
@@ -207,9 +256,21 @@ let
 
   tempScript = pkgs.writeShellApplication {
     name = "eww-temp";
+    runtimeInputs = [ pkgs.jq ];
     text = ''
-      temp_raw=$(cat /sys/class/thermal/thermal_zone0/temp)
-      echo $((temp_raw / 1000))
+      temp_raw=$(cat /sys/class/thermal/thermal_zone0/temp 2>/dev/null || echo 0)
+      temp=$((temp_raw / 1000))
+
+      # Find gpdfan hwmon for fan speed
+      fan=0
+      for hwmon in /sys/class/hwmon/hwmon*; do
+        if [ "$(cat "$hwmon/name" 2>/dev/null)" = "gpdfan" ]; then
+          fan=$(cat "$hwmon/fan1_input" 2>/dev/null || echo 0)
+          break
+        fi
+      done
+
+      jq -n --argjson temp "$temp" --argjson fan "$fan" '{temp: $temp, fan: $fan}'
     '';
   };
 
@@ -340,6 +401,38 @@ let
     '';
   };
 
+  brightnessScript = pkgs.writeShellApplication {
+    name = "eww-brightness";
+    runtimeInputs = [ pkgs.brightnessctl ];
+    text = ''
+      brightnessctl -m | cut -d, -f4 | tr -d '%'
+    '';
+  };
+
+  idleToggleScript = pkgs.writeShellApplication {
+    name = "eww-idle-toggle";
+    runtimeInputs = [ pkgs.systemd ];
+    text = ''
+      if systemctl --user is-active --quiet sway-idle-inhibit.service; then
+        systemctl --user stop sway-idle-inhibit.service
+      else
+        systemctl --user start sway-idle-inhibit.service
+      fi
+    '';
+  };
+
+  idleStatusScript = pkgs.writeShellApplication {
+    name = "eww-idle-status";
+    runtimeInputs = [ pkgs.systemd ];
+    text = ''
+      if systemctl --user is-active --quiet sway-idle-inhibit.service; then
+        echo "true"
+      else
+        echo "false"
+      fi
+    '';
+  };
+
   ewwConfigDir = pkgs.runCommand "eww-config" { } ''
     mkdir -p $out
     cp ${ewwYuck} $out/eww.yuck
@@ -378,12 +471,22 @@ in
       pkgs.bash
       pkgs.sway
     ];
+    environment.EWW_CONFIG = "${ewwConfigDir}";
     serviceConfig = {
       Type = "simple";
-      ExecStart = "${pkgs.eww}/bin/eww daemon --config ${ewwConfigDir} --no-daemonize";
-      ExecStop = "${pkgs.eww}/bin/eww --config ${ewwConfigDir} kill";
+      ExecStart = "${lib.getExe pkgs.eww} daemon --config ${ewwConfigDir} --no-daemonize";
+      ExecStop = "${lib.getExe pkgs.eww} --config ${ewwConfigDir} kill";
       Restart = "on-failure";
       RestartSec = 1;
+    };
+  };
+
+  # Idle inhibit service - toggled by eww button
+  systemd.user.services.sway-idle-inhibit = {
+    description = "Inhibit idle/sleep";
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = "${pkgs.systemd}/bin/systemd-inhibit --what=idle:sleep --who=eww --why='User requested' --mode=block sleep infinity";
     };
   };
 
