@@ -11,6 +11,7 @@
             age
             age-plugin-yubikey
             age-plugin-fido2-hmac
+            age-plugin-tpm
             yubikey-manager
             libfido2
           ]

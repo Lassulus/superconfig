@@ -17,7 +17,20 @@ detect_age_keys() {
         return
     fi
 
-    # Check for YubiKeys (second priority)
+    # Check for TPM on Linux (second priority - built-in, no USB needed)
+    # Requires: TPM device, hostname.age with age1tpm1 recipient, and identity in ~/.config/age/
+    if [[ -c /dev/tpmrm0 ]] && [[ -f ~/.config/age/tpm-identity.txt ]]; then
+        local hostname_key
+        hostname_key="${AGE_DETECT_KEYS_DIR:-}/age/$(hostname).age"
+        if [[ -f "$hostname_key" ]] && grep -q "^age1tpm1" "$hostname_key" 2>/dev/null; then
+            rm -f "$temp_identities"
+            echo "DETECTED_KEY=tpm"
+            echo "KEY_TYPE=tpm"
+            return
+        fi
+    fi
+
+    # Check for YubiKeys (third priority)
     if command -v ykman >/dev/null 2>&1; then
         local yubikey_serial
         yubikey_serial=$(ykman info 2>/dev/null | grep "Serial number:" | cut -d: -f2 | tr -d ' ' || true)
@@ -72,7 +85,7 @@ case "${1:-detect}" in
         echo "  DETECTED_KEY=<name>   - Name of the detected key (e.g., yubi1, solo2, se)"
         echo "  KEY_TYPE=<type>       - Type of key (yubikey, solo2, se)"
         echo ""
-        echo "Priority order: se > yubikey > solo2"
+        echo "Priority order: se > tpm > yubikey > solo2"
         ;;
     *)
         echo "Unknown command: $1" >&2

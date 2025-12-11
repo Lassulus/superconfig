@@ -14,6 +14,7 @@
           [
             pkgs.age-plugin-fido2-hmac
             pkgs.age-plugin-yubikey
+            pkgs.age-plugin-tpm
             self.packages.${system}.pass-otp
             self.packages.${system}.age-detect
           ]
@@ -53,6 +54,7 @@
               export PASSAGE_IDENTITIES_FILE="$PASS_BULK_KEY_FILE"
             else
               # Detect available age keys
+              export AGE_DETECT_KEYS_DIR="${self}/keys"
               eval "$(age-detect)"
 
               # Set up identity file if detected
