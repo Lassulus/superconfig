@@ -10,15 +10,16 @@
     secretKeyFile = "${config.krebs.secret.directory}/nix-serve.key";
   };
 
-  clanCore.facts.services.nix-serve = {
-    secret."nix-serve.key" = { };
-    public."nix-serve.pub" = { };
-    generator.path = with pkgs; [
+  clan.core.vars.generators.nix-serve = {
+    files."nix-serve.key" = { };
+    files."nix-serve.pub".secret = false;
+    runtimeInputs = with pkgs; [
       coreutils
       nix
     ];
-    generator.script = ''
-      nix-store --generate-binary-cache-key cache.${config.networking.hostName} "$secrets"/nix-serve.key "$facts"/nix-serve.pub
+    script = ''
+      exit 1  # Manual migration required from facts to vars
+      nix-store --generate-binary-cache-key cache.${config.networking.hostName} "$out"/nix-serve.key "$out"/nix-serve.pub
     '';
   };
 }

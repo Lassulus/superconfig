@@ -56,11 +56,13 @@
       recommendedProxySettings = true;
     };
   };
-  clanCore.facts.services.yellow-container = {
-    secret."yellow.sync.key" = { };
-    generator.script = ";";
-    generator.prompt = ''
+  clan.core.vars.generators.yellow-container = {
+    files."yellow.sync.key" = { };
+    prompts.key.description = ''
       copy or reference the secret key from the container into here, so we can actually start/sync the container
+    '';
+    script = ''
+      cat "$prompts"/key > "$out"/yellow.sync.key
     '';
   };
 }

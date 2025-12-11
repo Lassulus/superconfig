@@ -8,7 +8,6 @@
     ../../2configs/autoupdate.nix
   ];
 
-  clan.password-store.targetDirectory = "/var/state/secrets";
   clan.core.vars.password-store.secretLocation = "/var/state/secret-vars";
 
   krebs.build.host = config.krebs.hosts.radio;
@@ -27,7 +26,6 @@
   clan.core.vars.generators.radio-sync = {
     files."radio.sync.key" = { };
     files."radio.sync.pub".secret = false;
-    migrateFact = "radio-container";
     runtimeInputs = with pkgs; [
       coreutils
       openssh

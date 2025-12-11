@@ -4,16 +4,16 @@
 
   systemd.services.borgbackup-job-hetzner.serviceConfig.ReadWritePaths = [ "/var/log/telegraf" ];
 
-  clanCore.facts.services.borgbackup = {
-    secret."borgbackup.ssh.id25519" = { };
-    public."borgbackup.ssh.id25519.pub" = { };
-    generator.path = [
-      pkgs.coreutils
-      pkgs.openssh
+  clan.core.vars.generators.borgbackup = {
+    files."borgbackup.ssh.id25519" = { };
+    files."borgbackup.ssh.id25519.pub".secret = false;
+    runtimeInputs = with pkgs; [
+      coreutils
+      openssh
     ];
-    generator.script = ''
-      ssh-keygen -t ed25519 -N "" -f $secrets/borgbackup.ssh.id25519
-      mv $secrets/borgbackup.ssh.id25519.pub $facts/borgbackup.ssh.id25519.pub
+    script = ''
+      exit 1  # Manual migration required from facts to vars
+      ssh-keygen -t ed25519 -N "" -f $out/borgbackup.ssh.id25519
     '';
   };
 
@@ -30,7 +30,7 @@
     startAt = "*-*-* 02:00:00";
     # TODO: change backup key
     environment.BORG_RSH = "ssh -oPort=23 -i ${
-      config.clanCore.facts.services.borgbackup.secret."borgbackup.ssh.id25519".path
+      config.clan.core.vars.generators.borgbackup.files."borgbackup.ssh.id25519".path
     }";
     preHook = ''
       set -x

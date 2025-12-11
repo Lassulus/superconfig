@@ -8,14 +8,14 @@ let
   torrentport = 56709; # port forwarded in airvpn webinterface
 in
 {
+  clan.core.vars.password-store.secretLocation = "/var/state/secret-vars";
+
   imports = [
     ../../2configs
     ../../2configs/retiolum.nix
     ../../2configs/services/flix
     ../../2configs/autoupdate.nix
   ];
-
-  clan.password-store.targetDirectory = "/var/state/secrets";
 
   # we need to configure another port for the mycelium admin interface, because it conflicts with sonarr.
   services.mycelium.extraArgs = [
@@ -70,7 +70,7 @@ in
       ip -n transmission addr add 10.176.43.231/32 dev airvpn
       ip -n transmission addr add fd7d:76ee:e68f:a993:41b3:846b:d271:30d8/128 dev airvpn
       ip netns exec transmission wg syncconf airvpn <(wg-quick strip ${
-        config.clanCore.facts.services.airvpn.secret."airvpn.conf".path
+        config.clan.core.vars.generators.airvpn.files."airvpn.conf".path
       })
       ip -n transmission link set airvpn up
       ip -n transmission route add default dev airvpn
@@ -94,16 +94,16 @@ in
     };
   };
 
-  clanCore.facts.services.airvpn = {
-    secret."airvpn.conf" = { };
-    generator.path = with pkgs; [ coreutils ];
-    generator.prompt = ''
+  clan.core.vars.generators.airvpn = {
+    files."airvpn.conf" = { };
+    prompts.config.description = ''
       login into https://airvpn.org/ goto https://airvpn.org/generator/
       generate a wireguard config
       paste the config here
     '';
-    generator.script = ''
-      echo "$prompt_value" > "$secrets"/airvpn.conf
+    runtimeInputs = with pkgs; [ coreutils ];
+    script = ''
+      cat "$prompts"/config > "$out"/airvpn.conf
     '';
   };
 
@@ -124,16 +124,16 @@ in
       IOSchedulingPriority = 7;
     };
   };
-  clanCore.facts.services.yellow-container = {
-    secret."yellow.sync.key" = { };
-    public."yellow.sync.pub" = { };
-    generator.path = with pkgs; [
+  clan.core.vars.generators.yellow-container = {
+    files."yellow.sync.key" = { };
+    files."yellow.sync.pub".secret = false;
+    runtimeInputs = with pkgs; [
       coreutils
       openssh
     ];
-    generator.script = ''
-      ssh-keygen -t ed25519 -N "" -f "$secrets"/yellow.sync.key
-      mv "$secrets"/yellow.sync.key "$facts"/yellow.sync.pub
+    script = ''
+      ssh-keygen -t ed25519 -N "" -f "$out"/yellow.sync.key
+      mv "$out"/yellow.sync.key.pub "$out"/yellow.sync.pub
     '';
   };
 }

@@ -57,7 +57,7 @@
       # register-dns
       # block-outside-dns
       script-security 2
-      auth-user-pass ${config.clanCore.facts.services.c-base.secret."c-base.txt".path}
+      auth-user-pass ${config.clan.core.vars.generators.c-base.files."c-base.txt".path}
       #auth-user-pass
       key-direction 1
       <tls-auth>

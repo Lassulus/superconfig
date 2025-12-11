@@ -7,13 +7,11 @@
 }:
 {
   # Clan core configuration
-  clan.core.facts.secretStore = "password-store";
-  clan.core.facts.secretUploadDirectory = lib.mkDefault "/etc/secrets";
   clan.core.vars.settings.secretStore = "password-store";
   clan.core.networking.targetHost = "root@${config.networking.hostName}";
 
   # Stockholm configuration
-  krebs.secret.directory = config.clan.core.facts.secretUploadDirectory;
+  krebs.secret.directory = config.clan.core.vars.password-store.secretLocation;
 
   # Nixpkgs overlays
   nixpkgs.overlays = [
@@ -81,7 +79,6 @@
         };
         files.password.deploy = false;
         files.passwordHash.neededFor = "users";
-        migrateFact = "password";
         runtimeInputs = with pkgs; [
           coreutils
           mkpasswd
@@ -97,14 +94,13 @@
       services.openssh.settings.PasswordAuthentication = false;
       services.openssh.hostKeys = [
         {
-          path = config.clanCore.vars.generators.ssh.files."ssh.id_ed25519".path;
+          path = config.clan.core.vars.generators.ssh.files."ssh.id_ed25519".path;
           type = "ed25519";
         }
       ];
       clan.core.vars.generators.ssh = {
-        files."ssh.id_ed25519".secret = true;
+        files."ssh.id_ed25519" = { };
         files."ssh.id_ed25519.pub".secret = false;
-        migrateFact = "ssh";
         runtimeInputs = with pkgs; [
           coreutils
           openssh

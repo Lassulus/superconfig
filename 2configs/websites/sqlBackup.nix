@@ -1,12 +1,10 @@
 { config, pkgs, ... }:
 {
-  clanCore.facts.services.mysql = {
-    secret."mysql_rootPassword" = { };
-    generator.script = ''
-      cat > "$secrets"/mysql_rootPassword
-    '';
-    generator.prompt = ''
-      enter mysql root password
+  clan.core.vars.generators.mysql = {
+    files."mysql_rootPassword" = { };
+    prompts.password.description = "enter mysql root password";
+    script = ''
+      cat "$prompts"/password > "$out"/mysql_rootPassword
     '';
   };
   krebs.secret.files.mysql_rootPassword = {

@@ -118,13 +118,11 @@ in
     file_uploads = on
   '';
 
-  clanCore.facts.services.nextcloud = {
-    secret."nextcloud_pw" = { };
-    generator.script = ''
-      cat > "$secrets"/nexcloud_pw;
-    '';
-    generator.prompt = ''
-      enter initial admin password for nextcloud
+  clan.core.vars.generators.nextcloud = {
+    files."nextcloud_pw" = { };
+    prompts.password.description = "enter initial admin password for nextcloud";
+    script = ''
+      cat "$prompts"/password > "$out"/nextcloud_pw
     '';
   };
   # systemd.services.nextcloud-setup.after = [ "secret-nextcloud_pw.service" ];
@@ -285,52 +283,56 @@ in
       { domain = "beesmooth.ch"; }
     ];
   };
-  clanCore.facts.services."ubikmedia.eu-dkim" = {
-    secret."ubikmedia.eu.dkim.priv" = { };
-    public."ubikmedia.eu.dkim.pub" = { };
-    generator.path = with pkgs; [
+  clan.core.vars.generators."ubikmedia.eu-dkim" = {
+    files."ubikmedia.eu.dkim.priv" = { };
+    files."ubikmedia.eu.dkim.pub".secret = false;
+    runtimeInputs = with pkgs; [
       coreutils
       openssl
     ];
-    generator.script = ''
-      openssl genrsa -out "$secrets"/ubikmedia.eu.dkim.priv 1024
-      openssl rsa -in "$secrets"/ubikmedia.eu.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$facts"/ubikmedia.eu.dkim.pub
+    script = ''
+      exit 1  # Manual migration required from facts to vars
+      openssl genrsa -out "$out"/ubikmedia.eu.dkim.priv 1024
+      openssl rsa -in "$out"/ubikmedia.eu.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$out"/ubikmedia.eu.dkim.pub
     '';
   };
-  clanCore.facts.services."apanowicz.de-dkim" = {
-    secret."apanowicz.de.dkim.priv" = { };
-    public."apanowicz.de.dkim.pub" = { };
-    generator.path = with pkgs; [
+  clan.core.vars.generators."apanowicz.de-dkim" = {
+    files."apanowicz.de.dkim.priv" = { };
+    files."apanowicz.de.dkim.pub".secret = false;
+    runtimeInputs = with pkgs; [
       coreutils
       openssl
     ];
-    generator.script = ''
-      openssl genrsa -out "$secrets"/apanowicz.de.dkim.priv 1024
-      openssl rsa -in "$secrets"/apanowicz.de.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$facts"/apanowicz.de.dkim.pub
+    script = ''
+      exit 1  # Manual migration required from facts to vars
+      openssl genrsa -out "$out"/apanowicz.de.dkim.priv 1024
+      openssl rsa -in "$out"/apanowicz.de.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$out"/apanowicz.de.dkim.pub
     '';
   };
-  clanCore.facts.services."beesmooth.ch-dkim" = {
-    secret."beesmooth.ch.dkim.priv" = { };
-    public."beesmooth.ch.dkim.pub" = { };
-    generator.path = with pkgs; [
+  clan.core.vars.generators."beesmooth.ch-dkim" = {
+    files."beesmooth.ch.dkim.priv" = { };
+    files."beesmooth.ch.dkim.pub".secret = false;
+    runtimeInputs = with pkgs; [
       coreutils
       openssl
     ];
-    generator.script = ''
-      openssl genrsa -out "$secrets"/beesmooth.ch.dkim.priv 1024
-      openssl rsa -in "$secrets"/beesmooth.ch.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$facts"/beesmooth.ch.dkim.pub
+    script = ''
+      exit 1  # Manual migration required from facts to vars
+      openssl genrsa -out "$out"/beesmooth.ch.dkim.priv 1024
+      openssl rsa -in "$out"/beesmooth.ch.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$out"/beesmooth.ch.dkim.pub
     '';
   };
-  clanCore.facts.services."freemonkey.art" = {
-    secret."freemonkey.art.dkim.priv" = { };
-    public."freemonkey.art.dkim.pub" = { };
-    generator.path = with pkgs; [
+  clan.core.vars.generators."freemonkey.art" = {
+    files."freemonkey.art.dkim.priv" = { };
+    files."freemonkey.art.dkim.pub".secret = false;
+    runtimeInputs = with pkgs; [
       coreutils
       openssl
     ];
-    generator.script = ''
-      openssl genrsa -out "$secrets"/freemonkey.art.dkim.priv 1024
-      openssl rsa -in "$secrets"/freemonkey.art.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$facts"/freemonkey.art.dkim.pub
+    script = ''
+      exit 1  # Manual migration required from facts to vars
+      openssl genrsa -out "$out"/freemonkey.art.dkim.priv 1024
+      openssl rsa -in "$out"/freemonkey.art.dkim.priv -pubout -outform der 2>/dev/null | openssl base64 -A > "$out"/freemonkey.art.dkim.pub
     '';
   };
   services.borgbackup.jobs.hetzner.paths = [

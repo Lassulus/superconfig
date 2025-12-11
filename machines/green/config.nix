@@ -5,6 +5,8 @@
   ...
 }:
 {
+  clan.core.vars.password-store.secretLocation = "/var/state/secret-vars";
+
   imports = [
     ../../2configs
     ../../2configs/retiolum.nix
@@ -25,9 +27,6 @@
     ../../2configs/autoupdate.nix
   ];
 
-  # clanCore.facts.secretUploadDirectory = lib.mkForce "/var/state/secrets";
-  clan.password-store.targetDirectory = "/var/state/secrets";
-
   krebs.build.host = config.krebs.hosts.green;
 
   krebs.sync-containers3.inContainer = {
@@ -35,7 +34,7 @@
     pubkey = config.clan.core.vars.generators.green-container.files."green.sync.pub".path;
   };
 
-  clanCore.vars.generators.green-container = {
+  clan.core.vars.generators.green-container = {
     files."green.sync.key" = { };
     files."green.sync.pub".secret = false;
     runtimeInputs = with pkgs; [

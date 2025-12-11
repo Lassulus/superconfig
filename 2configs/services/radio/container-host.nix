@@ -22,11 +22,13 @@
       isReadOnly = false;
     };
   };
-  clanCore.facts.services.radio-container = {
-    secret."radio.sync.key" = { };
-    generator.script = ";";
-    generator.prompt = ''
+  clan.core.vars.generators.radio-container = {
+    files."radio.sync.key" = { };
+    prompts.key.description = ''
       copy or reference the secret key from the container into here, so we can actually start/sync the container
+    '';
+    script = ''
+      cat "$prompts"/key > "$out"/radio.sync.key
     '';
   };
 }

@@ -1,5 +1,7 @@
 { config, pkgs, ... }:
 {
+  clan.core.vars.password-store.secretLocation = "/var/state/secret-vars";
+
   imports = [
     ../../2configs
     ../../2configs/retiolum.nix
@@ -10,7 +12,6 @@
 
   krebs.build.host = config.krebs.hosts.orange;
   system.stateVersion = "24.05";
-  clan.password-store.targetDirectory = "/var/state/secrets";
 
   services.nginx.enable = true;
   networking.firewall.allowedTCPPorts = [
@@ -26,16 +27,16 @@
     enable = true;
     pubkey = builtins.readFile ./facts/orange.sync.pub;
   };
-  clanCore.facts.services.orange-container = {
-    secret."orange.sync.key" = { };
-    public."orange.sync.pub" = { };
-    generator.path = with pkgs; [
+  clan.core.vars.generators.orange-container = {
+    files."orange.sync.key" = { };
+    files."orange.sync.pub".secret = false;
+    runtimeInputs = with pkgs; [
       coreutils
       openssh
     ];
-    generator.script = ''
-      ssh-keygen -t ed25519 -N "" -f "$secrets"/orange.sync.key
-      mv "$secrets"/orange.sync.key "$facts"/orange.sync.pub
+    script = ''
+      ssh-keygen -t ed25519 -N "" -f "$out"/orange.sync.key
+      mv "$out"/orange.sync.key.pub "$out"/orange.sync.pub
     '';
   };
 }
