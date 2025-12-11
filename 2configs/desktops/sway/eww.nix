@@ -7,11 +7,14 @@ let
 
   # eww configuration
   ewwYuck = pkgs.writeText "eww.yuck" ''
-    ; Variables with polling - set initial values to avoid empty string errors
-    (defpoll time :interval "1s" :initial "00:00" "date '+%H:%M'")
-    (defpoll date :interval "60s" :initial "0000-00-00" "date '+%Y-%m-%d'")
-    (defpoll cpu :interval "2s" :initial '{"usage": 0, "load": "0.00", "freq": 0}' "${lib.getExe cpuScript}")
-    (defpoll memory :interval "2s" :initial 0 "${lib.getExe memScript}")
+    ; Magic variables (built-in, no polling needed)
+    ; EWW_TIME provides current time
+    ; EWW_CPU provides {cores: [...], avg: X}
+    ; EWW_RAM provides {used_mem_perc: X, available_mem: Y, total_mem: Z, ...}
+
+    ; Custom variables with polling
+    (defpoll cpu-freq :interval "2s" :initial 0 "${lib.getExe cpuFreqScript}")
+    (defpoll cpu-load :interval "2s" :initial "0.00" "cut -d' ' -f1 /proc/loadavg")
     (defpoll temperature :interval "2s" :initial '{"temp": 0, "fan": 0}' "${lib.getExe tempScript}")
     (defpoll battery :interval "10s" :initial '{"capacity": "100", "icon": "󰁹", "watts": "0", "time_remaining": "--", "status": "Full"}' "${lib.getExe batteryScript}")
     (defpoll volume :interval "1s" :initial '{"level": "0", "icon": "󰕿"}' "${lib.getExe volumeScript}")
@@ -33,19 +36,19 @@ let
 
     (defwidget center []
       (box :class "center" :orientation "h" :space-evenly false :halign "center"
-        (label :text "''${time}")))
+        (label :text {formattime(EWW_TIME, "%H:%M")})))
 
     (defwidget right []
       (box :class "right" :orientation "h" :space-evenly false :halign "end" :spacing 8
         (network-widget)
         (volume-widget)
-        (graph-widget :value {cpu.usage} :icon "󰍛" :class "cpu" :unit "%" :tooltip "Load: ''${cpu.load} | ''${cpu.freq} MHz")
-        (graph-widget :value memory :icon "󰘚" :class "memory" :unit "%")
+        (graph-widget :value {EWW_CPU.avg} :icon "󰍛" :class "cpu" :unit "%" :tooltip "Load: ''${cpu-load} | ''${cpu-freq} MHz")
+        (graph-widget :value {EWW_RAM.used_mem_perc} :icon "󰘚" :class "memory" :unit "%")
         (graph-widget :value {temperature.temp} :icon "󰔏" :class "temp" :unit "°" :tooltip "Fan: ''${temperature.fan} RPM")
         (brightness-widget)
         (battery-widget)
         (idle-inhibitor)
-        (label :class "date" :text "''${date}")
+        (label :class "date" :text {formattime(EWW_TIME, "%Y-%m-%d")})
         (systray :class "systray" :icon-size 18 :spacing 4)))
 
     (defwidget workspaces-widget []
@@ -67,7 +70,7 @@ let
                :dynamic true
                :line-style "round"
                :width 75)
-        (label :text "''${value}''${unit} ''${icon}")))
+        (label :text "''${round(value, 0)}''${unit} ''${icon}")))
 
     (defwidget battery-widget []
       (box :class "battery" :orientation "h" :space-evenly false
@@ -199,31 +202,10 @@ let
     }
   '';
 
-  cpuScript = pkgs.writeShellApplication {
-    name = "eww-cpu";
-    runtimeInputs = [ pkgs.jq ];
+  cpuFreqScript = pkgs.writeShellApplication {
+    name = "eww-cpu-freq";
+    runtimeInputs = [ ];
     text = ''
-      STATE_FILE="/tmp/eww-cpu-state"
-      read -r _cpu user nice system idle _rest < /proc/stat
-      total=$((user + nice + system + idle))
-
-      if [ -f "$STATE_FILE" ]; then
-        read -r prev_total prev_idle < "$STATE_FILE"
-        diff_total=$((total - prev_total))
-        diff_idle=$((idle - prev_idle))
-        if [ "$diff_total" -gt 0 ]; then
-          usage=$((100 * (diff_total - diff_idle) / diff_total))
-        else
-          usage=0
-        fi
-      else
-        usage=0
-      fi
-      echo "$total $idle" > "$STATE_FILE"
-
-      # Get load average (1 min)
-      load=$(cut -d' ' -f1 /proc/loadavg)
-
       # Get average CPU frequency in MHz
       freq=0
       count=0
@@ -237,17 +219,7 @@ let
       if [ "$count" -gt 0 ]; then
         freq=$((freq / count / 1000))
       fi
-
-      jq -n --argjson usage "$usage" --arg load "$load" --argjson freq "$freq" \
-        '{usage: $usage, load: $load, freq: $freq}'
-    '';
-  };
-
-  memScript = pkgs.writeShellApplication {
-    name = "eww-mem";
-    runtimeInputs = [ pkgs.gawk ];
-    text = ''
-      awk '/MemTotal/ {total=$2} /MemAvailable/ {available=$2} END {printf "%d", (total-available)*100/total}' /proc/meminfo
+      echo "$freq"
     '';
   };
 
