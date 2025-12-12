@@ -54,12 +54,6 @@ in
     description = "Trigger rumble on urgent windows";
     partOf = [ "sway-session.target" ];
     wantedBy = [ "sway-session.target" ];
-    unitConfig = {
-      ConditionPathExists = [
-        "/dev/input/event2"
-        "/sys/class/input/event2/device/capabilities/ff"
-      ];
-    };
     serviceConfig = {
       Type = "simple";
       ExecStart = lib.getExe (
@@ -71,10 +65,26 @@ in
             self.packages.${pkgs.system}.gpd-rumble
           ];
           text = ''
+            # Find first force-feedback capable device
+            FF_DEVICE=""
+            for ev in /sys/class/input/event*; do
+              if [ -f "$ev/device/capabilities/ff" ] && [ "$(cat "$ev/device/capabilities/ff")" != "0" ]; then
+                FF_DEVICE="/dev/input/''${ev##*/}"
+                break
+              fi
+            done
+
+            if [ -z "$FF_DEVICE" ]; then
+              echo "No force-feedback device found, exiting"
+              exit 0
+            fi
+
+            echo "Using force-feedback device: $FF_DEVICE"
+
             swaymsg -t subscribe -m '["window"]' | \
             jq --unbuffered -r 'select(.change == "urgent" and .container.urgent == true) | "urgent"' | \
             while read -r _; do
-              gpd-rumble 200 100 &
+              gpd-rumble 200 100 "$FF_DEVICE" &
             done
           '';
         }
