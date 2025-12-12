@@ -102,8 +102,8 @@
             };
             internet = {
               roles.default.machines = {
-                prism.settings.host = "ssh://prism.lassul.us:45621";
-                neoprism.settings.host = "ssh://neoprism.lassul.us:45621";
+                prism.settings.host = "root@prism.lassul.us:45621";
+                neoprism.settings.host = "root@neoprism.lassul.us:45621";
               };
             };
             state-version = {
