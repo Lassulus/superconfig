@@ -10,23 +10,24 @@
       packages.pass = self.wrapLib.makeWrapper {
         pkgs = pkgs;
         package = pkgs.passage;
-        runtimeInputs =
-          [
-            pkgs.age-plugin-fido2-hmac
-            pkgs.age-plugin-yubikey
-            pkgs.age-plugin-tpm
-            self.packages.${system}.pass-otp
-            self.packages.${system}.age-detect
-          ]
-          ++ (pkgs.lib.optionals pkgs.stdenv.isDarwin [
-            pkgs.age-plugin-se
-          ])
-          ++ (pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [
-            # Dummy age-plugin-se for Linux (encryption only, no Secure Enclave hardware)
-            (pkgs.writeShellScriptBin "age-plugin-se" ''
-              exec env PYTHONUNBUFFERED=1 ${pkgs.python3.withPackages (ps: [ ps.cryptography ])}/bin/python3 ${./age-plugin-se-dummy.py} "$@"
-            '')
-          ]);
+        runtimeInputs = [
+          pkgs.age-plugin-fido2-hmac
+          pkgs.age-plugin-yubikey
+          pkgs.age-plugin-tpm
+          self.packages.${system}.pass-otp
+          self.packages.${system}.age-detect
+        ]
+        ++ (pkgs.lib.optionals pkgs.stdenv.isDarwin [
+          pkgs.age-plugin-se
+        ])
+        ++ (pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [
+          # Dummy age-plugin-se for Linux (encryption only, no Secure Enclave hardware)
+          (pkgs.writeShellScriptBin "age-plugin-se" ''
+            exec env PYTHONUNBUFFERED=1 ${
+              pkgs.python3.withPackages (ps: [ ps.cryptography ])
+            }/bin/python3 ${./age-plugin-se-dummy.py} "$@"
+          '')
+        ]);
         aliases = [ "pass" ];
         wrapper =
           {
