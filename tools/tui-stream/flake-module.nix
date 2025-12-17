@@ -2,48 +2,49 @@
 {
   perSystem =
     { pkgs, ... }:
+    let
+      python = pkgs.python3;
+    in
     {
-      packages.tui-stream-server = pkgs.writeShellApplication {
-        name = "tui-stream-server";
-        runtimeInputs = [
-          pkgs.ffmpeg
-          pkgs.wf-recorder # Wayland screen capture
-          pkgs.wlr-randr # Wayland resolution detection
-          pkgs.xorg.xdpyinfo # X11 resolution detection
-        ];
-        text = builtins.readFile ./server.sh;
-      };
+      packages.tui-stream-server = pkgs.writeScriptBin "tui-stream-server" ''
+        #!${python}/bin/python3
+        ${builtins.readFile ./server.py}
+      '';
 
-      packages.tui-stream-client = pkgs.writeShellApplication {
-        name = "tui-stream-client";
-        runtimeInputs = [
-          pkgs.mpv # Default player
-        ];
-        text = builtins.readFile ./client.sh;
-      };
+      packages.tui-stream-client =
+        let
+          wrappedClient = pkgs.writeScriptBin "tui-stream-client-unwrapped" ''
+            #!${python}/bin/python3
+            ${builtins.readFile ./client.py}
+          '';
+        in
+        pkgs.writeShellScriptBin "tui-stream-client" ''
+          export PATH="${pkgs.lib.makeBinPath [ pkgs.ffmpeg ]}:$PATH"
+          exec ${wrappedClient}/bin/tui-stream-client-unwrapped "$@"
+        '';
 
       # Combined package with both server and client
       packages.tui-stream = pkgs.symlinkJoin {
         name = "tui-stream";
-        paths = [
-          pkgs.writeShellApplication {
-            name = "tui-stream-server";
-            runtimeInputs = [
-              pkgs.ffmpeg
-              pkgs.wf-recorder
-              pkgs.wlr-randr
-              pkgs.xorg.xdpyinfo
-            ];
-            text = builtins.readFile ./server.sh;
-          }
-          pkgs.writeShellApplication {
-            name = "tui-stream-client";
-            runtimeInputs = [
-              pkgs.mpv
-            ];
-            text = builtins.readFile ./client.sh;
-          }
-        ];
+        paths =
+          let
+            server = pkgs.writeScriptBin "tui-stream-server" ''
+              #!${python}/bin/python3
+              ${builtins.readFile ./server.py}
+            '';
+            clientUnwrapped = pkgs.writeScriptBin "tui-stream-client-unwrapped" ''
+              #!${python}/bin/python3
+              ${builtins.readFile ./client.py}
+            '';
+            client = pkgs.writeShellScriptBin "tui-stream-client" ''
+              export PATH="${pkgs.lib.makeBinPath [ pkgs.ffmpeg ]}:$PATH"
+              exec ${clientUnwrapped}/bin/tui-stream-client-unwrapped "$@"
+            '';
+          in
+          [
+            server
+            client
+          ];
       };
     };
 }
