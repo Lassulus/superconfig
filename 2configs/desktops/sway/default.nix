@@ -67,6 +67,19 @@ in
     };
   };
 
+  # Inhibit idle when audio is playing (prevents suspend during calls/music)
+  systemd.user.services.sway-audio-idle-inhibit = {
+    description = "Inhibit idle when audio is playing";
+    partOf = [ "sway-session.target" ];
+    wantedBy = [ "sway-session.target" ];
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = "${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit";
+      Restart = "on-failure";
+      RestartSec = 1;
+    };
+  };
+
   systemd.user.services.sway-urgent-rumble = {
     description = "Trigger rumble on urgent windows";
     partOf = [ "sway-session.target" ];
@@ -381,7 +394,6 @@ in
     exec ${pkgs.copyq}/bin/copyq --start-server
     exec ydotoold
     exec_always pkill kanshi; exec ${pkgs.kanshi}/bin/kanshi
-    exec_always pkill sway-audio-idle-inhibit; exec ${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit
 
     # theme and env specific stuff
     exec_always ${pkgs.writers.writeDash "dbus-sway-environment" ''
