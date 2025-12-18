@@ -7,6 +7,7 @@
         runtimeInputs = [
           pkgs.ffmpeg
           pkgs.coreutils
+          pkgs.procps
           pkgs.swaylock-plugin
           pkgs.mpvpaper
         ];
