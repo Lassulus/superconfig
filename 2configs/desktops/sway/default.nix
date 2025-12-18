@@ -8,8 +8,25 @@ let
 
   term = "/run/current-system/sw/bin/alacritty";
 
+  # Unified script: switch to workspace and move it to current output
+  gotoWorkspace = pkgs.writeShellApplication {
+    name = "goto-workspace";
+    runtimeInputs = [
+      pkgs.sway
+      pkgs.jq
+    ];
+    text = ''
+      WS="$1"
+      CURRENT_OUTPUT=$(swaymsg -r -t get_outputs | jq -r '.[] | select(.focused == true).name')
+      swaymsg workspace "$WS"
+      swaymsg move workspace to output "$CURRENT_OUTPUT"
+    '';
+  };
+
 in
 {
+  # Make goto-workspace available system-wide for eww and workspace-popup
+  environment.systemPackages = [ gotoWorkspace ];
   imports = [
     ../lib/wayland.nix
     ./eww.nix
@@ -258,14 +275,12 @@ in
 
     bindsym $mod+q exec ${pkgs.writers.writeDash "goto_workspace" ''
       set -efux
-      CURRENT_OUTPUT=$(swaymsg -r -t get_outputs | jq '.[] | select(.focused == true).name')
       WS=$(swaymsg -r -t get_workspaces |
         jq -r '.[].name' |
         menu -p 'Workspace name: '
       )
       if [ -n "$WS" ]; then
-        swaymsg workspace "$WS"
-        swaymsg move workspace to output "$CURRENT_OUTPUT"
+        ${lib.getExe gotoWorkspace} "$WS"
       fi
     ''}
 

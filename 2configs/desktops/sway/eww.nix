@@ -5,6 +5,9 @@
 }:
 let
 
+  # Reference to goto-workspace (defined in default.nix, available at /run/current-system/sw/bin/)
+  gotoWorkspace = "/run/current-system/sw/bin/goto-workspace";
+
   # eww configuration
   ewwYuck = pkgs.writeText "eww.yuck" ''
     ; Magic variables (built-in, no polling needed)
@@ -55,7 +58,7 @@ let
       (box :class "workspaces" :orientation "h" :space-evenly false :spacing 0
         (for ws in workspaces
           (button :class {ws.urgent ? "workspace urgent" : (ws.focused ? "workspace focused" : "workspace")}
-                  :onclick "swaymsg workspace ''${ws.name}"
+                  :onclick "${gotoWorkspace} ''${ws.name}"
             {ws.name}))))
 
     (defwidget graph-widget [value icon class unit ?tooltip]
@@ -503,4 +506,5 @@ in
       RestartSec = 1;
     };
   };
+
 }
