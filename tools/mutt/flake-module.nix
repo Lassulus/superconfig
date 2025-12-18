@@ -96,12 +96,11 @@
             virtual-mailboxes "Junk" "notmuch://?query=tag:junk"
             virtual-mailboxes "All" "notmuch://?query=*"
 
-            # clan.lol IMAP
-            set imap_user = "infra@clan.lol"
-            set imap_pass = "`SOPS_AGE_KEY=$(rbw get --folder clan.lol clan-infra --field age-key) nix develop git+https://git.clan.lol/clan/clan-infra -c clan vars get --flake git+https://git.clan.lol/clan/clan-infra web01 infra-mail/infra-password`"
-            set imap_check_subscribed = yes
-            virtual-mailboxes "─── clan-infra ───" "notmuch://?query=tag:nonexistent-separator-tag"
-            mailboxes "imaps://mail.clan.lol"
+            # clan.lol IMAP - no mailboxes declaration to prevent any startup connection
+            # Select the separator entry in sidebar, folder-hook will redirect to the IMAP server
+            virtual-mailboxes "clan-infra" "notmuch://?query=tag:nonexistent-separator-tag"
+            account-hook imaps://mail.clan.lol "set imap_user = 'infra@clan.lol'; set imap_pass = \"\`SOPS_AGE_KEY=\$(rbw get --folder clan.lol clan-infra --field age-key) nix develop git+https://git.clan.lol/clan/clan-infra -c clan vars get --flake git+https://git.clan.lol/clan/clan-infra web01 infra-mail/infra-password\`\""
+            folder-hook "notmuch://\\?query=tag:nonexistent-separator-tag" "push '<change-folder>imaps://mail.clan.lol<enter>'"
 
             tag-transforms "junk"     "k" \
                            "unread"   "u" \
