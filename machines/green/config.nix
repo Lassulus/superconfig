@@ -91,5 +91,6 @@
 
   environment.systemPackages = [
     self.packages.${pkgs.system}.muchsync
+    pkgs.rbw
   ];
 }
