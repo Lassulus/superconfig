@@ -19,6 +19,7 @@ let
     (defpoll cpu-freq :interval "2s" :initial 0 "${lib.getExe cpuFreqScript}")
     (defpoll cpu-load :interval "2s" :initial "0.00" "cut -d' ' -f1 /proc/loadavg")
     (defpoll temperature :interval "2s" :initial '{"temp": 0, "fan": 0}' "${lib.getExe tempScript}")
+    (defpoll power :interval "2s" :initial '{"watts": 0, "charging": false}' "${lib.getExe powerScript}")
     (defpoll battery :interval "10s" :initial '{"capacity": "100", "icon": "󰁹", "watts": "0", "time_remaining": "--", "status": "Full"}' "${lib.getExe batteryScript}")
     (defpoll volume :interval "1s" :initial '{"level": "0", "icon": "󰕿"}' "${lib.getExe volumeScript}")
     (defpoll network :interval "5s" :initial "󰖪 ..." "${lib.getExe networkScript}")
@@ -48,6 +49,7 @@ let
         (graph-widget :value {EWW_CPU.avg} :icon "󰍛" :class "cpu" :unit "%" :tooltip "Load: ''${cpu-load} | ''${cpu-freq} MHz")
         (graph-widget :value {EWW_RAM.used_mem_perc} :icon "󰘚" :class "memory" :unit "%")
         (graph-widget :value {temperature.temp} :icon "󰔏" :class "temp" :unit "°" :tooltip "Fan: ''${temperature.fan} RPM")
+        (power-graph-widget)
         (brightness-widget)
         (battery-widget)
         (idle-inhibitor)
@@ -79,6 +81,20 @@ let
       (box :class "battery" :orientation "h" :space-evenly false
            :tooltip "''${battery.watts}W | ''${battery.time_remaining} ''${battery.status == 'Charging' ? 'to full' : 'remaining'}"
         (label :text "''${battery.capacity}% ''${battery.icon}")))
+
+    (defwidget power-graph-widget []
+      (box :class {power.charging ? "graph-module power charging" : "graph-module power"} :orientation "h" :space-evenly false :spacing 4
+           :tooltip "''${battery.time_remaining} ''${battery.status == 'Charging' ? 'to full' : 'remaining'}"
+        (graph :class "graph"
+               :value {power.watts}
+               :thickness 3
+               :time-range "60s"
+               :min 0
+               :max 45
+               :dynamic false
+               :line-style "round"
+               :width 75)
+        (label :text "''${round(power.watts, 1)}W ''${power.charging ? '󰂄' : '󰁹'}")))
 
     (defwidget volume-widget []
       (box :class "volume" :orientation "h" :space-evenly false
@@ -164,6 +180,13 @@ let
         background-color: #ff9e64;
         color: #1a1b26;
       }
+      &.power {
+        background-color: #f7768e;
+        color: #1a1b26;
+        &.charging {
+          background-color: #9ece6a;
+        }
+      }
     }
 
     .graph {
@@ -246,6 +269,88 @@ let
     '';
   };
 
+  powerScript = pkgs.writeShellApplication {
+    name = "eww-power";
+    runtimeInputs = [
+      pkgs.jq
+      pkgs.bc
+    ];
+    text = ''
+      # Use RAPL for actual system power consumption (works on Intel and AMD Zen)
+      # Falls back to battery power_now if RAPL unavailable
+
+      state_file="/tmp/eww-power-state"
+      rapl_path="/sys/class/powercap/intel-rapl:0/energy_uj"
+
+      # Check charging status
+      charging="false"
+      for p in /sys/class/power_supply/BAT* /sys/class/power_supply/BATT*; do
+        if [ -f "$p/status" ]; then
+          status=$(cat "$p/status" 2>/dev/null || echo "Unknown")
+          if [ "$status" = "Charging" ]; then
+            charging="true"
+          fi
+          break
+        fi
+      done
+
+      # Try RAPL first (gives actual system power regardless of charging state)
+      if [ -r "$rapl_path" ]; then
+        current_energy=$(cat "$rapl_path")
+        current_time=$(date +%s%N)
+
+        if [ -f "$state_file" ]; then
+          read -r prev_energy prev_time < "$state_file"
+
+          # Calculate power from energy difference
+          energy_diff=$((current_energy - prev_energy))
+          time_diff=$((current_time - prev_time))
+
+          # Handle counter wrap-around
+          if [ "$energy_diff" -lt 0 ]; then
+            max_energy=$(cat /sys/class/powercap/intel-rapl:0/max_energy_range_uj 2>/dev/null || echo 0)
+            energy_diff=$((energy_diff + max_energy))
+          fi
+
+          if [ "$time_diff" -gt 0 ]; then
+            # energy_diff is in microjoules, time_diff is in nanoseconds
+            # watts = microjoules / (nanoseconds / 1e9) / 1e6 = microjoules * 1000 / nanoseconds
+            watts=$(echo "scale=1; $energy_diff * 1000 / $time_diff" | bc)
+          else
+            watts="0"
+          fi
+        else
+          watts="0"
+        fi
+
+        # Save current state
+        echo "$current_energy $current_time" > "$state_file"
+
+        jq -n --argjson watts "$watts" --argjson charging "$charging" '{watts: $watts, charging: $charging}'
+        exit 0
+      fi
+
+      # Fallback: use battery power_now (only accurate when discharging)
+      bat_path=""
+      for p in /sys/class/power_supply/BAT* /sys/class/power_supply/BATT*; do
+        if [ -f "$p/power_now" ]; then
+          bat_path="$p"
+          break
+        fi
+      done
+
+      if [ -z "$bat_path" ]; then
+        echo '{"watts": 0, "charging": false}'
+        exit 0
+      fi
+
+      power_now=$(cat "$bat_path/power_now" 2>/dev/null || echo 0)
+      watts=$(echo "scale=1; $power_now / 1000000" | bc)
+
+      jq -n --argjson watts "$watts" --argjson charging "$charging" '{watts: $watts, charging: $charging}'
+    '';
+  };
+
   batteryScript = pkgs.writeShellApplication {
     name = "eww-battery";
     runtimeInputs = [
@@ -287,7 +392,9 @@ let
           hours=$(echo "scale=2; $energy_now / $power_now" | bc)
         fi
         # Convert to hours:minutes
+        # Note: bc outputs ".76" for values < 1, so cut returns empty string
         h=$(echo "$hours" | cut -d. -f1)
+        h=''${h:-0}  # Default to 0 if empty (i.e., less than 1 hour)
         m=$(echo "scale=0; ($hours - $h) * 60 / 1" | bc)
         time_remaining="''${h}h ''${m}m"
       else
@@ -413,6 +520,12 @@ let
 
 in
 {
+  # Make RAPL energy counters readable for power monitoring
+  # Works on both Intel and AMD Zen CPUs (via intel_rapl_msr module)
+  services.udev.extraRules = ''
+    SUBSYSTEM=="powercap", ACTION=="add", RUN+="${pkgs.coreutils}/bin/chmod a+r /sys/class/powercap/%k/energy_uj"
+  '';
+
   # eww daemon
   systemd.user.services.eww = {
     description = "ElKowars Wacky Widgets daemon";
