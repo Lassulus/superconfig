@@ -19,6 +19,7 @@
       ];
     };
     http.enable = true;
+    tcp.enable = true;
   };
 
   networking.firewall.interfaces.int0.allowedTCPPorts = [
