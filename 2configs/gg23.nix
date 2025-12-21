@@ -29,7 +29,7 @@
     # };
   };
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
-  systemd.network.networks."50-int0" = {
+  systemd.network.networks."10-int0" = {
     name = "int0";
     address = [
       "10.42.0.1/24"
