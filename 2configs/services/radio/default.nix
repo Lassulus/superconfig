@@ -11,6 +11,21 @@ let
 
   music_dir = "/var/music";
 
+  # dash 0.5.13 has a regression where `read` builtin discards input when stdin is a socket
+  # This breaks htgen which uses tcpserver. Pin htgen's dash to 0.5.12 until upstream fixes it.
+  # See: https://git.kernel.org/pub/scm/utils/dash/dash.git/commit/?id=1d072e9c3292281a7eee54c41fec117ff22723e5
+  dash-0_5_12 = pkgs.dash.overrideAttrs (old: rec {
+    version = "0.5.12";
+    src = pkgs.fetchurl {
+      url = "http://gondor.apana.org.au/~herbert/dash/files/dash-${version}.tar.gz";
+      hash = "sha256-akdKxG6LCzKRbExg32lMggWNMpfYs4W3RQgDDKSo8oo=";
+    };
+  });
+
+  htgen-fixed = pkgs.htgen.override {
+    pkgs = pkgs // { dash = dash-0_5_12; };
+  };
+
   skip_track = pkgs.writers.writeBashBin "skip_track" ''
     set -eu
 
@@ -185,12 +200,14 @@ in
   ];
 
   krebs.htgen.radio = {
+    package = htgen-fixed;
     port = 8001;
     user = {
       name = "radio";
     };
     scriptFile = pkgs.writeDash "radio" ''
-      case "$Method $Request_URI" in
+      set -x
+      case "''${Method:-} ''${Request_URI:-}" in
         "POST /skip")
           printf 'HTTP/1.1 200 OK\r\n'
           printf 'Connection: close\r\n'
