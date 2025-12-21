@@ -10,7 +10,7 @@ let
     } $out/model.onnx
     ln -s ${
       pkgs.fetchurl {
-        url = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/libritts/high/en_US-libritts-high.onnx.json?download=true.json";
+        url = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/libritts/high/en_US-libritts-high.onnx.json?download=true";
         hash = "sha256-Lv3G1/lUWIuBgBMsvZuAAZM/3QCTLJK8kv0NICip6z0=";
       }
     } $out/model.onnx.json
