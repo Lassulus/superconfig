@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
   security.acme.certs."mail.lassul.us" = {
     group = "lasscert";
@@ -27,7 +27,10 @@
     enable = true;
     primary_hostname = "lassul.us";
     dkim = [
-      { domain = "lassul.us"; }
+      {
+        domain = "lassul.us";
+        private_key = config.clan.core.vars.generators.lassul-us-dkim.files."lassul.us.dkim.priv".path;
+      }
     ];
     ssl_cert = "/var/lib/acme/mail.lassul.us/fullchain.pem";
     ssl_key = "/var/lib/acme/mail.lassul.us/key.pem";
