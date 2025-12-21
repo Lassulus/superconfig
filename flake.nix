@@ -16,7 +16,7 @@
 
     clan-core.url = "git+https://git.clan.lol/clan/clan-core";
     # clan-core.url = "path:/Users/lassulus/src/clan/clan-core";
-    # clan-core.url = "git+file:/home/lass/src/clan/clan-core";
+    # clan-core.url = "path:/home/lass/src/clan/clan-core";
     clan-core.inputs.nixpkgs.follows = "nixpkgs";
     clan-core.inputs.disko.follows = "disko";
 
