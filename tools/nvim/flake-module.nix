@@ -106,6 +106,12 @@
 
           -- Create a command to manually refresh theme
           vim.api.nvim_create_user_command("RefreshTheme", detect_and_set_theme, {})
+
+          -- Configure lsp_lines to always show and disable default virtual_text
+          vim.diagnostic.config({
+            virtual_text = false,
+            virtual_lines = true,
+          })
         '';
         globals = {
           mapleader = " ";
@@ -236,6 +242,12 @@
             ];
             key = "gD";
             action = ":lua vim.lsp.buf.declaration()<CR>";
+          }
+          {
+            mode = "n";
+            key = "<leader>ll";
+            action = ":lua require('lsp_lines').toggle()<CR>";
+            options.desc = "Toggle lsp_lines";
           }
         ];
         # autoCmd = [

@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 {
   krebs.sync-containers3.containers.yellow = {
-    sshKey = "${config.krebs.secret.directory}/yellow.sync.key";
+    sshKey = config.clan.core.vars.generators.yellow-container.files."yellow.sync.key".path;
     startCommand = ''
       export PATH=$PATH:${pkgs.git}/bin
       until ${pkgs.dig.host}/bin/host github.com; do sleep 1; done
