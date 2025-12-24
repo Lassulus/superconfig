@@ -41,6 +41,8 @@ let
     Buschochsen
     Kurzschwanzaffen
     Vicuñas
+    Goldwandsänger
+    Nachtechsen
   '';
   systemPlugin = {
     plugin = "system";
