@@ -1,6 +1,5 @@
-{ ... }:
+{ pkgs, ... }:
 {
-
   nixpkgs.config.permittedInsecurePackages = [
     "jitsi-meet-1.0.8792"
   ];
@@ -26,7 +25,40 @@
     };
   };
 
-  services.prosody.checkConfig = false;
+  services.prosody.extraPluginPaths =
+    let
+      prosody-contrib-plugins = pkgs.fetchFromGitHub {
+        owner = "jitsi-contrib";
+        repo = "prosody-plugins";
+        rev = "v20250923";
+        sha256 = "sha256-sq33ATYkZWF+ASR4IZbTGrkGWwRT+xpPMuARLSdxoMU=";
+      };
+    in
+    [ "${prosody-contrib-plugins}/event_sync" ];
+
+  # The first argument needs to be a valid domain name (no underscores) and a subdomain
+  # of a virtual host configured in prosody (`services.prosody.virtualHosts`).
+  # The second argument is the name of the module which should be found in the top level
+  # of a plugin directory.
+  services.prosody.extraConfig = ''
+    Component "numtide-event-sync.jitsi.lassul.us" "event_sync_component"
+      muc_component = "conference.jitsi.lassul.us"
+      breakout_component = "breakout.jitsi.lassul.us"
+
+      api_prefix = "http://jitsi-presence.numtide.com"
+
+    Component "pinpox-event-sync.jitsi.lassul.us" "event_sync_component"
+      muc_component = "conference.jitsi.lassul.us"
+      breakout_component = "breakout.jitsi.lassul.us"
+
+      api_prefix = "http://matrixpresence.0cx.de:8227"
+
+    Component "pinpox2-event-sync.jitsi.lassul.us" "event_sync_component"
+      muc_component = "conference.jitsi.lassul.us"
+      breakout_component = "breakout.jitsi.lassul.us"
+
+      api_prefix = "http://matrixpresence.0cx.de:8226"
+  '';
 
   services.nginx.virtualHosts."meet.lassul.us" = {
     enableACME = true;
