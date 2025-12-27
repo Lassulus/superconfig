@@ -12,7 +12,7 @@
     # interface.bind = "retiolum";
     extraConfig = {
       bind_addr = config.krebs.build.host.nets.retiolum.ip4.addr;
-      bootstrap_expect = 3;
+      bootstrap_expect = 1;
       server = true;
       # retry_join = config.services.consul.extraConfig.start_join;
       retry_join = lib.mapAttrsToList (_n: h: lib.head h.nets.retiolum.aliases) (
