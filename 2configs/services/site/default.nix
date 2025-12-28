@@ -34,15 +34,6 @@
       default_type "text/html";
       alias ${pkgs.krebspage}/index.html;
     '';
-    locations."= /init".extraConfig =
-      let
-        initscript = pkgs.init.override {
-          pubkey = config.krebs.users.lass.pubkey;
-        };
-      in
-      ''
-        alias ${initscript}/bin/init;
-      '';
     locations."= /ssh.pub".extraConfig = ''
       alias ${pkgs.writeText "pub" config.krebs.users.lass-yubikey.pubkey};
     '';

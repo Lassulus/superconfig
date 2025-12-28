@@ -66,8 +66,6 @@
   krebs.build.host = config.krebs.hosts.mors;
 
   environment.systemPackages = with pkgs; [
-    self.packages.${pkgs.system}.acronym
-
     dnsutils
     woeusb
     (pkgs.writeDashBin "play-on" ''

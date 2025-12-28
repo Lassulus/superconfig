@@ -230,7 +230,6 @@
       printf '\a'
     '')
     usbutils
-    self.packages.${pkgs.system}.logify
     goify
 
     #unpack stuff

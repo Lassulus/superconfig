@@ -159,19 +159,6 @@ in
     }
     ../../2configs/minecraft.nix
     {
-      lass.nichtparasoup.enable = true;
-      services.nginx = {
-        enable = true;
-        virtualHosts."lol.lassul.us" = {
-          forceSSL = true;
-          enableACME = true;
-          locations."/".extraConfig = ''
-            proxy_pass http://localhost:5001;
-          '';
-        };
-      };
-    }
-    {
       imports = [
         ../../2configs/wiregrill.nix
       ];
