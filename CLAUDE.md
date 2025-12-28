@@ -25,7 +25,8 @@ The repository manages multiple overlay networks:
 - **Tor**: Anonymous network access
 
 ### Module System
-- `2configs/`: Main configuration modules (imported by all machines)
+- `2configs/`: Main configuration modules
+- `2configs/default.nix`: imported by all machines
 - `3modules/`: Custom NixOS module definitions
 - Stockholm modules are also imported for krebs infrastructure
 
@@ -35,11 +36,8 @@ The repository manages multiple overlay networks:
 # Enter development shell
 nix develop
 
-# Run interactive menu (default package)
-nix run
-
 # Deploy to a specific machine
-nix run .#deploy -- <MACHINE_NAME>
+clan machines update <MACHINE_NAME>
 
 # Format code
 nix fmt
@@ -64,15 +62,14 @@ torify ssh $(pass show machines/<machine-name>/tor-hostname)  # via tor
 
 **CRITICAL**: New nix files must be staged (git add) before they are available in flake evaluation. When creating new packages, modules, or any nix files, always run `git add <files>` before testing with `nix build`, `nix run`, etc.
 
-## Machine Facts and Secrets
+## Machine Facts and Secrets via vars
 
-Each machine stores its public facts in `machines/<name>/facts/` including:
 - SSH public keys
 - Network identities (retiolum, mycelium, zerotier)
 - Syncthing IDs
 - DKIM keys (for mail servers)
 
-Secrets are managed via password-store and uploaded to `/etc/secrets` on deployment.
+Secrets are managed via password-store and uploaded to `/run/secrets` on deployment.
 
 ## Adding New Machines
 
@@ -81,11 +78,6 @@ Secrets are managed via password-store and uploaded to `/etc/secrets` on deploym
 3. Generate facts using clan-cli
 4. Add to inventory in `flake.nix`
 5. Deploy using `nix run .#deploy -- <name>`
-
-## Testing
-
-- VM tests: `./5pkgs/init/test.sh`
-- Container tests are configured in `2configs/container-tests.nix`
 
 ## Commit Message Guidelines
 
