@@ -341,6 +341,12 @@
     openFirewall = true;
   };
 
+  # flaresolverr for bypassing cloudflare on some indexers
+  services.flaresolverr = {
+    enable = true;
+    openFirewall = true;
+  };
+
   # subtitles
   services.bazarr = {
     enable = true;
