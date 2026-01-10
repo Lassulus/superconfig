@@ -1,14 +1,25 @@
 #!/usr/bin/env bash
 set -euo pipefail
-set -x
 
 # Create temporary directory for this tor instance
 TOR_DIR=$(mktemp -d -t tornade.XXXXXX)
-trap 'rm -rf "$TOR_DIR"' EXIT
 
-# Generate random ports
-SOCKS_PORT=$((9050 + RANDOM % 1000))
+# Generate random ports in ephemeral range (49152-65535) to avoid collisions
+SOCKS_PORT=$((49152 + RANDOM % 16383))
 CONTROL_PORT=$((SOCKS_PORT + 1))
+
+# Track tor PID for cleanup
+TOR_PID=""
+
+# Cleanup function - must be defined before trap
+cleanup() {
+  if [ -n "$TOR_PID" ] && kill -0 "$TOR_PID" 2>/dev/null; then
+    kill "$TOR_PID" 2>/dev/null || true
+    wait "$TOR_PID" 2>/dev/null || true
+  fi
+  rm -rf "$TOR_DIR"
+}
+trap cleanup EXIT INT TERM
 
 # Create tor configuration
 cat > "$TOR_DIR/torrc" <<EOF
@@ -18,66 +29,30 @@ ControlPort 127.0.0.1:$CONTROL_PORT
 Log notice file $TOR_DIR/tor.log
 RunAsDaemon 0
 
-# Performance and reliability optimizations
-CircuitBuildTimeout 15
+# Hidden service optimizations - longer timeouts for .onion addresses
+CircuitBuildTimeout 60
 LearnCircuitBuildTimeout 0
-NumEntryGuards 8
-KeepalivePeriod 60
-SocksTimeout 120
+SocksTimeout 300
 
-# Reliability settings
-MaxCircuitDirtiness 600
-NewCircuitPeriod 30
-UseEntryGuards 1
+# Keep circuits stable for longer sessions
+MaxCircuitDirtiness 900
+KeepalivePeriod 60
 EOF
 
 # Start tor in background - suppress output to avoid protocol interference
 tor -f "$TOR_DIR/torrc" >/dev/null 2>&1 &
 TOR_PID=$!
 
-# Function to cleanup tor process
-cleanup() {
-  if kill -0 "$TOR_PID" 2>/dev/null; then
-    kill "$TOR_PID" 2>/dev/null || true
-    wait "$TOR_PID" 2>/dev/null || true
+# Wait for Tor to bootstrap (up to 90 seconds)
+for i in {1..90}; do
+  if [ -f "$TOR_DIR/tor.log" ] && grep -q "Bootstrapped 100%" "$TOR_DIR/tor.log" 2>/dev/null; then
+    break
   fi
-  rm -rf "$TOR_DIR"
-}
-trap cleanup EXIT INT TERM
-
-# Retry up to 5 times to establish circuits
-for attempt in 1 2 3 4 5; do
-  
-  if [ $attempt -gt 1 ]; then
-    # Kill previous tor instance and restart
-    kill "$TOR_PID" 2>/dev/null || true
-    wait "$TOR_PID" 2>/dev/null || true
-    tor -f "$TOR_DIR/torrc" >/dev/null 2>&1 &
-    TOR_PID=$!
+  # If log file doesn't exist after 5 seconds, tor likely failed to start
+  if [ "$i" -eq 5 ] && [ ! -f "$TOR_DIR/tor.log" ]; then
+    exit 1
   fi
-  
-  # Check frequently at first, then slow down - longer timeout per attempt
-  for i in {1..120}; do
-    # Check if log file exists and contains the success message
-    if [ -f "$TOR_DIR/tor.log" ] && grep -q "Bootstrapped 100%" "$TOR_DIR/tor.log" 2>/dev/null; then
-      # Success - exit both loops
-      break 2
-    fi
-    # If log file doesn't exist after 2 seconds, tor likely failed to start
-    if [ "$i" -eq 20 ] && [ ! -f "$TOR_DIR/tor.log" ]; then
-      # Log file wasn't created after 2 seconds - tor likely failed completely
-      # Exit with failure immediately rather than retrying
-      break
-    fi
-    # Check every 0.1s for first 2 seconds, then every 0.5s
-    if [ "$i" -le 20 ]; then
-      sleep 0.1
-    else
-      sleep 0.5
-    fi
-  done
-  
-  # This attempt failed, continue to next attempt
+  sleep 1
 done
 
 # Final check - if still not ready after all attempts, exit
