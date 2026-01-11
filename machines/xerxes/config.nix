@@ -8,6 +8,7 @@
     ../../2configs/tpm2.nix
     ../../2configs/desktops/sway/default.nix
     ../../2configs/sunshine.nix
+    ../../2configs/rtl-sdr.nix
   ];
   system.stateVersion = "25.05";
 
