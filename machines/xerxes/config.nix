@@ -11,6 +11,8 @@
   ];
   system.stateVersion = "25.05";
 
+  boot.tmp.cleanOnBoot = true;
+
   krebs.build.host = self.inputs.stockholm.kartei.hosts.xerxes;
 
   programs.firefox.enable = true;
