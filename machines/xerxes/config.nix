@@ -30,4 +30,7 @@
   documentation.nixos.enable = true;
   programs.steam.enable = true;
 
+  services.ollama = {
+    enable = true;
+  };
 }
