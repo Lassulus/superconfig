@@ -14,9 +14,5 @@
   # SDR and TETRA tools
   environment.systemPackages = [
     pkgs.rtl-sdr-blog  # V4 compatible drivers and tools
-    pkgs.gqrx          # SDR receiver with spectrum analyzer
-    pkgs.sox           # Audio processing for recordings
-    self.packages.${pkgs.system}.tetra-kit
-    self.packages.${pkgs.system}.tetra-receiver
   ];
 }
