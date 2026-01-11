@@ -8,20 +8,16 @@ This is lassulus's personal NixOS/nix-darwin configuration repository, built on 
 - Multiple machine configurations in `machines/`
 - Configuration modules in `2configs/` and `3modules/`
 - Custom packages in `5pkgs/`
-- Various network overlays (retiolum, spora, nether, zerotier, mycelium)
+- packages which could in theory be upstreamed to nixkgs should go into the pkgs folder, in the tools folder we add tools we write ourself which are more complex or not upstreamable
 
 ## Key Architecture Components
 
 ### Machine Management
 - **Clan-core**: Primary framework for managing multiple machines
-- **Inventory**: Machines are tagged in `flake.nix` (laptop/server tags)
-- **Secrets**: Uses password-store for secrets management via clan.core.facts
+- **Secrets**: Uses password-store for secrets management via clan.core.vars
 
 ### Network Overlays
 The repository manages multiple overlay networks:
-- **Retiolum**: VPN network (access via `.r` suffix)
-- **Spora**: Mycelium-based P2P network (access via `.s` suffix)  
-- **Nether**: ZeroTier-based network overlay (access via `.n` suffix)
 - **Tor**: Anonymous network access
 
 ### Module System
