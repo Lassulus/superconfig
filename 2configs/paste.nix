@@ -11,8 +11,6 @@
     self.inputs.stockholm.nixosModules.htgen
   ];
 
-  security.acme.certs."cyberlocker".server = config.krebs.ssl.acmeURL;
-  security.acme.certs."paste".server = config.krebs.ssl.acmeURL;
   services.nginx.virtualHosts.cyberlocker = {
     enableACME = true;
     addSSL = true;
