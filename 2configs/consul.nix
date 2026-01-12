@@ -12,7 +12,7 @@
     # interface.bind = "retiolum";
     extraConfig = {
       bind_addr = config.krebs.build.host.nets.retiolum.ip4.addr;
-      bootstrap_expect = 1;
+      bootstrap_expect = 3;
       server = true;
       # retry_join = config.services.consul.extraConfig.start_join;
       retry_join = lib.mapAttrsToList (_n: h: lib.head h.nets.retiolum.aliases) (
@@ -29,15 +29,19 @@
         cleanup_dead_servers = true;
         # How long a server must be stable before promoting
         server_stabilization_time = "10s";
-        # Only requires 3 servers minimum instead of all configured servers
-        min_quorum = 3;
+        # Allow cluster to operate with 2 of 3 nodes (majority quorum)
+        min_quorum = 2;
       };
 
-      # Performance tuning for faster leader elections
+      # Performance tuning - slightly relaxed for network tolerance
       performance = {
-        # Reduce raft timing for faster recovery
-        raft_multiplier = 1;
+        # 2 = default, gives more time for slow/unstable networks
+        # 1 was too aggressive and caused leader flapping
+        raft_multiplier = 2;
       };
+
+      # Reconnect timeout for failed nodes (default 72h, reduce for faster cleanup)
+      reconnect_timeout = "24h";
 
       # Leave on terminate for cleaner shutdowns
       leave_on_terminate = true;
@@ -48,9 +52,6 @@
   systemd.services.consul = {
     # Add pre-start script to clean up potential issues
     preStart = ''
-      # Remove any stale peers.json from failed recovery attempts
-      rm -f /var/lib/consul/raft/peers.json
-
       # Ensure proper permissions
       chown -R consul:consul /var/lib/consul
     '';
