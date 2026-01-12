@@ -6,6 +6,9 @@
     self.inputs.nixos-hardware.nixosModules.lenovo-thinkpad-x220
   ];
 
+  # Disable hdapsd - not needed for SSD, and the package is broken with newer GCC
+  services.hdapsd.enable = false;
+
   boot.loader.grub = {
     enable = true;
     device = "/dev/disk/by-id/ata-Samsung_SSD_850_EVO_500GB_S2RBNX0H662201F";
