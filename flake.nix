@@ -117,6 +117,29 @@
                 }
               ];
             };
+            yggdrasil = {
+              roles.default.tags.nixos = { };
+            };
+            tor-yggdrasil = {
+              module.name = "tor";
+              roles.client.tags.all = { };
+              roles.server.tags.all = { };
+              roles.server.settings = {
+                secretHostname = false;
+                portMapping = [
+                  {
+                    # tcp
+                    port = 6443;
+                    target.port = 6443;
+                  }
+                  {
+                    # tls
+                    port = 6446;
+                    target.port = 6443;
+                  }
+                ];
+              };
+            };
           };
         };
         machines =
