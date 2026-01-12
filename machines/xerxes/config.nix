@@ -9,6 +9,7 @@
     ../../2configs/desktops/sway/default.nix
     ../../2configs/sunshine.nix
     ../../2configs/rtl-sdr.nix
+    ../../2configs/browsers.nix
   ];
   system.stateVersion = "25.05";
 
@@ -16,7 +17,6 @@
 
   krebs.build.host = self.inputs.stockholm.kartei.hosts.xerxes;
 
-  programs.firefox.enable = true;
   environment.systemPackages = [
     pkgs.bitwarden-desktop
     pkgs.rbw
