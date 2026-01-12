@@ -102,8 +102,10 @@
             };
             internet = {
               roles.default.machines = {
-                prism.settings.host = "root@prism.lassul.us:45621";
-                neoprism.settings.host = "root@neoprism.lassul.us:45621";
+                prism.settings.host = "prism.lassul.us";
+                prism.settings.port = 45621;
+                neoprism.settings.host = "neoprism.lassul.us";
+                neoprism.settings.port = 45621;
               };
             };
             state-version = {
