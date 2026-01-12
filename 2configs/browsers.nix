@@ -5,7 +5,7 @@
     nativeMessagingHosts.packages = [
       pkgs.tridactyl-native
     ];
-    package = pkgs.firefox-devedition;
+    package = pkgs.firefox;
   };
   environment.variables.BROWSER = "${pkgs.firefox-devedition}/bin/firefox-devedition";
 }
