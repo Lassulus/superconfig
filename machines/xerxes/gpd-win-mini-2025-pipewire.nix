@@ -6,7 +6,7 @@
 let
   # The ALSA output device - may need adjustment based on PCI enumeration
   # Use `pactl list sinks short` or `pw-cli list-objects | grep alsa_output` to find the correct device
-  alsaDevice = "alsa_output.pci-0000_63_00.6.analog-stereo";
+  alsaDevice = "alsa_output.pci-0000_c4_00.6.analog-stereo";
 
   pipewireConfig = pkgs.writeTextDir "share/pipewire/pipewire.conf.d/gpd-win-mini-2025.conf" ''
     # GPD Win Mini 2025 speaker EQ
@@ -82,7 +82,7 @@ let
                             type  = builtin
                             name  = eq_band_11
                             label = bq_highshelf
-                            control = { "Freq" = 0.0 "Q" = 1.0 "Gain" = 15.0 }
+                            control = { "Freq" = 4000.0 "Q" = 1.0 "Gain" = 6.0 }
                         }
                     ]
                     links = [

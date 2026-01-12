@@ -4,6 +4,7 @@
     ./disk.nix
     ./config.nix
     ./gpd-fan.nix
+    ./gpd-win-mini-2025-pipewire.nix
   ];
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
