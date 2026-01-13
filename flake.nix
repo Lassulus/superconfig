@@ -56,6 +56,11 @@
     le_menu.url = "github:lassulus/le_menu";
     # le_menu.url = "git+file:/home/lass/src/le_menu";
     le_menu.inputs.nixpkgs.follows = "nixpkgs";
+
+    extra-container.url = "github:erikarvstedt/extra-container";
+    extra-container.inputs.nixpkgs.follows = "nixpkgs";
+
+    nix-hashlib.url = "git+https://git.clan.lol/clan/nix-hashlib";
   };
 
   outputs =
@@ -182,6 +187,16 @@
       flake.clanInternals = clan.clanInternals;
       flake.darwinConfigurations = clan.darwinConfigurations;
       flake.clan = clan;
+
+      # Container configurations for use with extra-container
+      # Auto-discovers machines with container.nix
+      flake.containerConfigurations = nixpkgs.lib.mapAttrs
+        (machineName: _: import ./machines/${machineName}/container.nix { inherit self; })
+        (
+          nixpkgs.lib.filterAttrs (
+            machineName: _: builtins.pathExists ./machines/${machineName}/container.nix
+          ) (builtins.readDir ./machines)
+        );
       perSystem =
         {
           lib,
@@ -208,7 +223,13 @@
               };
             };
             clan-cli = clan-core.packages.${system}.clan-cli;
-          };
+          } // lib.mapAttrs' (name: containerConfig:
+            lib.nameValuePair "container-${name}" (inputs.extra-container.lib.buildContainers {
+              inherit system;
+              nixpkgs = inputs.nixpkgs;
+              config.containers.${name} = containerConfig;
+            })
+          ) self.containerConfigurations;
           devShells.default = pkgs.mkShell {
             packages = [
               nixpkgs.legacyPackages.${system}.nil

@@ -10,6 +10,7 @@
     ../../2configs/sunshine.nix
     ../../2configs/rtl-sdr.nix
     ../../2configs/browsers.nix
+    ../../2configs/container-bridge.nix
   ];
   system.stateVersion = "25.05";
 
@@ -33,4 +34,7 @@
   services.ollama = {
     enable = true;
   };
+
+  # extra-container for testing declarative containers without full rebuilds
+  programs.extra-container.enable = true;
 }
