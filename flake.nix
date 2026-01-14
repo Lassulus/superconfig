@@ -59,8 +59,6 @@
 
     extra-container.url = "github:erikarvstedt/extra-container";
     extra-container.inputs.nixpkgs.follows = "nixpkgs";
-
-    nix-hashlib.url = "git+https://git.clan.lol/clan/nix-hashlib";
   };
 
   outputs =

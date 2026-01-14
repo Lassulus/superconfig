@@ -1,21 +1,6 @@
 { self }:
 let
-  lib = self.inputs.nixpkgs.lib;
-  hashlib = self.inputs.nix-hashlib.lib;
-
-  # Generate IPv6 suffix from hostname (16 hex chars = 64 bits)
-  ipv6SuffixFun = hashlib.makeHashFun {
-    type = "hash";
-    dictionary = lib.stringToCharacters "0123456789abcdef";
-    length = 16;
-  };
-
-  formatIPv6Suffix = hash:
-    "${builtins.substring 0 4 hash}:${builtins.substring 4 4 hash}:${builtins.substring 8 4 hash}:${builtins.substring 12 4 hash}";
-
   machineName = "virtulus";
-  ipv6Suffix = formatIPv6Suffix (ipv6SuffixFun machineName);
-  ipv6Address = "fd00:c700::${ipv6Suffix}";
 in
 {
   privateNetwork = true;
@@ -31,15 +16,19 @@ in
     clan.core.settings.directory = self;
     clan.core.settings.machine.name = machineName;
 
-    # Configure IPv6 inside the container (on eth0 interface)
+    # Accept Router Advertisements for SLAAC (IPv6 auto-configuration)
+    # Address will be generated from prefix + interface ID (stable privacy)
     systemd.network.networks."10-container" = {
       matchConfig.Name = "eth0";
-      address = [ "${ipv6Address}/64" ];
-      gateway = [ "fd00:c700::1" ];
-      networkConfig.ConfigureWithoutCarrier = true;
+      networkConfig = {
+        IPv6AcceptRA = true;
+        # Use stable privacy addresses (RFC 7217) - deterministic per interface
+        IPv6PrivacyExtensions = "prefer-public";
+      };
     };
 
-    # Use host's local DNS64 resolver
+    # DNS will be configured via RDNSS from Router Advertisements
+    # But keep a fallback in case RDNSS isn't received
     networking.nameservers = [ "fd00:c700::1" ];
   };
 }

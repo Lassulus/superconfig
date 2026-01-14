@@ -16,6 +16,9 @@
         dns64-prefix = "64:ff9b::/96";
         # Always synthesize, even if real AAAA exists (needed when host has no IPv6)
         dns64-synthall = "yes";
+        # Handle reverse DNS for NAT64 prefix locally (return NXDOMAIN immediately)
+        # Without this, PTR lookups for 64:ff9b::* timeout waiting for upstream
+        local-zone = ''"0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.b.9.f.f.4.6.0.0.ip6.arpa." static'';
       };
       forward-zone = [
         {
@@ -41,7 +44,25 @@
   systemd.network.networks."10-ctr0" = {
     matchConfig.Name = "ctr0";
     address = [ "fd00:c700::1/64" ];
-    networkConfig.ConfigureWithoutCarrier = true;
+    networkConfig = {
+      ConfigureWithoutCarrier = true;
+      IPv6SendRA = true;  # Enable Router Advertisements
+    };
+
+    # Router Advertisement configuration
+    ipv6SendRAConfig = {
+      Managed = false;       # No DHCPv6 for addresses (use SLAAC)
+      OtherInformation = false;  # No DHCPv6 for DNS (use RDNSS)
+      RouterLifetimeSec = 1800;
+      DNS = [ "fd00:c700::1" ];  # RDNSS: advertise DNS64 resolver
+    };
+    ipv6Prefixes = [
+      { Prefix = "fd00:c700::/64"; }
+    ];
+    # Advertise NAT64 prefix via PREF64 option (RFC 8781)
+    ipv6PREF64Prefixes = [
+      { Prefix = "64:ff9b::/96"; }
+    ];
   };
 
   # Exclude from NetworkManager
@@ -107,10 +128,10 @@
   ];
 
   # NAT66 - masquerade container IPv6 to reach public IPv6 (when host has IPv6)
-  # NAT44 - masquerade NAT64 translated IPv4 packets
+  # NAT44 - masquerade NAT64 translated IPv4 packets (exclude localhost!)
   krebs.iptables.tables.nat.POSTROUTING.rules = [
     { v4 = false; v6 = true; predicate = "-s fd00:c700::/64 ! -d fd00:c700::/64"; target = "MASQUERADE"; }
-    { v4 = true; v6 = false; predicate = ""; target = "MASQUERADE"; }  # Masquerade all outbound IPv4
+    { v4 = true; v6 = false; predicate = "! -d 127.0.0.0/8 ! -o lo"; target = "MASQUERADE"; }  # Don't masquerade localhost
   ];
 
   # Allow containers to reach host's DNS64 resolver (IPv6 only)
