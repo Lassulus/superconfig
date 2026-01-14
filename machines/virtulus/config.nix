@@ -1,5 +1,6 @@
-{ modulesPath, ... }:
+{ modulesPath, lib, ... }:
 {
+  system.stateVersion = lib.mkForce "25.05";
   imports = [
     ../../2configs
     ../../2configs/spora.nix
