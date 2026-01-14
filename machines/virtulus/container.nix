@@ -15,13 +15,11 @@ let
 
   machineName = "virtulus";
   ipv6Suffix = formatIPv6Suffix (ipv6SuffixFun machineName);
+  ipv6Address = "fd00:c700::${ipv6Suffix}";
 in
 {
   privateNetwork = true;
   hostBridge = "ctr0";
-
-  # Static IPv6 from hostname hash: fd00:ctr::7371:bba8:ddd5:45e4
-  localAddress6 = "fd00:ctr::${ipv6Suffix}/64";
 
   specialArgs = { inherit self; };
 
@@ -33,10 +31,15 @@ in
     clan.core.settings.directory = self;
     clan.core.settings.machine.name = machineName;
 
-    # DNS64 resolvers (Cloudflare)
-    networking.nameservers = [
-      "2606:4700:4700::64"
-      "2606:4700:4700::6400"
-    ];
+    # Configure IPv6 inside the container (on eth0 interface)
+    systemd.network.networks."10-container" = {
+      matchConfig.Name = "eth0";
+      address = [ "${ipv6Address}/64" ];
+      gateway = [ "fd00:c700::1" ];
+      networkConfig.ConfigureWithoutCarrier = true;
+    };
+
+    # Use host's local DNS64 resolver
+    networking.nameservers = [ "fd00:c700::1" ];
   };
 }
