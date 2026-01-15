@@ -8,8 +8,10 @@
   perSystem =
     { pkgs, ... }:
     let
-      gameDirs = builtins.attrNames (
-        lib.filterAttrs (_: type: type == "directory") (builtins.readDir ./.)
+      gameDirs = builtins.filter (name: name != "lib") (
+        builtins.attrNames (
+          lib.filterAttrs (_: type: type == "directory") (builtins.readDir ./.)
+        )
       );
 
       buildGame = name:
