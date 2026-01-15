@@ -17,26 +17,56 @@ from vosk import KaldiRecognizer, Model, SetLogLevel
 
 MODEL_DIR = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local/share")) / "vosk"
 
-# Small, fast models for real-time streaming
+# Models organized by size: small (~40MB), medium (~128MB), large (~1-2GB)
 MODELS = {
-    "en": "vosk-model-small-en-us-0.15",
-    "de": "vosk-model-small-de-0.15",
-    "fr": "vosk-model-small-fr-0.22",
-    "es": "vosk-model-small-es-0.42",
-    "ru": "vosk-model-small-ru-0.22",
-    "cn": "vosk-model-small-cn-0.22",
-    "ja": "vosk-model-small-ja-0.22",
+    "en": {
+        "small": "vosk-model-small-en-us-0.15",
+        "medium": "vosk-model-en-us-0.22-lgraph",
+        "large": "vosk-model-en-us-0.22",
+    },
+    "de": {
+        "small": "vosk-model-small-de-0.15",
+        "medium": "vosk-model-de-0.21",
+        "large": "vosk-model-de-0.21",
+    },
+    "fr": {
+        "small": "vosk-model-small-fr-0.22",
+        "medium": "vosk-model-fr-0.22",
+        "large": "vosk-model-fr-0.22",
+    },
+    "es": {
+        "small": "vosk-model-small-es-0.42",
+        "medium": "vosk-model-es-0.42",
+        "large": "vosk-model-es-0.42",
+    },
+    "ru": {
+        "small": "vosk-model-small-ru-0.22",
+        "medium": "vosk-model-ru-0.42",
+        "large": "vosk-model-ru-0.42",
+    },
+    "cn": {
+        "small": "vosk-model-small-cn-0.22",
+        "medium": "vosk-model-cn-0.22",
+        "large": "vosk-model-cn-0.22",
+    },
+    "ja": {
+        "small": "vosk-model-small-ja-0.22",
+        "medium": "vosk-model-ja-0.22",
+        "large": "vosk-model-ja-0.22",
+    },
 }
 
 
-def download_model(lang: str) -> Path:
+def download_model(lang: str, size: str = "small") -> Path:
     """Download vosk model if not present."""
-    model_name = MODELS.get(lang)
-    if not model_name:
+    lang_models = MODELS.get(lang)
+    if not lang_models:
         # Fall back to English if language not available
         print(f"No model for '{lang}', using English", file=sys.stderr)
-        model_name = MODELS["en"]
+        lang_models = MODELS["en"]
         lang = "en"
+
+    model_name = lang_models.get(size, lang_models["small"])
 
     model_path = MODEL_DIR / model_name
     if model_path.exists():
@@ -129,6 +159,13 @@ def main():
         help="Language: en, de, fr, es, ru, cn, ja (default: en)",
     )
     parser.add_argument(
+        "-s",
+        "--size",
+        default=os.environ.get("VOSK_SIZE", "small"),
+        choices=["small", "medium", "large"],
+        help="Model size: small (~40MB), medium (~128MB), large (~1-2GB) (default: small)",
+    )
+    parser.add_argument(
         "-w",
         "--words",
         action="store_true",
@@ -139,7 +176,7 @@ def main():
     # Suppress Vosk logging
     SetLogLevel(-1)
 
-    model_path = download_model(args.language)
+    model_path = download_model(args.language, args.size)
     model = Model(str(model_path))
 
     # Read WAV header
