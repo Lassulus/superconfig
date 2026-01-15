@@ -1,25 +1,83 @@
+{ pkgs, ... }:
+let
+  # Find hwmon device by name and return path to specific file
+  # Usage: findHwmon "k10temp" "temp1_input" -> /sys/class/hwmon/hwmonX/temp1_input
+  gpd-fan-control = pkgs.writeShellScript "gpd-fan-control" ''
+    set -euo pipefail
+
+    # Configuration
+    INTERVAL=2
+    MINTEMP=55000   # millidegrees - fan off below this
+    MAXTEMP=90000   # millidegrees - fan full above this
+    MINPWM=0
+    MAXPWM=255
+
+    # Find hwmon paths by name
+    find_hwmon() {
+      local name=$1
+      for hwmon in /sys/class/hwmon/hwmon*; do
+        if [[ -f "$hwmon/name" ]] && [[ "$(cat "$hwmon/name")" == "$name" ]]; then
+          echo "$hwmon"
+          return 0
+        fi
+      done
+      echo "ERROR: hwmon device '$name' not found" >&2
+      return 1
+    }
+
+    FAN_HWMON=$(find_hwmon "gpdfan")
+    TEMP_HWMON=$(find_hwmon "k10temp")
+
+    PWM_FILE="$FAN_HWMON/pwm1"
+    PWM_ENABLE="$FAN_HWMON/pwm1_enable"
+    TEMP_FILE="$TEMP_HWMON/temp1_input"
+
+    echo "Fan control: $PWM_FILE"
+    echo "Temperature: $TEMP_FILE"
+
+    # Enable manual PWM control
+    echo 1 > "$PWM_ENABLE"
+
+    cleanup() {
+      echo "Restoring automatic fan control..."
+      echo 0 > "$PWM_ENABLE" 2>/dev/null || true
+    }
+    trap cleanup EXIT
+
+    while true; do
+      TEMP=$(cat "$TEMP_FILE")
+
+      if (( TEMP <= MINTEMP )); then
+        PWM=$MINPWM
+      elif (( TEMP >= MAXTEMP )); then
+        PWM=$MAXPWM
+      else
+        # Linear interpolation
+        PWM=$(( (TEMP - MINTEMP) * (MAXPWM - MINPWM) / (MAXTEMP - MINTEMP) + MINPWM ))
+      fi
+
+      echo "$PWM" > "$PWM_FILE"
+      sleep "$INTERVAL"
+    done
+  '';
+in
 {
-  # Load modules in explicit order for stable hwmon numbering
-  # gpd_fan -> hwmon2, k10temp -> hwmon3 (loaded before ACPI devices)
   boot.kernelModules = [
     "gpd_fan"
     "k10temp"
   ];
 
-  hardware.fancontrol = {
-    enable = true;
-    config = ''
-      INTERVAL=2
-      DEVPATH=hwmon2=devices/platform/gpd_fan hwmon3=devices/pci0000:00/0000:00:18.3
-      DEVNAME=hwmon2=gpdfan hwmon3=k10temp
-      FCTEMPS=hwmon2/pwm1=hwmon3/temp1_input
-      FCFANS=hwmon2/pwm1=hwmon2/fan1_input
-      MINTEMP=hwmon2/pwm1=45
-      MAXTEMP=hwmon2/pwm1=85
-      MINSTART=hwmon2/pwm1=40
-      MINSTOP=hwmon2/pwm1=30
-      MINPWM=hwmon2/pwm1=0
-      MAXPWM=hwmon2/pwm1=255
-    '';
+  # Disable the built-in fancontrol (it uses brittle hwmon numbers)
+  hardware.fancontrol.enable = false;
+
+  systemd.services.gpd-fan-control = {
+    description = "GPD Fan Control (dynamic hwmon discovery)";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "systemd-modules-load.service" ];
+    serviceConfig = {
+      ExecStart = gpd-fan-control;
+      Restart = "always";
+      RestartSec = 5;
+    };
   };
 }
