@@ -189,13 +189,14 @@
 
       # Container configurations for use with extra-container
       # Auto-discovers machines with container.nix
-      flake.containerConfigurations = nixpkgs.lib.mapAttrs
-        (machineName: _: import ./machines/${machineName}/container.nix { inherit self; })
-        (
-          nixpkgs.lib.filterAttrs (
-            machineName: _: builtins.pathExists ./machines/${machineName}/container.nix
-          ) (builtins.readDir ./machines)
-        );
+      flake.containerConfigurations =
+        nixpkgs.lib.mapAttrs
+          (machineName: _: import ./machines/${machineName}/container.nix { inherit self; })
+          (
+            nixpkgs.lib.filterAttrs (
+              machineName: _: builtins.pathExists ./machines/${machineName}/container.nix
+            ) (builtins.readDir ./machines)
+          );
       perSystem =
         {
           lib,
@@ -222,12 +223,16 @@
               };
             };
             clan-cli = clan-core.packages.${system}.clan-cli;
-          } // lib.mapAttrs' (name: containerConfig:
-            lib.nameValuePair "container-${name}" (inputs.extra-container.lib.buildContainers {
-              inherit system;
-              nixpkgs = inputs.nixpkgs;
-              config.containers.${name} = containerConfig;
-            })
+          }
+          // lib.mapAttrs' (
+            name: containerConfig:
+            lib.nameValuePair "container-${name}" (
+              inputs.extra-container.lib.buildContainers {
+                inherit system;
+                nixpkgs = inputs.nixpkgs;
+                config.containers.${name} = containerConfig;
+              }
+            )
           ) self.containerConfigurations;
           devShells.default = pkgs.mkShell {
             packages = [

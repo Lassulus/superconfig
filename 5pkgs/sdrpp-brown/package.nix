@@ -92,7 +92,7 @@ let
     hash = "sha256-H+GMR3PIzLUu8jyltKCwhBs41U3dXZx9huuLBg8TLzk=";
   };
 in
-stdenv.mkDerivation (finalAttrs: {
+stdenv.mkDerivation (_finalAttrs: {
   pname = "sdrpp-brown";
 
   version = "0-unstable-2025-12-29";
@@ -107,41 +107,41 @@ stdenv.mkDerivation (finalAttrs: {
   nativeBuildInputs = [
     cmake
     pkg-config
-  ] ++ lib.optional ch_tetra_demodulator unzip;
+  ]
+  ++ lib.optional ch_tetra_demodulator unzip;
 
-  buildInputs =
-    [
-      glfw
-      glew
-      fftw
-      fftwFloat
-      volk
-      zstd
-    ]
-    ++ lib.optional stdenv.hostPlatform.isLinux libX11
-    ++ lib.optional stdenv.hostPlatform.isLinux libpulseaudio
-    ++ lib.optional airspy_source airspy
-    ++ lib.optional airspyhf_source airspyhf
-    ++ lib.optional bladerf_source libbladeRF
-    ++ lib.optional hackrf_source hackrf
-    ++ lib.optional limesdr_source limesuite
-    ++ lib.optionals rtl_sdr_source [
-      rtl-sdr-osmocom
-      libusb1
-    ]
-    ++ lib.optional sdrplay_source sdrplay
-    ++ lib.optional soapy_source soapysdr-with-plugins
-    ++ lib.optionals plutosdr_source [
-      libiio
-      libad9361
-    ]
-    ++ lib.optionals usrp_source [
-      uhd
-      boost
-    ]
-    ++ lib.optional (audio_source || audio_sink) rtaudio
-    ++ lib.optional portaudio_sink portaudio
-    ++ lib.optional (dab_decoder || m17_decoder) codec2;
+  buildInputs = [
+    glfw
+    glew
+    fftw
+    fftwFloat
+    volk
+    zstd
+  ]
+  ++ lib.optional stdenv.hostPlatform.isLinux libX11
+  ++ lib.optional stdenv.hostPlatform.isLinux libpulseaudio
+  ++ lib.optional airspy_source airspy
+  ++ lib.optional airspyhf_source airspyhf
+  ++ lib.optional bladerf_source libbladeRF
+  ++ lib.optional hackrf_source hackrf
+  ++ lib.optional limesdr_source limesuite
+  ++ lib.optionals rtl_sdr_source [
+    rtl-sdr-osmocom
+    libusb1
+  ]
+  ++ lib.optional sdrplay_source sdrplay
+  ++ lib.optional soapy_source soapysdr-with-plugins
+  ++ lib.optionals plutosdr_source [
+    libiio
+    libad9361
+  ]
+  ++ lib.optionals usrp_source [
+    uhd
+    boost
+  ]
+  ++ lib.optional (audio_source || audio_sink) rtaudio
+  ++ lib.optional portaudio_sink portaudio
+  ++ lib.optional (dab_decoder || m17_decoder) codec2;
 
   # Pre-place the ETSI codec in the build directory so CMake doesn't try to download it
   preConfigure = lib.optionalString ch_tetra_demodulator ''

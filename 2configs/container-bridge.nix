@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 {
   # Local DNS64 resolver for containers
   # Synthesizes AAAA records with 64:ff9b::/96 prefix for IPv4-only hosts
@@ -6,7 +6,10 @@
     enable = true;
     settings = {
       server = {
-        interface = [ "fd00:c700::1" "127.0.0.1" ];
+        interface = [
+          "fd00:c700::1"
+          "127.0.0.1"
+        ];
         access-control = [
           "fd00:c700::/64 allow"
           "127.0.0.0/8 allow"
@@ -24,9 +27,9 @@
         {
           name = ".";
           forward-addr = [
-            "1.1.1.1"      # Cloudflare (IPv4 - always works)
-            "8.8.8.8"      # Google (IPv4)
-            "2606:4700:4700::1111"  # Cloudflare (IPv6 - when available)
+            "1.1.1.1" # Cloudflare (IPv4 - always works)
+            "8.8.8.8" # Google (IPv4)
+            "2606:4700:4700::1111" # Cloudflare (IPv6 - when available)
           ];
         }
       ];
@@ -46,15 +49,15 @@
     address = [ "fd00:c700::1/64" ];
     networkConfig = {
       ConfigureWithoutCarrier = true;
-      IPv6SendRA = true;  # Enable Router Advertisements
+      IPv6SendRA = true; # Enable Router Advertisements
     };
 
     # Router Advertisement configuration
     ipv6SendRAConfig = {
-      Managed = false;       # No DHCPv6 for addresses (use SLAAC)
-      OtherInformation = false;  # No DHCPv6 for DNS (use RDNSS)
+      Managed = false; # No DHCPv6 for addresses (use SLAAC)
+      OtherInformation = false; # No DHCPv6 for DNS (use RDNSS)
       RouterLifetimeSec = 1800;
-      DNS = [ "fd00:c700::1" ];  # RDNSS: advertise DNS64 resolver
+      DNS = [ "fd00:c700::1" ]; # RDNSS: advertise DNS64 resolver
     };
     ipv6Prefixes = [
       { Prefix = "fd00:c700::/64"; }
@@ -91,10 +94,17 @@
   # Update Jool pool4 with current IPv4 address (needed for NAT64 on dynamic IPs)
   systemd.services.jool-pool4-update = {
     description = "Update Jool NAT64 pool4 with current IPv4";
-    after = [ "jool.service" "network-online.target" ];
+    after = [
+      "jool.service"
+      "network-online.target"
+    ];
     wants = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
-    path = [ pkgs.iproute2 pkgs.gawk pkgs.jool-cli ];
+    path = [
+      pkgs.iproute2
+      pkgs.gawk
+      pkgs.jool-cli
+    ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
@@ -120,23 +130,63 @@
   # Firewall rules for container bridge
   krebs.iptables.tables.filter.FORWARD.rules = [
     # IPv6 forwarding for containers
-    { v4 = false; v6 = true; predicate = "-i ctr0"; target = "ACCEPT"; }
-    { v4 = false; v6 = true; predicate = "-o ctr0 -m conntrack --ctstate RELATED,ESTABLISHED"; target = "ACCEPT"; }
+    {
+      v4 = false;
+      v6 = true;
+      predicate = "-i ctr0";
+      target = "ACCEPT";
+    }
+    {
+      v4 = false;
+      v6 = true;
+      predicate = "-o ctr0 -m conntrack --ctstate RELATED,ESTABLISHED";
+      target = "ACCEPT";
+    }
     # IPv4 forwarding for NAT64 translated packets
-    { v4 = true; v6 = false; predicate = "-m conntrack --ctstate RELATED,ESTABLISHED"; target = "ACCEPT"; }
-    { v4 = true; v6 = false; predicate = ""; target = "ACCEPT"; }
+    {
+      v4 = true;
+      v6 = false;
+      predicate = "-m conntrack --ctstate RELATED,ESTABLISHED";
+      target = "ACCEPT";
+    }
+    {
+      v4 = true;
+      v6 = false;
+      predicate = "";
+      target = "ACCEPT";
+    }
   ];
 
   # NAT66 - masquerade container IPv6 to reach public IPv6 (when host has IPv6)
   # NAT44 - masquerade NAT64 translated IPv4 packets (exclude localhost!)
   krebs.iptables.tables.nat.POSTROUTING.rules = [
-    { v4 = false; v6 = true; predicate = "-s fd00:c700::/64 ! -d fd00:c700::/64"; target = "MASQUERADE"; }
-    { v4 = true; v6 = false; predicate = "! -d 127.0.0.0/8 ! -o lo"; target = "MASQUERADE"; }  # Don't masquerade localhost
+    {
+      v4 = false;
+      v6 = true;
+      predicate = "-s fd00:c700::/64 ! -d fd00:c700::/64";
+      target = "MASQUERADE";
+    }
+    {
+      v4 = true;
+      v6 = false;
+      predicate = "! -d 127.0.0.0/8 ! -o lo";
+      target = "MASQUERADE";
+    } # Don't masquerade localhost
   ];
 
   # Allow containers to reach host's DNS64 resolver (IPv6 only)
   krebs.iptables.tables.filter.INPUT.rules = [
-    { v4 = false; v6 = true; predicate = "-s fd00:c700::/64 -p udp --dport 53"; target = "ACCEPT"; }
-    { v4 = false; v6 = true; predicate = "-s fd00:c700::/64 -p tcp --dport 53"; target = "ACCEPT"; }
+    {
+      v4 = false;
+      v6 = true;
+      predicate = "-s fd00:c700::/64 -p udp --dport 53";
+      target = "ACCEPT";
+    }
+    {
+      v4 = false;
+      v6 = true;
+      predicate = "-s fd00:c700::/64 -p tcp --dport 53";
+      target = "ACCEPT";
+    }
   ];
 }

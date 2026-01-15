@@ -1,7 +1,7 @@
 # GPD Win Mini 2025 PipeWire EQ configuration
 # Based on https://github.com/aarron-lee/gpd-win-tricks/tree/main/win_mini_equalizer
 # Credit: @BrotherChenwk from the GPD Discord
-{ pkgs, lib, config, ... }:
+{ pkgs, ... }:
 
 let
   # The ALSA output device - may need adjustment based on PCI enumeration

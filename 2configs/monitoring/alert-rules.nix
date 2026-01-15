@@ -43,9 +43,9 @@ lib.mapAttrsToList
     };
 
     promtail_file_lagging = {
-      condition = ''abs(promtail_file_bytes_total - promtail_read_bytes_total) > 1e6'';
+      condition = "abs(promtail_file_bytes_total - promtail_read_bytes_total) > 1e6";
       time = "15m";
-      description = ''{{ $labels.instance }} {{ $labels.job }} {{ $labels.path }} has been lagging by more than 1MB for more than 15m.'';
+      description = "{{ $labels.instance }} {{ $labels.job }} {{ $labels.path }} has been lagging by more than 1MB for more than 15m.";
     };
 
     filesystem_full_80percent = {
@@ -61,7 +61,7 @@ lib.mapAttrsToList
     };
 
     filesystem_inodes_full = {
-      condition = ''disk_inodes_free / disk_inodes_total < 0.10'';
+      condition = "disk_inodes_free / disk_inodes_total < 0.10";
       time = "10m";
       description = "{{$labels.instance}} device {{$labels.device}} on {{$labels.path}} got less than 10% inodes left on its filesystem.";
     };

@@ -87,7 +87,7 @@ in
     user = {
       name = "radio-news";
     };
-    script = ''. ${pkgs.writers.writeDash "htgen-news" ''
+    script = ". ${pkgs.writers.writeDash "htgen-news" ''
       set -xefu
       case "''${Method:-GET} $Request_URI" in
         "GET /")
@@ -107,7 +107,7 @@ in
           exit
         ;;
       esac
-    ''}'';
+    ''}";
   };
 
   # debug
