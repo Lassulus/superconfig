@@ -60,26 +60,26 @@ if ! grep -q "Bootstrapped 100%" "$TOR_DIR/tor.log" 2>/dev/null; then
   exit 1
 fi
 
-# Check if we're on Darwin
+# Execute the command (don't use exec - need cleanup trap to run)
+export TORSOCKS_TOR_PORT=$SOCKS_PORT
+export TOR_CONTROL_PORT=$CONTROL_PORT
+
 if [[ "$(uname)" == "Darwin" ]]; then
   if [[ "$1" == "ssh" ]]; then
-    # Direct SSH call - use old behavior
-    shift # remove 'ssh' from arguments
-    exec ssh -o ProxyCommand="nc -x 127.0.0.1:$SOCKS_PORT %h %p" "$@"
+    # Direct SSH call via nc SOCKS proxy
+    shift
+    ssh -o ProxyCommand="nc -x 127.0.0.1:$SOCKS_PORT %h %p" "$@"
   else
     # Other commands - create SSH wrapper and add to PATH
     SSH_WRAPPER="$TOR_DIR/ssh"
-    cat > "$SSH_WRAPPER" <<EOF
+    cat > "$SSH_WRAPPER" <<'SSHEOF'
 #!/usr/bin/env bash
-# SSH wrapper that routes through Tor on Darwin
-exec /usr/bin/ssh -o ProxyCommand="nc -x 127.0.0.1:$SOCKS_PORT %h %p" "\$@"
-EOF
+exec /usr/bin/ssh -o ProxyCommand="nc -x 127.0.0.1:$TORSOCKS_TOR_PORT %h %p" "$@"
+SSHEOF
     chmod +x "$SSH_WRAPPER"
-    export PATH="$TOR_DIR:$PATH"
+    PATH="$TOR_DIR:$PATH" torsocks "$@"
   fi
+else
+  torsocks "$@"
 fi
-
-# Execute the command
-export TORSOCKS_TOR_PORT=$SOCKS_PORT
-export TOR_CONTROL_PORT=$CONTROL_PORT
-exec torsocks "$@"
+# cleanup trap runs on exit
