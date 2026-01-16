@@ -1,0 +1,39 @@
+//!HOOK MAIN
+//!BIND HOOKED
+//!DESC ASCII art filter
+
+const int SCALE = 6;
+const bool MONOCHROME = false;
+const vec3 BASE_COLOR = vec3(0.0, 1.0, 0.0);
+
+float character(int n, vec2 p) {
+    p = floor(p * vec2(4.0, 4.0) + 2.5);
+    if (clamp(p.x, 0.0, 4.0) == p.x && clamp(p.y, 0.0, 4.0) == p.y) {
+        int a = int(round(p.x) + 5.0 * round(p.y));
+        if (((n >> a) & 1) == 1) return 1.0;
+    }
+    return 0.0;
+}
+
+vec4 hook() {
+    vec2 iResolution = HOOKED_size;
+    vec2 pix = HOOKED_pos * iResolution;
+    vec2 cell = floor(pix / vec2(float(SCALE) * 8.0)) * vec2(float(SCALE) * 8.0);
+    vec4 c = HOOKED_texOff((cell - pix) / iResolution * HOOKED_size);
+    float gray = 0.3 * c.r + 0.59 * c.g + 0.11 * c.b;
+
+    int n;
+    if (gray <= 0.2) n = 4096;
+    else if (gray <= 0.3) n = 65600;
+    else if (gray <= 0.4) n = 332772;
+    else if (gray <= 0.5) n = 15255086;
+    else if (gray <= 0.6) n = 23385164;
+    else if (gray <= 0.7) n = 15252014;
+    else if (gray <= 0.8) n = 13199452;
+    else n = 11512810;
+
+    vec2 p = mod(pix / vec2(float(SCALE) * 4.0), vec2(2.0)) - vec2(1.0);
+    if (MONOCHROME) c.rgb = BASE_COLOR;
+    c.rgb = c.rgb * character(n, p);
+    return c;
+}

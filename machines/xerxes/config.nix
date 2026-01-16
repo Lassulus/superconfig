@@ -11,6 +11,7 @@
     ../../2configs/rtl-sdr.nix
     ../../2configs/browsers.nix
     ../../2configs/container-bridge.nix
+    ../../2configs/android-webcam.nix
   ];
   system.stateVersion = "25.05";
 

@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+SHADER_PATH="@shaderPath@"
+ASCII_MODE=false
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --ascii)
+      ASCII_MODE=true
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      echo "Usage: android-webcam [--ascii]" >&2
+      exit 1
+      ;;
+  esac
+done
+
+# Check if v4l2loopback module is loaded
+if ! lsmod | grep -q v4l2loopback; then
+  echo "Error: v4l2loopback kernel module is not loaded" >&2
+  echo "Make sure you have rebooted after enabling the android-webcam module" >&2
+  exit 1
+fi
+
+if $ASCII_MODE; then
+  # ASCII mode needs both devices
+  if [[ ! -e /dev/video0 ]] || [[ ! -e /dev/video1 ]]; then
+    echo "Error: /dev/video0 and /dev/video1 must exist for ASCII mode" >&2
+    echo "v4l2loopback should be configured with devices=2" >&2
+    exit 1
+  fi
+else
+  if [[ ! -e /dev/video0 ]]; then
+    echo "Error: /dev/video0 must exist" >&2
+    exit 1
+  fi
+fi
+
+cleanup() {
+  echo "Stopping..."
+  kill $SCRCPY_PID 2>/dev/null || true
+  [[ -n "${FFMPEG_PID:-}" ]] && kill $FFMPEG_PID 2>/dev/null || true
+}
+trap cleanup EXIT
+
+# Start scrcpy to stream phone camera to /dev/video0
+echo "Starting phone camera stream..."
+scrcpy \
+  --video-source=camera \
+  --camera-facing=back \
+  --no-audio \
+  --v4l2-sink=/dev/video0 \
+  --video-encoder=c2.exynos.h264.encoder \
+  --camera-size=1920x1080 &
+SCRCPY_PID=$!
+
+if $ASCII_MODE; then
+  sleep 2
+
+  # Start ffmpeg with ASCII shader to /dev/video1
+  echo "Starting ASCII filter pipeline..."
+  ffmpeg \
+    -f v4l2 -i /dev/video0 \
+    -vf "libplacebo=custom_shader_path=${SHADER_PATH}" \
+    -f v4l2 -pix_fmt yuv420p /dev/video1 &
+  FFMPEG_PID=$!
+
+  echo ""
+  echo "Android ASCII webcam running!"
+  echo "  Raw camera: /dev/video0 (Phone Camera)"
+  echo "  ASCII output: /dev/video1 (ASCII Webcam)"
+else
+  echo ""
+  echo "Android webcam running!"
+  echo "  Camera: /dev/video0 (Phone Camera)"
+fi
+
+echo ""
+echo "Press Ctrl+C to stop"
+
+wait
