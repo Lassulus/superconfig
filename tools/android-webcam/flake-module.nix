@@ -11,7 +11,6 @@
         runtimeInputs = [
           pkgs.scrcpy
           ffmpeg-placebo
-          pkgs.kmod
         ];
         text = builtins.replaceStrings
           [ "@shaderPath@" ]

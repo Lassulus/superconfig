@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 SHADER_PATH="@shaderPath@"
 ASCII_MODE=false
 
@@ -17,13 +15,6 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Check if v4l2loopback module is loaded
-if ! lsmod | grep -q v4l2loopback; then
-  echo "Error: v4l2loopback kernel module is not loaded" >&2
-  echo "Make sure you have rebooted after enabling the android-webcam module" >&2
-  exit 1
-fi
-
 if $ASCII_MODE; then
   # ASCII mode needs both devices
   if [[ ! -e /dev/video0 ]] || [[ ! -e /dev/video1 ]]; then
@@ -40,8 +31,8 @@ fi
 
 cleanup() {
   echo "Stopping..."
-  kill $SCRCPY_PID 2>/dev/null || true
-  [[ -n "${FFMPEG_PID:-}" ]] && kill $FFMPEG_PID 2>/dev/null || true
+  kill "${SCRCPY_PID}" 2>/dev/null || true
+  [[ -n "${FFMPEG_PID:-}" ]] && kill "${FFMPEG_PID}" 2>/dev/null || true
 }
 trap cleanup EXIT
 
