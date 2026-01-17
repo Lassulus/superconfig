@@ -21,8 +21,6 @@
   #   inherit (pkgs) system;
   # }).fwupd;
 
-  krebs.power-action.battery = "BAT1";
-
   networking.hostId = "deadbeef";
 
   boot.loader.grub = {

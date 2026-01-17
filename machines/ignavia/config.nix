@@ -13,6 +13,7 @@
     # ../../2configs/baseX.nix
     ../../2configs/desktops/qtile/nixos.nix
     # ../../2configs/desktops/xmonad
+    ../../2configs/power-action.nix
     ../../2configs/yubikey.nix
     ../../2configs/pipewire.nix
     ../../2configs/browsers.nix

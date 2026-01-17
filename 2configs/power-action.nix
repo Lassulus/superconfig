@@ -1,47 +1,46 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
 let
-  suspend = pkgs.writers.writeDash "suspend" ''
-    ${pkgs.systemd}/bin/systemctl suspend
+  # Script that monitors upower D-Bus signals and speaks when battery gets low
+  batteryMonitor = pkgs.writers.writeBash "battery-monitor" ''
+    ${pkgs.upower}/bin/upower --monitor-detail | while read -r line; do
+      if echo "$line" | grep -q "warning-level:.*low"; then
+        ${pkgs.espeak}/bin/espeak -v +whisper -s 110 "power level low"
+      fi
+    done
   '';
-
-  speak =
-    text:
-    pkgs.writers.writeDash "speak" ''
-      ${pkgs.espeak}/bin/espeak -v +whisper -s 110 "${text}"
-    '';
 
 in
 {
-  krebs.power-action = {
+  # UPower handles battery monitoring via kernel events (not polling)
+  services.upower = {
     enable = true;
-    plans.low-battery = {
-      upperLimit = 10;
-      lowerLimit = 15;
-      charging = false;
-      action = pkgs.writers.writeDash "warn-low-battery" ''
-        ${speak "power level low"}
-      '';
-    };
-    plans.suspend = {
-      upperLimit = 10;
-      lowerLimit = 0;
-      charging = false;
-      action = pkgs.writers.writeDash "suspend-wrapper" ''
-        /run/wrappers/bin/sudo ${suspend}
-      '';
-    };
-    user = "lass";
+
+    # Use percentage thresholds instead of time-based
+    usePercentageForPolicy = true;
+
+    # Warning levels (triggers D-Bus signals for our monitor)
+    percentageLow = 15;
+    percentageCritical = 10;
+
+    # Suspend when battery drops below this
+    percentageAction = 5;
+
+    # Action to take at critical level
+    criticalPowerAction = "Suspend";
+    allowRiskyCriticalPowerAction = true;
   };
 
-  users.users.power-action = {
-    isNormalUser = true;
-    extraGroups = [
-      "audio"
-    ];
-  };
+  # User service to monitor battery and speak warnings
+  systemd.user.services.battery-warning = {
+    description = "Battery low warning speaker";
+    wantedBy = [ "default.target" ];
+    after = [ "upower.service" ];
 
-  security.sudo.extraConfig = ''
-    ${config.krebs.power-action.user} ALL= (root) NOPASSWD: ${suspend}
-  '';
+    serviceConfig = {
+      ExecStart = batteryMonitor;
+      Restart = "always";
+      RestartSec = 5;
+    };
+  };
 }

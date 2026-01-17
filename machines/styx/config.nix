@@ -25,8 +25,6 @@
 
   krebs.build.host = config.krebs.hosts.styx;
 
-  krebs.power-action.enable = lib.mkForce false;
-
   environment.systemPackages = with pkgs; [
     wol
     (writeDashBin "wake-alien" ''

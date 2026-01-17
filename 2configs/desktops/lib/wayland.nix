@@ -7,7 +7,6 @@
 {
   imports = [
     ../../alacritty.nix
-    ../../power-action.nix
     ../../xdg-open.nix
     ../../yubikey.nix
     ../../themes.nix

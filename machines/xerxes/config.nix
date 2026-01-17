@@ -7,6 +7,7 @@
     ../../2configs/yubikey.nix
     ../../2configs/tpm2.nix
     ../../2configs/desktops/sway/default.nix
+    ../../2configs/power-action.nix
     ../../2configs/sunshine.nix
     ../../2configs/rtl-sdr.nix
     ../../2configs/browsers.nix
