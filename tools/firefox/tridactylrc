@@ -1,0 +1,13 @@
+" Tridactyl configuration
+" Source this file from ~/.config/tridactyl/tridactylrc with:
+"   source /path/to/this/tridactylrc
+
+" Disable Tridactyl completely on sites that break with it
+" Uses seturl with regex pattern - prevents Tridactyl from injecting anything
+seturl my\.sevdesk\.de superignore true
+
+" Smooth scrolling
+set smoothscroll true
+
+" Don't focus input fields automatically
+set allowautofocus false

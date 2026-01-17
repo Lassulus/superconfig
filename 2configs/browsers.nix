@@ -1,11 +1,7 @@
-{ pkgs, ... }:
+{ pkgs, self, ... }:
 {
-  programs.firefox = {
-    enable = true;
-    nativeMessagingHosts.packages = [
-      pkgs.tridactyl-native
-    ];
-    package = pkgs.firefox;
-  };
-  environment.variables.BROWSER = "${pkgs.firefox-devedition}/bin/firefox-devedition";
+  environment.systemPackages = [
+    self.packages.${pkgs.system}.firefox
+  ];
+  environment.variables.BROWSER = "${self.packages.${pkgs.system}.firefox}/bin/firefox";
 }
