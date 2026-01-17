@@ -1,7 +1,5 @@
 { config, pkgs, ... }:
 {
-  services.postgresqlBackup.enable = true;
-
   systemd.services.borgbackup-job-hetzner.serviceConfig.ReadWritePaths = [ "/var/log/telegraf" ];
 
   clan.core.vars.generators.borgbackup = {
