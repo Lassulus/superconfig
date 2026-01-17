@@ -30,10 +30,6 @@
     locations."= /wireguard-key".extraConfig = ''
       alias ${pkgs.writeText "prism.wg" config.krebs.hosts.prism.nets.wiregrill.wireguard.pubkey};
     '';
-    locations."= /krebspage".extraConfig = ''
-      default_type "text/html";
-      alias ${pkgs.krebspage}/index.html;
-    '';
     locations."= /ssh.pub".extraConfig = ''
       alias ${pkgs.writeText "pub" config.krebs.users.lass-yubikey.pubkey};
     '';

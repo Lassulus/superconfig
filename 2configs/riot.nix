@@ -12,9 +12,6 @@ let
   ];
 in
 {
-  imports = [
-    self.inputs.stockholm.nixosModules.exim-smarthost
-  ];
   containers.riot = {
     config = {
       environment.systemPackages = [

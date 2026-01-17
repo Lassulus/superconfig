@@ -5,7 +5,7 @@
     ../../2configs
     ../../2configs/ssh-redirect.nix
     ../../2configs/retiolum.nix
-    ../../2configs/mail/internet-gateway.nix
+    ../../2configs/exim-smarthost.nix
     ../../2configs/gsm-wiki.nix
     ../../2configs/monitoring/telegraf.nix
     ../../2configs/pair-programming.nix

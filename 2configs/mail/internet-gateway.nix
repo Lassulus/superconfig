@@ -1,5 +1,7 @@
 { config, pkgs, ... }:
 {
+  networking.firewall.allowedTCPPorts = [ 25 ];
+
   security.acme.certs."mail.lassul.us" = {
     group = "lasscert";
     webroot = "/var/lib/acme/acme-challenge";
@@ -34,6 +36,7 @@
     ];
     ssl_cert = "/var/lib/acme/mail.lassul.us/fullchain.pem";
     ssl_key = "/var/lib/acme/mail.lassul.us/key.pem";
+    sender_domains = [ "lassul.us" ];
     local_domains = [
       "localhost"
       "lassul.us"
@@ -43,7 +46,7 @@
         driver = manualroute
         domains = lassul.us
         transport = remote_smtp
-        route_list = * orange.r
+        route_list = * green.r
         no_more
     '';
   };

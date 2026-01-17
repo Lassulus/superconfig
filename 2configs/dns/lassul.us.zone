@@ -55,10 +55,10 @@ vault IN CNAME neoprism
 
 ;; Mail
 @ IN MX 3 mail
-mail IN A 95.216.1.150
-mail IN AAAA 2a01:4f9:2a:1e9::1
-imap IN A 95.216.1.150
-imap IN AAAA 2a01:4f9:2a:1e9::1
+mail IN A 95.217.192.59
+mail IN AAAA 2a01:4f9:4a:4f1a::2
+imap IN A 95.217.192.59
+imap IN AAAA 2a01:4f9:4a:4f1a::2
 smtp._tls IN TXT "v=TLSRPTv1;rua=mailto:postmaster@lassul.us"
 ;
 default._domainkey IN TXT "k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDUv3DMndFellqu208feABEzT/PskOfTSdJCOF/HELBR0PHnbBeRoeHEm9XAcOe/Mz2t/ysgZ6JFXeFxCtoM5fG20brUMRzsVRxb9Ur5cEvOYuuRrbChYcKa+fopu8pYrlrqXD3miHISoy6ErukIYCRpXWUJHi1TlNQhLWFYqAaywIDAQAB"

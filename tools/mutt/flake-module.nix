@@ -22,7 +22,7 @@
             defaults
               logfile ~/.msmtp.log
             account prism
-              host prism.r
+              host neoprism.r
             account c-base
               from lassulus@c-base.org
               host c-mail.c-base.org
@@ -49,12 +49,12 @@
             if [ "$using_cbase" -eq 1 ]; then
               ${pkgs.coreutils}/bin/tee >(${pkgs.notmuch}/bin/notmuch insert +sent) | \
                 ${pkgs.msmtp}/bin/msmtp -C ${msmtprc} "$@"
-            # For prism account, check if prism.r is reachable
-            elif ping -W2 -c1 prism.r >/dev/null 2>&1; then
+            # For prism account, check if neoprism.r is reachable
+            elif ping -W2 -c1 neoprism.r >/dev/null 2>&1; then
               ${pkgs.coreutils}/bin/tee >(${pkgs.notmuch}/bin/notmuch insert +sent) | \
                 ${pkgs.msmtp}/bin/msmtp -C ${msmtprc} "$@"
             else
-              echo "Error: prism.r is not reachable" >&2
+              echo "Error: neoprism.r is not reachable" >&2
               exit 1
             fi
           '';
