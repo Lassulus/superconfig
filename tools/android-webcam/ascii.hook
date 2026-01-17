@@ -2,7 +2,7 @@
 //!BIND HOOKED
 //!DESC ASCII art filter
 
-const int SCALE = 6;
+const int SCALE = @SCALE@;
 const bool MONOCHROME = false;
 const vec3 BASE_COLOR = vec3(0.0, 1.0, 0.0);
 
