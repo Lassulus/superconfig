@@ -35,10 +35,6 @@ in
       imports = [
         ../../2configs/websites/domsen.nix
       ];
-      # needed by domsen.nix ^^
-      lass.usershadow = {
-        enable = true;
-      };
 
       krebs.iptables.tables.filter.INPUT.rules = [
         {
@@ -227,16 +223,6 @@ in
       services.nginx.virtualHosts."cgit.lassul.us".acmeFallbackHost = "orange.r";
       services.nginx.virtualHosts."mail.lassul.us".acmeFallbackHost = "neoprism.r";
       services.nginx.virtualHosts."mumble.lassul.us".acmeFallbackHost = "neoprism.r";
-      services.nginx.virtualHosts."mail.ubikmedia.eu" = {
-        enableACME = true;
-        forceSSL = true;
-        acmeFallbackHost = "ubik.r";
-        locations."/" = {
-          recommendedProxySettings = true;
-          proxyWebsockets = true;
-          proxyPass = "https://ubik.r";
-        };
-      };
     }
   ];
 

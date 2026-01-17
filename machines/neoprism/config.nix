@@ -22,7 +22,6 @@
     ../../2configs/consul.nix
     ../../2configs/services/flix/container-host.nix
     ../../2configs/services/radio/container-host.nix
-    ../../2configs/ubik-host.nix
     ../../2configs/orange-host.nix
     ../../2configs/hotdog-host.nix
 

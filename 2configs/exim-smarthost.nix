@@ -18,7 +18,6 @@ let
     "outlook@lassul.us"
     "steuer@aidsballs.de"
     "lass@aidsballs.de"
-    "wordpress@ubikmedia.de"
     "finanzamt@lassul.us"
     "netzclub@lassul.us"
     "nebenan@lassul.us"
