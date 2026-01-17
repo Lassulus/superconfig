@@ -7,16 +7,16 @@ description: Control Firefox browser from the command line. Use for web automati
 
 ```bash
 # List managed tabs
-browser-cli --list
+nix run github:lassulus/superconfig#skills.browser-cli -- --list
 
 # Open a page and get snapshot
-browser-cli <<'EOF'
+nix run github:lassulus/superconfig#skills.browser-cli -- <<'EOF'
 await tab("https://example.com")
 snap()
 EOF
 
 # Execute in a specific tab
-browser-cli abc123 <<'EOF'
+nix run github:lassulus/superconfig#skills.browser-cli -- abc123 <<'EOF'
 snap()
 EOF
 ```
@@ -29,7 +29,7 @@ confirmations; use `snap()` to get page state.
 ## Element Interaction (use refs from snap())
 
 ```bash
-browser-cli <<'EOF'
+nix run github:lassulus/superconfig#skills.browser-cli -- <<'EOF'
 await click(1)                    // Click element [1]
 await click(1, {double: true})    // Double click
 await type(2, "user@example.com") // Type into element [2]
@@ -42,7 +42,7 @@ key("Tab")
 EOF
 
 # Can still use CSS selectors when needed
-browser-cli <<'EOF'
+nix run github:lassulus/superconfig#skills.browser-cli -- <<'EOF'
 await click("#submit-button")
 await click("Sign In", "text")
 EOF
@@ -51,7 +51,7 @@ EOF
 ## Page Inspection
 
 ```bash
-browser-cli <<'EOF'
+nix run github:lassulus/superconfig#skills.browser-cli -- <<'EOF'
 snap()                    // Get page snapshot with refs
 snap({forms: true})       // Only form elements
 snap({links: true})       // Only links
@@ -65,7 +65,7 @@ EOF
 ## Waiting
 
 ```bash
-browser-cli <<'EOF'
+nix run github:lassulus/superconfig#skills.browser-cli -- <<'EOF'
 await wait(1000)              // Wait 1 second
 await wait("idle")            // Wait for DOM to stabilize
 await wait("text", "Success") // Wait for text to appear
@@ -76,7 +76,7 @@ EOF
 ## Downloads
 
 ```bash
-browser-cli TABID <<'EOF'
+nix run github:lassulus/superconfig#skills.browser-cli -- TABID <<'EOF'
 const url = document.querySelector('a[href*="pdf"]').href
 await download(url, "invoice.pdf")  // Downloads to ~/Downloads/invoice.pdf
 EOF
@@ -85,7 +85,7 @@ EOF
 ## Screenshots & Tabs
 
 ```bash
-browser-cli <<'EOF'
+nix run github:lassulus/superconfig#skills.browser-cli -- <<'EOF'
 await shot()                      // Screenshot, returns data URL
 await shot("/tmp/page.png")       // Screenshot to file
 await tab()                       // New tab
@@ -116,26 +116,26 @@ URL: https://example.com
 
 ```bash
 # Search on Google
-browser-cli <<'EOF'
+nix run github:lassulus/superconfig#skills.browser-cli -- <<'EOF'
 await tab("https://google.com")
 snap()
 EOF
 # Output shows [12] combobox "Suche"
 
-browser-cli <<'EOF'
+nix run github:lassulus/superconfig#skills.browser-cli -- <<'EOF'
 await type(12, "hello world")
 diff()
 EOF
 # Shows: Added (autocomplete options), Changed (input value)
 
 # Form filling
-browser-cli <<'EOF'
+nix run github:lassulus/superconfig#skills.browser-cli -- <<'EOF'
 await tab("https://example.com/login")
 snap()
 EOF
 # Output: [1] input "Email", [2] input "Password", [3] button "Sign In"
 
-browser-cli <<'EOF'
+nix run github:lassulus/superconfig#skills.browser-cli -- <<'EOF'
 await type(1, "user@test.com")
 await type(2, "secret123")
 await click(3)
@@ -143,7 +143,7 @@ diff()
 EOF
 
 # Wait for dynamic content
-browser-cli <<'EOF'
+nix run github:lassulus/superconfig#skills.browser-cli -- <<'EOF'
 await click(5)
 await wait("text", "Success")
 snap()
