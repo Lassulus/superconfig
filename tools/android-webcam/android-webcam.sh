@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 SHADER_TEMPLATE="@shaderPath@"
 ASCII_MODE=false
 ASCII_SCALE=6

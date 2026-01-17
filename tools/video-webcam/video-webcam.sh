@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 DEVICE="/dev/video0"
 LOOP=true
 
