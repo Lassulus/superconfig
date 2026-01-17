@@ -70,25 +70,25 @@ stdenv.mkDerivation {
   '';
 
   installPhase = ''
-    runHook preInstall
+        runHook preInstall
 
-    # Install all game files
-    mkdir -p "$out/share/${pname}"
-    cp -r * "$out/share/${pname}/"
+        # Install all game files
+        mkdir -p "$out/share/${pname}"
+        cp -r * "$out/share/${pname}/"
 
-    # Create wrapper script using umu-run (Proton launcher)
-    mkdir -p "$out/bin"
-    cat > "$out/bin/${pname}" <<WRAPPER
-#!/bin/sh
-export WINEPREFIX="\''${WINEPREFIX:-\$HOME/.local/share/${pname}/prefix}"
-export GAMEID="${pname}"
-export PROTONPATH="GE-Proton"
-exec ${umu-launcher}/bin/umu-run "\$out/share/${pname}/${exeName}" "\$@"
-WRAPPER
-    substituteInPlace "$out/bin/${pname}" --replace-fail '$out' "$out"
-    chmod +x "$out/bin/${pname}"
+        # Create wrapper script using umu-run (Proton launcher)
+        mkdir -p "$out/bin"
+        cat > "$out/bin/${pname}" <<WRAPPER
+    #!/bin/sh
+    export WINEPREFIX="\''${WINEPREFIX:-\$HOME/.local/share/${pname}/prefix}"
+    export GAMEID="${pname}"
+    export PROTONPATH="GE-Proton"
+    exec ${umu-launcher}/bin/umu-run "\$out/share/${pname}/${exeName}" "\$@"
+    WRAPPER
+        substituteInPlace "$out/bin/${pname}" --replace-fail '$out' "$out"
+        chmod +x "$out/bin/${pname}"
 
-    runHook postInstall
+        runHook postInstall
   '';
 
   meta = {

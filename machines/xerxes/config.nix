@@ -25,7 +25,7 @@
     pkgs.rbw
     # retroarch with patched dolphin core (fixes shader compiler thread issue)
     (pkgs.retroarch.withCores (
-      cores:
+      _cores:
       builtins.filter (c: c.pname or "" != "libretro-dolphin") pkgs.retroarch-free.cores
       ++ [ self.packages.${pkgs.system}.libretro-dolphin ]
     ))

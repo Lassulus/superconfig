@@ -80,24 +80,30 @@ mkIf (hasAttr "wiregrill" config.krebs.build.host.nets) {
     listenPort = 51820;
     privateKeyFile = config.clan.core.vars.generators.wiregrill.files."wiregrill.key".path;
     allowedIPsAsRoutes = true;
-    peers = mapAttrsToList (_name: host: {
-      # inherit name;
-      allowedIPs =
-        if isRouter then
-          (optional (!isNull host.nets.wiregrill.ip4) host.nets.wiregrill.ip4.addr)
-          ++ (optional (!isNull host.nets.wiregrill.ip6) host.nets.wiregrill.ip6.addr)
-        else
-          host.nets.wiregrill.wireguard.subnets;
-      endpoint = mkIf (!isNull host.nets.wiregrill.via) (
-        host.nets.wiregrill.via.ip4.addr + ":${toString host.nets.wiregrill.wireguard.port}"
-      );
-      persistentKeepalive = mkIf (!isNull host.nets.wiregrill.via) 61;
-      publicKey = (replaceStrings [ "\n" ] [ "" ] host.nets.wiregrill.wireguard.pubkey);
-    }) (filterAttrs (_: h:
-      hasAttr "wiregrill" h.nets
-      && hasAttr "wireguard" h.nets.wiregrill
-      && !isNull h.nets.wiregrill.wireguard
-      && !isNull h.nets.wiregrill.wireguard.pubkey
-    ) config.krebs.hosts);
+    peers =
+      mapAttrsToList
+        (_name: host: {
+          # inherit name;
+          allowedIPs =
+            if isRouter then
+              (optional (!isNull host.nets.wiregrill.ip4) host.nets.wiregrill.ip4.addr)
+              ++ (optional (!isNull host.nets.wiregrill.ip6) host.nets.wiregrill.ip6.addr)
+            else
+              host.nets.wiregrill.wireguard.subnets;
+          endpoint = mkIf (!isNull host.nets.wiregrill.via) (
+            host.nets.wiregrill.via.ip4.addr + ":${toString host.nets.wiregrill.wireguard.port}"
+          );
+          persistentKeepalive = mkIf (!isNull host.nets.wiregrill.via) 61;
+          publicKey = (replaceStrings [ "\n" ] [ "" ] host.nets.wiregrill.wireguard.pubkey);
+        })
+        (
+          filterAttrs (
+            _: h:
+            hasAttr "wiregrill" h.nets
+            && hasAttr "wireguard" h.nets.wiregrill
+            && !isNull h.nets.wiregrill.wireguard
+            && !isNull h.nets.wiregrill.wireguard.pubkey
+          ) config.krebs.hosts
+        );
   };
 }

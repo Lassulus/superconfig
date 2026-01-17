@@ -1,6 +1,6 @@
 {
   perSystem =
-    { pkgs, lib, ... }:
+    { pkgs, ... }:
     let
       tridactylrc = ./tridactylrc;
 

@@ -13,10 +13,9 @@
           ffmpeg-placebo
           pkgs.gnused
         ];
-        text = builtins.replaceStrings
-          [ "@shaderPath@" ]
-          [ "${./ascii.hook}" ]
-          (builtins.readFile ./android-webcam.sh);
+        text = builtins.replaceStrings [ "@shaderPath@" ] [ "${./ascii.hook}" ] (
+          builtins.readFile ./android-webcam.sh
+        );
       };
     };
 }

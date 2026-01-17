@@ -1,4 +1,9 @@
-{ config, pkgs, self, ... }:
+{
+  config,
+  pkgs,
+  self,
+  ...
+}:
 {
   # v4l2loopback with two devices: raw camera and ASCII output
   boot = {
