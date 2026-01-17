@@ -22,7 +22,12 @@
   environment.systemPackages = [
     pkgs.bitwarden-desktop
     pkgs.rbw
-    pkgs.retroarch-free
+    # retroarch with patched dolphin core (fixes shader compiler thread issue)
+    (pkgs.retroarch.withCores (
+      cores:
+      builtins.filter (c: c.pname or "" != "libretro-dolphin") pkgs.retroarch-free.cores
+      ++ [ self.packages.${pkgs.system}.libretro-dolphin ]
+    ))
     pkgs.pavucontrol
     pkgs.claude-code
     pkgs.ripgrep
