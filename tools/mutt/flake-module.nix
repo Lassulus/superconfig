@@ -45,17 +45,19 @@
               fi
             done
 
-            # For c-base account, always send directly (no Tor needed)
+            # For c-base account, always send directly
             if [ "$using_cbase" -eq 1 ]; then
               ${pkgs.coreutils}/bin/tee >(${pkgs.notmuch}/bin/notmuch insert +sent) | \
                 ${pkgs.msmtp}/bin/msmtp -C ${msmtprc} "$@"
-            # For prism account, check if neoprism.r is reachable
+            # For default account, try neoprism.r first, then SSH
             elif ping -W2 -c1 neoprism.r >/dev/null 2>&1; then
               ${pkgs.coreutils}/bin/tee >(${pkgs.notmuch}/bin/notmuch insert +sent) | \
                 ${pkgs.msmtp}/bin/msmtp -C ${msmtprc} "$@"
             else
-              echo "Error: neoprism.r is not reachable" >&2
-              exit 1
+              # Fall back to SSH tunnel to neoprism
+              echo "neoprism.r not reachable, sending via SSH..." >&2
+              ${pkgs.coreutils}/bin/tee >(${pkgs.notmuch}/bin/notmuch insert +sent) | \
+                ${pkgs.openssh}/bin/ssh -p 45621 neoprism.lassul.us sendmail -t
             fi
           '';
 
@@ -206,6 +208,7 @@
             pkgs.elinks
             pkgs.msmtp
             pkgs.notmuch
+            pkgs.openssh
             pkgs.urlscan
           ]
           ++ lib.optionals pkgs.stdenv.isLinux [
