@@ -343,6 +343,9 @@ in
       }
     ];
   };
+  # msmtp for local submission via SSH (connects to localhost:25)
+  environment.systemPackages = [ pkgs.msmtp ];
+
   krebs.iptables.tables.filter.INPUT.rules = [
     {
       predicate = "-p tcp --dport smtp";

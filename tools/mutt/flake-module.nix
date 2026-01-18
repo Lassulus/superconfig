@@ -54,10 +54,10 @@
               ${pkgs.coreutils}/bin/tee >(${pkgs.notmuch}/bin/notmuch insert +sent) | \
                 ${pkgs.msmtp}/bin/msmtp -C ${msmtprc} "$@"
             else
-              # Fall back to SSH tunnel to neoprism
+              # Fall back to SSH tunnel to neoprism, submit via SMTP to local daemon
               echo "neoprism.r not reachable, sending via SSH..." >&2
               ${pkgs.coreutils}/bin/tee >(${pkgs.notmuch}/bin/notmuch insert +sent) | \
-                ${pkgs.openssh}/bin/ssh -p 45621 neoprism.lassul.us sendmail -t
+                ${pkgs.openssh}/bin/ssh -p 45621 neoprism.lassul.us 'msmtp -C /dev/null --host=localhost --port=25 --read-envelope-from --read-recipients'
             fi
           '';
 
@@ -200,7 +200,7 @@
           '';
 
         in
-        self.wrapLib.makeWrapper {
+        (self.wrapLib.makeWrapper {
           pkgs = pkgs;
           package = pkgs.neomutt;
           aliases = [ "mutt" ];
@@ -220,6 +220,10 @@
           flags = {
             "-F" = "${muttrc}";
           };
-        };
+        }).overrideAttrs (old: {
+          passthru = (old.passthru or { }) // {
+            inherit msmtp;
+          };
+        });
     };
 }
