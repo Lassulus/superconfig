@@ -18,6 +18,48 @@
             text/html; ${pkgs.elinks}/bin/elinks -dump ; copiousoutput;
           '';
 
+          # Script to view HTML emails in browser with embedded images
+          viewHtmlBrowser = pkgs.writeShellScriptBin "view-html-browser" ''
+                        set -euo pipefail
+                        tmpfile=$(mktemp --suffix=.html)
+                        trap 'rm -f "$tmpfile"' EXIT
+
+                        ${pkgs.python3}/bin/python3 -c '
+            import email, sys, base64
+
+            msg = email.message_from_file(sys.stdin)
+
+            # Build map of Content-ID -> base64 data URI
+            cid_map = {}
+            for part in msg.walk():
+                cid = part.get("Content-ID", "").strip("<>")
+                if cid and part.get_content_maintype() == "image":
+                    data = part.get_payload(decode=True)
+                    if data:
+                        mime = part.get_content_type()
+                        cid_map[cid] = f"data:{mime};base64,{base64.b64encode(data).decode()}"
+
+            # Find HTML part
+            html = None
+            for part in msg.walk():
+                if part.get_content_type() == "text/html":
+                    payload = part.get_payload(decode=True)
+                    charset = part.get_content_charset() or "utf-8"
+                    html = payload.decode(charset, errors="replace")
+                    break
+
+            if html:
+                for cid, data_uri in cid_map.items():
+                    html = html.replace(f"cid:{cid}", data_uri)
+                print(html)
+            else:
+                print("<html><body><p>No HTML content found.</p></body></html>")
+            ' > "$tmpfile"
+
+                        ${if pkgs.stdenv.isDarwin then "open" else "xdg-open"} "$tmpfile"
+                        sleep 2
+          '';
+
           msmtprc = pkgs.writeText "msmtprc" ''
             defaults
               logfile ~/.msmtp.log
@@ -170,6 +212,9 @@
             # scan urls from emails
             macro index,pager \cb "<pipe-message> ${lib.getExe pkgs.urlscan}<Enter>"
             macro attach,compose \cb "<pipe-entry> ${lib.getExe pkgs.urlscan}<Enter>"
+
+            # view HTML in graphical browser
+            macro index,pager H "<pipe-message>${viewHtmlBrowser}/bin/view-html-browser<Enter>" "View HTML in browser"
 
             # sidebar
             set sidebar_divider_char = '│'
