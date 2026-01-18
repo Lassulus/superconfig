@@ -36,6 +36,8 @@
           '';
 
           msmtp = pkgs.writeShellScriptBin "msmtp" ''
+            export NOTMUCH_CONFIG="${notmuchConfig}"
+
             # Check if using c-base account (either explicit -a c-base or via From: header)
             using_cbase=0
             for arg in "$@"; do
@@ -220,10 +222,11 @@
           flags = {
             "-F" = "${muttrc}";
           };
-        }).overrideAttrs (old: {
-          passthru = (old.passthru or { }) // {
-            inherit msmtp;
-          };
-        });
+        }).overrideAttrs
+          (old: {
+            passthru = (old.passthru or { }) // {
+              inherit msmtp;
+            };
+          });
     };
 }
