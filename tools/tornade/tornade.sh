@@ -1,6 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Check for existing Tor daemon (env var or default port 9050)
+EXISTING_TOR_PORT="${TOR_SOCKS_PORT:-9050}"
+if nc -z 127.0.0.1 "$EXISTING_TOR_PORT" 2>/dev/null; then
+  # Use existing Tor daemon - no startup/cleanup needed
+  export TORSOCKS_TOR_PORT=$EXISTING_TOR_PORT
+  if [[ "$(uname)" == "Darwin" ]]; then
+    if [[ "$1" == "ssh" ]]; then
+      shift
+      exec ssh -o ProxyCommand="nc -x 127.0.0.1:$EXISTING_TOR_PORT %h %p" "$@"
+    else
+      exec torsocks "$@"
+    fi
+  else
+    exec torsocks "$@"
+  fi
+fi
+
 # Create temporary directory for this tor instance
 TOR_DIR=$(mktemp -d -t tornade.XXXXXX)
 
