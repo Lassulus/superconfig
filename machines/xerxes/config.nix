@@ -40,6 +40,10 @@
 
   services.ollama = {
     enable = true;
+    package = pkgs.ollama-rocm;
+    environmentVariables = {
+      HSA_OVERRIDE_GFX_VERSION = "11.0.0"; # Radeon 890M (gfx1150/RDNA 3.5) - fallback to gfx1100
+    };
   };
 
   # extra-container for testing declarative containers without full rebuilds
