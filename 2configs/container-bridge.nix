@@ -158,7 +158,7 @@
   ];
 
   # NAT66 - masquerade container IPv6 to reach public IPv6 (when host has IPv6)
-  # NAT44 - masquerade NAT64 translated IPv4 packets (exclude localhost!)
+  # Note: No IPv4 MASQUERADE needed - jool does SNAT with pool4 address for NAT64 traffic
   krebs.iptables.tables.nat.POSTROUTING.rules = [
     {
       v4 = false;
@@ -166,12 +166,6 @@
       predicate = "-s fd00:c700::/64 ! -d fd00:c700::/64";
       target = "MASQUERADE";
     }
-    {
-      v4 = true;
-      v6 = false;
-      predicate = "! -d 127.0.0.0/8 ! -o lo";
-      target = "MASQUERADE";
-    } # Don't masquerade localhost
   ];
 
   # Allow containers to reach host's DNS64 resolver (IPv6 only)
