@@ -3,6 +3,7 @@
   python3Packages,
   fetchurl,
   stdenv,
+  autoPatchelfHook,
 }:
 let
   version = "0.3.44";
@@ -39,6 +40,10 @@ python3Packages.buildPythonPackage {
   src = fetchurl {
     inherit (wheel) url hash;
   };
+
+  nativeBuildInputs = [ autoPatchelfHook ];
+
+  buildInputs = [ stdenv.cc.cc.lib ];
 
   dependencies = with python3Packages; [
     cffi
