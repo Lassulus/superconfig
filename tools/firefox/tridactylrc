@@ -11,3 +11,15 @@ set smoothscroll true
 
 " Don't focus input fields automatically
 set allowautofocus false
+
+" Open current page in mpv
+bind gm composite js document.location.href | exclaim_quiet mpv
+" Select a link and open it in mpv
+bind ;gm hint -W exclaim_quiet mpv
+
+" Open current page through archive.ph
+bind gA js tri.excmds.tabopen('https://archive.ph/' + document.location.href)
+" Custom command to open URL via archive.ph
+command archiveph js -p tri.excmds.tabopen('https://archive.ph/' + JS_ARG)
+" Select a link and open it through archive.ph
+bind ;gA hint -W archiveph
