@@ -74,23 +74,47 @@
               auth on
               user lassulus
               passwordeval rbw get --folder c-base login --field password
+            account clan-infra
+              from infra@clan.lol
+              host mail.clan.lol
+              port 587
+              tls on
+              tls_starttls on
+              auth on
+              user infra@clan.lol
+              passwordeval SOPS_AGE_KEY=$(rbw get --folder clan.lol clan-infra --field age-key) nix develop git+https://git.clan.lol/clan/clan-infra -c clan vars get --flake git+https://git.clan.lol/clan/clan-infra web01 infra-mail/infra-password
+            account dedede
+              from mail@dedede.org
+              host mail.privateemail.com
+              port 587
+              tls on
+              tls_starttls on
+              auth on
+              user mail@dedede.org
+              passwordeval rbw get --folder dedede mail@dedede.org
             account default: prism
           '';
 
           msmtp = pkgs.writeShellScriptBin "msmtp" ''
             export NOTMUCH_CONFIG="${notmuchConfig}"
 
-            # Check if using c-base account (either explicit -a c-base or via From: header)
-            using_cbase=0
+            # Detect which account to use based on arguments
+            account=""
             for arg in "$@"; do
               if [[ "$arg" == "c-base" ]] || [[ "$arg" =~ @c-base\.org ]]; then
-                using_cbase=1
+                account="c-base"
+                break
+              elif [[ "$arg" == "clan-infra" ]] || [[ "$arg" =~ @clan\.lol ]]; then
+                account="clan-infra"
+                break
+              elif [[ "$arg" == "dedede" ]] || [[ "$arg" =~ @dedede\.org ]]; then
+                account="dedede"
                 break
               fi
             done
 
-            # For c-base account, always send directly
-            if [ "$using_cbase" -eq 1 ]; then
+            # For external accounts (c-base, clan-infra, dedede), always send directly
+            if [ -n "$account" ]; then
               ${pkgs.coreutils}/bin/tee >(${pkgs.notmuch}/bin/notmuch insert +sent) | \
                 ${pkgs.msmtp}/bin/msmtp -C ${msmtprc} "$@"
             # For default account, try neoprism.r first, then SSH
@@ -120,7 +144,7 @@
 
             set sendmail="${msmtp}/bin/msmtp"
             set from="lassulus@lassul.us"
-            alternates ^.*@lassul\.us$ ^.*@.*\.r$ ^.*@c-base\.org$
+            alternates ^.*@lassul\.us$ ^.*@.*\.r$ ^.*@c-base\.org$ ^.*@dedede\.org$ ^.*@clan\.lol$
             unset envelope_from_address
             set use_envelope_from
             set reverse_name
