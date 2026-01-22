@@ -73,7 +73,7 @@
               tls_starttls off
               auth on
               user lassulus
-              passwordeval pass show c-base/pass
+              passwordeval rbw get --folder c-base login --field password
             account default: prism
           '';
 
