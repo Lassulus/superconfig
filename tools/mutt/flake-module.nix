@@ -63,6 +63,7 @@
           msmtprc = pkgs.writeText "msmtprc" ''
             defaults
               logfile ~/.msmtp.log
+              timeout 10
             account prism
               host neoprism.r
             account c-base
@@ -98,34 +99,46 @@
           msmtp = pkgs.writeShellScriptBin "msmtp" ''
             export NOTMUCH_CONFIG="${notmuchConfig}"
 
-            # Detect which account to use based on arguments
+            # Save message to temporary file first
+            tmpfile=$(mktemp)
+            trap 'rm -f "$tmpfile"' EXIT
+            cat > "$tmpfile"
+
+            # Detect which account to use based on From: header in the email
             account=""
-            for arg in "$@"; do
-              if [[ "$arg" == "c-base" ]] || [[ "$arg" =~ @c-base\.org ]]; then
-                account="c-base"
-                break
-              elif [[ "$arg" == "clan-infra" ]] || [[ "$arg" =~ @clan\.lol ]]; then
-                account="clan-infra"
-                break
-              elif [[ "$arg" == "dedede" ]] || [[ "$arg" =~ @dedede\.org ]]; then
-                account="dedede"
-                break
-              fi
-            done
+            from_line=$(grep -i "^From:" "$tmpfile" | head -1)
+            if [[ "$from_line" =~ @c-base\.org ]]; then
+              account="c-base"
+            elif [[ "$from_line" =~ @clan\.lol ]]; then
+              account="clan-infra"
+            elif [[ "$from_line" =~ @dedede\.org ]]; then
+              account="dedede"
+            fi
 
             # For external accounts (c-base, clan-infra, dedede), always send directly
             if [ -n "$account" ]; then
-              ${pkgs.coreutils}/bin/tee >(${pkgs.notmuch}/bin/notmuch insert +sent) | \
-                ${pkgs.msmtp}/bin/msmtp -C ${msmtprc} "$@"
-            # For default account, try neoprism.r first, then SSH
-            elif ping -W2 -c1 neoprism.r >/dev/null 2>&1; then
-              ${pkgs.coreutils}/bin/tee >(${pkgs.notmuch}/bin/notmuch insert +sent) | \
-                ${pkgs.msmtp}/bin/msmtp -C ${msmtprc} "$@"
+              if ${pkgs.msmtp}/bin/msmtp -C ${msmtprc} "$@" < "$tmpfile"; then
+                ${pkgs.notmuch}/bin/notmuch insert +sent < "$tmpfile"
+                exit 0
+              else
+                exit 1
+              fi
+            fi
+
+            # For default account, try neoprism.r first, fallback to SSH
+            if ${pkgs.msmtp}/bin/msmtp -C ${msmtprc} "$@" < "$tmpfile" 2>/dev/null; then
+              ${pkgs.notmuch}/bin/notmuch insert +sent < "$tmpfile"
+              exit 0
+            fi
+
+            # If direct connection failed, fall back to SSH tunnel
+            echo "Direct connection failed, sending via SSH..." >&2
+            if ${pkgs.openssh}/bin/ssh -o ConnectTimeout=10 -p 45621 neoprism.lassul.us 'msmtp -C /dev/null --host=localhost --port=25 --read-envelope-from --read-recipients' < "$tmpfile"; then
+              ${pkgs.notmuch}/bin/notmuch insert +sent < "$tmpfile"
+              exit 0
             else
-              # Fall back to SSH tunnel to neoprism, submit via SMTP to local daemon
-              echo "neoprism.r not reachable, sending via SSH..." >&2
-              ${pkgs.coreutils}/bin/tee >(${pkgs.notmuch}/bin/notmuch insert +sent) | \
-                ${pkgs.openssh}/bin/ssh -p 45621 neoprism.lassul.us 'msmtp -C /dev/null --host=localhost --port=25 --read-envelope-from --read-recipients'
+              echo "Failed to send email" >&2
+              exit 1
             fi
           '';
 
