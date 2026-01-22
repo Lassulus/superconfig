@@ -12,6 +12,9 @@ set smoothscroll true
 " Don't focus input fields automatically
 set allowautofocus false
 
+" Remove dangerous default binding (d closes tab)
+unbind d
+
 " Open current page in mpv
 bind gm composite js document.location.href | exclaim_quiet mpv
 " Select a link and open it in mpv
