@@ -12,6 +12,9 @@ set smoothscroll true
 " Don't focus input fields automatically
 set allowautofocus false
 
+" Allow autofocus on HedgeDoc/CodiMD instances (detected dynamically)
+autocmd DocLoad .* js if (document.title.includes('HedgeDoc') || document.title.includes('CodiMD') || document.querySelector('meta[name="application-name"][content="HedgeDoc"]')) { tri.excmds.set('allowautofocus', 'true'); }
+
 " Remove dangerous default binding (d closes tab)
 unbind d
 
