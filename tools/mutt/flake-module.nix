@@ -120,11 +120,15 @@
 
             set sendmail="${msmtp}/bin/msmtp"
             set from="lassulus@lassul.us"
-            alternates ^.*@lassul\.us$ ^.*@.*\.r$
+            alternates ^.*@lassul\.us$ ^.*@.*\.r$ ^.*@c-base\.org$
             unset envelope_from_address
             set use_envelope_from
             set reverse_name
             set markers=no
+
+            # Automatically use c-base email when sending/replying to c-base addresses
+            send-hook "." "unmy_hdr From"
+            send-hook "~C .*@c-base\.org" "my_hdr From: lassulus@c-base.org"
 
             set sort=threads
 
