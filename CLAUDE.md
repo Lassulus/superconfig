@@ -78,5 +78,6 @@ Secrets are managed via password-store and uploaded to `/run/secrets` on deploym
 ## Commit Message Guidelines
 
 - Use simple, descriptive commit messages without attribution footers
+- Use flake attribute paths as prefixes (e.g., `tools.mutt:` not just `mutt:`)
 - For flake.lock updates, use: "flake.lock: update"
 - Follow existing patterns seen in git log
