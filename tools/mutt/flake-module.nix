@@ -148,6 +148,11 @@
             account-hook imaps://mail.clan.lol "set imap_user = 'infra@clan.lol'; set imap_pass = \"\`SOPS_AGE_KEY=\$(rbw get --folder clan.lol clan-infra --field age-key) nix develop git+https://git.clan.lol/clan/clan-infra -c clan vars get --flake git+https://git.clan.lol/clan/clan-infra web01 infra-mail/infra-password\`\""
             folder-hook "notmuch://\\?query=tag:nonexistent-separator-tag" "push '<change-folder>imaps://mail.clan.lol<enter>'"
 
+            # dedede.org IMAP (Namecheap Private Email)
+            virtual-mailboxes "dedede" "notmuch://?query=tag:nonexistent-dedede-tag"
+            account-hook imaps://mail.privateemail.com "set imap_user = 'mail@dedede.org'; set imap_pass = \"\`rbw get --folder dedede mail@dedede.org\`\""
+            folder-hook "notmuch://\\?query=tag:nonexistent-dedede-tag" "push '<change-folder>imaps://mail.privateemail.com<enter>'"
+
             tag-transforms "junk"     "k" \
                            "unread"   "u" \
                            "replied"  "↻" \
