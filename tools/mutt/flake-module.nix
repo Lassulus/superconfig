@@ -117,7 +117,7 @@
 
             # For external accounts (c-base, clan-infra, dedede), always send directly
             if [ -n "$account" ]; then
-              if ${pkgs.msmtp}/bin/msmtp -C ${msmtprc} "$@" < "$tmpfile"; then
+              if ${pkgs.msmtp}/bin/msmtp -C ${msmtprc} -a "$account" "$@" < "$tmpfile"; then
                 ${pkgs.notmuch}/bin/notmuch insert +sent < "$tmpfile"
                 exit 0
               else
