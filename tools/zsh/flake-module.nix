@@ -4,10 +4,6 @@
     { pkgs, ... }:
     let
       zshrc = ''
-        # Source latest environment to pick up changes after nixos-rebuild
-        # (bypasses the __NIXOS_SET_ENVIRONMENT_DONE guard in /etc/zshenv)
-        . /etc/set-environment
-
         autoload -U compinit && compinit
 
         # Setup custom interactive shell init stuff.
