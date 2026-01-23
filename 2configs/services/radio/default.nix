@@ -133,7 +133,7 @@ in
       RADIO_PORT = "8002";
       HOOK_TRACK_CHANGE = pkgs.writers.writeDash "on_change" ''
         set -xefu
-        LIMIT=1000 #how many tracks to keep in the history
+        LIMIT=100000 #how many tracks to keep in the history
         HISTORY_FILE=/var/lib/radio/recent
 
         listeners=$(${pkgs.curl}/bin/curl -fSs http://localhost:8000/status-json.xsl |
