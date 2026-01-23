@@ -157,11 +157,16 @@
 
             set sendmail="${msmtp}/bin/msmtp"
             set from="lassulus@lassul.us"
-            alternates ^.*@lassul\.us$ ^.*@.*\.r$ ^.*@c-base\.org$ ^.*@dedede\.org$ ^.*@clan\.lol$
+            alternates ^.*@lassul\.us$ ^lassulus@c-base\.org$
             unset envelope_from_address
             set use_envelope_from
             set reverse_name
             set markers=no
+
+            # Folder hooks: set alternates per-mailbox so identities don't overlap
+            folder-hook . "unalternates *; alternates ^.*@lassul\\.us$ ^lassulus@c-base\\.org$; set from=lassulus@lassul.us"
+            folder-hook "imaps://.*mail\\.clan\\.lol" "unalternates *; alternates ^.*@clan\\.lol$; set from=infra@clan.lol"
+            folder-hook "imaps://.*mail\\.privateemail\\.com" "unalternates *; alternates ^.*@dedede\\.org$; set from=mail@dedede.org"
 
             # Automatically use c-base email when sending/replying to c-base addresses
             send-hook "." "unmy_hdr From"
