@@ -33,6 +33,7 @@
     pkgs.claude-code
     pkgs.ripgrep
     self.packages.${pkgs.system}.mpv
+    pkgs.gh
   ];
 
   documentation.nixos.enable = true;
