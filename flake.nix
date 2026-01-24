@@ -70,7 +70,7 @@
       ...
     }:
     let
-      clan = clan-core.lib.buildClan {
+      clan = clan-core.lib.clan {
         self = self;
         specialArgs.self = self;
         modules = import ./clan_modules { inherit nixpkgs; };
@@ -184,10 +184,10 @@
         in
         map (dir: ./tools + "/${dir}/flake-module.nix") toolDirs
       );
-      flake.nixosConfigurations = clan.nixosConfigurations;
-      flake.clanInternals = clan.clanInternals;
-      flake.darwinConfigurations = clan.darwinConfigurations;
-      flake.clan = clan;
+      flake.nixosConfigurations = clan.config.nixosConfigurations;
+      flake.clanInternals = clan.config.clanInternals;
+      flake.darwinConfigurations = clan.config.darwinConfigurations;
+      flake.clan = clan.config;
 
       # Container configurations for use with extra-container
       # Auto-discovers machines with container.nix
