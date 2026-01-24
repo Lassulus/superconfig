@@ -74,6 +74,7 @@
         self = self;
         specialArgs.self = self;
         modules = import ./clan_modules { inherit nixpkgs; };
+        meta.domain = "s";
         inventory = {
           meta.name = "superconfig";
           machines = {
