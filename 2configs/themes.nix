@@ -22,6 +22,11 @@ let
       set -f
       ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface gtk-theme "$(cat /var/theme/config/gtk-theme)" || :
       ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface color-scheme "prefer-$1" || :
+      set +f
+      for sock in /tmp/kitty-socket*; do
+        ${pkgs.kitty}/bin/kitten @ --to unix:"$sock" set-colors -a /var/theme/config/kitty-colors.conf 2>/dev/null || :
+      done
+      set -f
     else
       echo "theme $1 not found"
     fi
