@@ -8,6 +8,11 @@
 
         # Auto-destroy sessions when no clients attached (handles terminal close)
         set -g destroy-unattached on
+
+        # Enable kitty graphics protocol passthrough
+        set -g allow-passthrough on
+        set -ga update-environment TERM
+        set -ga update-environment TERM_PROGRAM
       '';
       tmuxConfigFile = pkgs.writeText "tmux.conf" tmuxConfigText;
     in
