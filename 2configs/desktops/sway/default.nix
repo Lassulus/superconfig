@@ -6,7 +6,7 @@
 }:
 let
 
-  term = "/run/current-system/sw/bin/alacritty";
+  term = "/run/current-system/sw/bin/kitty";
 
   # Unified script: switch to workspace and move it to current output
   gotoWorkspace = pkgs.writeShellApplication {
