@@ -18,10 +18,14 @@ autocmd DocLoad .* js if (document.title.includes('HedgeDoc') || document.title.
 " Remove dangerous default binding (d closes tab)
 unbind d
 
-" Open current page in mpv
-bind gm composite js document.location.href | exclaim_quiet mpv
-" Select a link and open it in mpv
-bind ;gm hint -W exclaim_quiet mpv
+" Enter ignore mode with Insert key (exit with Shift+Escape)
+bind <Insert> mode ignore
+
+" Show hints for input fields with ;e
+bind ;e hint -t input,textarea,select
+
+" Open current page in mpv (using mpvsafe for proper escaping)
+bind gv composite get_current_url | mpvsafe
 
 " Open current page through archive.ph
 bind gA js tri.excmds.tabopen('https://archive.ph/' + document.location.href)
