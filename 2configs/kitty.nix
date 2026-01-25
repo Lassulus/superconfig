@@ -22,6 +22,9 @@ let
     # URL handling
     open_url_with /run/current-system/sw/bin/xdg-open
     detect_urls yes
+
+    # Disable bell
+    enable_audio_bell no
   '';
 
   kitty = pkgs.symlinkJoin {
