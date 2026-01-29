@@ -24,7 +24,7 @@
             # Check if a host is reachable
             check_host() {
               local host=$1
-              ping -W2 -c1 "$host" >/dev/null 2>&1
+              ping -W2 -c3 "$host" >/dev/null 2>&1
             }
 
             # Smart host selection - try spora, nether, retiolum, then tor
