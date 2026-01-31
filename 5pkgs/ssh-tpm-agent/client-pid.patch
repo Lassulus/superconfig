@@ -1,0 +1,312 @@
+diff --git a/agent/agent.go b/agent/agent.go
+index 76a2610..e643575 100644
+--- a/agent/agent.go
++++ b/agent/agent.go
+@@ -25,6 +25,7 @@ import (
+ 	"github.com/google/go-tpm/tpm2/transport"
+ 	"golang.org/x/crypto/ssh"
+ 	"golang.org/x/crypto/ssh/agent"
++	"golang.org/x/sys/unix"
+ 	"golang.org/x/text/cases"
+ 	"golang.org/x/text/language"
+ )
+@@ -37,17 +38,18 @@ var (
+ var SSH_TPM_AGENT_ADD = "tpm-add-key"
+ 
+ type Agent struct {
+-	mu       sync.Mutex
+-	tpm      func() transport.TPMCloser
+-	op       func() ([]byte, error)
+-	pin      func(key.SSHTPMKeys) ([]byte, error)
+-	listener *net.UnixListener
+-	quit     chan interface{}
+-	wg       sync.WaitGroup
+-	keyring  func() *keyring.ThreadKeyring
+-	keys     []key.SSHTPMKeys
+-	hierkeys []*key.HierSSHTPMKey
+-	agents   []agent.ExtendedAgent
++	mu        sync.Mutex
++	tpm       func() transport.TPMCloser
++	op        func() ([]byte, error)
++	pin       func(key.SSHTPMKeys, int) ([]byte, error)
++	listener  *net.UnixListener
++	quit      chan interface{}
++	wg        sync.WaitGroup
++	keyring   func() *keyring.ThreadKeyring
++	keys      []key.SSHTPMKeys
++	hierkeys  []*key.HierSSHTPMKey
++	agents    []agent.ExtendedAgent
++	clientPID int
+ }
+ 
+ var _ agent.ExtendedAgent = &Agent{}
+@@ -118,8 +120,8 @@ func (a *Agent) signers() ([]ssh.Signer, error) {
+ 		s, err := ssh.NewSignerFromSigner(k.Signer(
+ 			a.keyring(), a.op, a.tpm,
+ 			func(_ *keyfile.TPMKey) ([]byte, error) {
+-				// Shimming the function to get the correct type
+-				return a.pin(k)
++				// Shimming the function to get the correct type, pass client PID
++				return a.pin(k, a.clientPID)
+ 			}),
+ 		)
+ 		if err != nil {
+@@ -225,6 +227,21 @@ func (a *Agent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signature, error) {
+ }
+ 
+ func (a *Agent) serveConn(c net.Conn) {
++	// Extract peer credentials to get the client PID
++	if uc, ok := c.(*net.UnixConn); ok {
++		rawConn, err := uc.SyscallConn()
++		if err == nil {
++			rawConn.Control(func(fd uintptr) {
++				if cred, err := unix.GetsockoptUcred(int(fd), unix.SOL_SOCKET, unix.SO_PEERCRED); err == nil {
++					a.mu.Lock()
++					a.clientPID = int(cred.Pid)
++					a.mu.Unlock()
++					slog.Debug("client connected", slog.Int("pid", int(cred.Pid)))
++				}
++			})
++		}
++	}
++
+ 	if err := agent.ServeAgent(a, c); err != io.EOF {
+ 		slog.Info("Agent client connection ended unsuccessfully", slog.String("error", err.Error()))
+ 	}
+@@ -461,7 +478,7 @@ func LoadKeys(keyDir string) ([]key.SSHTPMKeys, error) {
+ 	return keys, err
+ }
+ 
+-func NewAgent(listener *net.UnixListener, agents []agent.ExtendedAgent, keyring func() *keyring.ThreadKeyring, tpmFetch func() transport.TPMCloser, ownerPassword func() ([]byte, error), pin func(key.SSHTPMKeys) ([]byte, error)) *Agent {
++func NewAgent(listener *net.UnixListener, agents []agent.ExtendedAgent, keyring func() *keyring.ThreadKeyring, tpmFetch func() transport.TPMCloser, ownerPassword func() ([]byte, error), pin func(key.SSHTPMKeys, int) ([]byte, error)) *Agent {
+ 	a := &Agent{
+ 		agents:   agents,
+ 		tpm:      tpmFetch,
+diff --git a/agent/agent_test.go b/agent/agent_test.go
+index acaec3d..189b607 100644
+--- a/agent/agent_test.go
++++ b/agent/agent_test.go
+@@ -45,7 +45,7 @@ func TestAddKey(t *testing.T) {
+ 		// Owner password
+ 		func() ([]byte, error) { return []byte(""), nil },
+ 		// PIN Callback
+-		func(_ key.SSHTPMKeys) ([]byte, error) { return []byte(""), nil },
++		func(_ key.SSHTPMKeys, _ int) ([]byte, error) { return []byte(""), nil },
+ 	)
+ 	defer ag.Stop()
+ 
+diff --git a/askpass/askpass.go b/askpass/askpass.go
+index 8ef6370..0653165 100644
+--- a/askpass/askpass.go
++++ b/askpass/askpass.go
+@@ -8,6 +8,7 @@ import (
+ 	"log/slog"
+ 	"os"
+ 	"os/exec"
++	"strconv"
+ 	"strings"
+ 	"syscall"
+ 
+@@ -66,7 +67,7 @@ func isTerminal(fd uintptr) bool {
+ 	return err == nil
+ }
+ 
+-func ReadPassphrase(prompt string, flags ReadPassFlags) ([]byte, error) {
++func ReadPassphrase(prompt string, flags ReadPassFlags, clientPID int) ([]byte, error) {
+ 	var allow_askpass bool
+ 	var use_askpass bool
+ 	var askpass_hint string
+@@ -104,7 +105,7 @@ func ReadPassphrase(prompt string, flags ReadPassFlags) ([]byte, error) {
+ 		if (flags & RP_ASK_PERMISSION) != 0 {
+ 			askpass_hint = "confirm"
+ 		}
+-		return SshAskPass(prompt, askpass_hint)
++		return SshAskPass(prompt, askpass_hint, clientPID)
+ 	}
+ 
+ 	// If we want to echo stuff, we read directly from stdin
+@@ -130,7 +131,7 @@ func ReadPassphrase(prompt string, flags ReadPassFlags) ([]byte, error) {
+ 	return pin, nil
+ }
+ 
+-func SshAskPass(prompt, hint string) ([]byte, error) {
++func SshAskPass(prompt, hint string, clientPID int) ([]byte, error) {
+ 	var askpass string
+ 	var err error
+ 	if s, ok := os.LookupEnv("SSH_ASKPASS"); ok {
+@@ -147,6 +148,11 @@ func SshAskPass(prompt, hint string) ([]byte, error) {
+ 	if hint != "" {
+ 		os.Setenv("SSH_ASKPASS_PROMPT", hint)
+ 	}
++
++	if clientPID > 0 {
++		os.Setenv("SSH_CLIENT_PID", strconv.Itoa(clientPID))
++	}
++
+ 	out, err := exec.Command(askpass, prompt).Output()
+ 	switch hint {
+ 	case "confirm":
+@@ -169,8 +175,8 @@ func SshAskPass(prompt, hint string) ([]byte, error) {
+ 
+ // AskPremission runs SSH_ASKPASS in with SSH_ASKPASS_PROMPT=confirm set as env
+ // it will expect exit code 0 or !0 and return 'yes' and 'no' respectively.
+-func AskPermission() (bool, error) {
+-	a, err := ReadPassphrase("Confirm touch", RP_USE_ASKPASS|RP_ASK_PERMISSION)
++func AskPermission(clientPID int) (bool, error) {
++	a, err := ReadPassphrase("Confirm touch", RP_USE_ASKPASS|RP_ASK_PERMISSION, clientPID)
+ 	if err != nil {
+ 		return false, err
+ 	}
+diff --git a/cmd/ssh-tpm-agent/main.go b/cmd/ssh-tpm-agent/main.go
+index 1b76351..797428c 100644
+--- a/cmd/ssh-tpm-agent/main.go
++++ b/cmd/ssh-tpm-agent/main.go
+@@ -243,7 +243,7 @@ func main() {
+ 		// Owner password
+ 		func() ([]byte, error) {
+ 			if askOwnerPassword {
+-				return askpass.ReadPassphrase("Enter owner password for TPM", askpass.RP_USE_ASKPASS)
++				return askpass.ReadPassphrase("Enter owner password for TPM", askpass.RP_USE_ASKPASS, 0)
+ 			} else {
+ 				ownerPassword := os.Getenv("SSH_TPM_AGENT_OWNER_PASSWORD")
+ 				return []byte(ownerPassword), nil
+@@ -253,7 +253,7 @@ func main() {
+ 		// PIN Callback with caching
+ 		// SSHKeySigner in signer/signer.go resets this value if
+ 		// we get a TPMRCAuthFail
+-		func(key key.SSHTPMKeys) ([]byte, error) {
++		func(key key.SSHTPMKeys, clientPID int) ([]byte, error) {
+ 			auth, err := agentkeyring.ReadKey(key.Fingerprint())
+ 			if err == nil {
+ 				slog.Debug("providing cached userauth for key", slog.String("fp", key.Fingerprint()))
+@@ -261,8 +261,8 @@ func main() {
+ 				return auth.Read(), nil
+ 			} else if errors.Is(err, syscall.ENOKEY) || errors.Is(err, syscall.EACCES) {
+ 				keyInfo := fmt.Sprintf("Enter passphrase for (%s): ", key.GetDescription())
+-				// TODOt kjk: askpass should box the byte slice
+-				userauth, err := askpass.ReadPassphrase(keyInfo, askpass.RP_USE_ASKPASS)
++				// TODO: askpass should box the byte slice
++				userauth, err := askpass.ReadPassphrase(keyInfo, askpass.RP_USE_ASKPASS, clientPID)
+ 				fmt.Println(err)
+ 				if !noCache && err == nil {
+ 					slog.Debug("caching userauth for key in keyring", slog.String("fp", key.Fingerprint()))
+diff --git a/cmd/ssh-tpm-agent/main_test.go b/cmd/ssh-tpm-agent/main_test.go
+index 051febf..d2ff3c4 100644
+--- a/cmd/ssh-tpm-agent/main_test.go
++++ b/cmd/ssh-tpm-agent/main_test.go
+@@ -144,7 +144,7 @@ func runSSHAuth(t *testing.T, keytype tpm2.TPMAlgID, bits int, pin []byte, keyfn
+ 		// Owner password
+ 		func() ([]byte, error) { return []byte(""), nil },
+ 		// PIN Callback
+-		func(_ key.SSHTPMKeys) ([]byte, error) {
++		func(_ key.SSHTPMKeys, _ int) ([]byte, error) {
+ 			return pin, nil
+ 		},
+ 	)
+diff --git a/cmd/ssh-tpm-keygen/main.go b/cmd/ssh-tpm-keygen/main.go
+index f5d9421..12073b0 100644
+--- a/cmd/ssh-tpm-keygen/main.go
++++ b/cmd/ssh-tpm-keygen/main.go
+@@ -89,11 +89,11 @@ Example:
+ 
+ func getPin() ([]byte, error) {
+ 	for {
+-		pin1, err := askpass.ReadPassphrase("Enter passphrase (empty for no passphrase): ", askpass.RP_ALLOW_STDIN|askpass.RP_NEWLINE)
++		pin1, err := askpass.ReadPassphrase("Enter passphrase (empty for no passphrase): ", askpass.RP_ALLOW_STDIN|askpass.RP_NEWLINE, 0)
+ 		if err != nil {
+ 			return nil, err
+ 		}
+-		pin2, err := askpass.ReadPassphrase("Enter same passphrase again: ", askpass.RP_ALLOW_STDIN|askpass.RP_NEWLINE)
++		pin2, err := askpass.ReadPassphrase("Enter same passphrase again: ", askpass.RP_ALLOW_STDIN|askpass.RP_NEWLINE, 0)
+ 		if err != nil {
+ 			return nil, err
+ 		}
+@@ -106,7 +106,7 @@ func getPin() ([]byte, error) {
+ }
+ 
+ func getOwnerPassword() ([]byte, error) {
+-	return askpass.ReadPassphrase("Enter owner password: ", askpass.RP_ALLOW_STDIN)
++	return askpass.ReadPassphrase("Enter owner password: ", askpass.RP_ALLOW_STDIN, 0)
+ }
+ 
+ func doHostKeys(tpm transport.TPMCloser, outputFile string, ownerPassword []byte, hierarchy string) {
+@@ -191,7 +191,7 @@ func doChangePin(tpm transport.TPMCloser, passphrase, keyPin, ownerPassword []by
+ 		fmt.Printf("Key has comment '%s'\n", k.Description)
+ 	}
+ 	if outputFile == "" {
+-		f, err := askpass.ReadPassphrase(fmt.Sprintf("Enter file in which the key is (%s): ", filename), askpass.RP_ALLOW_STDIN|askpass.RPP_ECHO_ON)
++		f, err := askpass.ReadPassphrase(fmt.Sprintf("Enter file in which the key is (%s): ", filename), askpass.RP_ALLOW_STDIN|askpass.RPP_ECHO_ON, 0)
+ 		if err != nil {
+ 			return err
+ 		}
+@@ -199,18 +199,18 @@ func doChangePin(tpm transport.TPMCloser, passphrase, keyPin, ownerPassword []by
+ 	}
+ 
+ 	if len(passphrase) == 0 {
+-		passphrase, err = askpass.ReadPassphrase("Enter old passphrase: ", askpass.RP_ALLOW_STDIN|askpass.RP_NEWLINE)
++		passphrase, err = askpass.ReadPassphrase("Enter old passphrase: ", askpass.RP_ALLOW_STDIN|askpass.RP_NEWLINE, 0)
+ 		if err != nil {
+ 			return err
+ 		}
+ 	}
+ 
+ 	if len(keyPin) == 0 {
+-		keyPin, err = askpass.ReadPassphrase("Enter new passphrase (empty for no passphrase): ", askpass.RP_ALLOW_STDIN|askpass.RP_NEWLINE)
++		keyPin, err = askpass.ReadPassphrase("Enter new passphrase (empty for no passphrase): ", askpass.RP_ALLOW_STDIN|askpass.RP_NEWLINE, 0)
+ 		if err != nil {
+ 			return err
+ 		}
+-		newPin, err := askpass.ReadPassphrase("Enter same passphrase: ", askpass.RP_ALLOW_STDIN)
++		newPin, err := askpass.ReadPassphrase("Enter same passphrase: ", askpass.RP_ALLOW_STDIN, 0)
+ 		if err != nil {
+ 			return err
+ 		}
+@@ -256,7 +256,7 @@ func doWrapWith(supportedECCBitsizes []int, wrap, wrapWith string, keyParentHand
+ 	rawKey, err = ssh.ParseRawPrivateKey(pem)
+ 	if errors.As(err, &kerr) {
+ 		for {
+-			pin, err := askpass.ReadPassphrase("Enter existing passphrase (empty for no passphrase): ", askpass.RP_ALLOW_STDIN|askpass.RP_NEWLINE)
++			pin, err := askpass.ReadPassphrase("Enter existing passphrase (empty for no passphrase): ", askpass.RP_ALLOW_STDIN|askpass.RP_NEWLINE, 0)
+ 			if err != nil {
+ 				log.Fatal(err)
+ 			}
+@@ -353,7 +353,7 @@ func supportedECCBitsizes(tpm transport.TPMCloser) []int {
+ func checkFile(f string) error {
+ 	if utils.FileExists(f) {
+ 		fmt.Printf("%s already exists.\n", f)
+-		s, err := askpass.ReadPassphrase("Overwrite (y/n)? ", askpass.RP_ALLOW_STDIN|askpass.RPP_ECHO_ON)
++		s, err := askpass.ReadPassphrase("Overwrite (y/n)? ", askpass.RP_ALLOW_STDIN|askpass.RPP_ECHO_ON, 0)
+ 		if err != nil {
+ 			return err
+ 		}
+@@ -373,7 +373,7 @@ func doImportKey(tpm transport.TPMCloser, keyParentHandle tpm2.TPMHandle, ownerP
+ 	rawKey, err = ssh.ParseRawPrivateKey(pem)
+ 	if errors.As(err, &kerr) {
+ 		for {
+-			pin, err := askpass.ReadPassphrase("Enter existing passphrase (empty for no passphrase): ", askpass.RP_ALLOW_STDIN|askpass.RP_NEWLINE)
++			pin, err := askpass.ReadPassphrase("Enter existing passphrase (empty for no passphrase): ", askpass.RP_ALLOW_STDIN|askpass.RP_NEWLINE, 0)
+ 			if err != nil {
+ 				return nil, err
+ 			}
+@@ -665,7 +665,7 @@ func main() {
+ 		// Else create a normal key
+ 		fmt.Printf("Generating a sealed public/private %s key pair.\n", keyType)
+ 		if outputFile == "" {
+-			f, err := askpass.ReadPassphrase(fmt.Sprintf("Enter file in which to save the key (%s): ", filename), askpass.RP_ALLOW_STDIN|askpass.RPP_ECHO_ON)
++			f, err := askpass.ReadPassphrase(fmt.Sprintf("Enter file in which to save the key (%s): ", filename), askpass.RP_ALLOW_STDIN|askpass.RPP_ECHO_ON, 0)
+ 			if err != nil {
+ 				log.Fatal(err)
+ 			}
+diff --git a/internal/keytest/keytest.go b/internal/keytest/keytest.go
+index ade4ad8..90fcf77 100644
+--- a/internal/keytest/keytest.go
++++ b/internal/keytest/keytest.go
+@@ -121,7 +121,7 @@ func NewTestAgent(t *testing.T, tpm transport.TPMCloser) *agent.Agent {
+ 		func() *keyring.ThreadKeyring { return &keyring.ThreadKeyring{} },
+ 		func() transport.TPMCloser { return tpm },
+ 		func() ([]byte, error) { return []byte(""), nil },
+-		func(_ key.SSHTPMKeys) ([]byte, error) {
++		func(_ key.SSHTPMKeys, _ int) ([]byte, error) {
+ 			return []byte(""), nil
+ 		},
+ 	)

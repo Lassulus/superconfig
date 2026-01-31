@@ -1,14 +1,12 @@
-{ pkgs, lib, ... }:
+{
+  pkgs,
+  lib,
+  self,
+  ...
+}:
 let
-  pinentry-askpass = pkgs.writeShellScriptBin "pinentry-askpass" ''
-        result=$(cat <<EOF | ${pkgs.pinentry-gtk2}/bin/pinentry
-    SETDESC $1
-    SETPROMPT Passphrase:
-    GETPIN
-    EOF
-        )
-        echo "$result" | grep '^D ' | cut -d' ' -f2-
-  '';
+  ssh-tpm-agent = self.packages.${pkgs.system}.ssh-tpm-agent;
+  pinentry-rofi = self.packages.${pkgs.system}.pinentry-rofi;
 in
 {
   security.tpm2 = {
@@ -18,7 +16,6 @@ in
   };
   environment.systemPackages = [
     pkgs.keyutils
-    pinentry-askpass
   ];
   users.users.mainUser.extraGroups = [ "tss" ];
 
@@ -27,9 +24,9 @@ in
     wantedBy = [ "graphical-session.target" ];
     after = [ "graphical-session.target" ];
     serviceConfig = {
-      ExecStart = "${pkgs.ssh-tpm-agent}/bin/ssh-tpm-agent -l %t/ssh-tpm-agent.sock --no-cache";
+      ExecStart = "${ssh-tpm-agent}/bin/ssh-tpm-agent -l %t/ssh-tpm-agent.sock --no-cache";
       Environment = [
-        "SSH_ASKPASS=${lib.getExe pinentry-askpass}"
+        "SSH_ASKPASS=${lib.getExe pinentry-rofi}"
         "SSH_ASKPASS_REQUIRE=force"
       ];
       Restart = "on-failure";
