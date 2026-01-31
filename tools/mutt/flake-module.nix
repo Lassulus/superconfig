@@ -267,6 +267,10 @@
             # view HTML in graphical browser
             macro index,pager H "<pipe-message>${viewHtmlBrowser}/bin/view-html-browser<Enter>" "View HTML in browser"
 
+            # forward invoice to sevdesk
+            send-hook "~t autobox@sevdesk.email" "my_hdr From: sevdesk@lassul.us"
+            macro index,pager I "<forward-message>autobox@sevdesk.email<enter>" "Forward invoice to sevdesk"
+
             # sidebar
             set sidebar_divider_char = '│'
             set sidebar_delim_chars = "/"
