@@ -7,6 +7,8 @@
         runtimeInputs = with pkgs; [
           rofi
           coreutils
+          gnused
+          keyutils
         ];
         text = builtins.readFile ./pinentry-rofi.sh;
       };

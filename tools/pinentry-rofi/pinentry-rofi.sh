@@ -1,7 +1,41 @@
 #!/usr/bin/env bash
 # pinentry-rofi: A rofi-based pinentry for SSH TPM authentication
 # Reads SSH_CLIENT_PID to extract SSH command context
+# Caches PIN in kernel keyring for 5 minutes (sliding window)
 set -efu
+
+CACHE_KEY="pinentry-rofi-pin"
+CACHE_TIMEOUT=300  # 5 minutes
+
+# Get cached PIN from kernel keyring
+get_cached_pin() {
+  local key_id
+  key_id=$(keyctl search @u user "$CACHE_KEY" 2>/dev/null) || return 1
+  keyctl pipe "$key_id" 2>/dev/null
+}
+
+# Store PIN in kernel keyring with timeout
+cache_pin() {
+  local pin="$1"
+  # Remove old key if exists
+  keyctl purge user "$CACHE_KEY" >/dev/null 2>&1 || true
+  # Add new key with timeout
+  local key_id
+  key_id=$(keyctl add user "$CACHE_KEY" "$pin" @u)
+  keyctl timeout "$key_id" "$CACHE_TIMEOUT"
+}
+
+# Extend cache timeout (sliding window)
+extend_cache() {
+  local key_id
+  key_id=$(keyctl search @u user "$CACHE_KEY" 2>/dev/null) || return 1
+  keyctl timeout "$key_id" "$CACHE_TIMEOUT"
+}
+
+# Clear cached PIN
+clear_cache() {
+  keyctl purge user "$CACHE_KEY" >/dev/null 2>&1 || true
+}
 
 # Extract SSH args from client PID
 # Groups flags with their arguments on the same line
@@ -42,9 +76,14 @@ get_ssh_args() {
   [[ -n "$line" ]] && echo "$line"
 }
 
+# Escape string for pango markup
+escape_pango() {
+  sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g'
+}
+
 # Get SSH args
 ssh_args=""
-if ssh_args=$(get_ssh_args 2>/dev/null); then
+if ssh_args=$(get_ssh_args 2>/dev/null | escape_pango); then
   : # got args
 fi
 
@@ -64,6 +103,27 @@ if [[ -r "$theme_file" ]]; then
   theme_args=(-theme "$theme")
 fi
 
+# Check for cached PIN
+cached_pin=""
+if cached_pin=$(get_cached_pin 2>/dev/null) && [[ -n "$cached_pin" ]]; then
+  # Show menu with cache options
+  choice=$(printf "Use cached PIN\nClear cache" | rofi -dmenu \
+    -p "PIN cached" \
+    -no-fixed-num-lines \
+    "${mesg_args[@]}" \
+    "${theme_args[@]}" \
+    2>/dev/null) || exit 1
+
+  if [[ "$choice" == "Use cached PIN" ]]; then
+    extend_cache
+    echo "$cached_pin"
+    exit 0
+  elif [[ "$choice" == "Clear cache" ]]; then
+    clear_cache
+  fi
+  # Fall through to PIN prompt if cache cleared
+fi
+
 # Use rofi in password mode
 result=$(rofi -dmenu \
   -password \
@@ -73,5 +133,8 @@ result=$(rofi -dmenu \
   "${mesg_args[@]}" \
   "${theme_args[@]}" \
   < /dev/null 2>/dev/null) || exit 1
+
+# Cache the PIN
+cache_pin "$result"
 
 echo "$result"
