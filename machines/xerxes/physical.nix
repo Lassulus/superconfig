@@ -19,4 +19,6 @@
     options btusb enable_autosuspend=0
     options amdgpu ip_block_mask=0xfffff7ff
   '';
+
+  services.logind.powerKey = "suspend";
 }
