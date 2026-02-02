@@ -13,6 +13,7 @@
     ../../2configs/browsers.nix
     ../../2configs/container-bridge.nix
     ../../2configs/android-webcam.nix
+    ../../2configs/radicle.nix
   ];
   system.stateVersion = "25.05";
 
