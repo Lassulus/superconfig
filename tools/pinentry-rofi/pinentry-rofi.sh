@@ -106,12 +106,11 @@ fi
 # Check for cached PIN
 cached_pin=""
 if cached_pin=$(get_cached_pin 2>/dev/null) && [[ -n "$cached_pin" ]]; then
-  # Show menu with cache options - use -only-match to prevent typing from breaking selection
+  # Show menu with cache options
   choice=$(printf "OK\nCancel\nClear cache" | rofi -dmenu \
+    -i \
     -no-custom \
-    -only-match \
     -no-fixed-num-lines \
-    -theme-str 'inputbar { enabled: false; }' \
     "${mesg_args[@]}" \
     "${theme_args[@]}" \
     2>/dev/null) || exit 1
