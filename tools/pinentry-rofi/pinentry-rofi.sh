@@ -106,22 +106,30 @@ fi
 # Check for cached PIN
 cached_pin=""
 if cached_pin=$(get_cached_pin 2>/dev/null) && [[ -n "$cached_pin" ]]; then
-  # Show menu with cache options
-  choice=$(printf "Use cached PIN\nClear cache" | rofi -dmenu \
-    -p "PIN cached" \
+  # Show menu with cache options - use -only-match to prevent typing from breaking selection
+  choice=$(printf "OK\nCancel\nClear cache" | rofi -dmenu \
+    -no-custom \
+    -only-match \
     -no-fixed-num-lines \
+    -theme-str 'inputbar { enabled: false; }' \
     "${mesg_args[@]}" \
     "${theme_args[@]}" \
     2>/dev/null) || exit 1
 
-  if [[ "$choice" == "Use cached PIN" ]]; then
-    extend_cache
-    echo "$cached_pin"
-    exit 0
-  elif [[ "$choice" == "Clear cache" ]]; then
-    clear_cache
-  fi
-  # Fall through to PIN prompt if cache cleared
+  case "$choice" in
+    "OK")
+      extend_cache
+      echo "$cached_pin"
+      exit 0
+      ;;
+    "Cancel")
+      exit 1
+      ;;
+    "Clear cache")
+      clear_cache
+      exit 1
+      ;;
+  esac
 fi
 
 # Use rofi in password mode
