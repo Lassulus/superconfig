@@ -86,7 +86,9 @@
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${pkgs.jool-cli}/bin/jool instance add --netfilter --pool6 64:ff9b::/96";
+      # Use --iptables mode so we can control which packets Jool processes
+      # (--netfilter mode intercepts ALL traffic to pool6, breaking upstream NAT64)
+      ExecStart = "${pkgs.jool-cli}/bin/jool instance add --iptables --pool6 64:ff9b::/96";
       ExecStop = "${pkgs.jool-cli}/bin/jool instance remove";
     };
   };
@@ -181,6 +183,17 @@
       v6 = true;
       predicate = "-s fd00:c700::/64 -p tcp --dport 53";
       target = "ACCEPT";
+    }
+  ];
+
+  # Send only container traffic to Jool NAT64 (--iptables mode)
+  # Host traffic to 64:ff9b::/96 passes through to upstream NAT64 (e.g., Android hotspot)
+  krebs.iptables.tables.mangle.PREROUTING.rules = [
+    {
+      v4 = false;
+      v6 = true;
+      predicate = "-i ctr0 -d 64:ff9b::/96";
+      target = "JOOL";
     }
   ];
 }
