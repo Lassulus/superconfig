@@ -2,8 +2,7 @@
   description = "lassulus superconfig";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/e4bae1bd10c9c57b2cf517953ab70060a828ee6f";
-    # nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     # nixpkgs.url = "github:lassulus/nixpkgs/nixos-unstable";
     # nixpkgs.url = "path:/home/lass/tmp/nixpkgs-disk-debug";
     # nixpkgs.url = "git+file:/home/lass/src/nixpkgs";
