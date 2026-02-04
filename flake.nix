@@ -59,6 +59,9 @@
 
     extra-container.url = "github:erikarvstedt/extra-container";
     extra-container.inputs.nixpkgs.follows = "nixpkgs";
+
+    llm-agents.url = "github:numtide/llm-agents.nix";
+    llm-agents.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -247,6 +250,7 @@
               })
             ];
           };
+          legacyPackages.llm = inputs.llm-agents.packages.${system};
           checks =
             let
               # Check NixOS configurations can be evaluated (without building)
