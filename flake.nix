@@ -76,6 +76,7 @@
         self = self;
         specialArgs.self = self;
         modules = import ./clan_modules { inherit nixpkgs; };
+        vars.settings.secretStore = "password-store";
         meta.domain = "s";
         inventory = {
           meta.name = "superconfig";
