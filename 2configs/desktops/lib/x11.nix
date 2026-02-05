@@ -67,7 +67,6 @@
     acpi
     acpilight
     ripgrep
-    dic
     dmenu
     fzfmenu
     dconf
