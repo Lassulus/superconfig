@@ -1,6 +1,7 @@
 {
   self,
   config,
+  pkgs,
   ...
 }:
 
@@ -23,8 +24,6 @@
   system.stateVersion = "24.05";
   krebs.build.host = config.krebs.hosts.coaxmetal;
 
-  programs.adb.enable = true;
-
   nix.settings.trusted-users = [
     "root"
     "lass"
@@ -38,6 +37,7 @@
   documentation.nixos.enable = true;
 
   environment.systemPackages = [
+    pkgs.android-tools
     self.inputs.clan-core.packages.x86_64-linux.clan-vm-manager
   ];
 }
