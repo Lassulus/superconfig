@@ -38,6 +38,5 @@
 
   environment.systemPackages = [
     pkgs.android-tools
-    self.inputs.clan-core.packages.x86_64-linux.clan-vm-manager
   ];
 }
