@@ -216,7 +216,6 @@
 
     #neat utils
     file
-    hashPassword
     xkcdpass
     kpaste
     cyberlocker-tools
