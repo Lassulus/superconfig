@@ -1,7 +1,8 @@
+{ lib, ... }:
 {
   services.yggdrasil = {
     enable = true;
-    persistentKeys = true;
+    persistentKeys = lib.mkForce false;
     openMulticastPort = true;
     settings = {
       IfName = "ygg";
