@@ -22,7 +22,9 @@
 
   krebs.build.host = config.krebs.hosts.aergia;
 
-  programs.adb.enable = true;
+  environment.systemPackages = [
+    pkgs.android-tools
+  ];
 
   hardware.bluetooth = {
     enable = true;
