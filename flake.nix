@@ -62,6 +62,9 @@
 
     llm-agents.url = "github:numtide/llm-agents.nix";
     llm-agents.inputs.nixpkgs.follows = "nixpkgs";
+
+    rogue-talk.url = "github:rogue-talk/rogue-talk";
+    rogue-talk.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =

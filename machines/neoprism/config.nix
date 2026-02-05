@@ -10,6 +10,7 @@
     ../../2configs/monitoring/telegraf.nix
     ../../2configs/pair-programming.nix
     ../../2configs/nginx.nix
+    ../../2configs/rogue-talk.nix
 
     ../../2configs/services/matrix
     ../../2configs/services/matrix/proxy.nix
