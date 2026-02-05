@@ -16,6 +16,7 @@
           pkgs.age-plugin-tpm
           self.packages.${system}.pass-otp
           self.packages.${system}.age-detect
+          self.packages.${system}.pinentry-rofi-age
         ]
         ++ (pkgs.lib.optionals pkgs.stdenv.isDarwin [
           pkgs.age-plugin-se
@@ -65,6 +66,29 @@
               fi
             fi
 
+            maybe_set_tpm_pin() {
+              local target="''${1:-<stdin>}"
+              if [[ "''${KEY_TYPE:-}" != "tpm" ]]; then
+                return 0
+              fi
+              if [[ -n "''${AGE_TPM_PIN:-}" ]]; then
+                return 0
+              fi
+              AGE_TPM_PIN="$(${self.packages.${system}.pinentry-rofi-age}/bin/pinentry-rofi-age "$target")"
+              export AGE_TPM_PIN
+            }
+
+            decrypt_target=""
+            if [[ "''${1:-}" == "show" ]]; then
+              decrypt_target="''${2:-}"
+            elif [[ -n "''${1:-}" ]] && [[ "''${1:-}" != -* ]] && [[ "''${1:-}" != "otp" ]]; then
+              decrypt_target="''${1:-}"
+            fi
+
+            if [[ -n "$decrypt_target" ]]; then
+              maybe_set_tpm_pin "$decrypt_target"
+            fi
+
             # Handle OTP commands by delegating to pass-otp
             if [[ "''${1:-}" == "otp" ]]; then
               shift
@@ -88,6 +112,7 @@
               fi
 
               # Show pass and pipe to OTP (identities already set up by age-detect)
+              maybe_set_tpm_pin "$pass_name"
               ${exePath} show "$pass_name" | pass-otp $clip_arg
             else
               # Pass all other commands directly to passage (identities already set up)
