@@ -6,9 +6,6 @@
   ...
 }:
 {
-  # Clan core configuration
-  clan.core.vars.settings.secretStore = "password-store";
-
   # Stockholm configuration
   krebs.secret.directory = config.clan.core.vars.password-store.secretLocation;
 
