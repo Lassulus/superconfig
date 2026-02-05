@@ -42,8 +42,6 @@
 
   krebs.build.host = config.krebs.hosts.ignavia;
 
-  programs.adb.enable = true;
-
   nix.settings.trusted-users = [
     "root"
     "lass"
@@ -63,6 +61,7 @@
   programs.noisetorch.enable = true;
 
   environment.systemPackages = [
+    pkgs.android-tools
     pkgs.gh
     self.packages.${pkgs.system}.bank
     pkgs.mycelium
