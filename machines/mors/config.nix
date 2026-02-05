@@ -66,6 +66,7 @@
   krebs.build.host = config.krebs.hosts.mors;
 
   environment.systemPackages = with pkgs; [
+    android-tools
     dnsutils
     woeusb
     (pkgs.writeDashBin "play-on" ''
@@ -93,7 +94,6 @@
   };
 
   nixpkgs.config.android_sdk.accept_license = true;
-  programs.adb.enable = true;
 
   # It may leak your data, but look how FAST it is!1!!
   # https://make-linux-fast-again.com/
