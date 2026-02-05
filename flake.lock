@@ -39,14 +39,17 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1770240665,
-        "narHash": "sha256-rRbn3iS/ahONcYk6cLxQewOcGgabLpoxagLs5U+79o4=",
-        "path": "/home/lass/src/clan/clan-core",
-        "type": "path"
+        "lastModified": 1770294914,
+        "narHash": "sha256-S/Ry1XiedbyAT3pq3z3mDNyjfVtKrrfjjkbopJ6tJzU=",
+        "ref": "refs/heads/main",
+        "rev": "00629f830e13f9265aacf3efe4fa10c6361147ed",
+        "revCount": 12752,
+        "type": "git",
+        "url": "https://git.clan.lol/clan/clan-core"
       },
       "original": {
-        "path": "/home/lass/src/clan/clan-core",
-        "type": "path"
+        "type": "git",
+        "url": "https://git.clan.lol/clan/clan-core"
       }
     },
     "data-mesher": {
@@ -312,11 +315,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1768764703,
-        "narHash": "sha256-5ulSDyOG1U+1sJhkJHYsUOWEsmtLl97O0NTVMvgIVyc=",
+        "lastModified": 1770184146,
+        "narHash": "sha256-DsqnN6LvXmohTRaal7tVZO/AKBuZ02kPBiZKSU4qa/k=",
         "owner": "nix-darwin",
         "repo": "nix-darwin",
-        "rev": "0fc4e7ac670a0ed874abacf73c4b072a6a58064b",
+        "rev": "0d7874ef7e3ba02d58bebb871e6e29da36fa1b37",
         "type": "github"
       },
       "original": {
@@ -554,11 +557,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1770110318,
-        "narHash": "sha256-NUVGVtYBTC96WhPh4Y3SVM7vf0o1z5W4uqRBn9v1pfo=",
+        "lastModified": 1770145881,
+        "narHash": "sha256-ktjWTq+D5MTXQcL9N6cDZXUf9kX8JBLLBLT0ZyOTSYY=",
         "owner": "Mic92",
         "repo": "sops-nix",
-        "rev": "f990b0a334e96d3ef9ca09d4bd92778b42fd84f9",
+        "rev": "17eea6f3816ba6568b8c81db8a4e6ca438b30b7c",
         "type": "github"
       },
       "original": {
@@ -679,11 +682,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1769691507,
-        "narHash": "sha256-8aAYwyVzSSwIhP2glDhw/G0i5+wOrren3v6WmxkVonM=",
+        "lastModified": 1770228511,
+        "narHash": "sha256-wQ6NJSuFqAEmIg2VMnLdCnUc0b7vslUohqqGGD+Fyxk=",
         "owner": "numtide",
         "repo": "treefmt-nix",
-        "rev": "28b19c5844cc6e2257801d43f2772a4b4c050a1b",
+        "rev": "337a4fe074be1042a35086f15481d763b8ddc0e7",
         "type": "github"
       },
       "original": {
