@@ -52,7 +52,6 @@
     self.inputs.stockholm.nixosModules.ssl
     self.inputs.stockholm.nixosModules.systemd
     self.inputs.stockholm.nixosModules.ssh
-    self.inputs.stockholm.nixosModules.sync-containers3
     {
       # nix-index
       imports = [
