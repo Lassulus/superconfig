@@ -52,7 +52,7 @@ def on_metadata(m) =
   out = process.read(env["HOOK_TRACK_CHANGE"], env = m, timeout = 5.0)
   print(out)
 end
-tracks.on_metadata(on_metadata)
+tracks.on_metadata(synchronous = false, on_metadata)
 
 # some nice effects
 music = crossfade(tracks)
