@@ -27,9 +27,9 @@ bind ;e hint -t input,textarea,select
 " Open current page in mpv (using mpvsafe for proper escaping)
 bind gv composite get_current_url | mpvsafe
 
-" Open current page through archive.ph
-bind gA js tri.excmds.tabopen('https://archive.ph/' + document.location.href)
+" Open current page through archive.ph (newest snapshot, opens directly)
+bind gA js tri.excmds.tabopen('https://archive.ph/newest/' + document.location.href)
 " Custom command to open URL via archive.ph
-command archiveph js -p tri.excmds.tabopen('https://archive.ph/' + JS_ARG)
+command archiveph js -p tri.excmds.tabopen('https://archive.ph/newest/' + JS_ARG)
 " Select a link and open it through archive.ph
 bind ;gA hint -W archiveph
