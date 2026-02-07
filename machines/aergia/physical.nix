@@ -52,12 +52,6 @@
 
   environment.systemPackages = [
     pkgs.vulkan-tools
-    (pkgs.writers.writeDashBin "set_tdp" ''
-      set -efux
-      watt=$1
-      value=$(( $watt * 1000 ))
-      ${pkgs.ryzenadj}/bin/ryzenadj --stapm-limit="$value" --fast-limit="$value" --slow-limit="$value"
-    '')
   ];
 
   # corectrl
