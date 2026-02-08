@@ -1,6 +1,8 @@
 {
   pkgs,
   lib,
+  config,
+  self,
   ...
 }:
 let
@@ -20,6 +22,7 @@ let
     (defpoll cpu-load :interval "2s" :initial "0.00" "cut -d' ' -f1 /proc/loadavg")
     (defpoll temperature :interval "2s" :initial '{"temp": 0, "fan": 0}' "${lib.getExe tempScript}")
     (defpoll power :interval "2s" :initial '{"watts": 0, "charging": false}' "${lib.getExe powerScript}")
+    (defpoll power-profile :interval "2s" :initial '{"name": "unknown", "tdp": 0}' "${lib.getExe powerProfileStatusScript}")
     (defpoll battery :interval "10s" :initial '{"capacity": "100", "icon": "󰁹", "watts": "0", "time_remaining": "--", "status": "Full"}' "${lib.getExe batteryScript}")
     (defpoll volume :interval "1s" :initial '{"level": "0", "icon": "󰕿"}' "${lib.getExe volumeScript}")
     (defpoll network :interval "5s" :initial "󰖪 ..." "${lib.getExe networkScript}")
@@ -83,18 +86,19 @@ let
         (label :text "''${battery.capacity}% ''${battery.icon}")))
 
     (defwidget power-graph-widget []
-      (box :class {power.charging ? "graph-module power charging" : "graph-module power"} :orientation "h" :space-evenly false :spacing 4
-           :tooltip "''${battery.time_remaining} ''${battery.status == 'Charging' ? 'to full' : 'remaining'}"
-        (graph :class "graph"
-               :value {power.watts}
-               :thickness 3
-               :time-range "60s"
-               :min 0
-               :max 45
-               :dynamic false
-               :line-style "round"
-               :width 75)
-        (label :text "''${round(power.watts, 1)}W ''${power.charging ? '󰂄' : '󰁹'}")))
+      (eventbox :onclick "${lib.getExe powerProfileCycleScript}"
+        (box :class {power.charging ? "graph-module power charging" : "graph-module power"} :orientation "h" :space-evenly false :spacing 4
+             :tooltip "TDP: ''${power-profile.tdp}W (''${power-profile.name}) | ''${battery.time_remaining} ''${battery.status == 'Charging' ? 'to full' : 'remaining'}"
+          (graph :class "graph"
+                 :value {power.watts}
+                 :thickness 3
+                 :time-range "60s"
+                 :min 0
+                 :max 45
+                 :dynamic false
+                 :line-style "round"
+                 :width 75)
+          (label :text "''${round(power.watts, 1)}W ''${power.charging ? '󰂄' : '󰁹'}"))))
 
     (defwidget volume-widget []
       (box :class "volume" :orientation "h" :space-evenly false
@@ -512,6 +516,59 @@ let
     '';
   };
 
+  # Power profile state file (written by power-profile tool, read by eww)
+  powerProfileStateFile = "/tmp/power-profile-state";
+
+  powerProfileStatusScript = pkgs.writeShellApplication {
+    name = "eww-power-profile-status";
+    runtimeInputs = [ pkgs.jq ];
+    text = ''
+      state_file="${powerProfileStateFile}"
+      if [ -f "$state_file" ]; then
+        read -r name tdp < "$state_file"
+      else
+        name="unknown"
+        tdp="?"
+      fi
+      jq -n --arg name "$name" --arg tdp "$tdp" '{name: $name, tdp: $tdp}'
+    '';
+  };
+
+  powerProfileCycleScript = pkgs.writeShellApplication {
+    name = "eww-power-profile-cycle";
+    runtimeInputs = [ pkgs.libnotify ];
+    text = ''
+      state_file="${powerProfileStateFile}"
+
+      # Profile names (must match power-profile tool)
+      profiles=("low" "normal" "high")
+
+      # Read current profile from state file
+      current="unknown"
+      if [ -f "$state_file" ]; then
+        read -r current _ < "$state_file"
+      fi
+
+      # Find next profile (cycle through)
+      next_idx=0
+      for i in "''${!profiles[@]}"; do
+        if [ "''${profiles[$i]}" = "$current" ]; then
+          next_idx=$(( (i + 1) % ''${#profiles[@]} ))
+          break
+        fi
+      done
+
+      next="''${profiles[$next_idx]}"
+
+      # Use the power-profile tool (uses sudo internally, writes state file)
+      if /run/current-system/sw/bin/power-profile "$next" >/dev/null 2>&1; then
+        notify-send -t 2000 "Power Profile" "Set to $next"
+      else
+        notify-send -t 2000 "Power Profile" "Failed to set profile"
+      fi
+    '';
+  };
+
   ewwConfigDir = pkgs.runCommand "eww-config" { } ''
     mkdir -p $out
     cp ${ewwYuck} $out/eww.yuck
@@ -520,6 +577,25 @@ let
 
 in
 {
+  # ryzenadj and power-profile for power profile control
+  environment.systemPackages = [
+    pkgs.ryzenadj
+    self.packages.${pkgs.system}.power-profile
+  ];
+
+  # Allow user to run ryzenadj without password (for power profile switching)
+  security.sudo.extraRules = [
+    {
+      users = [ config.users.users.mainUser.name ];
+      commands = [
+        {
+          command = "/run/current-system/sw/bin/ryzenadj";
+          options = [ "NOPASSWD" ];
+        }
+      ];
+    }
+  ];
+
   # Make RAPL energy counters readable for power monitoring
   # Works on both Intel and AMD Zen CPUs (via intel_rapl_msr module)
   services.udev.extraRules = ''

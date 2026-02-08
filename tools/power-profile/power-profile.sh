@@ -7,6 +7,9 @@ PROFILE_LOW=3
 PROFILE_NORMAL=15
 PROFILE_HIGH=28
 
+# State file for eww integration (ryzenadj -i doesn't work on all CPUs)
+STATE_FILE="/tmp/power-profile-state"
+
 usage() {
   cat <<EOF
 Usage: power-profile <profile|watts>
@@ -32,7 +35,8 @@ EOF
 }
 
 set_tdp() {
-  local stapm=$1
+  local name=$1
+  local stapm=$2
   # Calculate burst limits (using integer math, *10 then /10 to simulate decimals)
   local slow=$(( (stapm * 12) / 10 ))
   local fast=$(( (stapm * 15) / 10 ))
@@ -45,7 +49,10 @@ set_tdp() {
   echo "  STAPM (sustained): ${stapm}W"
   echo "  Slow limit:        ${slow}W"
   echo "  Fast limit:        ${fast}W"
-  ryzenadj --stapm-limit="$stapm_mw" --slow-limit="$slow_mw" --fast-limit="$fast_mw"
+  /run/wrappers/bin/sudo /run/current-system/sw/bin/ryzenadj --stapm-limit="$stapm_mw" --slow-limit="$slow_mw" --fast-limit="$fast_mw"
+
+  # Write state for eww integration
+  echo "$name $stapm" > "$STATE_FILE"
   echo "Done."
 }
 
@@ -56,13 +63,13 @@ fi
 
 case "$1" in
   low)
-    set_tdp "$PROFILE_LOW"
+    set_tdp "low" "$PROFILE_LOW"
     ;;
   normal)
-    set_tdp "$PROFILE_NORMAL"
+    set_tdp "normal" "$PROFILE_NORMAL"
     ;;
   high)
-    set_tdp "$PROFILE_HIGH"
+    set_tdp "high" "$PROFILE_HIGH"
     ;;
   -h|--help|help)
     usage
@@ -70,7 +77,7 @@ case "$1" in
     ;;
   *)
     if [[ "$1" =~ ^[0-9]+$ ]]; then
-      set_tdp "$1"
+      set_tdp "custom" "$1"
     else
       echo "Error: Unknown profile '$1'"
       usage
