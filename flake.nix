@@ -181,6 +181,7 @@
         ./wrapperModules/flake-module.nix
         ./skills/flake-module.nix
         ./games/flake-module.nix
+        ./machines/pixel8/flake-module.nix
       ]
       ++ (
         # Auto-import all flake-module.nix files from tools subdirectories
@@ -206,6 +207,7 @@
               machineName: _: builtins.pathExists ./machines/${machineName}/container.nix
             ) (builtins.readDir ./machines)
           );
+
       perSystem =
         {
           lib,
