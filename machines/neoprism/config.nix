@@ -51,6 +51,9 @@
 
     # vaultwarden
     ../../2configs/vaultwarden.nix
+
+    # download user
+    ../../2configs/download-user.nix
   ];
 
   krebs.build.host = config.krebs.hosts.neoprism;
