@@ -5,7 +5,10 @@
     uid = 1001;
     group = "download";
   };
-  users.groups.download.members = [ "transmission" ];
+  users.groups.download.members = [
+    "transmission"
+    "sabnzbd"
+  ];
   services.transmission = {
     enable = true;
     package = pkgs.transmission_4;
@@ -453,5 +456,12 @@
     openFirewall = true;
     user = "download";
     group = "download";
+  };
+
+  # usenet download client
+  services.sabnzbd = {
+    enable = true;
+    group = "download";
+    openFirewall = true;
   };
 }
