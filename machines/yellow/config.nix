@@ -122,6 +122,8 @@ in
       CPUSchedulingPolicy = "idle";
       IOSchedulingClass = "idle";
       IOSchedulingPriority = 7;
+      # increase file descriptor limit to handle many torrents/peers
+      LimitNOFILE = 65536;
     };
   };
   clan.core.vars.generators.yellow-container = {
