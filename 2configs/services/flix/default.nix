@@ -20,6 +20,98 @@
       umask = 18;
       rpc-whitelist-enabled = false;
       rpc-host-whitelist-enabled = false;
+      # stop seeding after reaching 5.0 ratio
+      ratio-limit = 5;
+      ratio-limit-enabled = true;
+      # limit concurrent seeding to reduce resource usage
+      seed-queue-enabled = true;
+      seed-queue-size = 20;
+    };
+  };
+
+  # garbage collection for old torrents
+  systemd.services.transmission-gc = {
+    description = "Remove old completed torrents from Transmission";
+    after = [ "transmission.service" ];
+    path = [
+      pkgs.transmission_4
+      pkgs.jq
+      pkgs.coreutils
+      pkgs.gawk
+      pkgs.gnugrep
+      pkgs.findutils
+    ];
+    script = ''
+      set -efu
+      TRANSMISSION_HOST="128.0.0.1:9091"
+      MAX_AGE_DAYS=30
+      MIN_RATIO=5.0
+
+      # get list of all torrents as JSON
+      torrents=$(transmission-remote "$TRANSMISSION_HOST" -l 2>/dev/null | tail -n +2 | head -n -1 || true)
+
+      if [ -z "$torrents" ]; then
+        echo "No torrents found"
+        exit 0
+      fi
+
+      # process each torrent
+      echo "$torrents" | while read -r line; do
+        id=$(echo "$line" | awk '{print $1}' | tr -d '*')
+        # skip if not a valid ID
+        [ -z "$id" ] || [ "$id" = "ID" ] && continue
+
+        # get torrent info
+        info=$(transmission-remote "$TRANSMISSION_HOST" -t "$id" -i 2>/dev/null || continue)
+
+        # extract ratio and completion status
+        ratio=$(echo "$info" | grep "Ratio:" | awk '{print $2}')
+        percent=$(echo "$info" | grep "Percent Done:" | awk '{print $3}' | tr -d '%')
+        state=$(echo "$info" | grep "State:" | cut -d: -f2- | xargs)
+
+        # skip if not 100% complete
+        [ "$percent" != "100" ] && continue
+
+        # check if ratio reached
+        ratio_reached=false
+        if [ -n "$ratio" ] && [ "$ratio" != "None" ]; then
+          if awk "BEGIN {exit !($ratio >= $MIN_RATIO)}"; then
+            ratio_reached=true
+          fi
+        fi
+
+        # check age via date added
+        date_added=$(echo "$info" | grep "Date added:" | cut -d: -f2- | xargs)
+        if [ -n "$date_added" ]; then
+          added_epoch=$(date -d "$date_added" +%s 2>/dev/null || echo 0)
+          now_epoch=$(date +%s)
+          age_days=$(( (now_epoch - added_epoch) / 86400 ))
+        else
+          age_days=0
+        fi
+
+        # remove if ratio reached OR older than max age
+        if [ "$ratio_reached" = "true" ]; then
+          echo "Removing torrent $id (ratio: $ratio >= $MIN_RATIO)"
+          transmission-remote "$TRANSMISSION_HOST" -t "$id" --remove-and-delete
+        elif [ "$age_days" -ge "$MAX_AGE_DAYS" ]; then
+          echo "Removing torrent $id (age: $age_days days >= $MAX_AGE_DAYS)"
+          transmission-remote "$TRANSMISSION_HOST" -t "$id" --remove-and-delete
+        fi
+      done
+    '';
+    serviceConfig = {
+      Type = "oneshot";
+      User = "transmission";
+    };
+  };
+
+  systemd.timers.transmission-gc = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "daily";
+      Persistent = true;
+      RandomizedDelaySec = "1h";
     };
   };
   systemd.services.transmission-watcher = {
@@ -31,8 +123,16 @@
     ];
     script = ''
       set -efu -o pipefail
-      if ! curl -SsfL http://transmission.r; then
-        systemctl restart transmission*
+      # don't restart if transmission is currently starting or stopping
+      state=$(systemctl show -p ActiveState --value transmission.service)
+      if [ "$state" = "activating" ] || [ "$state" = "deactivating" ]; then
+        echo "transmission is $state, skipping"
+        exit 0
+      fi
+      # check if transmission responds (with timeout)
+      if ! curl -SsfL --max-time 10 http://transmission.r; then
+        echo "transmission not responding, restarting"
+        systemctl restart transmission.service
       fi
     '';
   };
