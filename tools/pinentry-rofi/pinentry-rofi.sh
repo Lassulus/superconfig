@@ -10,7 +10,7 @@ CACHE_TIMEOUT=300  # 5 minutes
 # Get cached PIN from kernel keyring
 get_cached_pin() {
   local key_id
-  key_id=$(keyctl search @s user "$CACHE_KEY" 2>/dev/null) || return 1
+  key_id=$(keyctl search @u user "$CACHE_KEY" 2>/dev/null) || return 1
   keyctl pipe "$key_id" 2>/dev/null
 }
 
@@ -21,14 +21,14 @@ cache_pin() {
   keyctl purge user "$CACHE_KEY" >/dev/null 2>&1 || true
   # Add new key with timeout (using padd to avoid PIN in /proc/*/cmdline)
   local key_id
-  key_id=$(printf '%s' "$pin" | keyctl padd user "$CACHE_KEY" @s) || return 0
+  key_id=$(printf '%s' "$pin" | keyctl padd user "$CACHE_KEY" @u) || return 0
   keyctl timeout "$key_id" "$CACHE_TIMEOUT" || true
 }
 
 # Extend cache timeout (sliding window)
 extend_cache() {
   local key_id
-  key_id=$(keyctl search @s user "$CACHE_KEY" 2>/dev/null) || return 0
+  key_id=$(keyctl search @u user "$CACHE_KEY" 2>/dev/null) || return 0
   keyctl timeout "$key_id" "$CACHE_TIMEOUT" || true
 }
 
