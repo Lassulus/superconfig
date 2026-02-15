@@ -1,12 +1,9 @@
 { self, ... }:
 {
   perSystem =
-    { pkgs, system, ... }:
+    { pkgs, ... }:
     {
       packages.mpv =
-        let
-          yt-dlp-master = self.packages.${system}.yt-dlp-master;
-        in
         let
           # Lazy-loaded autosub script
           autosub = pkgs.writeText "autosub.lua" ''
@@ -59,7 +56,7 @@
           ];
           extraFlags = {
             "--ytdl-format" = "bestvideo[height<=1080]+bestaudio/best";
-            "--script-opts" = "ytdl_hook-ytdl_path=${yt-dlp-master}/bin/yt-dlp";
+            "--script-opts" = "ytdl_hook-ytdl_path=${pkgs.yt-dlp}/bin/yt-dlp";
             "--script-opts-append" = "sponsorblock-local_database=no";
             "--audio-channels" = "2";
             "--script" = autosub;
