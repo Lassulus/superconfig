@@ -276,6 +276,13 @@
             session_name=$(${
               self.packages.${pkgs.system}.name-generator
             }/bin/name-generator 2>/dev/null || echo "session-$$")
+            # Prefix with workspace name in graphical sessions
+            if [[ -n "$WAYLAND_DISPLAY" ]]; then
+              _ws_name=$(${
+                self.packages.${pkgs.system}.workspace-manager
+              }/bin/workspace-manager workspace 2>/dev/null)
+              [[ -n "$_ws_name" ]] && session_name="''${_ws_name}-''${session_name}"
+            fi
             # Start tmux with the generated session name
             exec tmux -u new-session -s "$session_name"
           fi
