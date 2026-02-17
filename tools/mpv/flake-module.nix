@@ -1,4 +1,4 @@
-{ self, ... }:
+{ self, inputs, ... }:
 {
   perSystem =
     { pkgs, ... }:
@@ -46,7 +46,7 @@
           '';
 
         in
-        self.wrapperModules.mpv.apply {
+        (inputs.wrappers.wrapperModules.mpv.apply {
           pkgs = pkgs;
           scripts = with pkgs.mpvScripts; [
             sponsorblock
@@ -54,14 +54,14 @@
             vr-reversal
             visualizer
           ];
-          extraFlags = {
+          flags = {
             "--ytdl-format" = "bestvideo[height<=1080]+bestaudio/best";
             "--script-opts" = "ytdl_hook-ytdl_path=${pkgs.yt-dlp}/bin/yt-dlp";
             "--script-opts-append" = "sponsorblock-local_database=no";
             "--audio-channels" = "2";
-            "--script" = autosub;
+            "--script" = "${autosub}";
           };
-          "mpv.input".content = ''
+          "input.conf".content = ''
             : script-binding console/enable
             x add audio-delay -0.050
             X add audio-delay 0.050
@@ -71,7 +71,7 @@
           "mpv.conf".content = ''
             osd-font-size=20
           '';
-        };
+        }).wrapper;
 
       # Separate package for subtitle downloader
       packages.mpv-dl-subs =

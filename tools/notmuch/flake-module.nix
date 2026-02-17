@@ -1,4 +1,4 @@
-{ self, ... }:
+{ self, inputs, ... }:
 {
   perSystem =
     {
@@ -74,26 +74,27 @@
             ];
           };
 
+          notmuchConfig = inputs.wrappers.wrapperModules.notmuch.apply {
+            pkgs = pkgs;
+            settings = {
+              database = {
+                path = "Maildir";
+                mail_root = "Maildir";
+              };
+              new.tags = "unread;inbox;";
+              search.exclude_tags = "deleted;spam;";
+              maildir.synchronize_flags = true;
+              user = {
+                name = "lassulus";
+                primary_email = "lassulus@lassul.us";
+                other_email = lib.concatStringsSep ";" (lib.flatten (lib.attrValues mailboxes));
+              };
+            };
+            passthru = {
+              mailboxes = mailboxes;
+            };
+          };
         in
-        self.wrapperModules.notmuch.apply {
-          pkgs = pkgs;
-          config = {
-            database = {
-              path = "Maildir";
-              mail_root = "Maildir";
-            };
-            new.tags = "unread;inbox;";
-            search.exclude_tags = "deleted;spam;";
-            maildir.synchronize_flags = true;
-            user = {
-              name = "lassulus";
-              primary_email = "lassulus@lassul.us";
-              other_email = lib.concatStringsSep ";" (lib.flatten (lib.attrValues mailboxes));
-            };
-          };
-          passthru = {
-            mailboxes = mailboxes;
-          };
-        };
+        notmuchConfig.wrapper;
     };
 }

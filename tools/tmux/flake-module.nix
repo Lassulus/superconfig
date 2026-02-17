@@ -1,4 +1,4 @@
-{ self, ... }:
+{ self, inputs, ... }:
 {
   perSystem =
     { pkgs, ... }:
@@ -18,11 +18,11 @@
     in
     {
       packages.tmux =
-        (self.wrapLib.makeWrapper {
+        (inputs.wrappers.lib.wrapPackage {
           pkgs = pkgs;
           package = pkgs.tmux;
           flags = {
-            "-f" = tmuxConfigFile;
+            "-f" = "${tmuxConfigFile}";
           };
         }).overrideAttrs
           (old: {

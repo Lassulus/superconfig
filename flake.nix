@@ -65,6 +65,10 @@
 
     rogue-talk.url = "github:rogue-talk/rogue-talk";
     rogue-talk.inputs.nixpkgs.follows = "nixpkgs";
+
+    wrappers.url = "github:lassulus/wrappers";
+    # wrappers.url = "git+file:/home/lass/src/wrappers";
+    wrappers.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -178,7 +182,6 @@
         ./formatter.nix
         ./5pkgs/flake-module.nix
         ./keys/flake-module.nix
-        ./wrapperModules/flake-module.nix
         ./skills/flake-module.nix
         ./games/flake-module.nix
         ./machines/pixel8/flake-module.nix

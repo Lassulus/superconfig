@@ -1,4 +1,4 @@
-{ self, ... }:
+{ self, inputs, ... }:
 {
   perSystem =
     {
@@ -7,7 +7,7 @@
       ...
     }:
     {
-      packages.pass = self.wrapLib.makeWrapper {
+      packages.pass = inputs.wrappers.lib.wrapPackage {
         pkgs = pkgs;
         package = pkgs.passage;
         runtimeInputs = [

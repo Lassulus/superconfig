@@ -1,4 +1,4 @@
-{ self, ... }:
+{ self, inputs, ... }:
 {
   perSystem =
     { pkgs, system, ... }:
@@ -52,7 +52,7 @@
       '';
     in
     {
-      packages.pi = self.wrapLib.makeWrapper {
+      packages.pi = inputs.wrappers.lib.wrapPackage {
         pkgs = pkgs;
         package = piPkg;
         runtimeInputs = [ pkgs.nodejs ];

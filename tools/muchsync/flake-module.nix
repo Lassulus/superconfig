@@ -1,4 +1,4 @@
-{ self, ... }:
+{ self, inputs, ... }:
 {
   perSystem =
     {
@@ -7,12 +7,12 @@
       ...
     }:
     {
-      packages.muchsync = self.wrapLib.makeWrapper {
+      packages.muchsync = inputs.wrappers.lib.wrapPackage {
         pkgs = pkgs;
         package = pkgs.muchsync;
         runtimeInputs = [ pkgs.notmuch ] ++ lib.optionals pkgs.stdenv.isLinux [ pkgs.iputils ];
         env = {
-          NOTMUCH_CONFIG = self.packages.${pkgs.system}.notmuch.passthru.config.configFile.path;
+          NOTMUCH_CONFIG = self.packages.${pkgs.system}.notmuch.passthru.configuration.configFile.path;
         };
         wrapper =
           { exePath, envString, ... }:

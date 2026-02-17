@@ -530,7 +530,8 @@
         "rogue-talk": "rogue-talk",
         "spora": "spora",
         "stockholm": "stockholm",
-        "treefmt-nix": "treefmt-nix_6"
+        "treefmt-nix": "treefmt-nix_6",
+        "wrappers": "wrappers"
       }
     },
     "sops-nix": {
@@ -780,6 +781,26 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "wrappers": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1771363153,
+        "narHash": "sha256-YKa4ay96+0r+85akn/99t8ab1/iRUdWC/TRAKc+aAnE=",
+        "owner": "lassulus",
+        "repo": "wrappers",
+        "rev": "8cc78f6c3b4fd3875c5ac36954ca1d4cb64bce24",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lassulus",
+        "repo": "wrappers",
         "type": "github"
       }
     }

@@ -1,9 +1,9 @@
-{ self, ... }:
+{ self, inputs, ... }:
 {
   perSystem =
     { pkgs, ... }:
     {
-      packages.ssh-yubikey = self.wrapLib.makeWrapper {
+      packages.ssh-yubikey = inputs.wrappers.lib.wrapPackage {
         pkgs = pkgs;
         package = pkgs.openssh;
         env = {

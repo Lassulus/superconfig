@@ -1,4 +1,4 @@
-{ self, ... }:
+{ self, inputs, ... }:
 {
   perSystem =
     { pkgs, system, ... }:
@@ -11,7 +11,7 @@
       claudeMd = ./CLAUDE.md;
     in
     {
-      packages.claude = self.wrapLib.makeWrapper {
+      packages.claude = inputs.wrappers.lib.wrapPackage {
         pkgs = pkgs;
         package = (self.lib.halalify pkgs.claude-code);
         wrapper =

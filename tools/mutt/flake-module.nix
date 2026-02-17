@@ -1,4 +1,4 @@
-{ self, ... }:
+{ self, inputs, ... }:
 {
   perSystem =
     {
@@ -11,8 +11,8 @@
       packages.mutt =
         let
           # Mailboxes configuration from mail.nix
-          mailboxes = self.packages.${system}.notmuch.mailboxes;
-          notmuchConfig = self.packages.${system}.notmuch.passthru.config.configFile.path;
+          mailboxes = self.packages.${system}.notmuch.passthru.mailboxes;
+          notmuchConfig = self.packages.${system}.notmuch.passthru.configuration.configFile.path;
 
           mailcap = pkgs.writeText "mailcap" ''
             text/html; ${pkgs.elinks}/bin/elinks -dump ; copiousoutput;
@@ -302,7 +302,7 @@
           '';
 
         in
-        (self.wrapLib.makeWrapper {
+        (inputs.wrappers.lib.wrapPackage {
           pkgs = pkgs;
           package = pkgs.neomutt;
           aliases = [ "mutt" ];

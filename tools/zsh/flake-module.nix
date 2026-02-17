@@ -1,4 +1,4 @@
-{ self, ... }:
+{ self, inputs, ... }:
 {
   perSystem =
     { pkgs, ... }:
@@ -343,7 +343,7 @@
     in
     {
       packages.zsh =
-        (self.wrapLib.makeWrapper {
+        (inputs.wrappers.lib.wrapPackage {
           pkgs = pkgs;
           package = pkgs.zsh;
           runtimeInputs = with pkgs; [
