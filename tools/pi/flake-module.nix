@@ -32,6 +32,8 @@
       # - Remove the resistance extension (annoying terminator quote widget)
       # - Rebind ultrathink ctrl+u -> ctrl+shift+u (conflicts with deleteToLineStart)
       # - Rebind speedreading ctrl+r -> ctrl+shift+r (conflicts with renameSession)
+      # Patch pi-hooks:
+      # - Replace terminal bell with pw-play peon sounds in permission extension
       pluginPrefix = pkgs.runCommand "pi-plugins" { } ''
         cp -a ${pluginPrefixRaw} $out
         chmod -R u+w $out
@@ -42,6 +44,11 @@
         # Fix keybinding conflicts in extension source
         ${pkgs.gnused}/bin/sed -i 's/"ctrl+u"/"ctrl+shift+u"/' $out/lib/node_modules/shitty-extensions/extensions/ultrathink.ts
         ${pkgs.gnused}/bin/sed -i 's/"ctrl+r"/"ctrl+shift+r"/' $out/lib/node_modules/shitty-extensions/extensions/speedreading.ts
+
+        # Patch permission extension to use pw-play for peon sounds on Linux
+        ${pkgs.python3}/bin/python3 ${./patch-permission-sound.py} \
+          $out/lib/node_modules/pi-hooks/permission/permission.ts \
+          ${pkgs.pipewire}/bin/pw-play
       '';
     in
     {
