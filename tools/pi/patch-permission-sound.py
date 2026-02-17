@@ -8,21 +8,22 @@ pw_play = sys.argv[2]
 
 src = open(ts_file).read()
 
-replacement = """function playPermissionSound(): void {
+# Use a lambda for replacement to avoid re.sub interpreting backslash sequences
+replacement = r"""function playPermissionSound(): void {
   const isMac = process.platform === "darwin";
   if (isMac) {
     exec('afplay /System/Library/Sounds/Funk.aiff 2>/dev/null', (err) => {
-      if (err) process.stdout.write("\\x07");
+      if (err) process.stdout.write("\x07");
     });
   } else {
     const n = Math.floor(Math.random() * 4) + 1;
-    exec(`""" + pw_play + """ "$HOME/src/sounds/games/Warcraft III/Units/Orc/Peon/PeonWhat${n}.wav"`, () => {});
+    exec(`""" + pw_play + r""" "$HOME/src/sounds/games/Warcraft III/Units/Orc/Peon/PeonWhat${n}.wav"`, () => {});
   }
 }"""
 
 result = re.sub(
     r'function playPermissionSound\(\): void \{.*?\n\}',
-    replacement,
+    lambda m: replacement,
     src,
     flags=re.DOTALL,
 )
