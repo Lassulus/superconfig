@@ -296,11 +296,8 @@
         fi
 
         # Workspace manager integration: cd to workspace directory on new terminal
-        if [[ -z "$WORKSPACE_MANAGER_INIT" ]]; then
-          export WORKSPACE_MANAGER_INIT=1
-          _ws_dir=$(${self.packages.${pkgs.system}.workspace-manager}/bin/workspace-manager dir 2>/dev/null)
-          [[ -n "$_ws_dir" && -d "$_ws_dir" ]] && cd "$_ws_dir"
-        fi
+        _ws_dir=$(${self.packages.${pkgs.system}.workspace-manager}/bin/workspace-manager dir 2>/dev/null)
+        [[ -n "$_ws_dir" && -d "$_ws_dir" ]] && cd "$_ws_dir"
 
         # Disable some features to support TRAMP.
         if [ "$TERM" = dumb ]; then
