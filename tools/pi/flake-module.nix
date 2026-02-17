@@ -28,13 +28,20 @@
             npm install -g pi-hooks shitty-extensions
           '';
 
-      # Remove the resistance extension (annoying terminator quote widget)
+      # Patch shitty-extensions:
+      # - Remove the resistance extension (annoying terminator quote widget)
+      # - Rebind ultrathink ctrl+u -> ctrl+shift+u (conflicts with deleteToLineStart)
+      # - Rebind speedreading ctrl+r -> ctrl+shift+r (conflicts with renameSession)
       pluginPrefix = pkgs.runCommand "pi-plugins" { } ''
         cp -a ${pluginPrefixRaw} $out
         chmod -R u+w $out
         pkg=$out/lib/node_modules/shitty-extensions/package.json
         ${pkgs.jq}/bin/jq '.pi.extensions |= map(select(contains("resistance") | not))' "$pkg" > "$pkg.tmp"
         mv "$pkg.tmp" "$pkg"
+
+        # Fix keybinding conflicts in extension source
+        ${pkgs.gnused}/bin/sed -i 's/"ctrl+u"/"ctrl+shift+u"/' $out/lib/node_modules/shitty-extensions/extensions/ultrathink.ts
+        ${pkgs.gnused}/bin/sed -i 's/"ctrl+r"/"ctrl+shift+r"/' $out/lib/node_modules/shitty-extensions/extensions/speedreading.ts
       '';
     in
     {
