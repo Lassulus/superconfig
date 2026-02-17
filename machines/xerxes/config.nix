@@ -41,6 +41,8 @@
   documentation.nixos.enable = true;
   programs.steam.enable = true;
 
+  lass.workspace-manager.enable = true;
+
   services.ollama = {
     enable = true;
     package = pkgs.ollama-rocm;

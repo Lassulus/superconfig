@@ -20,8 +20,18 @@ stdenvNoCC.mkDerivation {
   buildPhase = ''
     runHook preBuild
 
-    # Create boot.img for Pixel 8
-    # Using boot header version 4 for Android 12+ devices
+    # Create init_boot.img for Pixel 8 (Android 13+)
+    # This replaces only the init ramdisk, keeping GrapheneOS kernel + vendor_boot
+    # Header version 4, no kernel - just our ramdisk with /init
+    mkbootimg \
+      --header_version 4 \
+      --ramdisk ${initramfs}/initrd \
+      --os_version 14.0.0 \
+      --os_patch_level 2024-01 \
+      --pagesize 4096 \
+      --output init_boot.img
+
+    # Also create full boot.img for reference/testing
     mkbootimg \
       --kernel ${kernel}/kernel/Image \
       --ramdisk ${initramfs}/initrd \
@@ -29,6 +39,7 @@ stdenvNoCC.mkDerivation {
       --os_version 14.0.0 \
       --os_patch_level 2024-01 \
       --pagesize 4096 \
+      --cmdline "rdinit=/init" \
       --output boot.img
 
     runHook postBuild
@@ -38,6 +49,7 @@ stdenvNoCC.mkDerivation {
     runHook preInstall
 
     mkdir -p $out
+    cp init_boot.img $out/
     cp boot.img $out/
 
     # Also provide the components separately for debugging
@@ -45,24 +57,6 @@ stdenvNoCC.mkDerivation {
     ln -s ${kernel} $out/components/kernel
     ln -s ${initramfs}/initrd $out/components/initrd
     ln -s ${kernel}/dtbo.img $out/dtbo.img
-
-    # Create a flash script
-    cat > $out/flash.sh << 'EOF'
-    #!/bin/sh
-    set -e
-    echo "Flashing Pixel 8 boot image..."
-    echo "Make sure device is in fastboot mode (power + volume down)"
-    echo ""
-    echo "To flash temporarily (will revert on reboot):"
-    echo "  fastboot boot ${placeholder "out"}/boot.img"
-    echo ""
-    echo "To flash permanently (DANGER - can brick device):"
-    echo "  fastboot flash boot ${placeholder "out"}/boot.img"
-    echo ""
-    echo "To flash DTBO (may be needed):"
-    echo "  fastboot flash dtbo ${placeholder "out"}/dtbo.img"
-    EOF
-    chmod +x $out/flash.sh
 
     runHook postInstall
   '';

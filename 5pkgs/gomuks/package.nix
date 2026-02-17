@@ -57,6 +57,7 @@ buildGoModule (
     ];
 
     subPackages = [
+      "cmd/gomuks"
       "cmd/gomuks-terminal"
     ];
 
@@ -65,7 +66,8 @@ buildGoModule (
     '';
 
     postInstall = ''
-      mv $out/bin/gomuks-terminal $out/bin/gomuks
+      mv $out/bin/gomuks $out/bin/gomuks-server
+      mv $out/bin/gomuks-terminal $out/bin/gomuks-tui
     '';
 
     meta = {

@@ -133,8 +133,8 @@
             };
             tor-yggdrasil = {
               module.name = "tor";
-              roles.client.tags.all = { };
-              roles.server.tags.all = { };
+              roles.client.tags.nixos = { };
+              roles.server.tags.nixos = { };
               roles.server.settings = {
                 secretHostname = false;
                 portMapping = [

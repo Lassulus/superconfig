@@ -101,8 +101,10 @@ let
           (label :text "''${round(power.watts, 1)}W ''${power.charging ? '󰂄' : '󰁹'}"))))
 
     (defwidget volume-widget []
-      (box :class "volume" :orientation "h" :space-evenly false
-        (label :text "''${volume.level}% ''${volume.icon}")))
+      (eventbox :onscroll "${lib.getExe volumeAdjustScript} {}"
+                :onclick "${pkgs.pulseaudio}/bin/pactl set-sink-mute @DEFAULT_SINK@ toggle"
+        (box :class "volume" :orientation "h" :space-evenly false
+          (label :text "''${volume.level}% ''${volume.icon}"))))
 
     (defwidget network-widget []
       (box :class "network" :orientation "h" :space-evenly false
@@ -445,6 +447,19 @@ let
         icon="󰕿"
       fi
       jq -n --arg level "$vol" --arg icon "$icon" '{level: $level, icon: $icon}'
+    '';
+  };
+
+  volumeAdjustScript = pkgs.writeShellApplication {
+    name = "eww-volume-adjust";
+    runtimeInputs = [ pkgs.pulseaudio ];
+    text = ''
+      direction="$1"
+      if [ "$direction" = "up" ]; then
+        pactl set-sink-volume @DEFAULT_SINK@ +5%
+      else
+        pactl set-sink-volume @DEFAULT_SINK@ -5%
+      fi
     '';
   };
 

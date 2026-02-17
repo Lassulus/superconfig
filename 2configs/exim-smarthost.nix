@@ -244,6 +244,7 @@ let
     "bitpanda@lassul.us"
     "schufa@lassul.us"
     "burger@lassul.us"
+    "eweka@lassul.us"
   ];
 
 in
