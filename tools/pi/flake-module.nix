@@ -6,8 +6,8 @@
       piPkg = self.legacyPackages.${system}.llm.pi;
 
       # Pre-install pi plugins into a fake npm global prefix
-      pluginPrefix =
-        pkgs.runCommand "pi-plugins"
+      pluginPrefixRaw =
+        pkgs.runCommand "pi-plugins-raw"
           {
             nativeBuildInputs = [
               pkgs.nodejs
@@ -27,6 +27,15 @@
             export npm_config_prefix=$out
             npm install -g pi-hooks shitty-extensions
           '';
+
+      # Remove the resistance extension (annoying terminator quote widget)
+      pluginPrefix = pkgs.runCommand "pi-plugins" { } ''
+        cp -a ${pluginPrefixRaw} $out
+        chmod -R u+w $out
+        pkg=$out/lib/node_modules/shitty-extensions/package.json
+        ${pkgs.jq}/bin/jq '.pi.extensions |= map(select(contains("resistance") | not))' "$pkg" > "$pkg.tmp"
+        mv "$pkg.tmp" "$pkg"
+      '';
     in
     {
       packages.pi = self.wrapLib.makeWrapper {

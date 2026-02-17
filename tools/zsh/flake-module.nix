@@ -272,6 +272,32 @@
               tmux set-environment -g SSH_AUTH_SOCK "$SSH_AUTH_SOCK" 2>/dev/null
             fi
 
+            # SSH session chooser: show existing sessions via fzf
+            # Delete key kills the highlighted session, then refreshes the list
+            if [[ -n "$SSH_CLIENT" ]]; then
+              while true; do
+                existing=$(tmux list-sessions -F '#{session_name}: #{session_windows} windows (created #{session_created_string})#{?session_attached, (attached),}' 2>/dev/null)
+                [[ -z "$existing" ]] && break
+                chosen=$(echo ">>> new session <<<\n$existing" \
+                  | fzf --height=80% --reverse \
+                        --header="Pick a tmux session (DEL to kill)" \
+                        --expect=delete \
+                        --preview='s={1}; s=''${s%:}; [ "$s" = ">>>" ] && echo "Create a new session" || tmux capture-pane -t "$s" -p -e 2>/dev/null' \
+                        --preview-window=right:60%)
+                key=$(echo "$chosen" | head -1)
+                selection=$(echo "$chosen" | tail -1)
+                chosen_name=$(echo "$selection" | cut -d: -f1)
+                if [[ "$key" == "delete" && -n "$chosen_name" && "$chosen_name" != ">>> new session <<<" ]]; then
+                  tmux kill-session -t "$chosen_name" 2>/dev/null
+                  continue
+                fi
+                if [[ -n "$chosen_name" && "$chosen_name" != ">>> new session <<<" ]]; then
+                  exec tmux -u attach -t "$chosen_name"
+                fi
+                break
+              done
+            fi
+
             # Generate a readable session name using name-generator
             session_name=$(${
               self.packages.${pkgs.system}.name-generator
