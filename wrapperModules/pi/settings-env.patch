@@ -1,0 +1,20 @@
+--- /tmp/settings-manager.js.orig	2026-02-18 23:29:05.967146474 +0100
++++ /tmp/settings-manager.js	2026-02-18 23:29:12.452952321 +0100
+@@ -97,7 +97,16 @@
+     /** Create a SettingsManager that loads from files */
+     static create(cwd = process.cwd(), agentDir = getAgentDir()) {
+         const storage = new FileSettingsStorage(cwd, agentDir);
+-        return SettingsManager.fromStorage(storage);
++        const manager = SettingsManager.fromStorage(storage);
++        const baseFile = process.env.PI_SETTINGS_FILE;
++        if (baseFile) {
++            try {
++                const baseSettings = JSON.parse(readFileSync(baseFile, "utf-8"));
++                manager.globalSettings = deepMergeSettings(manager.globalSettings, baseSettings);
++                manager.settings = deepMergeSettings(manager.globalSettings, manager.projectSettings);
++            } catch (e) {}
++        }
++        return manager;
+     }
+     /** Create a SettingsManager from an arbitrary storage backend */
+     static fromStorage(storage) {

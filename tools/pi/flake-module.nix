@@ -1,86 +1,49 @@
 { self, inputs, ... }:
 {
   perSystem =
-    { pkgs, system, ... }:
+    { pkgs, ... }:
     let
-      piPkg = self.legacyPackages.${system}.llm.pi;
+      pi = inputs.wrappers.lib.wrapModule {
+        imports = [ self.wrapperModules.pi ];
+        inherit pkgs;
 
-      # Pre-install pi plugins into a fake npm global prefix
-      pluginPrefixRaw =
-        pkgs.runCommand "pi-plugins-raw"
-          {
-            nativeBuildInputs = [
-              pkgs.nodejs
-              pkgs.cacert
-            ];
-            outputHashMode = "recursive";
-            outputHashAlgo = "sha256";
-            outputHash = "sha256-QZSVCJ0XirRz56v6ogxaB37c0bI8+OGEjrnqCFr/YI8=";
-            impureEnvVars = [
-              "http_proxy"
-              "https_proxy"
-            ];
-            SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
-          }
-          ''
-            export HOME=$TMPDIR
-            export npm_config_prefix=$out
-            npm install -g pi-hooks shitty-extensions
-          '';
+        settings = {
+          packages = [
+            {
+              source = "npm:pi-hooks";
+              hash = "sha256-IYXckWXmRsX62aQANatkcu2kV+PXT5mNB2ONpJsOPMI=";
+            }
+            {
+              source = "npm:shitty-extensions";
+              hash = "sha256-OJZezuRDUiKysfkjJxeA6BjGohFR/+uVg611jGaRTV0=";
+              extensions = [ "!extensions/resistance.ts" ];
+            }
+          ];
+          defaultProvider = "anthropic";
+          defaultModel = "claude-opus-4-6";
+          defaultThinkingLevel = "medium";
+          permissionLevel = "low";
+          permissionMode = "ask";
+          permissionConfig.overrides.minimal = [
+            "nix build *"
+            "nix eval *"
+            "nix fmt *"
+          ];
+        };
 
-      # Patch shitty-extensions:
-      # - Remove the resistance extension (annoying terminator quote widget)
-      # - Rebind ultrathink ctrl+u -> ctrl+shift+u (conflicts with deleteToLineStart)
-      # - Rebind speedreading ctrl+r -> ctrl+shift+r (conflicts with renameSession)
-      # Patch pi-hooks:
-      # - Replace terminal bell with pw-play peon sounds in permission extension
-      pluginPrefix = pkgs.runCommand "pi-plugins" { } ''
-        cp -a ${pluginPrefixRaw} $out
-        chmod -R u+w $out
-        pkg=$out/lib/node_modules/shitty-extensions/package.json
-        ${pkgs.jq}/bin/jq '.pi.extensions |= map(select(contains("resistance") | not))' "$pkg" > "$pkg.tmp"
-        mv "$pkg.tmp" "$pkg"
+        pluginOverrides = ''
+          # Fix keybinding conflicts in extension source
+          ${pkgs.gnused}/bin/sed -i 's/"ctrl+u"/"ctrl+shift+u"/' $out/lib/node_modules/shitty-extensions/extensions/ultrathink.ts
+          ${pkgs.gnused}/bin/sed -i 's/"ctrl+r"/"ctrl+shift+r"/' $out/lib/node_modules/shitty-extensions/extensions/speedreading.ts
 
-        # Fix keybinding conflicts in extension source
-        ${pkgs.gnused}/bin/sed -i 's/"ctrl+u"/"ctrl+shift+u"/' $out/lib/node_modules/shitty-extensions/extensions/ultrathink.ts
-        ${pkgs.gnused}/bin/sed -i 's/"ctrl+r"/"ctrl+shift+r"/' $out/lib/node_modules/shitty-extensions/extensions/speedreading.ts
-
-        # Patch permission extension to use pw-play for peon sounds on Linux
-        ${pkgs.python3}/bin/python3 ${./patch-permission-sound.py} \
-          $out/lib/node_modules/pi-hooks/permission/permission.ts \
-          ${pkgs.pipewire}/bin/pw-play
-      '';
+          # Patch permission extension to use pw-play for peon sounds on Linux
+          ${pkgs.python3}/bin/python3 ${./patch-permission-sound.py} \
+            $out/lib/node_modules/pi-hooks/permission/permission.ts \
+            ${pkgs.pipewire}/bin/pw-play
+        '';
+      };
     in
     {
-      packages.pi = inputs.wrappers.lib.wrapPackage {
-        pkgs = pkgs;
-        package = piPkg;
-        runtimeInputs = [ pkgs.nodejs ];
-        wrapper =
-          { exePath, ... }:
-          ''
-            set -efu
-            export npm_config_prefix="${pluginPrefix}"
-
-            # Ensure settings.json has our plugins listed
-            SETTINGS_DIR="''${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
-            SETTINGS_FILE="$SETTINGS_DIR/settings.json"
-            mkdir -p "$SETTINGS_DIR"
-
-            # Add packages to settings if not already present
-            if [ ! -f "$SETTINGS_FILE" ]; then
-              echo '{"packages":["npm:pi-hooks","npm:shitty-extensions"]}' > "$SETTINGS_FILE"
-            else
-              for pkg in "npm:pi-hooks" "npm:shitty-extensions"; do
-                if ! grep -q "$pkg" "$SETTINGS_FILE"; then
-                  ${pkgs.jq}/bin/jq --arg p "$pkg" '.packages = ((.packages // []) + [$p] | unique)' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp"
-                  mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
-                fi
-              done
-            fi
-
-            exec ${exePath} "$@"
-          '';
-      };
+      packages.pi = pi.wrapper;
     };
 }
