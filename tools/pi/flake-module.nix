@@ -12,12 +12,36 @@
             {
               source = "npm:pi-hooks";
               version = "1.0.3";
-              hash = "sha256-IYXckWXmRsX62aQANatkcu2kV+PXT5mNB2ONpJsOPMI=";
+              hash = "sha256-jU3akfqsWgjvOG+8+Md2qEzkXp48LUaXVncpUMXxy7s=";
+              deps = [
+                {
+                  source = "npm:shell-quote";
+                  version = "1.8.3";
+                  hash = "sha256-32QLNUuvjigj1scqLlCVFTfgS3MHm9dBjPk9iVB+IsE=";
+                }
+                {
+                  source = "npm:vscode-languageserver-protocol";
+                  version = "3.17.5";
+                  hash = "sha256-dHPrLSFj8/i+oJZE+dgDeJoZXllrZdOUbEFX5YPjzMg=";
+                  deps = [
+                    {
+                      source = "npm:vscode-jsonrpc";
+                      version = "8.2.0";
+                      hash = "sha256-PaRFMcOY8VRQdMtyjjWagi81ufiscXHIR/QvByi5x8s=";
+                    }
+                    {
+                      source = "npm:vscode-languageserver-types";
+                      version = "3.17.5";
+                      hash = "sha256-1nP55/i75RNRvlHFjzLU3PqXpnDruGvGMzaDlMYJysA=";
+                    }
+                  ];
+                }
+              ];
             }
             {
               source = "npm:shitty-extensions";
               version = "1.0.9";
-              hash = "sha256-Qv1mDM3LVauxwPNojCN5kj6yAtKOXodwbtqQk02RqPQ=";
+              hash = "sha256-g26MZ5x4HUcDai4SXPaOEhqgGGqzAI68znnsCbKJv7E=";
               extensions = [ "!extensions/resistance.ts" ];
             }
           ];
