@@ -9,6 +9,7 @@ let
 
   to = lib.concatStringsSep "," [
     "lass@green.r"
+    "bot"
   ];
 
   mails = [
