@@ -40,7 +40,6 @@
             ...
           }:
           ''
-                        set -x
                         ${envString}
                         ${preHook}
 
@@ -87,7 +86,19 @@
                   if [[ "''${1:-}" == "show" ]]; then
                     decrypt_target="''${2:-}"
                   elif [[ -n "''${1:-}" ]] && [[ "''${1:-}" != -* ]] && [[ "''${1:-}" != "otp" ]]; then
-                    decrypt_target="''${1:-}"
+                    # Skip passage subcommands that don't need decryption
+                    case "''${1:-}" in
+                      ls|find|git|insert|generate|rm|mv|cp|help|version|init)
+                        ;;
+                      edit|grep|reencrypt)
+                        # These commands do decrypt, prompt with command as target
+                        decrypt_target="''${2:-''${1:-}}"
+                        ;;
+                      *)
+                        # Bare pass-name (implicit show)
+                        decrypt_target="''${1:-}"
+                        ;;
+                    esac
                   fi
 
                   if [[ -n "$decrypt_target" ]]; then
