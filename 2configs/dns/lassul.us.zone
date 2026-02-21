@@ -52,6 +52,7 @@ cdio IN CNAME neoprism
 c IN CNAME neoprism
 hass IN CNAME neoprism
 vault IN CNAME neoprism
+cal IN CNAME neoprism
 
 ;; Mail
 @ IN MX 3 mail

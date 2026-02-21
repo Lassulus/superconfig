@@ -55,6 +55,9 @@
     # download user
     ../../2configs/download-user.nix
 
+    # caldav calendar
+    ../../2configs/radicale.nix
+
     # opencrow matrix bot
     ../../2configs/opencrow.nix
   ];
