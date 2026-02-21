@@ -38,7 +38,12 @@ let
       name = "${name}.json";
       path = pkgs.writeText "${name}.json" (
         builtins.toJSON {
-          inherit (ws) directory on_enter on_leave on_create;
+          inherit (ws)
+            directory
+            on_enter
+            on_leave
+            on_create
+            ;
         }
       );
     }) cfg.workspaces

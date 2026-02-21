@@ -1,30 +1,41 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   users = [ "opencrow" ];
 
   # Generate one var per user with random password
-  userGenerators = lib.listToAttrs (map (user: {
-    name = "radicale-${user}";
-    value = {
-      files."htpasswd-line" = { };
-      files."password" = { };
-      runtimeInputs = with pkgs; [ apacheHttpd coreutils ];
-      script = ''
-        password=$(head -c 32 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | head -c 24)
-        echo "$password" > "$out/password"
-        htpasswd -nbB ${user} "$password" > "$out/htpasswd-line"
-      '';
-    };
-  }) users);
+  userGenerators = lib.listToAttrs (
+    map (user: {
+      name = "radicale-${user}";
+      value = {
+        files."htpasswd-line" = { };
+        files."password" = { };
+        runtimeInputs = with pkgs; [
+          apacheHttpd
+          coreutils
+        ];
+        script = ''
+          password=$(head -c 32 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | head -c 24)
+          echo "$password" > "$out/password"
+          htpasswd -nbB ${user} "$password" > "$out/htpasswd-line"
+        '';
+      };
+    }) users
+  );
 
-  loadCredentials = map (user:
-    "radicale-${user}-htpasswd:${config.clan.core.vars.generators."radicale-${user}".files."htpasswd-line".path}"
+  loadCredentials = map (
+    user:
+    "radicale-${user}-htpasswd:${
+      config.clan.core.vars.generators."radicale-${user}".files."htpasswd-line".path
+    }"
   ) users;
 
   assembleHtpasswd = pkgs.writeShellScript "radicale-htpasswd" (
-    lib.concatMapStringsSep "\n" (user:
-      "cat \${CREDENTIALS_DIRECTORY}/radicale-${user}-htpasswd"
-    ) users
+    lib.concatMapStringsSep "\n" (user: "cat \${CREDENTIALS_DIRECTORY}/radicale-${user}-htpasswd") users
   );
 in
 {

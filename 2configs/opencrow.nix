@@ -1,4 +1,9 @@
-{ self, config, pkgs, ... }:
+{
+  self,
+  config,
+  pkgs,
+  ...
+}:
 let
   opencrow = self.inputs.opencrow.packages.${pkgs.system}.opencrow;
   pi = self.inputs.llm-agents.packages.${pkgs.system}.pi;
