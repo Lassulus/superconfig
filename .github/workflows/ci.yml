@@ -19,6 +19,8 @@ jobs:
             experimental-features = nix-command flakes
 
       - uses: DeterminateSystems/magic-nix-cache-action@main
+        with:
+          use-flakehub: false
 
       - name: Run flake checks
         run: nix flake check
