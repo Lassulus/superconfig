@@ -76,6 +76,7 @@
     };
     environmentVariables = {
       HSA_OVERRIDE_GFX_VERSION = "11.0.0"; # Radeon 890M (gfx1150/RDNA 3.5) - fallback to gfx1100
+      OLLAMA_NUM_CTX = "16384"; # 48 GiB RAM shared with GPU; 32k OOMs with 32B model
     };
   };
 
