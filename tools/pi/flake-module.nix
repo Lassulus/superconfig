@@ -11,11 +11,13 @@
           packages = [
             {
               source = "npm:pi-hooks";
+              version = "1.0.3";
               hash = "sha256-IYXckWXmRsX62aQANatkcu2kV+PXT5mNB2ONpJsOPMI=";
             }
             {
               source = "npm:shitty-extensions";
-              hash = "sha256-OJZezuRDUiKysfkjJxeA6BjGohFR/+uVg611jGaRTV0=";
+              version = "1.0.9";
+              hash = "sha256-Qv1mDM3LVauxwPNojCN5kj6yAtKOXodwbtqQk02RqPQ=";
               extensions = [ "!extensions/resistance.ts" ];
             }
           ];

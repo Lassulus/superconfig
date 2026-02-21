@@ -11,38 +11,46 @@
 
       # Extract npm packages with hashes from settings.packages
       npmPackages = lib.filter (p: builtins.isAttrs p && p ? hash) (config.settings.packages or [ ]);
+
+      # Fetch an npm tarball and unpack it into lib/node_modules/<name>
       fetchPlugin =
         pkg:
         let
           source = pkg.source or pkg;
           name = lib.removePrefix "npm:" source;
+          tarball = pkgs.fetchurl {
+            url = "https://registry.npmjs.org/${name}/-/${name}-${pkg.version}.tgz";
+            hash = pkg.hash;
+          };
+          deps = map fetchPlugin (pkg.deps or [ ]);
         in
         pkgs.runCommand "pi-plugin-${name}"
           {
             nativeBuildInputs = [
-              pkgs.nodejs
-              pkgs.cacert
+              pkgs.gnutar
+              pkgs.gzip
             ];
-            outputHashMode = "recursive";
-            outputHashAlgo = "sha256";
-            outputHash = pkg.hash;
-            impureEnvVars = [
-              "http_proxy"
-              "https_proxy"
-            ];
-            SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
           }
           ''
-            export HOME=$TMPDIR
-            export npm_config_prefix=$out
-            npm install -g ${name}
+            mkdir -p $out/lib/node_modules/${name}
+            tar xzf ${tarball} --strip-components=1 -C $out/lib/node_modules/${name}
+            ${lib.concatMapStringsSep "\n" (
+              dep:
+              "mkdir -p $out/lib/node_modules/${name}/node_modules"
+              + "\ncp -a ${dep}/lib/node_modules/* $out/lib/node_modules/${name}/node_modules/"
+              + "\ncp -a ${dep}/lib/node_modules/* $out/lib/node_modules/"
+            ) deps}
           '';
 
       fetchedPlugins = map fetchPlugin npmPackages;
 
       # Strip hash and null-valued attrs from package entries before writing settings.json
       cleanPackage =
-        p: if builtins.isAttrs p then lib.filterAttrs (k: v: k != "hash" && v != null) p else p;
+        p:
+        if builtins.isAttrs p then
+          lib.filterAttrs (k: v: k != "hash" && k != "version" && k != "deps" && v != null) p
+        else
+          p;
 
       cleanSettings = config.settings // {
         packages = map cleanPackage (config.settings.packages or [ ]);
@@ -69,6 +77,15 @@
                     options.source = lib.mkOption {
                       type = lib.types.str;
                       description = "Package source (e.g. npm:package-name).";
+                    };
+                    options.version = lib.mkOption {
+                      type = lib.types.str;
+                      description = "Exact version to pin (e.g. 1.0.3). Ensures reproducible fetching.";
+                    };
+                    options.deps = lib.mkOption {
+                      type = lib.types.listOf (lib.types.attrsOf lib.types.anything);
+                      default = [ ];
+                      description = "Transitive npm dependencies as {source, version, hash} attrsets.";
                     };
                     options.extensions = lib.mkOption {
                       type = lib.types.nullOr (lib.types.listOf lib.types.str);
