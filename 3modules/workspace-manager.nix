@@ -24,6 +24,11 @@ let
         default = [ ];
         description = "Commands to run when leaving this workspace";
       };
+      on_create = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        description = "Commands to run in a tmux session when the workspace is first entered. Each command gets its own tmux window with visible logs. Reattach with: tmux attach -t ws-<name>";
+      };
     };
   };
 
@@ -33,7 +38,7 @@ let
       name = "${name}.json";
       path = pkgs.writeText "${name}.json" (
         builtins.toJSON {
-          inherit (ws) directory on_enter on_leave;
+          inherit (ws) directory on_enter on_leave on_create;
         }
       );
     }) cfg.workspaces
@@ -77,6 +82,12 @@ in
       default = "~";
       description = "Default directory for workspaces without configuration";
     };
+
+    terminalCommand = lib.mkOption {
+      type = lib.types.str;
+      default = "kitty";
+      description = "Terminal emulator to use for on_create commands. Must support '-T title' for setting the window title.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -93,6 +104,7 @@ in
           "WORKSPACE_MANAGER_CONFIG_DIR=${cfg.configDir}"
           "WORKSPACE_MANAGER_SYSTEM_CONFIG_DIR=${systemConfigDir}"
           "WORKSPACE_MANAGER_DEFAULT_DIR=${cfg.defaultDirectory}"
+          "WORKSPACE_MANAGER_TERMINAL=${cfg.terminalCommand}"
         ];
       };
     };

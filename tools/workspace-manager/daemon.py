@@ -46,6 +46,8 @@ DEFAULT_DIRECTORY = (
     Path(_default_dir_env).expanduser() if _default_dir_env else Path.home()
 )
 
+TERMINAL_COMMAND = os.environ.get("WORKSPACE_MANAGER_TERMINAL", "kitty")
+
 
 def load_config_file(config_file: Path) -> dict[str, Any] | None:
     """Load a workspace config file, returning None if it doesn't exist or fails."""
@@ -71,6 +73,7 @@ class WorkspaceConfig:
         self.directory: Path = DEFAULT_DIRECTORY
         self.on_enter: list[str] = []
         self.on_leave: list[str] = []
+        self.on_create: list[str] = []
         self._load()
 
     def _load(self) -> None:
@@ -98,6 +101,8 @@ class WorkspaceConfig:
             self.on_enter = list(merged["on_enter"])
         if "on_leave" in merged:
             self.on_leave = list(merged["on_leave"])
+        if "on_create" in merged:
+            self.on_create = list(merged["on_create"])
 
 
 class WorkspaceManager:
@@ -106,6 +111,7 @@ class WorkspaceManager:
     def __init__(self) -> None:
         self.current_workspace: str | None = None
         self.configs: dict[str, WorkspaceConfig] = {}
+        self.created_workspaces: set[str] = set()
 
     def get_config(self, workspace: str) -> WorkspaceConfig:
         """Get or create config for a workspace (configs are loaded fresh each time)"""
@@ -120,6 +126,91 @@ class WorkspaceManager:
             return config.directory
         return DEFAULT_DIRECTORY
 
+    def _tmux_session_exists(self, session_name: str) -> bool:
+        """Check if a tmux session already exists"""
+        try:
+            result = subprocess.run(
+                ["tmux", "has-session", "-t", session_name],
+                capture_output=True,
+            )
+            return result.returncode == 0
+        except FileNotFoundError:
+            print("Warning: tmux not found", file=sys.stderr)
+            return False
+
+    async def _run_on_create(self, workspace: str, config: WorkspaceConfig) -> None:
+        """Start on_create commands each in their own tmux session + terminal.
+
+        For each command, creates a tmux session named <workspace>-start<N>
+        running the command, then opens a terminal window attached to it.
+        If the terminal is closed, reattach with: tmux attach -t <workspace>-start<N>
+        """
+        if not config.on_create:
+            return
+
+        work_dir = str(config.directory)
+
+        for i, cmd in enumerate(config.on_create, start=1):
+            session_name = f"{workspace}-start{i}"
+
+            # Skip if tmux session already exists (e.g. from a previous run)
+            if self._tmux_session_exists(session_name):
+                print(
+                    f"Tmux session '{session_name}' already exists, skipping",
+                    file=sys.stderr,
+                )
+                continue
+
+            # Create a detached tmux session running the command
+            try:
+                subprocess.run(
+                    [
+                        "tmux",
+                        "new-session",
+                        "-d",
+                        "-s",
+                        session_name,
+                        "-c",
+                        work_dir,
+                        cmd,
+                    ],
+                    check=True,
+                )
+                print(
+                    f"Created tmux session '{session_name}': {cmd}",
+                    file=sys.stderr,
+                )
+            except (OSError, subprocess.CalledProcessError) as e:
+                print(
+                    f"Failed to create tmux session '{session_name}': {e}",
+                    file=sys.stderr,
+                )
+                continue
+
+            # Open a terminal window attached to the tmux session
+            try:
+                subprocess.Popen(
+                    [
+                        TERMINAL_COMMAND,
+                        "-T",
+                        session_name,
+                        "tmux",
+                        "attach",
+                        "-t",
+                        session_name,
+                    ],
+                    start_new_session=True,
+                )
+                print(
+                    f"Opened terminal for tmux session '{session_name}'",
+                    file=sys.stderr,
+                )
+            except OSError as e:
+                print(
+                    f"Failed to open terminal for '{session_name}': {e}",
+                    file=sys.stderr,
+                )
+
     async def handle_workspace_change(
         self, old_workspace: str | None, new_workspace: str
     ) -> None:
@@ -133,8 +224,13 @@ class WorkspaceManager:
         # Update current workspace
         self.current_workspace = new_workspace
 
-        # Run on_enter hooks for new workspace
+        # Run on_create hooks if this is the first time entering the workspace
         new_config = self.get_config(new_workspace)
+        if new_workspace not in self.created_workspaces:
+            self.created_workspaces.add(new_workspace)
+            await self._run_on_create(new_workspace, new_config)
+
+        # Run on_enter hooks for new workspace
         for hook in new_config.on_enter:
             await self._run_hook(hook, "on_enter", new_workspace)
 

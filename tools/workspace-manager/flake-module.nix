@@ -38,7 +38,7 @@
           cp daemon.py $out/bin/workspace-manager-daemon
           chmod +x $out/bin/workspace-manager-daemon
           wrapProgram $out/bin/workspace-manager-daemon \
-            --prefix PATH : ${python}/bin:${pkgs.sway}/bin
+            --prefix PATH : ${python}/bin:${pkgs.sway}/bin:${pkgs.tmux}/bin
           runHook postInstall
         '';
         meta.mainProgram = "workspace-manager-daemon";
