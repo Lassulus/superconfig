@@ -187,7 +187,7 @@
         ./keys/flake-module.nix
         ./skills/flake-module.nix
         ./games/flake-module.nix
-        ./machines/pixel8/flake-module.nix
+
         ./wrapperModules/pi/flake-module.nix
       ]
       ++ (
