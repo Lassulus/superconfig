@@ -8,7 +8,7 @@
   ];
 
   krebs.build.host.name = "virtulus";
-  services.mingetty.autologinUser = "demo";
+  services.getty.autologinUser = "demo";
 
   users.users.demo = {
     isNormalUser = true;

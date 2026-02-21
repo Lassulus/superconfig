@@ -248,7 +248,22 @@
               inputs.extra-container.lib.buildContainers {
                 inherit system;
                 nixpkgs = inputs.nixpkgs;
-                config.containers.${name} = containerConfig;
+                config = {
+                  # Workaround: extra-container's minimal module set doesn't
+                  # include nixos-init.nix, but systemd.nix now references
+                  # config.system.nixos-init.package for env-generator.
+                  # Provide a dummy option until extra-container is updated.
+
+                  imports = [
+                    (
+                      { pkgs, lib, ... }:
+                      {
+                        options.system.nixos-init.package = lib.mkPackageOption pkgs "nixos-init" { };
+                      }
+                    )
+                  ];
+                  containers.${name} = containerConfig;
+                };
               }
             )
           ) self.containerConfigurations;
