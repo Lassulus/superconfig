@@ -65,6 +65,7 @@ in
       OPENCROW_PI_SESSION_DIR = "/home/bot/opencrow/sessions";
       OPENCROW_PI_WORKING_DIR = "/home/bot/opencrow";
       OPENCROW_PI_SKILLS = "${opencrow}/share/opencrow/skills/web";
+      OPENCROW_PI_SKILLS_DIR = "/home/bot/skills";
       OPENCROW_SOUL_FILE = "${opencrow}/share/opencrow/SOUL.md";
       PI_CODING_AGENT_DIR = "/home/bot/opencrow/pi-agent";
     };
