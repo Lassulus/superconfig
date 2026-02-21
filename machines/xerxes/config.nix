@@ -43,9 +43,37 @@
 
   lass.workspace-manager.enable = true;
 
-  services.ollama = {
+  services.ollama = let
+    gpuTargets = [ "gfx1100" ]; # Radeon 890M (gfx1150/RDNA 3.5) - only build for fallback target
+    customRocblas = pkgs.rocmPackages.rocblas.override {
+      withHipBlasLt = false; # hipblaslt takes extremely long to build; rocblas's own Tensile kernels work fine
+      inherit gpuTargets;
+    };
+    customRocsparse = pkgs.rocmPackages.rocsparse.override {
+      inherit gpuTargets;
+    };
+    customRocsolver = pkgs.rocmPackages.rocsolver.override {
+      inherit gpuTargets;
+      rocblas = customRocblas;
+      rocsparse = customRocsparse;
+    };
+    customHipblas = pkgs.rocmPackages.hipblas.override {
+      rocblas = customRocblas;
+      rocsolver = customRocsolver;
+      rocsparse = customRocsparse;
+    };
+    customRocmPackages = pkgs.rocmPackages // {
+      rocblas = customRocblas;
+      hipblas = customHipblas;
+      rocsolver = customRocsolver;
+      rocsparse = customRocsparse;
+    };
+  in {
     enable = true;
-    package = pkgs.ollama-rocm;
+    package = pkgs.ollama-rocm.override {
+      rocmGpuTargets = gpuTargets;
+      rocmPackages = customRocmPackages;
+    };
     environmentVariables = {
       HSA_OVERRIDE_GFX_VERSION = "11.0.0"; # Radeon 890M (gfx1150/RDNA 3.5) - fallback to gfx1100
     };
