@@ -54,6 +54,9 @@
 
     # download user
     ../../2configs/download-user.nix
+
+    # opencrow matrix bot
+    ../../2configs/opencrow.nix
   ];
 
   krebs.build.host = config.krebs.hosts.neoprism;

@@ -69,6 +69,9 @@
     wrappers.url = "github:lassulus/wrappers";
     # wrappers.url = "git+file:/home/lass/src/wrappers";
     wrappers.inputs.nixpkgs.follows = "nixpkgs";
+
+    opencrow.url = "github:pinpox/opencrow";
+    opencrow.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =

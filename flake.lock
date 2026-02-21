@@ -491,12 +491,33 @@
         "type": "github"
       }
     },
-    "rogue-talk": {
+    "opencrow": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
         ],
         "treefmt-nix": "treefmt-nix_5"
+      },
+      "locked": {
+        "lastModified": 1771622489,
+        "narHash": "sha256-CGAS5ISs+h6GNQwaOLycfbcFRkN0legi/hdDov4Obfk=",
+        "owner": "pinpox",
+        "repo": "opencrow",
+        "rev": "9ec2d17e6c9d45b22b9cca3174b6b1a75758d8f6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pinpox",
+        "repo": "opencrow",
+        "type": "github"
+      }
+    },
+    "rogue-talk": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "treefmt-nix": "treefmt-nix_6"
       },
       "locked": {
         "lastModified": 1770248736,
@@ -527,10 +548,11 @@
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
         "nixvim": "nixvim",
+        "opencrow": "opencrow",
         "rogue-talk": "rogue-talk",
         "spora": "spora",
         "stockholm": "stockholm",
-        "treefmt-nix": "treefmt-nix_6",
+        "treefmt-nix": "treefmt-nix_7",
         "wrappers": "wrappers"
       }
     },
@@ -746,6 +768,27 @@
     "treefmt-nix_5": {
       "inputs": {
         "nixpkgs": [
+          "opencrow",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1770228511,
+        "narHash": "sha256-wQ6NJSuFqAEmIg2VMnLdCnUc0b7vslUohqqGGD+Fyxk=",
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "rev": "337a4fe074be1042a35086f15481d763b8ddc0e7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "treefmt-nix_6": {
+      "inputs": {
+        "nixpkgs": [
           "rogue-talk",
           "nixpkgs"
         ]
@@ -764,7 +807,7 @@
         "type": "github"
       }
     },
-    "treefmt-nix_6": {
+    "treefmt-nix_7": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
