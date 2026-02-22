@@ -14,6 +14,7 @@
     ../../2configs/container-bridge.nix
     ../../2configs/android-webcam.nix
     ../../2configs/radicle.nix
+    ../../2configs/steam.nix
   ];
   system.stateVersion = "25.05";
 
@@ -39,8 +40,6 @@
   ];
 
   documentation.nixos.enable = true;
-  programs.steam.enable = true;
-
   lass.workspace-manager.enable = true;
 
   services.ollama =

@@ -3,6 +3,7 @@
 {
   programs.steam = {
     enable = true;
+    gamescopeSession.enable = true;
     remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
     dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
     package = pkgs.steam.override {
@@ -32,12 +33,14 @@
         in
         ''
           export LD_LIBRARY_PATH="${gmLib}:$LD_LIBRARY_PATH"
+          export PATH="${pkgs.gamescope}/bin:$PATH"
         '';
     };
   };
 
   environment.systemPackages = with pkgs; [
     mangohud
+    gamescope
   ];
 
   programs.gamemode.enable = true;
