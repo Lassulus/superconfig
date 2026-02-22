@@ -63,9 +63,11 @@
           ${pkgs.gnused}/bin/sed -i 's/"ctrl+r"/"ctrl+shift+r"/' $out/lib/node_modules/shitty-extensions/extensions/speedreading.ts
 
           # Patch permission extension to use pw-play for peon sounds on Linux
-          ${pkgs.python3}/bin/python3 ${./patch-permission-sound.py} \
-            $out/lib/node_modules/pi-hooks/permission/permission.ts \
-            ${pkgs.pipewire}/bin/pw-play
+          ${pkgs.lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
+            ${pkgs.python3}/bin/python3 ${./patch-permission-sound.py} \
+              $out/lib/node_modules/pi-hooks/permission/permission.ts \
+              ${pkgs.pipewire}/bin/pw-play
+          ''}
         '';
       };
     in
