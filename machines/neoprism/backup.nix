@@ -40,13 +40,15 @@
     encryption.mode = "none";
     compression = "auto,zstd";
     startAt = "*-*-* 03:00:00";
-    environment.BORG_RSH = let
-      knownHostsFile = pkgs.writeText "storagebox-known-hosts" ''
-        [u550643.your-storagebox.de]:23 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIICf9svRenC/PLKIL9nk6K/pxQgoiFC41wTNvoIncOxs
-      '';
-    in "ssh -oPort=23 -oUserKnownHostsFile=${knownHostsFile} -i ${
-      config.clan.core.vars.generators.borgbackup.files."borgbackup.ssh.id25519".path
-    }";
+    environment.BORG_RSH =
+      let
+        knownHostsFile = pkgs.writeText "storagebox-known-hosts" ''
+          [u550643.your-storagebox.de]:23 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIICf9svRenC/PLKIL9nk6K/pxQgoiFC41wTNvoIncOxs
+        '';
+      in
+      "ssh -oPort=23 -oUserKnownHostsFile=${knownHostsFile} -i ${
+        config.clan.core.vars.generators.borgbackup.files."borgbackup.ssh.id25519".path
+      }";
 
     readWritePaths = [
       "/var/backup"
