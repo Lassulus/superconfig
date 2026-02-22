@@ -75,6 +75,10 @@ Secrets are managed via password-store and uploaded to `/run/secrets` on deploym
 4. Add to inventory in `flake.nix`
 5. Deploy using `nix run .#deploy -- <name>`
 
+## Pre-Commit
+
+**CRITICAL**: Always run `nix fmt` before committing to ensure all files pass the treefmt formatting check in CI.
+
 ## Commit Message Guidelines
 
 - Use simple, descriptive commit messages without attribution footers
