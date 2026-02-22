@@ -133,7 +133,7 @@
 
             # If direct connection failed, fall back to SSH tunnel
             echo "Direct connection failed, sending via SSH..." >&2
-            if ${pkgs.openssh}/bin/ssh -o ConnectTimeout=10 -p 45621 neoprism.lassul.us 'msmtp -C /dev/null --host=localhost --port=25 --read-envelope-from --read-recipients' < "$tmpfile"; then
+            if ${pkgs.openssh}/bin/ssh -o ConnectTimeout=10 -p 45621 lass@neoprism.lassul.us 'msmtp -C /dev/null --host=localhost --port=25 --read-envelope-from --read-recipients' < "$tmpfile"; then
               ${pkgs.notmuch}/bin/notmuch insert +sent < "$tmpfile"
               exit 0
             else
