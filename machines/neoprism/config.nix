@@ -60,6 +60,9 @@
 
     # opencrow matrix bot
     ../../2configs/opencrow.nix
+
+    # backups
+    ./backup.nix
   ];
 
   krebs.build.host = config.krebs.hosts.neoprism;
