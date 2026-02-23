@@ -14,8 +14,8 @@ he IN NS oxygen.ns.hetzner.com.
 he IN NS hydrogen.ns.hetzner.com.
 he IN NS helium.ns.hetzner.de.
 
-@ IN A 95.216.1.150
-@ IN AAAA 2a01:4f9:2a:1e9::1
+@ IN A 95.217.192.59
+@ IN AAAA 2a01:4f9:4a:4f1a::2
 prism IN A 95.216.1.150
 4.prism IN A 95.216.1.150
 prism IN AAAA 2a01:4f9:2a:1e9::1
@@ -31,13 +31,13 @@ ns1 IN AAAA 2a01:4f9:4a:4f1a::2
 
 * IN CNAME www
 
-www IN CNAME prism
+www IN CNAME neoprism
 cgit IN CNAME prism
 pad IN CNAME neoprism
 go IN CNAME neoprism
 cast IN CNAME neoprism
 matrix IN CNAME neoprism
-paste IN CNAME prism
+paste IN CNAME neoprism
 radio IN CNAME neoprism
 jitsi IN CNAME neoprism
 meet IN CNAME neoprism

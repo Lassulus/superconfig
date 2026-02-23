@@ -16,6 +16,9 @@
 
     virtualHosts.default = {
       default = true;
+      locations."/".extraConfig = ''
+        return 404;
+      '';
       locations."= /etc/os-release".extraConfig = ''
         default_type text/plain;
         alias /etc/os-release;
