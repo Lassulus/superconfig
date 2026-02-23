@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, lib, ... }:
 
 {
   imports = [
@@ -58,12 +58,21 @@
     # caldav calendar
     ../../2configs/radicale.nix
 
+    # lassul.us website
+    ../../2configs/websites/lassulus.nix
+
+    # paste + cyberlocker
+    ../../2configs/paste.nix
+
     # opencrow matrix bot
     ../../2configs/opencrow.nix
 
     # backups
     ./backup.nix
   ];
+
+  # lassul.us shouldn't be the default vhost here (nginx.nix already sets one)
+  services.nginx.virtualHosts."lassul.us".default = lib.mkForce false;
 
   krebs.build.host = config.krebs.hosts.neoprism;
   system.stateVersion = "24.05";
