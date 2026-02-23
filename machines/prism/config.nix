@@ -223,6 +223,42 @@ in
       services.nginx.virtualHosts."cgit.lassul.us".acmeFallbackHost = "orange.r";
       services.nginx.virtualHosts."mail.lassul.us".acmeFallbackHost = "neoprism.r";
       services.nginx.virtualHosts."mumble.lassul.us".acmeFallbackHost = "neoprism.r";
+
+      # proxy paste/cyberlocker to neoprism
+      services.nginx.virtualHosts."p.krebsco.de" = {
+        locations."/".extraConfig = lib.mkForce ''
+          client_max_body_size 4G;
+          proxy_set_header Host $host;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          proxy_pass https://neoprism.lassul.us;
+        '';
+        locations."/form".extraConfig = lib.mkForce ''
+          client_max_body_size 4G;
+          proxy_set_header Host $host;
+          proxy_pass https://neoprism.lassul.us;
+        '';
+        locations."/image".extraConfig = lib.mkForce ''
+          proxy_set_header Host $host;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          proxy_pass https://neoprism.lassul.us;
+        '';
+        extraConfig = lib.mkForce ''
+          add_header Access-Control-Allow-Headers Authorization always;
+          add_header Access-Control-Allow-Origin * always;
+          add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS' always;
+        '';
+      };
+      services.nginx.virtualHosts."c.krebsco.de" = {
+        locations."/".extraConfig = lib.mkForce ''
+          proxy_set_header Host $host;
+          proxy_pass https://neoprism.lassul.us;
+        '';
+        extraConfig = lib.mkForce ''
+          add_header Access-Control-Allow-Origin * always;
+          add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS' always;
+        '';
+      };
     }
   ];
 
