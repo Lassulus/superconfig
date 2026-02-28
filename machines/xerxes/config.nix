@@ -15,6 +15,7 @@
     ../../2configs/android-webcam.nix
     ../../2configs/radicle.nix
     ../../2configs/steam.nix
+    ../../2configs/auto-timezone.nix
   ];
   system.stateVersion = "25.05";
 
