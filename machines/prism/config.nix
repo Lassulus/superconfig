@@ -127,7 +127,7 @@ in
     ../../2configs/binary-cache/server.nix
     ../../2configs/binary-cache/proxy.nix
     ../../2configs/iodined.nix
-    ../../2configs/paste.nix
+    # paste.nix removed - paste/cyberlocker now runs on neoprism, proxied below
     ../../2configs/syncthing.nix
     ../../2configs/container-networking.nix
     ../../2configs/bgt-bot
@@ -226,37 +226,65 @@ in
 
       # proxy paste/cyberlocker to neoprism
       services.nginx.virtualHosts."p.krebsco.de" = {
-        locations."/".extraConfig = lib.mkForce ''
+        enableACME = true;
+        addSSL = true;
+        serverAliases = [ "p.krebsco.de" ];
+        locations."/".extraConfig = ''
           client_max_body_size 4G;
           proxy_set_header Host $host;
           proxy_set_header X-Forwarded-Proto $scheme;
           proxy_pass https://neoprism.lassul.us;
         '';
-        locations."/form".extraConfig = lib.mkForce ''
+        locations."/form".extraConfig = ''
           client_max_body_size 4G;
           proxy_set_header Host $host;
           proxy_pass https://neoprism.lassul.us;
         '';
-        locations."/image".extraConfig = lib.mkForce ''
+        locations."/image".extraConfig = ''
           proxy_set_header Host $host;
           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
           proxy_set_header X-Forwarded-Proto $scheme;
           proxy_pass https://neoprism.lassul.us;
         '';
-        extraConfig = lib.mkForce ''
+        extraConfig = ''
           add_header Access-Control-Allow-Headers Authorization always;
           add_header Access-Control-Allow-Origin * always;
           add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS' always;
         '';
       };
       services.nginx.virtualHosts."c.krebsco.de" = {
-        locations."/".extraConfig = lib.mkForce ''
+        enableACME = true;
+        addSSL = true;
+        serverAliases = [ "c.krebsco.de" ];
+        locations."/".extraConfig = ''
           proxy_set_header Host $host;
           proxy_pass https://neoprism.lassul.us;
         '';
-        extraConfig = lib.mkForce ''
+        extraConfig = ''
           add_header Access-Control-Allow-Origin * always;
           add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS' always;
+        '';
+      };
+      services.nginx.virtualHosts.paste = {
+        serverAliases = [ "p.r" ];
+        locations."/".extraConfig = ''
+          client_max_body_size 4G;
+          proxy_set_header Host $host;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          proxy_pass https://neoprism.lassul.us;
+        '';
+        locations."/image".extraConfig = ''
+          proxy_set_header Host $host;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          proxy_pass https://neoprism.lassul.us;
+        '';
+      };
+      services.nginx.virtualHosts.cyberlocker = {
+        serverAliases = [ "c.r" ];
+        locations."/".extraConfig = ''
+          proxy_set_header Host $host;
+          proxy_pass https://neoprism.lassul.us;
         '';
       };
     }
