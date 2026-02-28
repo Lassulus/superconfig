@@ -84,4 +84,8 @@
 
   # extra-container for testing declarative containers without full rebuilds
   programs.extra-container.enable = true;
+
+  nix.settings.trusted-users = [ "root" "lass" ];
+
+  systemd.services.nix-daemon.environment.SSH_AUTH_SOCK = "/run/user/1000/ssh-tpm-agent.sock";
 }
