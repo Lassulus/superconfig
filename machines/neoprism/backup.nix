@@ -26,6 +26,8 @@
     paths = [
       "/var/backup"
       "/var/lib/bitwarden_rs"
+      "/var/lib/htgen-cyberlocker"
+      "/var/lib/htgen-paste"
       "/var/lib/matrix-synapse/media_store/local_content"
       "/var/lib/radicale"
       "/home/bot"
