@@ -39,8 +39,8 @@ let
     echo 1 > "$PWM_ENABLE"
 
     cleanup() {
-      echo "Restoring automatic fan control..."
-      echo 0 > "$PWM_ENABLE" 2>/dev/null || true
+      echo "Setting fan to 0..."
+      echo 0 > "$PWM_FILE" 2>/dev/null || true
     }
     trap cleanup EXIT
 
@@ -70,6 +70,33 @@ in
   # Disable the built-in fancontrol (it uses brittle hwmon numbers)
   hardware.fancontrol.enable = false;
 
+  # Stop fan service and set PWM to 0 before s2idle, restart after resume
+  environment.etc."systemd/system-sleep/gpd-fan".source = pkgs.writeShellScript "gpd-fan-sleep" ''
+    find_hwmon() {
+      for hwmon in /sys/class/hwmon/hwmon*; do
+        if [ -f "$hwmon/name" ] && [ "$(cat "$hwmon/name")" = "$1" ]; then
+          echo "$hwmon"
+          return 0
+        fi
+      done
+      return 1
+    }
+    case "$1" in
+      pre)
+        # Stop the fan service first so it can't overwrite our PWM 0
+        systemctl stop gpd-fan-control.service
+        FAN=$(find_hwmon gpdfan)
+        if [ -n "$FAN" ]; then
+          echo 1 > "$FAN/pwm1_enable"
+          echo 0 > "$FAN/pwm1"
+        fi
+        ;;
+      post)
+        systemctl start gpd-fan-control.service
+        ;;
+    esac
+  '';
+
   systemd.services.gpd-fan-control = {
     description = "GPD Fan Control (dynamic hwmon discovery)";
     wantedBy = [ "multi-user.target" ];
@@ -80,4 +107,5 @@ in
       RestartSec = 5;
     };
   };
+
 }
