@@ -70,7 +70,7 @@
     # wrappers.url = "git+file:/home/lass/src/wrappers";
     wrappers.inputs.nixpkgs.follows = "nixpkgs";
 
-    opencrow.url = "github:pinpox/opencrow";
+    opencrow.url = "github:Lassulus/opencrow/tool_n_stop";
     opencrow.inputs.nixpkgs.follows = "nixpkgs";
   };
 
