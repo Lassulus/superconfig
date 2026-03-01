@@ -8,7 +8,10 @@
 
 {
   imports = [
-    { key = "stockholm-htgen"; imports = [ self.inputs.stockholm.nixosModules.htgen ]; }
+    {
+      key = "stockholm-htgen";
+      imports = [ self.inputs.stockholm.nixosModules.htgen ];
+    }
   ];
 
   services.nginx.virtualHosts.cyberlocker = {
