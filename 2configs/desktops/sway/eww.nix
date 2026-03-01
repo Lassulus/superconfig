@@ -30,12 +30,25 @@ let
     (defpoll idle-inhibited :interval "0.5s" :initial "false" "${lib.getExe idleStatusScript}")
     (deflisten workspaces :initial '[]' "${lib.getExe workspacesScript}")
 
+    ; Tooltip state
+    (defvar hover-tooltip "")
+
+    ; Generic hover-tooltip wrapper: shows tooltip on hover via in-bar overlay
+    (defwidget hover-tip [text]
+      (eventbox :onhover {text != "" ? "''${EWW_CMD} update hover-tooltip=${"'"}''${text}${"'"}" : ""}
+                :onhoverlost "''${EWW_CMD} update hover-tooltip=${"'"}${"'"}"
+        (children)))
+
     ; Widget definitions
     (defwidget bar []
-      (centerbox :orientation "h"
-        (left)
-        (center)
-        (right)))
+      (overlay
+        (centerbox :orientation "h"
+          (left)
+          (center)
+          (right))
+        (revealer :reveal {hover-tooltip != ""} :transition "slidedown" :duration "150ms" :valign "end" :halign "end"
+          (box :class "hover-tooltip"
+            (label :text hover-tooltip)))))
 
     (defwidget left []
       (box :class "left" :orientation "h" :space-evenly false :halign "start"
@@ -67,38 +80,38 @@ let
             {ws.name}))))
 
     (defwidget graph-widget [value icon class unit ?tooltip]
-      (box :class "graph-module ''${class}" :orientation "h" :space-evenly false :spacing 4
-           :tooltip {tooltip ?: ""}
-        (graph :class "graph"
-               :value value
-               :thickness 3
-               :time-range "60s"
-               :min 0
-               :max 100
-               :dynamic true
-               :line-style "round"
-               :width 75)
-        (label :text "''${round(value, 0)}''${unit} ''${icon}")))
-
-    (defwidget battery-widget []
-      (box :class "battery" :orientation "h" :space-evenly false
-           :tooltip "''${battery.watts}W | ''${battery.time_remaining} ''${battery.status == 'Charging' ? 'to full' : 'remaining'}"
-        (label :text "''${battery.capacity}% ''${battery.icon}")))
-
-    (defwidget power-graph-widget []
-      (eventbox :onclick "${lib.getExe powerProfileCycleScript}"
-        (box :class {power.charging ? "graph-module power charging" : "graph-module power"} :orientation "h" :space-evenly false :spacing 4
-             :tooltip "TDP: ''${power-profile.tdp}W (''${power-profile.name}) | ''${battery.time_remaining} ''${battery.status == 'Charging' ? 'to full' : 'remaining'}"
+      (hover-tip :text {tooltip ?: ""}
+        (box :class "graph-module ''${class}" :orientation "h" :space-evenly false :spacing 4
           (graph :class "graph"
-                 :value {power.watts}
+                 :value value
                  :thickness 3
                  :time-range "60s"
                  :min 0
-                 :max 45
-                 :dynamic false
+                 :max 100
+                 :dynamic true
                  :line-style "round"
                  :width 75)
-          (label :text "''${round(power.watts, 1)}W ''${power.charging ? '󰂄' : '󰁹'}"))))
+          (label :text "''${round(value, 0)}''${unit} ''${icon}"))))
+
+    (defwidget battery-widget []
+      (hover-tip :text "''${battery.watts}W | ''${battery.time_remaining} ''${battery.status == 'Charging' ? 'to full' : 'remaining'}"
+        (box :class "battery" :orientation "h" :space-evenly false
+          (label :text "''${battery.capacity}% ''${battery.icon}"))))
+
+    (defwidget power-graph-widget []
+      (hover-tip :text "TDP: ''${power-profile.tdp}W (''${power-profile.name}) | ''${battery.time_remaining} ''${battery.status == 'Charging' ? 'to full' : 'remaining'}"
+        (eventbox :onclick "${lib.getExe powerProfileCycleScript}"
+          (box :class {power.charging ? "graph-module power charging" : "graph-module power"} :orientation "h" :space-evenly false :spacing 4
+            (graph :class "graph"
+                   :value {power.watts}
+                   :thickness 3
+                   :time-range "60s"
+                   :min 0
+                   :max 45
+                   :dynamic false
+                   :line-style "round"
+                   :width 75)
+            (label :text "''${round(power.watts, 1)}W ''${power.charging ? '󰂄' : '󰁹'}")))))
 
     (defwidget volume-widget []
       (eventbox :onscroll "${lib.getExe volumeAdjustScript} {}"
@@ -131,6 +144,8 @@ let
       :exclusive true
       :focusable false
       (bar))
+
+
   '';
 
   ewwScss = pkgs.writeText "eww.scss" ''
@@ -225,12 +240,11 @@ let
       margin: 0 2px;
     }
 
-    tooltip {
-      background-color: #1a1b26;
+    .hover-tooltip {
+      background-color: #24283b;
       color: #c0caf5;
-      border: 1px solid #414868;
-      border-radius: 4px;
-      padding: 4px 8px;
+      border-bottom: 1px solid #414868;
+      padding: 2px 12px;
     }
   '';
 
