@@ -74,6 +74,8 @@
   # lassul.us shouldn't be the default vhost here (nginx.nix already sets one)
   services.nginx.virtualHosts."lassul.us".default = lib.mkForce false;
 
+  services.ollama.enable = true;
+
   krebs.build.host = config.krebs.hosts.neoprism;
   system.stateVersion = "24.05";
 }
