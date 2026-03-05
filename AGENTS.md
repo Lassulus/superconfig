@@ -73,7 +73,7 @@ Secrets are managed via password-store and uploaded to `/run/secrets` on deploym
 2. Add `config.nix`, `physical.nix`, and optionally `disk.nix`
 3. Generate facts using clan-cli
 4. Add to inventory in `flake.nix`
-5. Deploy using `nix run .#deploy -- <name>`
+5. Deploy using `clan machines update <name>`
 
 ## Pre-Commit
 
