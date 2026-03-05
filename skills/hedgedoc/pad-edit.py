@@ -12,19 +12,34 @@ except ImportError:
     import subprocess
     import os
 
-    # Bootstrap: re-exec under nix shell with websocket-client
-    os.execvp(
-        "nix",
-        [
-            "nix",
-            "shell",
-            "nixpkgs#python3Packages.websocket-client",
-            "-c",
-            "python3",
-            __file__,
-        ]
-        + sys.argv[1:],
-    )
+    # Bootstrap: get the store path for websocket-client and re-exec with PYTHONPATH.
+    # Much faster than `nix shell` which sets up a full environment.
+    # Cache the store path in /tmp so subsequent runs skip nix entirely.
+    cache = "/tmp/.pad-edit-websocket-path"
+    store_path = None
+    if os.path.exists(cache):
+        store_path = open(cache).read().strip()
+        if not os.path.exists(store_path):
+            store_path = None
+
+    if not store_path:
+        store_path = subprocess.check_output(
+            ["nix", "build", "nixpkgs#python3Packages.websocket-client",
+             "--no-link", "--print-out-paths"],
+            text=True,
+        ).strip()
+        open(cache, "w").write(store_path)
+
+    # Find the site-packages dir inside the store path
+    import glob
+    site_dirs = glob.glob(f"{store_path}/lib/python*/site-packages")
+    if not site_dirs:
+        print("ERROR: Could not find site-packages in websocket-client store path", file=sys.stderr)
+        sys.exit(1)
+
+    env = os.environ.copy()
+    env["PYTHONPATH"] = site_dirs[0] + (":" + env["PYTHONPATH"] if "PYTHONPATH" in env else "")
+    os.execve(sys.executable, [sys.executable, __file__] + sys.argv[1:], env)
 
 HEDGEDOC_URL = "https://pad.lassul.us"
 
