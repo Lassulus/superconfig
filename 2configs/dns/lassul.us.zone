@@ -1,4 +1,4 @@
-@ 3600 IN SOA lassul.us. ns1.lassul.us. 2025111200 7200 3600 86400 3600
+@ 3600 IN SOA lassul.us. ns1.lassul.us. 2026030500 7200 3600 86400 3600
 
 ;;@ 3600 IN NS ns1
 @ 3600 IN NS ns1
@@ -62,7 +62,10 @@ imap IN A 95.217.192.59
 imap IN AAAA 2a01:4f9:4a:4f1a::2
 smtp._tls IN TXT "v=TLSRPTv1;rua=mailto:postmaster@lassul.us"
 ;
-default._domainkey IN TXT "k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDUv3DMndFellqu208feABEzT/PskOfTSdJCOF/HELBR0PHnbBeRoeHEm9XAcOe/Mz2t/ysgZ6JFXeFxCtoM5fG20brUMRzsVRxb9Ur5cEvOYuuRrbChYcKa+fopu8pYrlrqXD3miHISoy6ErukIYCRpXWUJHi1TlNQhLWFYqAaywIDAQAB"
+mail._domainkey IN TXT ( "v=DKIM1; k=rsa; "
+	"p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuGBSOPqq6EsTMZSiIrawNgUh3lM3K4jduEYIxmmp72s62Yp3Pcc3pYVCjMnhd9mhZG2bpPtoiyyy1oac5htdUoifz2OwHDinWLJZ+cxa+R2tPi7cfRW1ou7b/CzmsN4o96iCPtux2GVtVTk1EQZoOkFC/+/s7lO481qCId0g0j6tIos4W4D6qS6Dz5q1IQra4avRPxDmVDaVvLHzY"
+	"LGl/siLTLxgjbw42eh7rqCAdUI6uOD0T04mAQiV4lO7bJNqdc0xsrleMUhwAiTnkmzXBpmNzG+x8vKgzH6kgByN1nSqCjZHtDpFNZcJOvvdXNlO1ezk+vm7azQHqjbWXWt2GQIDAQAB"
+)
 _dmarc IN TXT "v=DMARC1; p=none; adkim=r; aspf=r; rua=mailto:postmaster@lassul.us; ruf=mailto:postmaster@lassul.us; pct=100"
 @ IN TXT "v=spf1 mx -all"
 
