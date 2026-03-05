@@ -47,7 +47,7 @@ in
           require ["fileinto", "mailbox"];
 
           # GitHub — sort by repo from List-Id header
-          if header :matches "List-Id" "*.github.com" {
+          if header :contains "List-Id" ".github.com" {
               if header :contains "List-Id" "nixpkgs" { fileinto :create "GitHub.nixpkgs"; }
               elsif header :contains "List-Id" "disko" { fileinto :create "GitHub.disko"; }
               elsif header :contains "List-Id" "clan-core" { fileinto :create "GitHub.clan-core"; }
