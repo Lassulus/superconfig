@@ -33,6 +33,7 @@
       "/home/bot"
       "/var/vmail"
       "/var/dkim"
+      "/var/sieve"
     ];
     exclude = [
       "*.pyc"

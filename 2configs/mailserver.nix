@@ -43,77 +43,6 @@ in
           "lassulus@lassul.us"
         ];
         catchAll = [ "lassul.us" ];
-        sieveScript = ''
-          require ["fileinto", "mailbox"];
-
-          # GitHub — sort by repo from List-Id header
-          if header :contains "List-Id" ".github.com" {
-              if header :contains "List-Id" "nixpkgs" { fileinto :create "GitHub.nixpkgs"; }
-              elsif header :contains "List-Id" "disko" { fileinto :create "GitHub.disko"; }
-              elsif header :contains "List-Id" "clan-core" { fileinto :create "GitHub.clan-core"; }
-              elsif header :contains "List-Id" "data-mesher" { fileinto :create "GitHub.data-mesher"; }
-              elsif header :contains "List-Id" "foundation" { fileinto :create "GitHub.foundation"; }
-              elsif header :contains "List-Id" "nix." { fileinto :create "GitHub.nix"; }
-              elsif header :contains "List-Id" "nixos-wiki" { fileinto :create "GitHub.nixos-wiki"; }
-              elsif header :contains "List-Id" "nixos-homepage" { fileinto :create "GitHub.nixos-homepage"; }
-              else { fileinto :create "GitHub.other"; }
-              stop;
-          }
-
-          # Gitea (clan)
-          if anyof (
-              header :matches "X-Gitea-*" "*",
-              address :domain "From" "clan.lol"
-          ) {
-              fileinto :create "GitHub.clan";
-              stop;
-          }
-
-          # Mailing lists — sort by List-Id
-          if exists "List-Id" {
-              if header :contains "List-Id" "vorstand.c-base" { fileinto :create "Lists.c-base-vorstand"; }
-              elsif header :contains "List-Id" "c-base" { fileinto :create "Lists.c-base"; }
-              elsif header :contains "List-Id" "afra" { fileinto :create "Lists.afra"; }
-              elsif header :contains "List-Id" "soundlab" { fileinto :create "Lists.soundlab"; }
-              elsif header :contains "List-Id" "nixos" { fileinto :create "Lists.nixos"; }
-              elsif header :contains "List-Id" "shack" { fileinto :create "Lists.shack"; }
-              elsif header :contains "List-Id" "dezentrale" { fileinto :create "Lists.dezentrale"; }
-              elsif header :contains "List-Id" "dn42" { fileinto :create "Lists.dn42"; }
-              elsif header :contains "List-Id" "tinc" { fileinto :create "Lists.tinc"; }
-              elsif header :contains "List-Id" "wireguard" { fileinto :create "Lists.wireguard"; }
-              elsif header :contains "List-Id" "retiolum" { fileinto :create "Lists.retiolum"; }
-              else { fileinto :create "Lists.other"; }
-              stop;
-          }
-
-          # Billing/receipts
-          if anyof (
-              address :domain "From" "paypal.de",
-              address :domain "From" "paypal.com",
-              address :domain "From" "steuerberaten.de",
-              address :domain "From" "patreon.com",
-              address :domain "From" "dhl.de",
-              address :domain "From" "eloop.app",
-              header :contains "Subject" "Rechnung",
-              header :contains "Subject" "Invoice",
-              header :contains "Subject" "receipt"
-          ) {
-              fileinto :create "Billing";
-              stop;
-          }
-
-          # Newsletters (has unsubscribe but no List-Id)
-          if allof (
-              header :contains "List-Unsubscribe" "http",
-              not exists "List-Id"
-          ) {
-              fileinto :create "Newsletters";
-              stop;
-          }
-
-          # Everything else -> INBOX
-          keep;
-        '';
       };
       "bot@lassul.us" = {
         hashedPasswordFile =
@@ -127,6 +56,9 @@ in
     # DKIM — auto-managed by module
     dkimSigning = true;
     dkimSelector = "mail";
+
+    # ManageSieve: lets mail clients manage sieve rules dynamically (port 4190)
+    enableManageSieve = true;
 
     # Full-text search for IMAP clients
     fullTextSearch = {
@@ -186,24 +118,13 @@ in
     "nginx"
   ];
 
-  # Firewall rules (krebs.iptables pattern, INPUT policy is DROP)
-  krebs.iptables.tables.filter.INPUT.rules = [
-    {
-      predicate = "-p tcp --dport smtp";
-      target = "ACCEPT";
-    }
-    {
-      predicate = "-p tcp --dport submissions";
-      target = "ACCEPT";
-    }
-    {
-      predicate = "-p tcp --dport submission";
-      target = "ACCEPT";
-    }
-    {
-      predicate = "-p tcp --dport imaps";
-      target = "ACCEPT";
-    }
+  # Firewall: SMTP(25), submission(587), submissions(465), IMAPS(993), ManageSieve(4190)
+  networking.firewall.allowedTCPPorts = [
+    25
+    587
+    465
+    993
+    4190
   ];
 
   # msmtp for local submission via SSH
