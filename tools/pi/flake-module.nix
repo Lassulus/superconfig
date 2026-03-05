@@ -62,6 +62,11 @@
           ${pkgs.gnused}/bin/sed -i 's/"ctrl+u"/"ctrl+shift+u"/' $out/lib/node_modules/shitty-extensions/extensions/ultrathink.ts
           ${pkgs.gnused}/bin/sed -i 's/"ctrl+r"/"ctrl+shift+r"/' $out/lib/node_modules/shitty-extensions/extensions/speedreading.ts
 
+          # Add hedgedoc skill
+          ln -s ${
+            self.legacyPackages.${pkgs.system}.skills.hedgedoc
+          }/share/hedgedoc $out/lib/node_modules/shitty-extensions/skills/hedgedoc
+
           # Patch permission extension to use pw-play for peon sounds on Linux
           ${pkgs.lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
             ${pkgs.python3}/bin/python3 ${./patch-permission-sound.py} \
