@@ -72,6 +72,9 @@
 
     opencrow.url = "github:Lassulus/opencrow/tool_n_stop";
     opencrow.inputs.nixpkgs.follows = "nixpkgs";
+
+    nixos-mailserver.url = "gitlab:simple-nixos-mailserver/nixos-mailserver/master";
+    nixos-mailserver.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =

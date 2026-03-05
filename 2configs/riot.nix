@@ -97,12 +97,4 @@ in
     serverAliases = domains;
   };
 
-  krebs.exim-smarthost.extraRouters = ''
-    forward_riot:
-      driver = manualroute
-      domains = ${lib.concatStringsSep ":" domains}
-      transport = remote_smtp
-      route_list = * riot
-      no_more
-  '';
 }

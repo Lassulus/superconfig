@@ -31,6 +31,8 @@
       "/var/lib/matrix-synapse/media_store/local_content"
       "/var/lib/radicale"
       "/home/bot"
+      "/var/vmail"
+      "/var/dkim"
     ];
     exclude = [
       "*.pyc"
