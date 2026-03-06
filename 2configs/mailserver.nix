@@ -127,6 +127,16 @@ in
     4190
   ];
 
-  # msmtp for local submission via SSH
-  environment.systemPackages = [ pkgs.msmtp ];
+  # muchsync: lass user needs access to vmail for notmuch/muchsync
+  users.groups.virtualMail.members = [ "lass" ];
+  systemd.tmpfiles.rules = [
+    "L+ /home/lass/Maildir - - - - /var/vmail/lassul.us/lass/mail"
+  ];
+
+  # notmuch + muchsync + msmtp for CLI mail access
+  environment.systemPackages = [
+    self.packages.${pkgs.system}.notmuch
+    pkgs.muchsync
+    pkgs.msmtp
+  ];
 }
