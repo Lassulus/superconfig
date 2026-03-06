@@ -50,8 +50,8 @@
             if [ "$auto_sync" = true ]; then
               # Move archived messages from INBOX to archive folder
               mkdir -p "$HOME/Maildir/.archive"/{cur,new,tmp}
-              notmuch search --output=files 'tag:archive AND folder:""' | while IFS= read -r f; do
-                mv "$f" "$HOME/Maildir/.archive/cur/"
+              notmuch search --output=files 'tag:archive AND folder:"" AND NOT folder:.archive' | while IFS= read -r f; do
+                [ -f "$f" ] && mv "$f" "$HOME/Maildir/.archive/cur/"
               done
               notmuch new --quiet 2>/dev/null
 
