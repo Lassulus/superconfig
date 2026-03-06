@@ -48,7 +48,14 @@
             fi
 
             if [ "$auto_sync" = true ]; then
-              exec ${exePath} -s "$MUCHSYNC_SSH" "$@" lass@"$MUCHSYNC_HOST"
+              # Move archived messages from INBOX to archive folder
+              mkdir -p "$HOME/Maildir/.archive"/{cur,new,tmp}
+              notmuch search --output=files 'tag:archive AND folder:""' | while IFS= read -r f; do
+                mv "$f" "$HOME/Maildir/.archive/cur/"
+              done
+              notmuch new --quiet 2>/dev/null
+
+              ${exePath} -s "$MUCHSYNC_SSH" "$@" lass@"$MUCHSYNC_HOST"
             else
               # Pass through arguments to muchsync
               exec ${exePath} "$@"

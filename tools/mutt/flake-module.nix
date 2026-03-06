@@ -164,10 +164,14 @@
             set nm_default_uri = "notmuch://$HOME/Maildir"
             set nm_record = yes
             set nm_record_tags = "-inbox me archive"
-            set spoolfile = +INBOX
-            set virtual_spoolfile = yes
+            set virtual_spoolfile
+            set spoolfile = "notmuch://?query=folder:\"\" AND NOT tag:archive"
 
             set mail_check_stats
+            set confirmappend = no
+            set confirmcreate = no
+            set mbox_type = Maildir
+            set delete = yes
             set sendmail="${msmtp}/bin/msmtp"
             set from="lassulus@lassul.us"
             alternates ^.*@lassul\.us$ ^lassulus@c-base\.org$
@@ -189,8 +193,8 @@
 
             set index_format="%4C %Z %?GI?%GI& ? %[%y-%m-%d] %-20.20a %?M?(%3M)& ? %s %> %r %g"
 
-            virtual-mailboxes "Unread" "notmuch://?query=tag:unread AND folder:\"\""
-            virtual-mailboxes "INBOX" "notmuch://?query=folder:\"\""
+            virtual-mailboxes "INBOX" "notmuch://?query=folder:\"\" AND NOT tag:archive"
+            virtual-mailboxes "Unread" "notmuch://?query=tag:unread"
             source "${genVirtualMailboxes}|"
             virtual-mailboxes "TODO" "notmuch://?query=tag:TODO"
             virtual-mailboxes "Starred" "notmuch://?query=tag:*"
@@ -245,8 +249,8 @@
             bind index a noop
             bind pager A noop
             bind pager a noop
-            macro index A "<save-message>=.archive\n" "Archive message to archive folder"
-            macro pager A "<save-message>=.archive\n" "Archive message to archive folder"
+            macro index A "<modify-labels>+archive -unread -inbox\n" "Archive message"
+            macro pager A "<modify-labels>+archive -unread -inbox\n" "Archive message"
 
             bind index U noop
             bind index u noop
