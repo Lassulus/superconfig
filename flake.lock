@@ -603,16 +603,15 @@
         "treefmt-nix": "treefmt-nix_5"
       },
       "locked": {
-        "lastModified": 1772390087,
-        "narHash": "sha256-O3BSaU+qHQhNnEQtwFFikXcitGLcEu1UIhaFrgcnbhQ=",
-        "owner": "Lassulus",
+        "lastModified": 1772834035,
+        "narHash": "sha256-WbBuyNuYhenb+vYmZnILiTpZV/YJYz+K9FnQbibGrtQ=",
+        "owner": "pinpox",
         "repo": "opencrow",
-        "rev": "efd0c09332f329852a04ef0a9e71ee4d33df0a30",
+        "rev": "3d65ab96497ca8a95bc137c7673c9e953be931e8",
         "type": "github"
       },
       "original": {
-        "owner": "Lassulus",
-        "ref": "tool_n_stop",
+        "owner": "pinpox",
         "repo": "opencrow",
         "type": "github"
       }
