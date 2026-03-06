@@ -21,24 +21,8 @@
             # Create Maildir structure if it doesn't exist
             mkdir -p "$HOME/Maildir"/{cur,new,tmp}
 
-            # Check if a host is reachable
-            check_host() {
-              local host=$1
-              ping -W2 -c3 "$host" >/dev/null 2>&1
-            }
-
-            # Smart host selection - try spora, nether, retiolum, then tor
-            find_green_host() {
-              if check_host green.s; then
-                echo "green.s"
-              elif check_host green.n; then
-                echo "green.n"
-              elif check_host green.r; then
-                echo "green.r"
-              else
-                echo "tor"
-              fi
-            }
+            MUCHSYNC_HOST="neoprism.lassul.us"
+            MUCHSYNC_SSH="ssh -p 45621"
 
             # Check if we should do auto-sync
             # Auto-sync if no args or only verbose/config flags
@@ -64,23 +48,7 @@
             fi
 
             if [ "$auto_sync" = true ]; then
-              host=$(find_green_host)
-              echo "Syncing with $host..." >&2
-
-              if [ "$host" = "tor" ]; then
-                # Build dependencies lazily
-                echo "Building tornade..." >&2
-                tornade_path=$(nix build --no-link --print-out-paths "${self}#tornade")
-                clan_path=$(nix build --no-link --print-out-paths "${self}#clan-cli")
-
-                # Get tor hostname using clan CLI
-                tor_hostname=$(CLAN_DIR="${self}" "$clan_path/bin/clan" vars get green tor-ssh/hostname)
-
-                # Use muchsync with custom ssh command via tornade
-                exec ${exePath} -s "$tornade_path/bin/tornade ssh" "$@" lass@"$tor_hostname"
-              else
-                exec ${exePath} "$@" lass@"$host"
-              fi
+              exec ${exePath} -s "$MUCHSYNC_SSH" "$@" lass@"$MUCHSYNC_HOST"
             else
               # Pass through arguments to muchsync
               exec ${exePath} "$@"

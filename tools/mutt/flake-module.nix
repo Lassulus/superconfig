@@ -10,9 +10,19 @@
     {
       packages.mutt =
         let
-          # Mailboxes configuration from mail.nix
-          mailboxes = self.packages.${system}.notmuch.passthru.mailboxes;
           notmuchConfig = self.packages.${system}.notmuch.passthru.configuration.configFile.path;
+
+          # Generate virtual-mailboxes from Maildir folder structure at build time
+          # This discovers sieve folders dynamically — no hardcoded list needed
+          genVirtualMailboxes = pkgs.writeShellScript "gen-virtual-mailboxes" ''
+            maildir="$HOME/Maildir"
+            [ -d "$maildir" ] || exit 0
+            for dir in "$maildir"/.*; do
+              [ -d "$dir/cur" ] || continue
+              name=$(basename "$dir" | sed 's/^\.//')
+              echo "virtual-mailboxes \"$name\" \"notmuch://?query=folder:$name\""
+            done | sort
+          '';
 
           mailcap = pkgs.writeText "mailcap" ''
             text/html; ${pkgs.elinks}/bin/elinks -dump ; copiousoutput;
@@ -178,9 +188,7 @@
 
             virtual-mailboxes "Unread" "notmuch://?query=tag:unread"
             virtual-mailboxes "INBOX" "notmuch://?query=tag:inbox"
-            ${lib.concatMapStringsSep "\n" (
-              i: ''${"  "}virtual-mailboxes "${i.name}" "notmuch://?query=tag:${i.name}"''
-            ) (lib.mapAttrsToList lib.nameValuePair mailboxes)}
+            source "${genVirtualMailboxes}|"
             virtual-mailboxes "TODO" "notmuch://?query=tag:TODO"
             virtual-mailboxes "Starred" "notmuch://?query=tag:*"
             virtual-mailboxes "Archive" "notmuch://?query=tag:archive"
