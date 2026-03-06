@@ -78,7 +78,10 @@ in
     };
 
     serviceConfig = {
-      EnvironmentFile = config.clan.core.vars.generators.opencrow.files."opencrow.env".path;
+      EnvironmentFile = [
+        config.clan.core.vars.generators.opencrow.files."opencrow.env".path
+        config.clan.core.vars.generators.mailserver-bot.files."mail.env".path
+      ];
       ExecStart = "${opencrow}/bin/opencrow";
       Restart = "on-failure";
       RestartSec = 10;

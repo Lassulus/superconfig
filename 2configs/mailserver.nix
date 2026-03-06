@@ -87,6 +87,7 @@ in
   clan.core.vars.generators.mailserver-bot = {
     files."bot-mail-password" = { };
     files."bot-mail-password-hash" = { };
+    files."mail.env" = { };
     runtimeInputs = with pkgs; [
       coreutils
       mkpasswd
@@ -95,6 +96,11 @@ in
     script = ''
       pwgen -s 32 1 > "$out/bot-mail-password"
       mkpasswd -sm bcrypt < "$out/bot-mail-password" > "$out/bot-mail-password-hash"
+      cat > "$out/mail.env" << EOF
+      IMAP_USER=bot@lassul.us
+      IMAP_PASSWORD=$(cat "$out/bot-mail-password")
+      IMAP_HOST=localhost
+      EOF
     '';
   };
 
@@ -168,8 +174,11 @@ in
     '';
   };
 
-  # Dovecot virtual mailbox: "Unread" shows all unseen messages across all folders
-  services.dovecot2.mailPlugins.globally.enable = [ "virtual" ];
+  # Dovecot virtual mailbox + ACL-restricted shared namespace for bot
+  services.dovecot2.mailPlugins.globally.enable = [
+    "virtual"
+    "acl"
+  ];
   services.dovecot2.extraConfig =
     let
       virtualDir = pkgs.linkFarm "dovecot-virtual" [
@@ -180,6 +189,20 @@ in
       ];
     in
     ''
+      plugin {
+        acl = vfile
+        acl_shared_dict = file:/var/vmail/shared-mailboxes.db
+      }
+
+      namespace shared {
+        type = shared
+        separator = .
+        prefix = shared.%%n.
+        location = maildir:/var/vmail/lassul.us/%%n/mail:LAYOUT=Maildir++
+        subscriptions = no
+        list = children
+      }
+
       namespace virtual {
         prefix = virtual.
         separator = .
@@ -190,6 +213,34 @@ in
         }
       }
     '';
+
+  # Write dovecot-acl files to grant bot read-only + flag access to lass's mail
+  systemd.services.dovecot-acl-sync = {
+    description = "Sync dovecot ACL files for bot shared access";
+    after = [ "dovecot.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      User = "virtualMail";
+      Group = "virtualMail";
+    };
+    # l=lookup, r=read, w=write-flags, s=write-seen (no insert/delete/expunge)
+    script = ''
+      acl_line="user=bot@lassul.us lrws"
+      find /var/vmail/lassul.us/lass/mail -type d | while IFS= read -r dir; do
+        acl_file="$dir/dovecot-acl"
+        if [ ! -f "$acl_file" ] || [ "$(cat "$acl_file")" != "$acl_line" ]; then
+          echo "$acl_line" > "$acl_file"
+        fi
+      done
+    '';
+  };
+  systemd.timers.dovecot-acl-sync = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "1min";
+      OnUnitActiveSec = "1h";
+    };
+  };
 
   # notmuch + muchsync + msmtp for CLI mail access
   environment.systemPackages = [
