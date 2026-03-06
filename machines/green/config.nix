@@ -1,5 +1,4 @@
 {
-  self,
   config,
   pkgs,
   ...
@@ -10,8 +9,6 @@
   imports = [
     ../../2configs
     ../../2configs/retiolum.nix
-    ../../2configs/exim-retiolum.nix
-    ../../2configs/mail.nix
 
     ../../2configs/syncthing.nix
 
@@ -52,9 +49,6 @@
     "d /home/lass/.local 0700 lass users -"
     "d /home/lass/.config 0700 lass users -"
 
-    "d /var/state/lass_mail 0700 lass users -"
-    "L+ /home/lass/Maildir - - - - ../../var/state/lass_mail"
-
     "d /var/state/lass_ssh 0700 lass users -"
     "L+ /home/lass/.ssh - - - - ../../var/state/lass_ssh"
     "d /var/state/lass_gpg 0700 lass users -"
@@ -82,15 +76,7 @@
     PubkeyAcceptedAlgorithms +ssh-rsa
   '';
 
-  services.dovecot2 = {
-    enable = true;
-    mailLocation = "maildir:~/Maildir";
-  };
-
-  networking.firewall.allowedTCPPorts = [ 143 ];
-
   environment.systemPackages = [
-    self.packages.${pkgs.system}.muchsync
     pkgs.rbw
   ];
 }
