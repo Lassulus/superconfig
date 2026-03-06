@@ -7,7 +7,6 @@
   };
 
   users.groups.lasscert.members = [
-    "exim"
     "nginx"
   ];
 

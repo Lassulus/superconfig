@@ -122,7 +122,6 @@ in
         forceSSL = lib.mkForce false;
       };
     }
-    ../../2configs/exim-smarthost.nix
     ../../2configs/privoxy-retiolum.nix
     ../../2configs/binary-cache/server.nix
     ../../2configs/binary-cache/proxy.nix

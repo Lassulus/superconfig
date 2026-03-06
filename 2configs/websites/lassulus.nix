@@ -13,8 +13,6 @@
   };
 
   users.groups.lasscert.members = [
-    "dovecot2"
-    "exim"
     "nginx"
   ];
 

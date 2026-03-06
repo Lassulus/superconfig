@@ -4,7 +4,6 @@
   imports = [
     ../../2configs
     ../../2configs/retiolum.nix
-    ../../2configs/exim-retiolum.nix
     ../../2configs/browsers.nix
     ../../2configs/network-manager.nix
     ../../2configs/syncthing.nix

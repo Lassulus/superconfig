@@ -12,7 +12,6 @@
     ../../2configs/retiolum.nix
     ../../2configs/desktops/qtile/nixos.nix
     ../../2configs/pipewire.nix
-    ../../2configs/exim-retiolum.nix
     ../../2configs/browsers.nix
     ../../2configs/pass.nix
     ../../2configs/steam.nix

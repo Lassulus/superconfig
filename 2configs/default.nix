@@ -42,12 +42,10 @@
     self.inputs.stockholm.nixosModules.kartei
     self.inputs.stockholm.nixosModules.build
     self.inputs.stockholm.nixosModules.dns
-    self.inputs.stockholm.nixosModules.exim
-    self.inputs.stockholm.nixosModules.exim-retiolum
     self.inputs.stockholm.nixosModules.tinc
     self.inputs.stockholm.nixosModules.iptables
-    self.inputs.stockholm.nixosModules.setuid
     self.inputs.stockholm.nixosModules.secret
+    self.inputs.stockholm.nixosModules.setuid
     self.inputs.stockholm.nixosModules.sitemap
     self.inputs.stockholm.nixosModules.ssl
     self.inputs.stockholm.nixosModules.systemd

@@ -9,7 +9,6 @@
     ../../2configs
     ../../2configs/retiolum.nix
     ../../2configs/pipewire.nix
-    ../../2configs/exim-retiolum.nix
     ../../2configs/nfs-dl.nix
     ../../2configs/yellow-mounts/samba.nix
     ../../2configs/gg23.nix
