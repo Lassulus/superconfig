@@ -17,6 +17,7 @@
                 mail_root = "Maildir";
               };
               new.tags = "unread;inbox;";
+              new.ignore = "fts-flatcurve";
               search.exclude_tags = "deleted;spam;";
               maildir.synchronize_flags = true;
               user = {
