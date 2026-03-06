@@ -1,4 +1,4 @@
-@ 3600 IN SOA lassul.us. ns1.lassul.us. 2026030500 7200 3600 86400 3600
+@ 3600 IN SOA lassul.us. ns1.lassul.us. 2026030600 7200 3600 86400 3600
 
 ;;@ 3600 IN NS ns1
 @ 3600 IN NS ns1
@@ -68,6 +68,10 @@ mail._domainkey IN TXT ( "v=DKIM1; k=rsa; "
 )
 _dmarc IN TXT "v=DMARC1; p=none; adkim=r; aspf=r; rua=mailto:postmaster@lassul.us; ruf=mailto:postmaster@lassul.us; pct=100"
 @ IN TXT "v=spf1 mx -all"
+
+;; Autodiscovery (RFC 6186)
+_imaps._tcp IN SRV 5 0 993 mail.lassul.us.
+_submissions._tcp IN SRV 5 0 465 mail.lassul.us.
 
 @ IN CAA 0 issue "letsencrypt.org"
 @ IN CAA 0 iodef "mailto:caa@lassul.us"

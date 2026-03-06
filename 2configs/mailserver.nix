@@ -131,11 +131,42 @@ in
   users.groups.virtualMail.members = [ "lass" ];
   systemd.tmpfiles.rules = [
     "L+ /home/lass/Maildir - - - - /var/vmail/lassul.us/lass/mail"
-    "z /var/vmail 0750 virtualMail virtualMail -"
-    "z /var/vmail/lassul.us 0750 virtualMail virtualMail -"
-    "z /var/vmail/lassul.us/lass 0750 virtualMail virtualMail -"
-    "Z /var/vmail/lassul.us/lass/mail 0770 virtualMail virtualMail -"
+    # dovecot pre-start sets /var/vmail to 02770 already; just fix subdirs
+    "z /var/vmail/lassul.us 2770 virtualMail virtualMail -"
+    "z /var/vmail/lassul.us/lass 2770 virtualMail virtualMail -"
+    "Z /var/vmail/lassul.us/lass/mail 2770 virtualMail virtualMail -"
   ];
+
+  # Thunderbird autoconfig
+  services.nginx.virtualHosts."autoconfig.lassul.us" = {
+    forceSSL = true;
+    enableACME = true;
+    locations."= /mail/config-v1.1.xml".extraConfig = ''
+      default_type application/xml;
+      return 200 '<?xml version="1.0" encoding="UTF-8"?>
+        <clientConfig version="1.1">
+          <emailProvider id="lassul.us">
+            <domain>lassul.us</domain>
+            <displayName>lassul.us Mail</displayName>
+            <displayShortName>lassul.us</displayShortName>
+            <incomingServer type="imap">
+              <hostname>mail.lassul.us</hostname>
+              <port>993</port>
+              <socketType>SSL</socketType>
+              <authentication>password-cleartext</authentication>
+              <username>%EMAILADDRESS%</username>
+            </incomingServer>
+            <outgoingServer type="smtp">
+              <hostname>mail.lassul.us</hostname>
+              <port>465</port>
+              <socketType>SSL</socketType>
+              <authentication>password-cleartext</authentication>
+              <username>%EMAILADDRESS%</username>
+            </outgoingServer>
+          </emailProvider>
+        </clientConfig>';
+    '';
+  };
 
   # notmuch + muchsync + msmtp for CLI mail access
   environment.systemPackages = [
