@@ -291,7 +291,7 @@
             set sidebar_folder_indent
             set sidebar_visible = yes
             set sidebar_format = '%D%?F? [%F]?%* %?N?%N/? %?S?%S?'
-            set sidebar_width   = 20
+            set sidebar_width   = 30
             color sidebar_new yellow red
 
             # sidebar bindings
