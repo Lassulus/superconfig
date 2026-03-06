@@ -12,46 +12,46 @@ Manage HedgeDoc pads on `pad.lassul.us` — create, read, and edit collaborative
 - **URL**: `https://pad.lassul.us`
 - **Access**: Anonymous (no auth required)
 
-## Script
+## Invocation
 
-Use `./pad.sh <command>` (scripts are next to this SKILL.md):
+Use `s skills.hedgedoc <command>` — this IS the pad script. Do NOT use `./pad.sh` directly.
 
 ### Read a pad
 ```bash
-./pad.sh read <pad-id>
+s skills.hedgedoc read <pad-id>
 ```
 
 ### Create a new pad
 ```bash
 # From stdin
-echo "# My Document" | ./pad.sh create
+echo "# My Document" | s skills.hedgedoc create
 
 # From a file
-./pad.sh create /path/to/file.md
+s skills.hedgedoc create /path/to/file.md
 ```
 Returns the new pad URL.
 
 ### Edit a pad (in-place)
 ```bash
 # From stdin
-echo "# Updated content" | ./pad.sh edit <pad-id>
+echo "# Updated content" | s skills.hedgedoc edit <pad-id>
 
 # From a file
-./pad.sh edit <pad-id> /path/to/file.md
+s skills.hedgedoc edit <pad-id> /path/to/file.md
 ```
 Edits the pad in-place via the HedgeDoc websocket API (socket.io + OT). No new pad created.
 
 ### Get pad info
 ```bash
-./pad.sh info <pad-id>
+s skills.hedgedoc info <pad-id>
 ```
 Returns JSON with title, description, viewcount, timestamps.
 
 ## Typical Workflow
 
-1. **Read** the pad: `pad.sh read <id>` → get current markdown
+1. **Read** the pad: `s skills.hedgedoc read <id>` → get current markdown
 2. **Edit** locally: save modified content to a temp file
-3. **Write back**: `pad.sh edit <id> /tmp/updated.md`
+3. **Write back**: `s skills.hedgedoc edit <id> /tmp/updated.md`
 4. **Share**: `https://pad.lassul.us/<id>`
 
 ## How it works
