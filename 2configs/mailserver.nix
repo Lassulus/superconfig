@@ -168,6 +168,29 @@ in
     '';
   };
 
+  # Dovecot virtual mailbox: "Unread" shows all unseen messages across all folders
+  services.dovecot2.mailPlugins.globally.enable = [ "virtual" ];
+  services.dovecot2.extraConfig =
+    let
+      virtualDir = pkgs.linkFarm "dovecot-virtual" [
+        {
+          name = "Unread/dovecot-virtual";
+          path = pkgs.writeText "dovecot-virtual-unread" "*\n  unseen\n";
+        }
+      ];
+    in
+    ''
+      namespace virtual {
+        prefix = virtual.
+        separator = .
+        location = virtual:${virtualDir}:INDEX=/var/vmail/virtual-indexes/%u
+        subscriptions = no
+        mailbox Unread {
+          auto = subscribe
+        }
+      }
+    '';
+
   # notmuch + muchsync + msmtp for CLI mail access
   environment.systemPackages = [
     self.packages.${pkgs.system}.notmuch
