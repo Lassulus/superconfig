@@ -131,6 +131,10 @@ in
   users.groups.virtualMail.members = [ "lass" ];
   systemd.tmpfiles.rules = [
     "L+ /home/lass/Maildir - - - - /var/vmail/lassul.us/lass/mail"
+    "z /var/vmail 0750 virtualMail virtualMail -"
+    "z /var/vmail/lassul.us 0750 virtualMail virtualMail -"
+    "z /var/vmail/lassul.us/lass 0750 virtualMail virtualMail -"
+    "Z /var/vmail/lassul.us/lass/mail 0770 virtualMail virtualMail -"
   ];
 
   # notmuch + muchsync + msmtp for CLI mail access
