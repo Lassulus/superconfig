@@ -167,6 +167,7 @@
             set spoolfile = +INBOX
             set virtual_spoolfile = yes
 
+            set mail_check_stats
             set sendmail="${msmtp}/bin/msmtp"
             set from="lassulus@lassul.us"
             alternates ^.*@lassul\.us$ ^lassulus@c-base\.org$
@@ -244,10 +245,8 @@
             bind index a noop
             bind pager A noop
             bind pager a noop
-            macro index A "<modify-labels>+archive -unread -inbox\n"
-            macro index a "<modify-labels>-archive\n"
-            macro pager A "<modify-labels>+archive -unread -inbox\n"
-            macro pager a "<modify-labels>-archive\n"
+            macro index A "<save-message>=.archive\n" "Archive message to archive folder"
+            macro pager A "<save-message>=.archive\n" "Archive message to archive folder"
 
             bind index U noop
             bind index u noop
