@@ -19,8 +19,10 @@
             [ -d "$maildir" ] || exit 0
             for dir in "$maildir"/.*; do
               [ -d "$dir/cur" ] || continue
-              name=$(basename "$dir" | sed 's/^\.//')
-              echo "virtual-mailboxes \"$name\" \"notmuch://?query=folder:$name\""
+              dotname=$(basename "$dir")
+              # Display name without leading dot
+              name=''${dotname#.}
+              echo "virtual-mailboxes \"$name\" \"notmuch://?query=folder:$dotname\""
             done | sort
           '';
 
@@ -162,7 +164,7 @@
             set nm_default_uri = "notmuch://$HOME/Maildir"
             set nm_record = yes
             set nm_record_tags = "-inbox me archive"
-            set spoolfile = +Inbox
+            set spoolfile = +INBOX
             set virtual_spoolfile = yes
 
             set sendmail="${msmtp}/bin/msmtp"
@@ -186,8 +188,8 @@
 
             set index_format="%4C %Z %?GI?%GI& ? %[%y-%m-%d] %-20.20a %?M?(%3M)& ? %s %> %r %g"
 
-            virtual-mailboxes "Unread" "notmuch://?query=tag:unread"
-            virtual-mailboxes "INBOX" "notmuch://?query=tag:inbox"
+            virtual-mailboxes "Unread" "notmuch://?query=tag:unread AND folder:\"\""
+            virtual-mailboxes "INBOX" "notmuch://?query=folder:\"\""
             source "${genVirtualMailboxes}|"
             virtual-mailboxes "TODO" "notmuch://?query=tag:TODO"
             virtual-mailboxes "Starred" "notmuch://?query=tag:*"
