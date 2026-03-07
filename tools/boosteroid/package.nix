@@ -51,6 +51,8 @@ let
 in
 buildFHSEnv {
   name = "boosteroid";
+  pname = "boosteroid";
+  inherit version;
 
   targetPkgs = _: [
     unwrapped
@@ -93,6 +95,8 @@ buildFHSEnv {
     cd "$dir"
     exec "$dir/Boosteroid" "$@"
   '';
+
+  passthru.updateScript = ./update.sh;
 
   meta = {
     description = "Boosteroid cloud gaming client";
