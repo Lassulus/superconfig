@@ -70,6 +70,8 @@
         mode = "mirror";
         mountpoint = "/";
         rootFsOptions = {
+          acltype = "posixacl";
+          xattr = "sa";
         };
         datasets = {
           reserved = {

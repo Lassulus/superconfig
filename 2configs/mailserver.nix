@@ -69,6 +69,14 @@ in
     stateVersion = 3;
   };
 
+  # dovecot pre-start creates /var/vmail with 0700; widen for lass (virtualMail group)
+  # POSIX ACL default ensures new files inherit lass access (needed for muchsync hardlinks)
+  systemd.services.dovecot.serviceConfig.ExecStartPost = [
+    "+${pkgs.coreutils}/bin/chmod 2770 /var/vmail"
+    "+${pkgs.acl}/bin/setfacl -R -m u:lass:rwX /var/vmail/lassul.us/lass/mail"
+    "+${pkgs.acl}/bin/setfacl -R -d -m u:lass:rwX /var/vmail/lassul.us/lass/mail"
+  ];
+
   # Password generation for mail accounts
   clan.core.vars.generators.mailserver-lass = {
     files."lass-mail-password" = { };
@@ -137,10 +145,9 @@ in
   users.groups.virtualMail.members = [ "lass" ];
   systemd.tmpfiles.rules = [
     "L+ /home/lass/Maildir - - - - /var/vmail/lassul.us/lass/mail"
-    # dovecot pre-start sets /var/vmail to 02770 already; just fix subdirs
     "z /var/vmail/lassul.us 2770 virtualMail virtualMail -"
     "z /var/vmail/lassul.us/lass 2770 virtualMail virtualMail -"
-    "Z /var/vmail/lassul.us/lass/mail 2770 virtualMail virtualMail -"
+    "d /var/vmail/lassul.us/lass/mail 2770 virtualMail virtualMail -"
   ];
 
   # Thunderbird autoconfig
@@ -226,7 +233,12 @@ in
     # l=lookup, r=read, w=write-flags, s=write-seen (no insert/delete/expunge)
     script = ''
       acl_line="user=bot@lassul.us lrws"
-      find /var/vmail/lassul.us/lass/mail -type d | while IFS= read -r dir; do
+      # Only write ACL in mailbox root dirs, skip cur/new/tmp/notmuch subdirs
+      find /var/vmail/lassul.us/lass/mail -type d \
+        -not -name cur -not -name new -not -name tmp \
+        -not -path '*/.notmuch/*' -not -name .notmuch \
+        -not -path '*/fts-flatcurve/*' -not -name fts-flatcurve \
+        | while IFS= read -r dir; do
         acl_file="$dir/dovecot-acl"
         if [ ! -f "$acl_file" ] || [ "$(cat "$acl_file")" != "$acl_line" ]; then
           echo "$acl_line" > "$acl_file"
