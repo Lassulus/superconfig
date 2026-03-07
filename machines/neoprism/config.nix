@@ -6,6 +6,7 @@
     ../../2configs/ssh-redirect.nix
     ../../2configs/retiolum.nix
     ../../2configs/mailserver.nix
+    ../../2configs/snappymail.nix
     ../../2configs/gsm-wiki.nix
     ../../2configs/monitoring/telegraf.nix
     ../../2configs/pair-programming.nix
