@@ -69,10 +69,11 @@ in
     stateVersion = 3;
   };
 
-  # dovecot pre-start creates /var/vmail with 0700; widen for lass (virtualMail group)
+  # nixos-mailserver mkForces virtualMail without homeMode; match its priority
+  users.users.virtualMail = lib.mkOverride 50 { homeMode = "2770"; };
+
   # POSIX ACL default ensures new files inherit lass access (needed for muchsync hardlinks)
   systemd.services.dovecot.serviceConfig.ExecStartPost = [
-    "+${pkgs.coreutils}/bin/chmod 2770 /var/vmail"
     "+${pkgs.acl}/bin/setfacl -R -m u:lass:rwX /var/vmail/lassul.us/lass/mail"
     "+${pkgs.acl}/bin/setfacl -R -d -m u:lass:rwX /var/vmail/lassul.us/lass/mail"
   ];
