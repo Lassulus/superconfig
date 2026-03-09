@@ -1,0 +1,24 @@
+bin "deploy"
+about "Deploy machines via clan, with passage sync and bulk key management"
+
+arg "<machine>" help="Machine(s) to deploy" var=#true
+
+flag "--tags" help="Tags to query machines for" {
+  arg "<tags>"
+  var=#true
+}
+flag "--target-host" help="Address of the machine to update (user@host:1234)" {
+  arg "<target_host>"
+}
+flag "--build-host" help="Machine to build the configuration on" {
+  arg "<build_host>"
+}
+flag "--host-key-check" help="SSH host key check mode" {
+  arg "<mode>"
+  choices "strict" "ask" "accept-new" "tofu" "none"
+}
+flag "--upload-inputs" help="Upload all flake inputs from local machine"
+flag "--debug" help="Enable debug logging"
+flag "--flake" help="Path to the flake" {
+  arg "<path>"
+}
