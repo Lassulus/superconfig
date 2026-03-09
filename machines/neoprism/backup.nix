@@ -31,6 +31,7 @@
       "/var/lib/matrix-synapse/media_store/local_content"
       "/var/lib/radicale"
       "/home/bot"
+      "/var/lib/vibe-kanban"
       "/var/vmail"
       "/var/dkim"
       "/var/sieve"
@@ -40,6 +41,8 @@
       "/home/bot/.cache"
       "/home/bot/.nix-defexpr"
       "/home/bot/.nix-profile"
+      "/var/lib/vibe-kanban/.cache"
+      "/var/lib/vibe-kanban/.npm"
     ];
     repo = "u550643@u550643.your-storagebox.de:/./neoprism";
     encryption.mode = "none";
