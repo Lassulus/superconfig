@@ -1,0 +1,5 @@
+bin "tornade"
+about "Run a command through Tor (starts ephemeral Tor instance if needed)"
+
+arg "<command>" help="Command to run through Tor"
+arg "[args...]" help="Arguments for the command" var=#true

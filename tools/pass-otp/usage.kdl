@@ -1,0 +1,7 @@
+bin "pass-otp"
+about "Generate TOTP codes from OTP secrets"
+
+flag "-c --clip" help="Copy OTP code to clipboard instead of printing"
+flag "-h --help" help="Show help message"
+
+arg "[secret]" help="OTP secret (raw base32, otpauth:// URL, or multi-line text)"

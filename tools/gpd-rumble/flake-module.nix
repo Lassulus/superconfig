@@ -19,6 +19,8 @@
           cp gpd-rumble $out/bin/
         '';
 
+        passthru.usage = builtins.readFile ./usage.kdl;
+
         meta = {
           description = "Trigger vibration motor on GPD Win Mini 2025";
           platforms = lib.platforms.linux;

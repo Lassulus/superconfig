@@ -2,7 +2,7 @@
   perSystem =
     { pkgs, ... }:
     {
-      packages.pinentry-rofi = pkgs.writeShellApplication {
+      packages.pinentry-rofi = (pkgs.writeShellApplication {
         name = "pinentry-rofi";
         runtimeInputs = with pkgs; [
           rofi
@@ -11,6 +11,6 @@
           keyutils
         ];
         text = builtins.readFile ./pinentry-rofi.sh;
-      };
+      }).overrideAttrs { passthru.usage = builtins.readFile ./usage.kdl; };
     };
 }

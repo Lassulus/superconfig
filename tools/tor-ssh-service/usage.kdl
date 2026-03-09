@@ -1,0 +1,2 @@
+bin "tor-ssh-service"
+about "Expose local SSH as a Tor hidden service with QR code"

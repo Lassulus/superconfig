@@ -1,0 +1,2 @@
+bin "memhack"
+about "Interactive memory hacking REPL for a running process"

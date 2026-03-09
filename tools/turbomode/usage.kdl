@@ -1,0 +1,6 @@
+bin "turbomode"
+about "Turbo/rapid-fire mode for gamepad buttons"
+
+flag "--button <button>" help="Button name (a/b/x/y/lb/rb/lt/rt/start/select/thumbl/thumbr) or evdev code"
+flag "--device <path>" help="Input device path (auto-detects gamepad if not specified)"
+flag "--rate <rate>" help="Presses per second (default: 30)"

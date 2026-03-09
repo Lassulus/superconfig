@@ -19,7 +19,7 @@
       );
     in
     {
-      packages.ssh-with-age = pkgs.writeShellApplication {
+      packages.ssh-with-age = (pkgs.writeShellApplication {
         name = "ssh-with-age";
         runtimeInputs = [
           pkgs.openssh
@@ -129,6 +129,6 @@
           # Use the found key with SSH
           ssh -i "$temp_key" "$@"
         '';
-      };
+      }).overrideAttrs { passthru.usage = builtins.readFile ./usage.kdl; };
     };
 }

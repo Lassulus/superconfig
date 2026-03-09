@@ -1,0 +1,7 @@
+bin "workspace-manager"
+about "Query workspace-manager-daemon for current workspace and directory info"
+
+cmd "dir" help="Print the directory for the current workspace"
+cmd "workspace" help="Print the current workspace name"
+cmd "status" help="Check if daemon is running and print status"
+cmd "help" help="Show help message"

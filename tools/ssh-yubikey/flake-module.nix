@@ -3,7 +3,7 @@
   perSystem =
     { pkgs, ... }:
     {
-      packages.ssh-yubikey = inputs.wrappers.lib.wrapPackage {
+      packages.ssh-yubikey = (inputs.wrappers.lib.wrapPackage {
         pkgs = pkgs;
         package = pkgs.openssh;
         env = {
@@ -24,6 +24,6 @@
             ${envString}
             ${builtins.readFile ./ssh-yubikey}
           '';
-      };
+      }).overrideAttrs { passthru.usage = builtins.readFile ./usage.kdl; };
     };
 }

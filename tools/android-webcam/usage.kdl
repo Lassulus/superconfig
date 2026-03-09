@@ -1,0 +1,6 @@
+bin "android-webcam"
+about "Stream Android phone camera to virtual webcam via scrcpy"
+
+flag "--ascii" help="Enable ASCII art filter mode"
+
+arg "[size]" help="ASCII character size 1-20 (default: 6, only with --ascii)"

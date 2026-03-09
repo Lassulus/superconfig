@@ -1,0 +1,2 @@
+bin "install-ssh-keys"
+about "Install SSH authorized keys to /root/.ssh/authorized_keys"

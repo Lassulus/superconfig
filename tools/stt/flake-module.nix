@@ -23,6 +23,7 @@
             --set PYTHONPATH ${python}/${python.sitePackages}
           runHook postInstall
         '';
+        passthru.usage = builtins.readFile ./usage.kdl;
         meta.mainProgram = "stt";
       };
     };

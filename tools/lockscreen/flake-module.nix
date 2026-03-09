@@ -2,7 +2,7 @@
   perSystem =
     { pkgs, ... }:
     {
-      packages.lockscreen = pkgs.writeShellApplication {
+      packages.lockscreen = (pkgs.writeShellApplication {
         name = "lockscreen";
         runtimeInputs = [
           pkgs.ffmpeg
@@ -17,6 +17,6 @@
           START=$((RANDOM % ''${DURATION:-300}))
           exec swaylock-plugin --command "mpvpaper -o \"no-audio loop start=$START\" '*' \"$VIDEO\"" "$@"
         '';
-      };
+      }).overrideAttrs { passthru.usage = builtins.readFile ./usage.kdl; };
     };
 }
