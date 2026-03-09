@@ -1,0 +1,9 @@
+bin "payment-qr"
+about "Generate SEPA payment QR codes (EPC QR code format)"
+
+flag "-n --name <name>" help="Beneficiary name (required)"
+flag "-i --iban <iban>" help="IBAN (required)"
+flag "-b --bic <bic>" help="BIC (optional, auto-detected from IBAN)"
+flag "-a --amount <amount>" help="Amount in EUR (e.g. 123.45)"
+flag "-d --desc <description>" help="Payment description/reference"
+flag "-h --help" help="Show help message"

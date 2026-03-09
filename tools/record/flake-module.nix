@@ -3,7 +3,7 @@
   perSystem =
     { pkgs, self', ... }:
     {
-      packages.record = pkgs.writeShellApplication {
+      packages.record = (pkgs.writeShellApplication {
         name = "record";
         runtimeInputs = [
           pkgs.ffmpeg
@@ -12,6 +12,6 @@
         ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.pulseaudio ]
         ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ self'.packages.system-audio-dump ];
         text = builtins.readFile ./rec.sh;
-      };
+      }).overrideAttrs { passthru.usage = builtins.readFile ./usage.kdl; };
     };
 }

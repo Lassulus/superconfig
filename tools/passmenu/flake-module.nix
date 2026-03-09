@@ -3,7 +3,7 @@
   perSystem =
     { pkgs, ... }:
     {
-      packages.passmenu = pkgs.writeShellApplication {
+      packages.passmenu = (pkgs.writeShellApplication {
         name = "passmenu";
         runtimeInputs =
           with pkgs;
@@ -66,6 +66,6 @@
             fi
           fi
         '';
-      };
+      }).overrideAttrs { passthru.usage = builtins.readFile ./usage.kdl; };
     };
 }

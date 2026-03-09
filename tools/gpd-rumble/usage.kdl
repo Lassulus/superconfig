@@ -1,0 +1,6 @@
+bin "gpd-rumble"
+about "Trigger vibration motor on GPD Win Mini 2025"
+
+arg "[duration_ms]" help="Vibration duration in milliseconds (default: 500)"
+arg "[strength_percent]" help="Vibration strength 0-100 (default: 100)"
+arg "[device]" help="Input device path (default: /dev/input/event2)"

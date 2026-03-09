@@ -1,0 +1,4 @@
+bin "jellyseekrr"
+about "Search and request movies/TV shows via Jellyseerr"
+
+arg "<search_query>" help="Search query for movies or TV shows"

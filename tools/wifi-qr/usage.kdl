@@ -1,0 +1,2 @@
+bin "wifi-qr"
+about "Scan a WiFi QR code and connect to the network"

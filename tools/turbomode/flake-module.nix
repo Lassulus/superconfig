@@ -24,6 +24,8 @@
           runHook postInstall
         '';
 
+        passthru.usage = builtins.readFile ./usage.kdl;
+
         meta = {
           description = "Turbo/rapid-fire mode for gamepad buttons";
           platforms = pkgs.lib.platforms.linux;

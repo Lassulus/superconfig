@@ -1,0 +1,4 @@
+bin "flaxget"
+about "Download files from flax.lassul.us with interactive selection"
+
+flag "-s --stream" help="Stream files to mpv while downloading"

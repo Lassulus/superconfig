@@ -1,0 +1,8 @@
+bin "video-webcam"
+about "Stream a video file to a virtual webcam device"
+
+flag "-d --device <device>" help="v4l2 device to use (default: /dev/video0)"
+flag "--no-loop" help="Don't loop the video"
+flag "-h --help" help="Show help message"
+
+arg "<video-file>" help="Video file to stream"

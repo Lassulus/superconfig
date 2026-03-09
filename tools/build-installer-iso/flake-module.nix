@@ -168,7 +168,7 @@ in
   perSystem =
     { pkgs, ... }:
     {
-      packages.build-installer-iso = pkgs.writeShellApplication {
+      packages.build-installer-iso = (pkgs.writeShellApplication {
         name = "build-installer-iso";
         runtimeInputs = with pkgs; [
           xorriso
@@ -180,6 +180,6 @@ in
           export FLAKE_ROOT="${self}"
           ${builtins.readFile ./build-installer-iso.sh}
         '';
-      };
+      }).overrideAttrs { passthru.usage = builtins.readFile ./usage.kdl; };
     };
 }

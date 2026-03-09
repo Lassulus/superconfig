@@ -1,0 +1,5 @@
+bin "s"
+about "Run a package from superconfig"
+
+arg "<package>" help="Package name to run"
+arg "[args...]" help="Arguments to pass to the package" var=#true

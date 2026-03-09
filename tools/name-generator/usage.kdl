@@ -1,0 +1,5 @@
+bin "name-generator"
+about "Generate a random name in the format adjective-noun"
+
+flag "-s --separator <char>" help="Use CHAR as separator (default: -)"
+flag "-h --help" help="Show help message"

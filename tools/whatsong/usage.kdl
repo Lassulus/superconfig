@@ -1,0 +1,4 @@
+bin "whatsong"
+about "Identify a song from microphone audio and find it on YouTube"
+
+arg "[duration]" help="Recording duration in seconds (default: 5)"

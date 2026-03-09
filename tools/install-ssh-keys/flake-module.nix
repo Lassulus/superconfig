@@ -11,7 +11,7 @@
       '';
     in
     {
-      packages.install-ssh-keys = pkgs.writeShellApplication {
+      packages.install-ssh-keys = (pkgs.writeShellApplication {
         name = "install-ssh-keys";
         runtimeInputs = [ ];
         text = ''
@@ -33,6 +33,6 @@
 
           echo "Appended SSH keys to /root/.ssh/authorized_keys: ${lib.concatStringsSep ", " (lib.attrNames self.keys.ssh)}"
         '';
-      };
+      }).overrideAttrs { passthru.usage = builtins.readFile ./usage.kdl; };
     };
 }

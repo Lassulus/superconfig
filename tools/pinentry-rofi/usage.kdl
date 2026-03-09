@@ -1,0 +1,2 @@
+bin "pinentry-rofi"
+about "Rofi-based pinentry for SSH TPM authentication with kernel keyring caching"

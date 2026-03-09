@@ -1,0 +1,7 @@
+bin "record"
+about "Record audio from a source and output WAV to stdout"
+
+flag "-l --list" help="List available audio sources"
+flag "-h --help" help="Show help message"
+
+arg "[source]" help="Audio source to record from (interactive selection if omitted)"

@@ -1,0 +1,4 @@
+bin "ssh-yubikey"
+about "SSH wrapper that automatically uses the correct YubiKey/Solo2 key"
+
+arg "[ssh_options...]" help="SSH options and destination" var=#true

@@ -3,7 +3,7 @@
   perSystem =
     { pkgs, ... }:
     {
-      packages.age-detect = pkgs.writeShellApplication {
+      packages.age-detect = (pkgs.writeShellApplication {
         name = "age-detect";
         runtimeInputs =
           with pkgs;
@@ -19,6 +19,6 @@
             pkgs.age-plugin-se
           ]);
         text = builtins.readFile ./age-detect;
-      };
+      }).overrideAttrs { passthru.usage = builtins.readFile ./usage.kdl; };
     };
 }

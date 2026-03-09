@@ -1,0 +1,4 @@
+bin "mic-to-text"
+about "Record from microphone and transcribe using whisper.cpp"
+
+arg "[duration]" help="Recording duration in seconds (default: 5)"

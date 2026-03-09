@@ -1,0 +1,4 @@
+bin "passmenu"
+about "Interactive password selector using menu and pass"
+
+flag "--type" help="Type the password/OTP instead of copying to clipboard"

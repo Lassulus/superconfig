@@ -3,7 +3,7 @@
   perSystem =
     { pkgs, ... }:
     {
-      packages.tornade = pkgs.writeShellApplication {
+      packages.tornade = (pkgs.writeShellApplication {
         name = "tornade";
         runtimeInputs = with pkgs; [
           tor
@@ -12,6 +12,6 @@
           procps
         ];
         text = builtins.readFile ./tornade.sh;
-      };
+      }).overrideAttrs { passthru.usage = builtins.readFile ./usage.kdl; };
     };
 }

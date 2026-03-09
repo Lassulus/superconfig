@@ -1,0 +1,6 @@
+bin "age-detect"
+about "Detect connected age-compatible security keys"
+
+cmd "detect" help="Detect connected security keys (default)"
+
+flag "-h --help" help="Show help message"

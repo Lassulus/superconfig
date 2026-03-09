@@ -3,7 +3,7 @@
   perSystem =
     { pkgs, ... }:
     {
-      packages.gh-act = pkgs.writeShellApplication {
+      packages.gh-act = (pkgs.writeShellApplication {
         name = "gh-act";
         runtimeInputs = with pkgs; [
           yq
@@ -38,6 +38,6 @@
             done
           done
         '';
-      };
+      }).overrideAttrs { passthru.usage = builtins.readFile ./usage.kdl; };
     };
 }

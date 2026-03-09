@@ -3,7 +3,7 @@
   perSystem =
     { pkgs, lib, ... }:
     {
-      packages.pass-otp = pkgs.writeShellApplication {
+      packages.pass-otp = (pkgs.writeShellApplication {
         name = "pass-otp";
         runtimeInputs = [
           pkgs.oath-toolkit
@@ -99,6 +99,6 @@
             echo "$otp_code"
           fi
         '';
-      };
+      }).overrideAttrs { passthru.usage = builtins.readFile ./usage.kdl; };
     };
 }

@@ -13,7 +13,7 @@
       };
     in
     {
-      packages.name-generator = pkgs.writeShellApplication {
+      packages.name-generator = (pkgs.writeShellApplication {
         name = "name-generator";
         runtimeInputs = [ pkgs.bash ];
         text = ''
@@ -52,6 +52,6 @@
           # Output the generated name
           echo "''${ADJECTIVES[$ADJ_INDEX]}''${SEPARATOR}''${NOUNS[$NOUN_INDEX]}"
         '';
-      };
+      }).overrideAttrs { passthru.usage = builtins.readFile ./usage.kdl; };
     };
 }

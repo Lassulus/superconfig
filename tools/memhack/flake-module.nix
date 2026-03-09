@@ -12,7 +12,7 @@
       };
     in
     {
-      packages.memhack = pkgs.writeShellApplication {
+      packages.memhack = (pkgs.writeShellApplication {
         name = "memhack";
         runtimeInputs = [
           pkgs.procps
@@ -20,6 +20,6 @@
           memhack-repl
         ];
         text = builtins.readFile ./memhack.sh;
-      };
+      }).overrideAttrs { passthru.usage = builtins.readFile ./usage.kdl; };
     };
 }

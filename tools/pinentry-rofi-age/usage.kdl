@@ -1,0 +1,4 @@
+bin "pinentry-rofi-age"
+about "Rofi-based pinentry for age-plugin-tpm decryption with kernel keyring caching"
+
+arg "[target]" help="File being decrypted (for display purposes)"

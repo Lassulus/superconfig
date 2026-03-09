@@ -1,0 +1,2 @@
+bin "menu"
+about "Cross-platform interactive menu selector (fzf/rofi/wofi/choose)"
