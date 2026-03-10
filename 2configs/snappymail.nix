@@ -21,6 +21,8 @@ in
     phpOptions = ''
       upload_max_filesize = 25M
       post_max_size = 25M
+      default_socket_timeout = 30
+      max_execution_time = 60
     '';
     phpEnv = {
       SNAPPYMAIL_DATA_PATH = dataDir;
@@ -53,6 +55,7 @@ in
         include ${pkgs.nginx}/conf/fastcgi.conf;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         fastcgi_param SNAPPYMAIL_DATA_PATH ${dataDir};
+        fastcgi_read_timeout 60s;
       '';
     };
     locations."~ /\\." = {

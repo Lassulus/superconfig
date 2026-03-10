@@ -67,6 +67,9 @@ in
     };
 
     stateVersion = 3;
+
+    # virtual.All mailbox needs more memory to sync all folders
+    imapMemoryLimit = 1024;
   };
 
   # nixos-mailserver mkForces virtualMail without homeMode; match its priority
@@ -206,6 +209,17 @@ in
       mode = "0640";
       argument = "*\n-notmuch\n-fts-flatcurve\n  unseen\n";
     };
+    "/var/vmail/virtual-config/All".d = {
+      user = "virtualMail";
+      group = "virtualMail";
+      mode = "0750";
+    };
+    "/var/vmail/virtual-config/All/dovecot-virtual".f = {
+      user = "virtualMail";
+      group = "virtualMail";
+      mode = "0640";
+      argument = "*\n-notmuch\n-fts-flatcurve\n  all\n";
+    };
   };
 
   services.dovecot2.extraConfig = ''
@@ -229,6 +243,9 @@ in
       location = virtual:/var/vmail/virtual-config:INDEX=/var/vmail/virtual-indexes/%u
       subscriptions = no
       mailbox Unread {
+        auto = subscribe
+      }
+      mailbox All {
         auto = subscribe
       }
     }
