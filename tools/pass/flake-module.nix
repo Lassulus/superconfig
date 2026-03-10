@@ -51,36 +51,6 @@
                             ;;
                         esac
 
-                        setup_identities() {
-                          # Check if bulk key file should be used for decryption
-                          if [[ -n "''${PASS_BULK_KEY_FILE:-}" ]]; then
-                            if [[ ! -f "$PASS_BULK_KEY_FILE" ]] || [[ ! -s "$PASS_BULK_KEY_FILE" ]]; then
-                              mkdir -p "$(dirname "$PASS_BULK_KEY_FILE")"
-                              ${exePath} show bulk-operations/age-key > "$PASS_BULK_KEY_FILE" 2>/dev/null || true
-                            fi
-                          fi
-
-                          # Set up identities for age decryption
-                          if [[ -n "''${PASS_BULK_KEY_FILE:-}" ]] && [[ -f "$PASS_BULK_KEY_FILE" ]] && [[ -s "$PASS_BULK_KEY_FILE" ]]; then
-                            # Use bulk key if available
-                            export PASSAGE_IDENTITIES_FILE="$PASS_BULK_KEY_FILE"
-                          else
-                            # Detect available age keys
-                            export AGE_DETECT_KEYS_DIR="${self}/keys"
-                            eval "$(age-detect)"
-
-                            # Set up identity file if detected
-                            if [[ -n "''${IDENTITY_FILE:-}" ]]; then
-                              export PASSAGE_IDENTITIES_FILE="$IDENTITY_FILE"
-                              trap 'rm -f "$IDENTITY_FILE"' EXIT
-                            fi
-                          fi
-                        }
-
-                        if [[ "$needs_decrypt" == true ]]; then
-                          setup_identities
-                        fi
-
             ${
               if pkgs.stdenv.isLinux then
                 ''
@@ -95,7 +65,46 @@
                     AGE_TPM_PIN="$(${self.packages.${system}.pinentry-rofi-age}/bin/pinentry-rofi-age "$target")"
                     export AGE_TPM_PIN
                   }
+                ''
+              else
+                ''
+                  # No TPM on Darwin, define no-op
+                  maybe_set_tpm_pin() { :; }
+                ''
+            }
 
+                        setup_identities() {
+                          # Always detect available age keys first
+                          export AGE_DETECT_KEYS_DIR="${self}/keys"
+                          eval "$(age-detect)"
+
+                          # Set up identity file if detected
+                          if [[ -n "''${IDENTITY_FILE:-}" ]]; then
+                            export PASSAGE_IDENTITIES_FILE="$IDENTITY_FILE"
+                            trap 'rm -f "$IDENTITY_FILE"' EXIT
+                          fi
+
+                          # Try to decrypt and cache the bulk key using the detected identity
+                          if [[ -n "''${PASS_BULK_KEY_FILE:-}" ]]; then
+                            if [[ ! -f "$PASS_BULK_KEY_FILE" ]] || [[ ! -s "$PASS_BULK_KEY_FILE" ]]; then
+                              mkdir -p "$(dirname "$PASS_BULK_KEY_FILE")"
+                              maybe_set_tpm_pin "bulk-operations/age-key"
+                              ${exePath} show bulk-operations/age-key > "$PASS_BULK_KEY_FILE" 2>/dev/null || true
+                            fi
+                            # Switch to bulk key for subsequent operations if available
+                            if [[ -f "$PASS_BULK_KEY_FILE" ]] && [[ -s "$PASS_BULK_KEY_FILE" ]]; then
+                              export PASSAGE_IDENTITIES_FILE="$PASS_BULK_KEY_FILE"
+                            fi
+                          fi
+                        }
+
+                        if [[ "$needs_decrypt" == true ]]; then
+                          setup_identities
+                        fi
+
+            ${
+              if pkgs.stdenv.isLinux then
+                ''
                   decrypt_target=""
                   if [[ "''${1:-}" == "show" ]]; then
                     decrypt_target="''${2:-}"
@@ -120,10 +129,7 @@
                   fi
                 ''
               else
-                ''
-                  # No TPM on Darwin, define no-op
-                  maybe_set_tpm_pin() { :; }
-                ''
+                ""
             }
 
                         # Handle OTP commands by delegating to pass-otp
