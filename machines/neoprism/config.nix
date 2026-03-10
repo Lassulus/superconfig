@@ -68,8 +68,8 @@
     # opencrow matrix bot
     ../../2configs/opencrow.nix
 
-    # vibe kanban
-    ../../2configs/vibe-kanban.nix
+    # kanvibe (kanban board)
+    ../../2configs/kanvibe.nix
 
     # backups
     ./backup.nix
