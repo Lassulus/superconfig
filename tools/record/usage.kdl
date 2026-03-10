@@ -5,3 +5,5 @@ flag "-l --list" help="List available audio sources"
 flag "-h --help" help="Show help message"
 
 arg "[source]" help="Audio source to record from (interactive selection if omitted)"
+
+complete "source" run="if [ \"$(uname)\" = Darwin ]; then echo system; ffmpeg -f avfoundation -list_devices true -i '' 2>&1 | sed -n '/AVFoundation audio devices:/,/^[^[]/p' | grep -oE '\\[[0-9]+\\]' | tr -d '[]'; else pactl list sources short 2>/dev/null | awk '{print $2}'; fi"
