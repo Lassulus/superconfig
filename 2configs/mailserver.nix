@@ -187,40 +187,52 @@ in
     "virtual"
     "acl"
   ];
-  services.dovecot2.extraConfig =
-    let
-      virtualDir = pkgs.linkFarm "dovecot-virtual" [
-        {
-          name = "Unread/dovecot-virtual";
-          path = pkgs.writeText "dovecot-virtual-unread" "*\n  unseen\n";
-        }
-      ];
-    in
-    ''
-      plugin {
-        acl = vfile
-        acl_shared_dict = file:/var/vmail/shared-mailboxes.db
-      }
+  # Provision virtual mailbox config to a writable directory (nix store is read-only,
+  # and the ACL plugin needs to write dovecot-acl-list next to the virtual config)
+  systemd.tmpfiles.settings."dovecot-virtual" = {
+    "/var/vmail/virtual-config".d = {
+      user = "virtualMail";
+      group = "virtualMail";
+      mode = "0750";
+    };
+    "/var/vmail/virtual-config/Unread".d = {
+      user = "virtualMail";
+      group = "virtualMail";
+      mode = "0750";
+    };
+    "/var/vmail/virtual-config/Unread/dovecot-virtual".f = {
+      user = "virtualMail";
+      group = "virtualMail";
+      mode = "0640";
+      argument = "*\n-notmuch\n-fts-flatcurve\n  unseen\n";
+    };
+  };
 
-      namespace shared {
-        type = shared
-        separator = .
-        prefix = shared.%%n.
-        location = maildir:/var/vmail/lassul.us/%%n/mail:LAYOUT=Maildir++
-        subscriptions = no
-        list = children
-      }
+  services.dovecot2.extraConfig = ''
+    plugin {
+      acl = vfile
+      acl_shared_dict = file:/var/vmail/shared-mailboxes.db
+    }
 
-      namespace virtual {
-        prefix = virtual.
-        separator = .
-        location = virtual:${virtualDir}:INDEX=/var/vmail/virtual-indexes/%u
-        subscriptions = no
-        mailbox Unread {
-          auto = subscribe
-        }
+    namespace shared {
+      type = shared
+      separator = .
+      prefix = shared.%%n.
+      location = maildir:/var/vmail/lassul.us/%%n/mail:LAYOUT=Maildir++
+      subscriptions = no
+      list = children
+    }
+
+    namespace virtual {
+      prefix = virtual.
+      separator = .
+      location = virtual:/var/vmail/virtual-config:INDEX=/var/vmail/virtual-indexes/%u
+      subscriptions = no
+      mailbox Unread {
+        auto = subscribe
       }
-    '';
+    }
+  '';
 
   # Write dovecot-acl files to grant bot read-only + flag access to lass's mail
   systemd.services.dovecot-acl-sync = {
