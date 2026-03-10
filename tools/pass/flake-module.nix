@@ -43,28 +43,42 @@
                         ${envString}
                         ${preHook}
 
-                        # Check if bulk key file should be used for decryption
-                        if [[ -n "''${PASS_BULK_KEY_FILE:-}" ]]; then
-                          if [[ ! -f "$PASS_BULK_KEY_FILE" ]] || [[ ! -s "$PASS_BULK_KEY_FILE" ]]; then
-                            mkdir -p "$(dirname "$PASS_BULK_KEY_FILE")"
-                            ${exePath} show bulk-operations/age-key > "$PASS_BULK_KEY_FILE" 2>/dev/null || true
-                          fi
-                        fi
+                        # Determine if the command needs decryption
+                        needs_decrypt=true
+                        case "''${1:-}" in
+                          ls|find|git|insert|generate|rm|mv|cp|help|version|init)
+                            needs_decrypt=false
+                            ;;
+                        esac
 
-                        # Set up identities for age decryption
-                        if [[ -n "''${PASS_BULK_KEY_FILE:-}" ]] && [[ -f "$PASS_BULK_KEY_FILE" ]] && [[ -s "$PASS_BULK_KEY_FILE" ]]; then
-                          # Use bulk key if available
-                          export PASSAGE_IDENTITIES_FILE="$PASS_BULK_KEY_FILE"
-                        else
-                          # Detect available age keys
-                          export AGE_DETECT_KEYS_DIR="${self}/keys"
-                          eval "$(age-detect)"
-
-                          # Set up identity file if detected
-                          if [[ -n "''${IDENTITY_FILE:-}" ]]; then
-                            export PASSAGE_IDENTITIES_FILE="$IDENTITY_FILE"
-                            trap 'rm -f "$IDENTITY_FILE"' EXIT
+                        setup_identities() {
+                          # Check if bulk key file should be used for decryption
+                          if [[ -n "''${PASS_BULK_KEY_FILE:-}" ]]; then
+                            if [[ ! -f "$PASS_BULK_KEY_FILE" ]] || [[ ! -s "$PASS_BULK_KEY_FILE" ]]; then
+                              mkdir -p "$(dirname "$PASS_BULK_KEY_FILE")"
+                              ${exePath} show bulk-operations/age-key > "$PASS_BULK_KEY_FILE" 2>/dev/null || true
+                            fi
                           fi
+
+                          # Set up identities for age decryption
+                          if [[ -n "''${PASS_BULK_KEY_FILE:-}" ]] && [[ -f "$PASS_BULK_KEY_FILE" ]] && [[ -s "$PASS_BULK_KEY_FILE" ]]; then
+                            # Use bulk key if available
+                            export PASSAGE_IDENTITIES_FILE="$PASS_BULK_KEY_FILE"
+                          else
+                            # Detect available age keys
+                            export AGE_DETECT_KEYS_DIR="${self}/keys"
+                            eval "$(age-detect)"
+
+                            # Set up identity file if detected
+                            if [[ -n "''${IDENTITY_FILE:-}" ]]; then
+                              export PASSAGE_IDENTITIES_FILE="$IDENTITY_FILE"
+                              trap 'rm -f "$IDENTITY_FILE"' EXIT
+                            fi
+                          fi
+                        }
+
+                        if [[ "$needs_decrypt" == true ]]; then
+                          setup_identities
                         fi
 
             ${
