@@ -1,8 +1,0 @@
-bin "ssh-with-age"
-about "SSH wrapper that tries each encrypted SSH key with the connected FIDO2 device"
-
-flag "--list-keys" help="List available encrypted SSH keys"
-flag "--list-devices" help="List connected FIDO2 devices"
-flag "-h --help" help="Show help message"
-
-arg "[ssh_options...]" help="SSH options and destination" var=#true
