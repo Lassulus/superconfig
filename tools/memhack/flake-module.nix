@@ -12,14 +12,16 @@
       };
     in
     {
-      packages.memhack = (pkgs.writeShellApplication {
-        name = "memhack";
-        runtimeInputs = [
-          pkgs.procps
-          pkgs.fzf
-          memhack-repl
-        ];
-        text = builtins.readFile ./memhack.sh;
-      }).overrideAttrs { passthru.usage = builtins.readFile ./usage.kdl; };
+      packages.memhack =
+        (pkgs.writeShellApplication {
+          name = "memhack";
+          runtimeInputs = [
+            pkgs.procps
+            pkgs.fzf
+            memhack-repl
+          ];
+          text = builtins.readFile ./memhack.sh;
+        }).overrideAttrs
+          { passthru.usage = builtins.readFile ./usage.kdl; };
     };
 }

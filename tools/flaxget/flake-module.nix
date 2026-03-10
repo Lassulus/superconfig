@@ -3,15 +3,17 @@
   perSystem =
     { pkgs, ... }:
     {
-      packages.flaxget = (pkgs.writeShellApplication {
-        name = "flaxget";
-        runtimeInputs = [
-          pkgs.curl
-          pkgs.fzf
-          pkgs.coreutils
-          pkgs.aria2
-        ];
-        text = builtins.readFile ./flaxget.sh;
-      }).overrideAttrs { passthru.usage = builtins.readFile ./usage.kdl; };
+      packages.flaxget =
+        (pkgs.writeShellApplication {
+          name = "flaxget";
+          runtimeInputs = [
+            pkgs.curl
+            pkgs.fzf
+            pkgs.coreutils
+            pkgs.aria2
+          ];
+          text = builtins.readFile ./flaxget.sh;
+        }).overrideAttrs
+          { passthru.usage = builtins.readFile ./usage.kdl; };
     };
 }

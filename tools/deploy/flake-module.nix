@@ -14,6 +14,7 @@
           inputs.clan-core.packages.${system}.clan-cli
         ];
         text = ''
+          set -x
           DEPLOY_TMPDIR=$(mktemp -d)
           chmod 700 "$DEPLOY_TMPDIR"
           trap 'rm -rf "$DEPLOY_TMPDIR"' EXIT

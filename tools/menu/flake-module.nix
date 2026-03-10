@@ -26,6 +26,7 @@
             })
           else
             throw "unsupported system"
-        ).overrideAttrs { passthru.usage = builtins.readFile ./usage.kdl; };
+        ).overrideAttrs
+          { passthru.usage = builtins.readFile ./usage.kdl; };
     };
 }

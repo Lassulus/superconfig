@@ -93,38 +93,38 @@
       '';
     in
     {
-      packages.s = (pkgs.writeShellApplication {
-        name = "s";
-        runtimeInputs = [ pkgs.nix ];
-        text = ''
-          # Use local checkout if it exists, otherwise fall back to self
-          if [ -d "$HOME/src/superconfig" ]; then
-            flake="$HOME/src/superconfig"
-          else
-            flake="${self}"
-          fi
+      packages.s =
+        (pkgs.writeShellApplication {
+          name = "s";
+          runtimeInputs = [ pkgs.nix ];
+          text = ''
+            # Use local checkout if it exists, otherwise fall back to self
+            if [ -d "$HOME/src/superconfig" ]; then
+              flake="$HOME/src/superconfig"
+            else
+              flake="${self}"
+            fi
 
-          if [ $# -eq 0 ]; then
-            echo "Usage: s <package> [args...]" >&2
-            echo "Runs a package from superconfig ($flake)" >&2
-            exit 1
-          fi
+            if [ $# -eq 0 ]; then
+              echo "Usage: s <package> [args...]" >&2
+              echo "Runs a package from superconfig ($flake)" >&2
+              exit 1
+            fi
 
-          pkg="$1"
-          shift
+            pkg="$1"
+            shift
 
-          exec nix run "$flake#$pkg" -- "$@"
-        '';
-      }).overrideAttrs (old: {
-        buildCommand =
-          old.buildCommand
-          + ''
-            mkdir -p $out/share/zsh/site-functions
-            cp ${zshCompletion} $out/share/zsh/site-functions/_s
+            exec nix run "$flake#$pkg" -- "$@"
           '';
-        passthru = (old.passthru or { }) // {
-          usage = builtins.readFile ./usage.kdl;
-        };
-      });
+        }).overrideAttrs
+          (old: {
+            buildCommand = old.buildCommand + ''
+              mkdir -p $out/share/zsh/site-functions
+              cp ${zshCompletion} $out/share/zsh/site-functions/_s
+            '';
+            passthru = (old.passthru or { }) // {
+              usage = builtins.readFile ./usage.kdl;
+            };
+          });
     };
 }

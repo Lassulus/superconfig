@@ -6,16 +6,18 @@
       ffmpeg-placebo = pkgs.ffmpeg.override { withPlacebo = true; };
     in
     {
-      packages.android-webcam = (pkgs.writeShellApplication {
-        name = "android-webcam";
-        runtimeInputs = [
-          pkgs.scrcpy
-          ffmpeg-placebo
-          pkgs.gnused
-        ];
-        text = builtins.replaceStrings [ "@shaderPath@" ] [ "${./ascii.hook}" ] (
-          builtins.readFile ./android-webcam.sh
-        );
-      }).overrideAttrs { passthru.usage = builtins.readFile ./usage.kdl; };
+      packages.android-webcam =
+        (pkgs.writeShellApplication {
+          name = "android-webcam";
+          runtimeInputs = [
+            pkgs.scrcpy
+            ffmpeg-placebo
+            pkgs.gnused
+          ];
+          text = builtins.replaceStrings [ "@shaderPath@" ] [ "${./ascii.hook}" ] (
+            builtins.readFile ./android-webcam.sh
+          );
+        }).overrideAttrs
+          { passthru.usage = builtins.readFile ./usage.kdl; };
     };
 }

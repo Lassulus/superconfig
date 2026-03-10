@@ -6,14 +6,16 @@
       python = pkgs.python3;
     in
     {
-      packages.workspace-manager = (pkgs.writeShellApplication {
-        name = "workspace-manager";
-        runtimeInputs = [
-          pkgs.socat
-          pkgs.jq
-        ];
-        text = builtins.readFile ./workspace-manager.sh;
-      }).overrideAttrs { passthru.usage = builtins.readFile ./usage.kdl; };
+      packages.workspace-manager =
+        (pkgs.writeShellApplication {
+          name = "workspace-manager";
+          runtimeInputs = [
+            pkgs.socat
+            pkgs.jq
+          ];
+          text = builtins.readFile ./workspace-manager.sh;
+        }).overrideAttrs
+          { passthru.usage = builtins.readFile ./usage.kdl; };
 
       packages.workspace-manager-daemon = pkgs.stdenv.mkDerivation {
         pname = "workspace-manager-daemon";

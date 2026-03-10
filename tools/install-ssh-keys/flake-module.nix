@@ -11,28 +11,30 @@
       '';
     in
     {
-      packages.install-ssh-keys = (pkgs.writeShellApplication {
-        name = "install-ssh-keys";
-        runtimeInputs = [ ];
-        text = ''
-          set -euo pipefail
+      packages.install-ssh-keys =
+        (pkgs.writeShellApplication {
+          name = "install-ssh-keys";
+          runtimeInputs = [ ];
+          text = ''
+            set -euo pipefail
 
-          # Check if we're running as root
-          if [[ $EUID -ne 0 ]]; then
-              echo "Not running as root. Using sudo to install keys to /root/.ssh/authorized_keys"
-              exec sudo "$0" "$@"
-          fi
+            # Check if we're running as root
+            if [[ $EUID -ne 0 ]]; then
+                echo "Not running as root. Using sudo to install keys to /root/.ssh/authorized_keys"
+                exec sudo "$0" "$@"
+            fi
 
-          # Create /root/.ssh directory if it doesn't exist
-          mkdir -p /root/.ssh
-          chmod 700 /root/.ssh
+            # Create /root/.ssh directory if it doesn't exist
+            mkdir -p /root/.ssh
+            chmod 700 /root/.ssh
 
-          # Append the authorized_keys
-          cat ${authorizedKeysFile} >> /root/.ssh/authorized_keys
-          chmod 600 /root/.ssh/authorized_keys
+            # Append the authorized_keys
+            cat ${authorizedKeysFile} >> /root/.ssh/authorized_keys
+            chmod 600 /root/.ssh/authorized_keys
 
-          echo "Appended SSH keys to /root/.ssh/authorized_keys: ${lib.concatStringsSep ", " (lib.attrNames self.keys.ssh)}"
-        '';
-      }).overrideAttrs { passthru.usage = builtins.readFile ./usage.kdl; };
+            echo "Appended SSH keys to /root/.ssh/authorized_keys: ${lib.concatStringsSep ", " (lib.attrNames self.keys.ssh)}"
+          '';
+        }).overrideAttrs
+          { passthru.usage = builtins.readFile ./usage.kdl; };
     };
 }
