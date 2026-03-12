@@ -33,15 +33,32 @@ in
     ];
   };
 
-  clan.core.vars.generators.opencrow = {
+  clan.core.vars.generators.opencrow-matrix = {
     prompts.matrix-access-token = {
-      description = "Matrix access token for @opencrow:lassul.us - register via synapse admin API using the registration_shared_secret";
+      description = "Matrix access token for @opencrow:lassul.us";
       type = "hidden";
+      persist = true;
     };
+  };
+
+  clan.core.vars.generators.opencrow-openrouter = {
+    prompts.openrouter-api-key = {
+      description = "OpenRouter API key for opencrow - get from https://openrouter.ai/keys";
+      type = "hidden";
+      persist = true;
+    };
+  };
+
+  clan.core.vars.generators.opencrow-env = {
+    dependencies = [
+      "opencrow-matrix"
+      "opencrow-openrouter"
+    ];
     files."opencrow.env" = { };
     script = ''
       cat > "$out/opencrow.env" << EOF
-      OPENCROW_MATRIX_ACCESS_TOKEN=$(cat $prompts/matrix-access-token)
+      OPENCROW_MATRIX_ACCESS_TOKEN=$(cat $in/opencrow-matrix/matrix-access-token)
+      OPENROUTER_API_KEY=$(cat $in/opencrow-openrouter/openrouter-api-key)
       EOF
     '';
   };
@@ -71,15 +88,17 @@ in
       OPENCROW_PI_WORKING_DIR = "/home/bot/opencrow";
       OPENCROW_PI_SKILLS = "${opencrow}/share/opencrow/skills/web";
       OPENCROW_PI_SKILLS_DIR = "/home/bot/skills";
+      OPENCROW_PI_PROVIDER = "openrouter";
+      OPENCROW_PI_MODEL = "openrouter/qwen/qwen-2.5-7b-instruct";
       OPENCROW_HEARTBEAT_INTERVAL = "10m";
       OPENCROW_SHOW_TOOL_CALLS = "1";
-      OPENCROW_SOUL_FILE = "${opencrow}/share/opencrow/SOUL.md";
+      OPENCROW_SOUL_FILE = "/home/bot/opencrow/SOUL.md";
       PI_CODING_AGENT_DIR = "/home/bot/opencrow/pi-agent";
     };
 
     serviceConfig = {
       EnvironmentFile = [
-        config.clan.core.vars.generators.opencrow.files."opencrow.env".path
+        config.clan.core.vars.generators.opencrow-env.files."opencrow.env".path
         config.clan.core.vars.generators.mailserver-bot.files."mail.env".path
       ];
       ExecStart = "${opencrow}/bin/opencrow";
