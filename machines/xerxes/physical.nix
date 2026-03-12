@@ -70,7 +70,5 @@
   # s2idle for 15 minutes, then hibernate to save power
   services.logind.powerKey = "suspend-then-hibernate";
   services.logind.lidSwitch = "suspend-then-hibernate";
-  systemd.sleep.extraConfig = ''
-    HibernateDelaySec=15min
-  '';
+  systemd.sleep.settings.Sleep.HibernateDelaySec = "15min";
 }
