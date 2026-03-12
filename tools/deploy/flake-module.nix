@@ -19,13 +19,12 @@
           chmod 700 "$DEPLOY_TMPDIR"
           trap 'rm -rf "$DEPLOY_TMPDIR"' EXIT
 
+          # Set bulk key path so the pass wrapper can lazily extract it
+          # on the first actual decryption (if any secrets need uploading).
           export PASS_BULK_KEY_FILE="$DEPLOY_TMPDIR/bulk-key"
 
           # Sync password store before deploy
           pass git pull --rebase
-
-          # Extract bulk key for fast decryption during deploy
-          pass show bulk-operations/age-key > "$PASS_BULK_KEY_FILE" 2>/dev/null || true
 
           # Deploy
           clan machines update "$@"

@@ -94,6 +94,8 @@
                             # Switch to bulk key for subsequent operations if available
                             if [[ -f "$PASS_BULK_KEY_FILE" ]] && [[ -s "$PASS_BULK_KEY_FILE" ]]; then
                               export PASSAGE_IDENTITIES_FILE="$PASS_BULK_KEY_FILE"
+                              # Bulk key is a plain age key, no TPM PIN needed for decryption
+                              KEY_TYPE=bulk
                             fi
                           fi
                         }
