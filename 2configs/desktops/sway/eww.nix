@@ -34,9 +34,11 @@ let
     (defvar hover-tooltip "")
 
     ; Generic hover-tooltip wrapper: shows tooltip on hover via in-bar overlay
+    ; Use an explicit eww command here instead of the EWW_CMD shell variable,
+    ; because yuck also treats dollar-brace interpolation as a dynamic string.
     (defwidget hover-tip [text]
-      (eventbox :onhover {text != "" ? "''${EWW_CMD} update hover-tooltip=${"'"}''${text}${"'"}" : ""}
-                :onhoverlost "''${EWW_CMD} update hover-tooltip=${"'"}${"'"}"
+      (eventbox :onhover {text != "" ? "${lib.getExe pkgs.eww} --config \"$EWW_CONFIG\" update hover-tooltip=${"'"}''${text}${"'"}" : ""}
+                :onhoverlost "${lib.getExe pkgs.eww} --config \"$EWW_CONFIG\" update hover-tooltip=${"'"}${"'"}"
         (children)))
 
     ; Widget definitions
