@@ -25,11 +25,11 @@ let
 
 in
 {
-  # Make goto-workspace available system-wide for eww and workspace-popup
+  # Make goto-workspace available system-wide for workspace switching
   environment.systemPackages = [ gotoWorkspace ];
   imports = [
     ../lib/wayland.nix
-    ./eww.nix
+    ./noctalia.nix
   ];
   programs.sway = {
     enable = true;
