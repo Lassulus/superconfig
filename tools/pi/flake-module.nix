@@ -45,6 +45,9 @@
               extensions = [ "!extensions/resistance.ts" ];
             }
           ];
+          extensions = [
+            ./questionnaire.ts
+          ];
           defaultProvider = "anthropic";
           defaultModel = "claude-opus-4-6";
           defaultThinkingLevel = "medium";
@@ -61,6 +64,9 @@
           # Fix keybinding conflicts in extension source
           ${pkgs.gnused}/bin/sed -i 's/"ctrl+u"/"ctrl+shift+u"/' $out/lib/node_modules/shitty-extensions/extensions/ultrathink.ts
           ${pkgs.gnused}/bin/sed -i 's/"ctrl+r"/"ctrl+shift+r"/' $out/lib/node_modules/shitty-extensions/extensions/speedreading.ts
+
+          # Remove a-nach-b skill
+          rm -rf $out/lib/node_modules/shitty-extensions/skills/a-nach-b
 
           # Add hedgedoc skill
           ln -s ${
