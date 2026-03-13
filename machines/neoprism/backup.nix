@@ -31,7 +31,7 @@
       "/var/lib/matrix-synapse/media_store/local_content"
       "/var/lib/radicale"
       "/home/bot"
-      "/var/lib/kanvibe"
+      "/var/lib/kannix"
       "/var/vmail"
       "/var/dkim"
       "/var/sieve"
@@ -41,8 +41,7 @@
       "/home/bot/.cache"
       "/home/bot/.nix-defexpr"
       "/home/bot/.nix-profile"
-      "/var/lib/kanvibe/.cache"
-      "/var/lib/kanvibe/.npm"
+      "/var/lib/kannix/.cache"
     ];
     repo = "u550643@u550643.your-storagebox.de:/./neoprism";
     encryption.mode = "none";
