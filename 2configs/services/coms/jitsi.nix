@@ -26,6 +26,11 @@
     };
   };
 
+  # Disable AWS harvester (not needed)
+  services.jitsi-videobridge.extraProperties = {
+    "org.ice4j.ice.harvest.DISABLE_AWS_HARVESTER" = "true";
+  };
+
   services.prosody.checkConfig = false;
 
   services.nginx.virtualHosts."meet.lassul.us" = {
