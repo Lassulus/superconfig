@@ -10,38 +10,36 @@
   systemd.network.networks."50-et0" = {
     matchConfig.Name = "et0";
     DHCP = "yes";
-    # dhcpV4Config.UseDNS = false;
-    # dhcpV6Config.UseDNS = false;
     linkConfig = {
       RequiredForOnline = "routable";
     };
     networkConfig = {
-      LinkLocalAddressing = "no";
+      IPv6AcceptRA = true;
+      IPv6Forwarding = true;
     };
-    # dhcpV6Config = {
-    #   PrefixDelegationHint = "::/60";
-    # };
-    # networkConfig = {
-    #   IPv6AcceptRA = true;
-    # };
-    # ipv6PrefixDelegationConfig = {
-    #   Managed = true;
-    # };
   };
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
+  boot.kernel.sysctl."net.ipv6.conf.all.forwarding" = 1;
   systemd.network.networks."10-int0" = {
     name = "int0";
     address = [
       "10.42.0.1/24"
+      "fd42:7d6a::1/64"
     ];
     networkConfig = {
-      # IPForward = "yes";
-      # IPMasquerade = "both";
+      IPv4Forwarding = true;
+      IPv6Forwarding = true;
       ConfigureWithoutCarrier = true;
       DHCPServer = "yes";
-      # IPv6SendRA = "yes";
-      # DHCPPrefixDelegation = "yes";
+      IPv6SendRA = true;
     };
+    ipv6Prefixes = [
+      {
+        ipv6PrefixConfig = {
+          Prefix = "fd42:7d6a::/64";
+        };
+      }
+    ];
     dhcpServerStaticLeases = [
       {
         # printer
@@ -104,6 +102,11 @@
     {
       v6 = false;
       predicate = "-s 10.42.0.0/24";
+      target = "MASQUERADE";
+    }
+    {
+      v4 = false;
+      predicate = "-s fd42:7d6a::/64";
       target = "MASQUERADE";
     }
   ];
