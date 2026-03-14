@@ -10,17 +10,6 @@ let
   bareRepo = "${stateDir}/repos/kannix.git";
   srcDir = "${stateDir}/checkout/kannix";
 
-  pythonEnv = pkgs.python3.withPackages (
-    ps: with ps; [
-      fastapi
-      uvicorn
-      jinja2
-      python-multipart
-      bcrypt
-      websockets
-    ]
-  );
-
   configFile = pkgs.writeText "kannix.json" (
     builtins.toJSON {
       columns = [
@@ -39,42 +28,35 @@ let
     }
   );
 
-  vendorDir = pkgs.runCommand "kannix-vendor" { } ''
-    mkdir -p $out
-    cp ${pkgs.fetchurl {
-      url = "https://cdn.jsdelivr.net/npm/diff2html@3.4.56/bundles/css/diff2html.min.css";
-      hash = "sha256-0+zA6bKx5chGbBneKb7QUv0IY0ddJYKezIWERu/e03I=";
-    }} $out/diff2html.min.css
-    cp ${pkgs.fetchurl {
-      url = "https://cdn.jsdelivr.net/npm/diff2html@3.4.56/bundles/js/diff2html-ui.min.js";
-      hash = "sha256-mXoOqduEwKvM41xkFZr+RtMNz9/SQ0FWGdmz6BAXE4s=";
-    }} $out/diff2html-ui.min.js
-  '';
-
-  kannixDevScript = pkgs.writeShellScript "kannix-dev" ''
+  kannixScript = pkgs.writeShellScript "kannix-run" ''
     export KANNIX_CONFIG=${configFile}
     export KANNIX_STATE_DIR=${stateDir}
-    export PYTHONPATH=${srcDir}/src
     export PATH=${
       lib.makeBinPath [
         pkgs.tmux
         pkgs.git
+        pkgs.nix
+        pkgs.inotify-tools
+        pkgs.coreutils
       ]
     }:$PATH
     cd ${srcDir}
 
-    # Symlink vendor files
-    mkdir -p src/kannix/static/vendor
-    ln -sf ${vendorDir}/diff2html.min.css src/kannix/static/vendor/diff2html.min.css
-    ln -sf ${vendorDir}/diff2html-ui.min.js src/kannix/static/vendor/diff2html-ui.min.js
+    while true; do
+      nix run .# -- \
+        --host 127.0.0.1 \
+        --port ${toString port} &
+      PID=$!
 
-    exec ${pythonEnv}/bin/python -m uvicorn \
-      kannix.main:create_dev_app \
-      --factory \
-      --host 127.0.0.1 \
-      --port ${toString port} \
-      --reload \
-      --reload-dir ${srcDir}/src
+      inotifywait -r -e modify,create,delete,move \
+        --exclude '(__pycache__|\.pyc|\.git/|result)' \
+        ${srcDir}/src ${srcDir}/flake.nix ${srcDir}/flake.lock ${srcDir}/package.nix ${srcDir}/pyproject.toml
+
+      echo "Change detected, restarting..."
+      kill $PID 2>/dev/null
+      wait $PID 2>/dev/null
+      sleep 1
+    done
   '';
 in
 {
@@ -95,14 +77,9 @@ in
       self.keys.ssh.massulus.public
     ];
     packages = [
-      pythonEnv
       pkgs.tmux
       pkgs.git
       self.packages.${pkgs.system}.s
-      (pkgs.writeShellScriptBin "kannix-ctl" ''
-        export PYTHONPATH=${srcDir}/src
-        exec ${pythonEnv}/bin/python -m kannix.ctl "$@"
-      '')
     ];
   };
 
@@ -129,17 +106,17 @@ in
   };
 
   systemd.user.services.kannix = {
-    description = "Kannix dev server";
+    description = "Kannix kanban server";
     wantedBy = [ "default.target" ];
     after = [ "network.target" ];
     path = [
       pkgs.tmux
       pkgs.git
-      pythonEnv
+      pkgs.nix
     ];
     serviceConfig = {
       Type = "simple";
-      ExecStart = toString kannixDevScript;
+      ExecStart = toString kannixScript;
       Restart = "on-failure";
       RestartSec = 5;
       WorkingDirectory = srcDir;
