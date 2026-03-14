@@ -43,8 +43,7 @@
     startAt = "daily";
     script = ''
       ${pkgs.podman}/bin/podman pull ${config.virtualisation.oci-containers.containers.homeassistant.image}
-      ${pkgs.podman}/bin/podman stop homeassistant
-      ${pkgs.podman}/bin/podman start homeassistant
+      systemctl restart podman-homeassistant.service
       ${pkgs.podman}/bin/podman system prune -a --volumes -f
     '';
   };
