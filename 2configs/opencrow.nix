@@ -90,7 +90,7 @@ in
       OPENCROW_PI_SKILLS_DIR = "/home/bot/skills";
       OPENCROW_PI_PROVIDER = "openrouter";
       OPENCROW_PI_MODEL = "openrouter/qwen/qwen-2.5-7b-instruct";
-      OPENCROW_HEARTBEAT_INTERVAL = "10m";
+      # OPENCROW_HEARTBEAT_INTERVAL = "10m"; # disabled: model too small, runs full heartbeat every time
       OPENCROW_SHOW_TOOL_CALLS = "1";
       OPENCROW_SOUL_FILE = "/home/bot/opencrow/SOUL.md";
       PI_CODING_AGENT_DIR = "/home/bot/opencrow/pi-agent";
