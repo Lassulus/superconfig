@@ -76,8 +76,6 @@
     nixos-mailserver.url = "gitlab:simple-nixos-mailserver/nixos-mailserver/master";
     nixos-mailserver.inputs.nixpkgs.follows = "nixpkgs";
 
-    kannix.url = "git+file:/home/lass/src/kannix";
-    kannix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
