@@ -120,6 +120,11 @@
         "8.8.8.8"
         "1.1.1.1"
       ];
+      # Pin to Linux 6.12 LTS to avoid "rosetta error: unhandled auxillary
+      # vector type 29" — newer kernels (6.18+) expose AT_MINSIGSTKSZ which
+      # Rosetta doesn't handle yet.
+      # https://github.com/lima-vm/lima/issues/3592
+      boot.kernelPackages = (import self.inputs.nixpkgs { system = "aarch64-linux"; }).linuxKernel.packages.linux_6_12;
     };
   };
 
