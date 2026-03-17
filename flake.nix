@@ -263,6 +263,11 @@
                       { pkgs, lib, ... }:
                       {
                         options.system.nixos-init.package = lib.mkPackageOption pkgs "nixos-init" { };
+                        options.time.timeZone = lib.mkOption {
+                          type = lib.types.nullOr lib.types.str;
+                          default = null;
+                          description = "Dummy option for extra-container compatibility";
+                        };
                       }
                     )
                   ];
