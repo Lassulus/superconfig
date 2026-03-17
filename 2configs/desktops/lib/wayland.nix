@@ -85,7 +85,7 @@
     wlr-randr
     wl-clipboard
     wev
-    blueberry
+    blueman
     grim # screenshots
     wtype
     zathura
