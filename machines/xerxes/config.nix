@@ -42,44 +42,35 @@
   documentation.nixos.enable = true;
   lass.workspace-manager.enable = true;
 
-  services.ollama =
+  # llama-swap: on-demand model hot-swapping proxy for llama.cpp
+  # Models are stored in /data/models/ as GGUF files
+  services.llama-swap =
     let
-      gpuTargets = [ "gfx1100" ]; # Radeon 890M (gfx1150/RDNA 3.5) - only build for fallback target
-      customRocblas = pkgs.rocmPackages.rocblas.override {
-        withHipBlasLt = false; # hipblaslt takes extremely long to build; rocblas's own Tensile kernels work fine
-        inherit gpuTargets;
-      };
-      customRocsparse = pkgs.rocmPackages.rocsparse.override {
-        inherit gpuTargets;
-      };
-      customRocsolver = pkgs.rocmPackages.rocsolver.override {
-        inherit gpuTargets;
-        rocblas = customRocblas;
-        rocsparse = customRocsparse;
-      };
-      customHipblas = pkgs.rocmPackages.hipblas.override {
-        rocblas = customRocblas;
-        rocsolver = customRocsolver;
-        rocsparse = customRocsparse;
-      };
-      customRocmPackages = pkgs.rocmPackages // {
-        rocblas = customRocblas;
-        hipblas = customHipblas;
-        rocsolver = customRocsolver;
-        rocsparse = customRocsparse;
-      };
+      llama-server = "${pkgs.llama-cpp-rocm}/bin/llama-server";
     in
     {
       enable = true;
-      package = pkgs.ollama-rocm.override {
-        rocmGpuTargets = gpuTargets;
-        rocmPackages = customRocmPackages;
-      };
-      environmentVariables = {
-        HSA_OVERRIDE_GFX_VERSION = "11.0.0"; # Radeon 890M (gfx1150/RDNA 3.5) - fallback to gfx1100
-        OLLAMA_NUM_CTX = "16384"; # 48 GiB RAM shared with GPU; 32k OOMs with 32B model
+      port = 11434;
+      settings = {
+        healthCheckTimeout = 300;
+        models = {
+          qwen3-32b = {
+            cmd = "${llama-server} --port \${PORT} --model /data/models/qwen3-32b.gguf --ctx-size 16384 --n-gpu-layers 99 --jinja";
+            ttl = 300;
+          };
+          qwen-coder-next = {
+            cmd = "${llama-server} --port \${PORT} --model /data/models/Qwen3-Coder-Next-Q4_K_M-00001-of-00004.gguf --ctx-size 16384 --n-gpu-layers 99 --jinja";
+            ttl = 300;
+          };
+        };
       };
     };
+  # ROCm GPU access and environment for llama-swap spawned llama-server processes
+  systemd.services.llama-swap.environment.HSA_OVERRIDE_GFX_VERSION = "11.0.0"; # Radeon 890M (gfx1150/RDNA 3.5) - fallback to gfx1100
+  systemd.services.llama-swap.serviceConfig.SupplementaryGroups = [
+    "render"
+    "video"
+  ];
 
   # extra-container for testing declarative containers without full rebuilds
   programs.extra-container.enable = true;
