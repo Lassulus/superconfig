@@ -74,4 +74,22 @@ in
   services.udev.extraRules = ''
     SUBSYSTEM=="powercap", ACTION=="add", RUN+="${pkgs.coreutils}/bin/chmod a+r /sys/class/powercap/%k/energy_uj"
   '';
+
+  # Configure noctalia darkModeChange hook to trigger switch-theme
+  # This makes noctalia's dark mode button also switch the system theme
+  system.activationScripts.noctalia-hooks.text =
+    let
+      jq = "${pkgs.jq}/bin/jq";
+      settingsFile = "/home/${config.users.users.mainUser.name}/.config/noctalia/settings.json";
+    in
+    ''
+      if [ -f "${settingsFile}" ]; then
+        ${jq} '
+          .hooks.enabled = true |
+          .hooks.darkModeChange = "if [ \"$1\" = \"true\" ]; then switch-theme dark; else switch-theme light; fi"
+        ' "${settingsFile}" > "${settingsFile}.tmp" && \
+          mv "${settingsFile}.tmp" "${settingsFile}" && \
+          chown ${config.users.users.mainUser.name}:users "${settingsFile}" || true
+      fi
+    '';
 }

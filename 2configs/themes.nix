@@ -10,6 +10,10 @@ let
         ${placeholder "out"}/bin/switch-theme dark
       fi
     elif test -e "/etc/themes/$1"; then
+      # Skip if already on the requested theme (prevents loops with noctalia hook)
+      if [ "$(${pkgs.coreutils}/bin/cat /var/theme/current_theme 2>/dev/null)" = "$1" ]; then
+        exit 0
+      fi
       ${pkgs.coreutils}/bin/mkdir -p /var/theme/config
       ${pkgs.rsync}/bin/rsync --chown=lass:users -a --delete "/etc/themes/$1/" /var/theme/config/
       echo "$1" > /var/theme/current_theme
@@ -27,6 +31,17 @@ let
         ${pkgs.kitty}/bin/kitten @ --to unix:"$sock" set-colors -a /var/theme/config/kitty-colors.conf 2>/dev/null || :
       done
       set -f
+      # Update noctalia-shell dark mode setting (it watches settings.json for changes)
+      noctalia_settings="''${XDG_CONFIG_HOME:-$HOME/.config}/noctalia/settings.json"
+      if test -f "$noctalia_settings"; then
+        if [ "$1" = dark ]; then
+          noctalia_dark=true
+        else
+          noctalia_dark=false
+        fi
+        ${pkgs.jq}/bin/jq ".colorSchemes.darkMode = $noctalia_dark" "$noctalia_settings" > "$noctalia_settings.tmp" && \
+          ${pkgs.coreutils}/bin/mv "$noctalia_settings.tmp" "$noctalia_settings" || :
+      fi
     else
       echo "theme $1 not found"
     fi
