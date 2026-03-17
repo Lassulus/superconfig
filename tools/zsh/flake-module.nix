@@ -253,7 +253,8 @@
 
         # Auto-start tmux for new sessions
         # Check if we're already in tmux (even through sudo)
-        if [[ "$TERM" != "linux" && -z "$TMUX" && "$TERM" != "dumb" ]]; then
+        # Only run in interactive shells — non-interactive SSH commands must not exec tmux
+        if [[ -o interactive && "$TERM" != "linux" && -z "$TMUX" && "$TERM" != "dumb" ]]; then
           # Check if we're inside tmux by looking for tmux in the process tree
           in_tmux=false
           pid=$$
