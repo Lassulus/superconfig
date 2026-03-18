@@ -55,11 +55,11 @@
         healthCheckTimeout = 300;
         models = {
           qwen3-32b = {
-            cmd = "${llama-server} --port \${PORT} --model /data/models/qwen3-32b.gguf --ctx-size 16384 --n-gpu-layers 99 --jinja";
+            cmd = "${llama-server} --port \${PORT} --model /data/models/qwen3-32b.gguf --ctx-size 16384 --jinja";
             ttl = 300;
           };
           qwen-coder-next = {
-            cmd = "${llama-server} --port \${PORT} --model /data/models/Qwen3-Coder-Next-Q4_K_M-00001-of-00004.gguf --ctx-size 16384 --n-gpu-layers 99 --jinja";
+            cmd = "${llama-server} --port \${PORT} --model /data/models/Qwen3-Coder-Next-Q4_K_M/Qwen3-Coder-Next-Q4_K_M-00001-of-00004.gguf --ctx-size 16384 --jinja";
             ttl = 300;
           };
         };
