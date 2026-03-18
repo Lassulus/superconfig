@@ -124,7 +124,8 @@
       # vector type 29" — newer kernels (6.18+) expose AT_MINSIGSTKSZ which
       # Rosetta doesn't handle yet.
       # https://github.com/lima-vm/lima/issues/3592
-      boot.kernelPackages = (import self.inputs.nixpkgs { system = "aarch64-linux"; }).linuxKernel.packages.linux_6_12;
+      boot.kernelPackages =
+        (import self.inputs.nixpkgs { system = "aarch64-linux"; }).linuxKernel.packages.linux_6_12;
     };
   };
 
