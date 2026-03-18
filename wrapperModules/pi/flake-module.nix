@@ -48,7 +48,16 @@
       cleanPackage =
         p:
         if builtins.isAttrs p then
-          lib.filterAttrs (k: v: k != "hash" && k != "version" && k != "deps" && v != null) p
+          let
+            cleaned = lib.filterAttrs (k: v: k != "hash" && k != "version" && k != "deps" && v != null) p;
+            # Embed version into source spec so pi treats it as pinned (e.g. npm:pi-hooks@1.0.3)
+            withVersion =
+              if p ? version && p ? source && !(lib.hasInfix "@" (lib.removePrefix "npm:" p.source)) then
+                cleaned // { source = "${p.source}@${p.version}"; }
+              else
+                cleaned;
+          in
+          withVersion
         else
           p;
 
