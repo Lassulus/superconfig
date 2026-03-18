@@ -38,6 +38,10 @@ let
   src = fetchurl {
     url = "https://boosteroid.com/linux/installer/boosteroid_portable.tar";
     hash = "sha256-xXpFD9dzHbakOqOIQ1sqzmGRo49EYbVqHZT0nGvRPcI=";
+    curlOptsList = [
+      "--user-agent"
+      "Mozilla/5.0"
+    ];
   };
 
   unwrapped = stdenv.mkDerivation {
