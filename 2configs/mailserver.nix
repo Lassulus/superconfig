@@ -290,4 +290,48 @@ in
     pkgs.muchsync
     pkgs.msmtp
   ];
+
+  # After muchsync writes tags to notmuch DB, the Maildir filenames don't get updated
+  # (muchsync bypasses notmuch's flag sync). This watches the xapian DB for changes and
+  # renames files to add/remove the S (Seen) flag based on the notmuch unread tag.
+  systemd.paths.notmuch-flag-sync = {
+    wantedBy = [ "multi-user.target" ];
+    pathConfig.PathChanged = "/var/vmail/lassul.us/lass/mail/.notmuch/xapian";
+  };
+  systemd.services.notmuch-flag-sync = {
+    description = "Sync notmuch tags to Maildir flags after muchsync";
+    serviceConfig = {
+      Type = "oneshot";
+      User = "lass";
+      Group = "virtualMail";
+      ExecStart = pkgs.writeShellScript "notmuch-flag-sync" ''
+        export NOTMUCH_CONFIG="${
+          self.packages.${pkgs.system}.notmuch.passthru.configuration.configFile.path
+        }"
+        # Add S flag to files notmuch considers read but that lack it
+        ${pkgs.notmuch}/bin/notmuch search --output=files 'NOT tag:unread' \
+          | ${pkgs.gnugrep}/bin/grep -v ',.*S' \
+          | ${pkgs.gnugrep}/bin/grep '/cur/' \
+          | while IFS= read -r f; do
+              [ -f "$f" ] || continue
+              base="''${f%:2,*}"
+              flags="''${f##*:2,}"
+              mv "$f" "''${base}:2,''${flags}S"
+            done
+        # Remove S flag from files notmuch considers unread but that have it
+        ${pkgs.notmuch}/bin/notmuch search --output=files 'tag:unread' \
+          | ${pkgs.gnugrep}/bin/grep ',.*S' \
+          | ${pkgs.gnugrep}/bin/grep '/cur/' \
+          | while IFS= read -r f; do
+              [ -f "$f" ] || continue
+              base="''${f%:2,*}"
+              flags="''${f##*:2,}"
+              newflags="$(echo "$flags" | ${pkgs.gnused}/bin/sed 's/S//g')"
+              mv "$f" "''${base}:2,''${newflags}"
+            done
+        # Update notmuch DB with the renames
+        ${pkgs.notmuch}/bin/notmuch new --quiet 2>/dev/null || true
+      '';
+    };
+  };
 }
