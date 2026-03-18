@@ -7,6 +7,7 @@
     ./gpd-win-mini-2025-pipewire.nix
   ];
   boot.loader.systemd-boot.enable = true;
+  boot.loader.systemd-boot.configurationLimit = 10;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.kernelPackages = pkgs.linuxPackages_latest;
   hardware.graphics.enable = true;
@@ -41,6 +42,7 @@
   boot.kernelParams = [
     "resume_offset=156473344"
     "amdgpu.gpu_recovery=1" # attempt GPU reset on failure instead of black screen
+    "amdgpu.dcdebugmask=0x10" # disable DSC to prevent GPU hang with external displays
   ];
 
   # Pre-evict VRAM before sleep to prevent amdgpu resume black screen
