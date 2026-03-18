@@ -4,13 +4,13 @@ set -euo pipefail
 # Configuration
 JELLYSEERR_URL="https://flox.lassul.us"
 
-# Get API key from pass or environment
-JELLYSEERR_API_KEY="${JELLYSEERR_API_KEY:-$(pass show www/flox.lassul.us/api_key 2>/dev/null | tr -d '\n' || true)}"
+# Get API key from rbw or environment
+JELLYSEERR_API_KEY="${JELLYSEERR_API_KEY:-$(rbw get flix.lassul.us --raw 2>/dev/null | jq -r '.notes // empty' || true)}"
 
 # Check if API key is available
 if [[ -z "$JELLYSEERR_API_KEY" ]]; then
     echo "Error: Could not retrieve API key" >&2
-    echo "Set JELLYSEERR_API_KEY environment variable or ensure 'pass show www/flox.lassul.us/api_key' works" >&2
+    echo "Set JELLYSEERR_API_KEY environment variable or ensure the flix.lassul.us rbw entry has the API key in notes" >&2
     exit 1
 fi
 

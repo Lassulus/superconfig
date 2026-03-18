@@ -8,7 +8,7 @@
           name = "jellyseekrr";
           runtimeInputs = with pkgs; [
             self.packages.${pkgs.system}.menu
-            self.packages.${pkgs.system}.pass
+            rbw
             curl
             jq
           ];
