@@ -59,7 +59,7 @@ in
       ExecStart = ''
         ${pkgs.swayidle}/bin/swayidle -w \
           timeout 120 '${lib.getExe' pkgs.systemd "systemctl"} --user start lock.target' \
-          timeout 300 '${lib.getExe' pkgs.systemd "systemctl"} suspend' \
+          timeout 300 '${lib.getExe' pkgs.systemd "systemctl"} suspend-then-hibernate' \
           before-sleep '${lib.getExe' pkgs.systemd "systemctl"} --user start lock.target'
       '';
       Restart = "on-failure";
