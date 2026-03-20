@@ -9,9 +9,12 @@ let
   # Quickshell's activate() sends "workspace number <num>" which fails for named workspaces (num=-1)
   noctalia-shell-patched = pkgs.noctalia-shell.overrideAttrs (old: {
     postInstall = (old.postInstall or "") + ''
-      substituteInPlace $out/share/noctalia-shell/Services/Compositor/SwayService.qml \
-        --replace-fail 'workspace.handle.activate();' \
-          'Quickshell.execDetached([msgCommand, "workspace", workspace.name]);'
+          substituteInPlace $out/share/noctalia-shell/Services/Compositor/SwayService.qml \
+            --replace-fail 'workspace.handle.activate();' \
+              'Quickshell.execDetached([msgCommand, "workspace", workspace.name]);' \
+            --replace-fail 'property bool initialized: false' \
+              'property bool globalWorkspaces: true
+      property bool initialized: false'
     '';
   });
 in
