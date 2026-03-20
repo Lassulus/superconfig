@@ -5,13 +5,21 @@
   ...
 }:
 let
-  # Patch noctalia-shell to use workspace name instead of number for sway
-  # Quickshell's activate() sends "workspace number <num>" which fails for named workspaces (num=-1)
+  sway-focus-workspace = pkgs.writeShellScript "sway-focus-workspace" ''
+    # Bring a workspace to the currently focused output
+    ws="$1"
+    current_output=$(${pkgs.sway}/bin/swaymsg -t get_workspaces | ${pkgs.jq}/bin/jq -r '.[] | select(.focused) | .output')
+    ${pkgs.sway}/bin/swaymsg "workspace $ws, move workspace to output $current_output"
+  '';
+  # Patch noctalia-shell for sway:
+  # - Use workspace name instead of number (activate() sends "workspace number <num>" which fails for named workspaces)
+  # - Show all workspaces on all screens (globalWorkspaces)
+  # - Bring workspace to current screen on click instead of jumping to its screen
   noctalia-shell-patched = pkgs.noctalia-shell.overrideAttrs (old: {
     postInstall = (old.postInstall or "") + ''
           substituteInPlace $out/share/noctalia-shell/Services/Compositor/SwayService.qml \
             --replace-fail 'workspace.handle.activate();' \
-              'Quickshell.execDetached([msgCommand, "workspace", workspace.name]);' \
+              'Quickshell.execDetached(["${sway-focus-workspace}", workspace.name]);' \
             --replace-fail 'property bool initialized: false' \
               'property bool globalWorkspaces: true
       property bool initialized: false'
