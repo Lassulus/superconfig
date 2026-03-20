@@ -1,0 +1,20 @@
+{
+  "manifest_version": 2,
+  "name": "Workspace Tabs",
+  "version": "1.0.0",
+  "description": "Manage Firefox tabs per workspace, integrated with workspace-manager",
+  "permissions": [
+    "tabs",
+    "storage",
+    "menus",
+    "nativeMessaging"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "workspace-tabs@workspace-manager"
+    }
+  }
+}

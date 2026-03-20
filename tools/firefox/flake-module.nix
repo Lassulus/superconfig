@@ -1,12 +1,33 @@
+{ self, ... }:
 {
   perSystem =
-    { pkgs, ... }:
+    {
+      pkgs,
+      lib,
+      system,
+      ...
+    }:
     let
       tridactylrc = ./tridactylrc;
 
-      firefoxBase = pkgs.wrapFirefox pkgs.firefox-unwrapped {
+      workspaceTabsExtension = self.packages.${system}.workspace-tabs-extension;
+
+      firefoxBase = pkgs.wrapFirefox pkgs.firefox-devedition-unwrapped {
         nativeMessagingHosts = [
           pkgs.tridactyl-native
+          self.packages.${system}.workspace-tabs-native-host
+        ];
+        extraPolicies = {
+          Extensions.Install = [
+            "${workspaceTabsExtension}/workspace-tabs@workspace-manager.xpi"
+          ];
+        };
+        extraPrefsFiles = [
+          (pkgs.writeText "workspace-tabs-prefs.js" ''
+            lockPref("xpinstall.signatures.required", false);
+            lockPref("browser.startup.page", 0);
+            lockPref("browser.sessionstore.resume_from_crash", false);
+          '')
         ];
       };
 
@@ -32,7 +53,7 @@
           ln -sf "$target" "$config_file"
         fi
 
-        exec ${firefoxBase}/bin/firefox "$@"
+        exec ${lib.getExe firefoxBase} "$@"
       '';
     in
     {

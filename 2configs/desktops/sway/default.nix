@@ -27,6 +27,18 @@ in
 {
   # Make goto-workspace available system-wide for workspace switching
   environment.systemPackages = [ gotoWorkspace ];
+
+  # Firefox as a systemd user service, started on login
+  systemd.user.services.firefox = {
+    description = "Firefox Web Browser";
+    partOf = [ "sway-session.target" ];
+    wantedBy = [ "sway-session.target" ];
+    after = [ "sway-session.target" ];
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = lib.getExe self.packages.${pkgs.system}.firefox;
+    };
+  };
   imports = [
     ../lib/wayland.nix
     ./noctalia.nix

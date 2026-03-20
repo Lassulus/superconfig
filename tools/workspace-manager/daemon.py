@@ -271,6 +271,29 @@ class WorkspaceManager:
 
 manager = WorkspaceManager()
 
+# Subscribers: list of (StreamWriter, Event) tuples
+subscribers: list[tuple[asyncio.StreamWriter, asyncio.Event]] = []
+
+
+async def notify_subscribers(old_workspace: str | None, new_workspace: str) -> None:
+    """Notify all subscribers of a workspace change."""
+    event = (
+        json.dumps(
+            {
+                "event": "workspace_change",
+                "old": old_workspace,
+                "new": new_workspace,
+            }
+        ).encode()
+        + b"\n"
+    )
+    for writer, done in subscribers:
+        try:
+            writer.write(event)
+            await writer.drain()
+        except (OSError, ConnectionResetError):
+            done.set()
+
 
 async def subscribe_sway() -> None:
     """Subscribe to sway IPC workspace events"""
@@ -308,6 +331,7 @@ async def subscribe_sway() -> None:
                                 file=sys.stderr,
                             )
                             await manager.handle_workspace_change(old_name, new_name)
+                            await notify_subscribers(old_name, new_name)
                 except json.JSONDecodeError as e:
                     print(f"Failed to parse sway event: {e}", file=sys.stderr)
 
@@ -336,7 +360,21 @@ async def handle_client(
         command = data.decode().strip()
 
         response: dict[str, Any]
-        if command == "dir":
+        if command == "subscribe":
+            # Keep connection open and send workspace change events.
+            # Disconnection is detected in notify_subscribers when write fails.
+            done = asyncio.Event()
+            subscribers.append((writer, done))
+            print("New subscriber connected", file=sys.stderr)
+            try:
+                await done.wait()
+            except asyncio.CancelledError:
+                pass
+            finally:
+                subscribers[:] = [(w, d) for w, d in subscribers if w is not writer]
+                print("Subscriber disconnected", file=sys.stderr)
+            return
+        elif command == "dir":
             response = {"directory": str(manager.get_current_directory())}
         elif command == "workspace":
             response = {"workspace": manager.current_workspace}
