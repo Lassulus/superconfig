@@ -68,6 +68,9 @@
     # opencrow matrix bot
     ../../2configs/opencrow.nix
 
+    # document signing
+    ../../2configs/docuseal.nix
+
     # kannix (kanban board)
     ../../2configs/kannix.nix
 
