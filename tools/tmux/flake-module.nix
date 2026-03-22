@@ -36,6 +36,10 @@
       tmuxConfigText = ''
         set-option -g default-terminal screen-256color
 
+        # Enable extended keys (CSI u / modified key sequences)
+        set -s extended-keys on
+        set -as terminal-features 'xterm*:extkeys'
+
         # Auto-destroy sessions when no clients attached (handles terminal close)
         set -g destroy-unattached on
 
