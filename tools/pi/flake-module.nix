@@ -47,6 +47,7 @@
           ];
           extensions = [
             ./questionnaire.ts
+            ./auto-theme.ts
           ];
           defaultProvider = "anthropic";
           defaultModel = "claude-opus-4-6";
