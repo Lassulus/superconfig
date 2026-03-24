@@ -15,6 +15,7 @@
     ../../2configs/radicle.nix
     ../../2configs/steam.nix
     ../../2configs/auto-timezone.nix
+    self.wrapperModules.workspace-manager
   ];
   system.stateVersion = "25.05";
 

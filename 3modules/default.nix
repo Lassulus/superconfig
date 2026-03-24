@@ -4,6 +4,5 @@ _: {
     ./screenlock.nix
     ./fetchWallpaper.nix
     ./sync-containers3.nix
-    ./workspace-manager.nix
   ];
 }

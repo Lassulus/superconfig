@@ -253,7 +253,10 @@ in
         bindsym $mod+Shift+space floating toggle
 
         # Swap focus between the tiling area and the floating area
-        bindsym $mod+space focus mode_toggle
+        bindsym $mod+a focus mode_toggle
+
+        # Workspace manager menu
+        bindsym $mod+space exec ${lib.getExe self.packages.${pkgs.system}.workspace-menu}
 
         # Move focus to the parent container
         bindsym $mod+Shift+a focus parent

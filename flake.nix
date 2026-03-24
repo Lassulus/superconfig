@@ -193,6 +193,12 @@
         ./games/flake-module.nix
 
         ./wrapperModules/pi/flake-module.nix
+        {
+          options.flake.wrapperModules = nixpkgs.lib.mkOption {
+            type = nixpkgs.lib.types.lazyAttrsOf nixpkgs.lib.types.raw;
+            default = { };
+          };
+        }
       ]
       ++ (
         # Auto-import all flake-module.nix files from tools subdirectories

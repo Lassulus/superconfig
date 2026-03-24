@@ -153,6 +153,7 @@ def main() -> None:
                                 "id": 0,
                                 "event": "workspace_change",
                                 "workspace": event.get("new", ""),
+                                "restore": event.get("restore", True),
                             }
                         )
                 except (OSError, json.JSONDecodeError) as e:

@@ -48,6 +48,9 @@ DEFAULT_DIRECTORY = (
 
 TERMINAL_COMMAND = os.environ.get("WORKSPACE_MANAGER_TERMINAL", "kitty")
 
+_on_new_handler_env = os.environ.get("WORKSPACE_MANAGER_ON_NEW_HANDLER")
+ON_NEW_HANDLER: str | None = _on_new_handler_env if _on_new_handler_env else None
+
 
 def load_config_file(config_file: Path) -> dict[str, Any] | None:
     """Load a workspace config file, returning None if it doesn't exist or fails."""
@@ -211,10 +214,83 @@ class WorkspaceManager:
                     file=sys.stderr,
                 )
 
+    def _workspace_has_windows(self, workspace: str) -> bool:
+        """Check if a workspace already has windows (via sway tree)."""
+        try:
+            result = subprocess.run(
+                ["swaymsg", "-t", "get_tree", "-r"],
+                capture_output=True,
+                text=True,
+                timeout=2,
+            )
+            if result.returncode != 0:
+                return False
+            tree: dict[str, Any] = json.loads(result.stdout)
+            # Find the workspace node and check for app containers
+            for output in tree.get("nodes", []):
+                for ws in output.get("nodes", []):
+                    if ws.get("name") == workspace:
+
+                        def has_apps(node: dict[str, Any]) -> bool:
+                            if node.get("type") == "con" and (
+                                node.get("app_id") or node.get("pid")
+                            ):
+                                return True
+                            for child in node.get("nodes", []) + node.get(
+                                "floating_nodes", []
+                            ):
+                                if has_apps(child):
+                                    return True
+                            return False
+
+                        return has_apps(ws)
+        except (OSError, json.JSONDecodeError, subprocess.TimeoutExpired) as e:
+            print(f"Failed to check workspace windows: {e}", file=sys.stderr)
+        return False
+
+    async def _ask_on_new(self, workspace: str) -> bool:
+        """Ask the user whether to restore a workspace via the on-new handler.
+
+        Returns True if on_create should be run, False to skip.
+        If no handler is configured, always returns True (auto-restore).
+        Skips the prompt if the workspace already has windows.
+        """
+        if self._workspace_has_windows(workspace):
+            return True
+        if ON_NEW_HANDLER is None:
+            return True
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                ON_NEW_HANDLER,
+                workspace,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            _, stderr = await proc.communicate()
+            if stderr:
+                print(
+                    f"on-new handler stderr: {stderr.decode().strip()}",
+                    file=sys.stderr,
+                )
+            # Exit 0 = restore, anything else = skip
+            return proc.returncode == 0
+        except FileNotFoundError:
+            print(
+                f"on-new handler not found: {ON_NEW_HANDLER}",
+                file=sys.stderr,
+            )
+            return True
+        except Exception as e:
+            print(f"on-new handler error: {e}", file=sys.stderr)
+            return True
+
     async def handle_workspace_change(
         self, old_workspace: str | None, new_workspace: str
-    ) -> None:
-        """Handle a workspace focus change event"""
+    ) -> bool:
+        """Handle a workspace focus change event.
+
+        Returns True if the workspace should be restored, False to start fresh.
+        """
         # Run on_leave hooks for old workspace
         if old_workspace:
             old_config = self.get_config(old_workspace)
@@ -225,10 +301,13 @@ class WorkspaceManager:
         self.current_workspace = new_workspace
 
         # Run on_create hooks if this is the first time entering the workspace
+        should_restore = True
         new_config = self.get_config(new_workspace)
         if new_workspace not in self.created_workspaces:
             self.created_workspaces.add(new_workspace)
-            await self._run_on_create(new_workspace, new_config)
+            should_restore = await self._ask_on_new(new_workspace)
+            if should_restore:
+                await self._run_on_create(new_workspace, new_config)
 
         # Run on_enter hooks for new workspace
         for hook in new_config.on_enter:
@@ -236,6 +315,8 @@ class WorkspaceManager:
 
         # Write state file
         self._write_state()
+
+        return should_restore
 
     async def _run_hook(self, command: str, hook_type: str, workspace: str) -> None:
         """Run a hook command in the background"""
@@ -275,7 +356,9 @@ manager = WorkspaceManager()
 subscribers: list[tuple[asyncio.StreamWriter, asyncio.Event]] = []
 
 
-async def notify_subscribers(old_workspace: str | None, new_workspace: str) -> None:
+async def notify_subscribers(
+    old_workspace: str | None, new_workspace: str, *, restore: bool = True
+) -> None:
     """Notify all subscribers of a workspace change."""
     event = (
         json.dumps(
@@ -283,6 +366,7 @@ async def notify_subscribers(old_workspace: str | None, new_workspace: str) -> N
                 "event": "workspace_change",
                 "old": old_workspace,
                 "new": new_workspace,
+                "restore": restore,
             }
         ).encode()
         + b"\n"
@@ -330,8 +414,12 @@ async def subscribe_sway() -> None:
                                 f"Workspace change: {old_name} -> {new_name}",
                                 file=sys.stderr,
                             )
-                            await manager.handle_workspace_change(old_name, new_name)
-                            await notify_subscribers(old_name, new_name)
+                            restore = await manager.handle_workspace_change(
+                                old_name, new_name
+                            )
+                            await notify_subscribers(
+                                old_name, new_name, restore=restore
+                            )
                 except json.JSONDecodeError as e:
                     print(f"Failed to parse sway event: {e}", file=sys.stderr)
 

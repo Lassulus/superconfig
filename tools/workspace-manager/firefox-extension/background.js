@@ -63,7 +63,8 @@ function sendNative(cmd, params = {}) {
 function handleNativeMessage(msg) {
   if (msg.event === "workspace_change") {
     // Push event from workspace-manager — handle workspace switch
-    onWorkspaceChange(msg.workspace);
+    // restore flag: true = restore saved tabs, false = start fresh
+    onWorkspaceChange(msg.workspace, msg.restore !== false);
     return;
   }
   if (msg.id && pendingRequests.has(msg.id)) {
@@ -294,9 +295,12 @@ async function restoreOnStartup() {
 
 // ── Workspace change handling ────────────────────────────────
 
-async function onWorkspaceChange(workspace) {
+async function onWorkspaceChange(workspace, restore = true) {
   if (!workspace || workspace === lastWorkspace) return;
   lastWorkspace = workspace;
+
+  // If restore is false, the user chose "New session" — don't restore tabs
+  if (!restore) return;
 
   // Check if this workspace has saved tabs but no Firefox window
   const withFirefox = await getWorkspacesWithFirefox();
