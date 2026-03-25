@@ -107,9 +107,8 @@
         runtimeInputs = [
           pkgs.sway
           pkgs.jq
-          pkgs.rofi
+          self.packages.${pkgs.system}.menu
           pkgs.libnotify
-          pkgs.kitty
           pkgs.findutils
           pkgs.gnused
           pkgs.coreutils

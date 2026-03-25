@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Workspace Menu - rofi-based menu for workspace management
+# Workspace Menu for workspace management
 
 set -euo pipefail
 
@@ -54,7 +54,7 @@ action_close() {
   ws_name=$(get_current_workspace)
 
   local confirm
-  confirm=$(printf "Yes\nNo" | rofi -dmenu -p "Close workspace '${ws_name}'? (kills all windows)")
+  confirm=$(printf "Yes\nNo" | menu -p "Close workspace '${ws_name}'? (kills all windows)")
   if [ "$confirm" != "Yes" ]; then
     return 0
   fi
@@ -86,13 +86,13 @@ action_delete() {
   fi
 
   local selected
-  selected=$(echo "$configs" | rofi -dmenu -p "Delete workspace config")
+  selected=$(echo "$configs" | menu -p "Delete workspace config")
   if [ -z "$selected" ]; then
     return 0
   fi
 
   local confirm
-  confirm=$(printf "Yes\nNo" | rofi -dmenu -p "Delete config for '${selected}'?")
+  confirm=$(printf "Yes\nNo" | menu -p "Delete config for '${selected}'?")
   if [ "$confirm" = "Yes" ]; then
     rm "${WORKSPACES_DIR}/${selected}.json"
     notify-send "Workspace Manager" "Deleted config for '${selected}'"
@@ -112,7 +112,7 @@ action_edit() {
   fi
 
   local selected
-  selected=$(echo "$configs" | rofi -dmenu -p "Edit workspace config")
+  selected=$(echo "$configs" | menu -p "Edit workspace config")
   if [ -z "$selected" ]; then
     return 0
   fi
@@ -123,7 +123,7 @@ action_edit() {
     echo '{}' > "$config_file"
   fi
 
-  kitty "${EDITOR:-vim}" "$config_file" &
+  swaymsg exec "${TERMINAL:-kitty} ${EDITOR:-vim} $config_file"
 }
 
 # Main menu
@@ -133,7 +133,7 @@ main() {
 
   local choice
   choice=$(printf "Restore tabs\nClose workspace\nEdit config\nDelete config" | \
-    rofi -dmenu -p "Workspace: ${ws_name}")
+    menu -p "Workspace: ${ws_name}")
 
   case "$choice" in
     "Restore tabs")
