@@ -186,7 +186,6 @@
 
     git
     git-absorb
-    git-preview
     gnumake
     jq
     nix-output-monitor
