@@ -25,6 +25,10 @@ let
     trap 'rm -rf "$OUTPUT"' EXIT
     SPEAKER=$[ $RANDOM % 900 ]
     while read line; do
+      # skip empty lines, piper crashes on empty input
+      if [ -z "$line" ]; then
+        continue
+      fi
       filename=$(printf '%04d' $offset).wav
       echo "$line" |
         ${pkgs.piper-tts}/bin/piper \
