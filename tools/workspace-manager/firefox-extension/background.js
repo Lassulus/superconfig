@@ -1,31 +1,25 @@
 /* Workspace Tabs - Firefox extension for workspace-manager integration
  *
- * Provides "Send to workspace" context menu on tabs.
- * Queries sway tree directly to find Firefox windows per workspace.
- * Saves/restores tabs per workspace across restarts.
+ * - Saves tabs to ~/workspaces/<name>.json via native host on every tab change
+ * - Restores tabs from workspace file when switching to a workspace
+ * - Maintains a hidden anchor window to keep Firefox alive
+ * - Provides "Send to workspace" context menu
  */
 
 const HOST_NAME = "workspace_tabs";
+const ANCHOR_TITLE = "workspace-anchor";
 
 let port = null;
 let pendingRequests = new Map();
 let requestId = 0;
 let lastWorkspace = null;
-let restoringWorkspaces = new Set(); // prevent double-restore
+let anchorWindowId = null;
+let restoringWorkspaces = new Set();
 let pendingNewWorkspaceTabId = null;
+let savePending = false;
+let initialized = false;
 
-// Handle messages from the new-workspace popup
-browser.runtime.onMessage.addListener((msg) => {
-  if (
-    msg.action === "sendToNewWorkspace" &&
-    msg.workspace &&
-    pendingNewWorkspaceTabId
-  ) {
-    const tabId = pendingNewWorkspaceTabId;
-    pendingNewWorkspaceTabId = null;
-    sendTabToWorkspace(tabId, msg.workspace);
-  }
-});
+// ── Native messaging ────────────────────────────────────────
 
 function connectNative() {
   try {
@@ -62,9 +56,7 @@ function sendNative(cmd, params = {}) {
 
 function handleNativeMessage(msg) {
   if (msg.event === "workspace_change") {
-    // Push event from workspace-manager — handle workspace switch
-    // restore flag: true = restore saved tabs, false = start fresh
-    onWorkspaceChange(msg.workspace, msg.restore !== false);
+    onWorkspaceChange(msg.workspace);
     return;
   }
   if (msg.id && pendingRequests.has(msg.id)) {
@@ -73,6 +65,8 @@ function handleNativeMessage(msg) {
     resolve(msg);
   }
 }
+
+// ── Workspace queries ───────────────────────────────────────
 
 async function getCurrentWorkspace() {
   try {
@@ -92,7 +86,8 @@ async function listWorkspaces() {
   }
 }
 
-// Get Firefox windows per workspace from sway tree (always fresh)
+// ── Firefox window <-> workspace mapping ────────────────────
+
 async function getFirefoxWindowMappings() {
   try {
     const resp = await sendNative("map_windows");
@@ -105,7 +100,7 @@ async function getFirefoxWindowMappings() {
     for (const mapping of resp.windows) {
       const swayTitle = mapping.windowTitle || "";
       for (const win of allWindows) {
-        if (matched.has(win.id)) continue;
+        if (matched.has(win.id) || win.id === anchorWindowId) continue;
         const activeTab = win.tabs && win.tabs.find((t) => t.active);
         if (
           activeTab &&
@@ -134,50 +129,108 @@ async function getWorkspacesWithFirefox() {
   }
 }
 
-// ── Tab saving ──────────────────────────────────────────────
+// ── Anchor window (keeps Firefox alive) ─────────────────────
 
-async function saveAllTabs() {
-  try {
-    const mappings = await getFirefoxWindowMappings();
-    const stored = (await browser.storage.local.get("savedTabs")) || {};
-    const savedTabs = stored.savedTabs || {};
+async function ensureAnchorWindow() {
+  if (anchorWindowId !== null) {
+    try {
+      await browser.windows.get(anchorWindowId);
+      return; // still exists
+    } catch (e) {
+      anchorWindowId = null;
+    }
+  }
 
-    for (const [workspace, windowId] of mappings) {
+  // Close any existing windows (Firefox's default startup window)
+  const existingWindows = await browser.windows.getAll();
+
+  // Create anchor window with a page that sets the window title
+  const win = await browser.windows.create({
+    url: browser.runtime.getURL("anchor.html"),
+  });
+  anchorWindowId = win.id;
+
+  // Close Firefox's default window(s)
+  for (const w of existingWindows) {
+    if (w.id !== anchorWindowId) {
       try {
-        const tabs = await browser.tabs.query({ windowId });
-        savedTabs[workspace] = tabs
-          .filter((t) => t.url && !t.url.startsWith("about:"))
-          .map((t) => ({
-            url: t.url,
-            title: t.title,
-            pinned: t.pinned,
-            active: t.active,
-          }));
+        await browser.windows.remove(w.id);
       } catch (e) {
-        // window might have closed
+        // already closed
       }
     }
+  }
+  // Daemon's for_window rule hides anchor when title updates to "workspace-anchor"
+}
 
-    await browser.storage.local.set({ savedTabs });
+// Prevent anchor window from being closed
+browser.windows.onRemoved.addListener((windowId) => {
+  if (windowId === anchorWindowId) {
+    anchorWindowId = null;
+    ensureAnchorWindow();
+  }
+});
+
+// ── Tab saving (to workspace file) ─────────────────────────
+
+async function saveTabsForWorkspace(workspace) {
+  if (!workspace) return;
+
+  const mappings = await getFirefoxWindowMappings();
+  const windowId = mappings.get(workspace);
+  if (!windowId) return;
+
+  try {
+    const tabs = await browser.tabs.query({ windowId });
+    const tabData = tabs
+      .filter((t) => t.url && !t.url.startsWith("about:"))
+      .map((t) => ({
+        url: t.url,
+        pinned: t.pinned,
+        active: t.active,
+      }));
+
+    await sendNative("save_tabs", { workspace, tabs: tabData });
   } catch (e) {
-    console.error("Failed to save tabs:", e);
+    console.error(`Failed to save tabs for ${workspace}:`, e);
   }
 }
 
-async function getSavedTabs() {
-  const stored = await browser.storage.local.get("savedTabs");
-  return (stored && stored.savedTabs) || {};
+async function saveAllTabs() {
+  const mappings = await getFirefoxWindowMappings();
+  for (const [workspace] of mappings) {
+    await saveTabsForWorkspace(workspace);
+  }
 }
 
-async function clearSavedTabs(workspace) {
-  const savedTabs = await getSavedTabs();
-  delete savedTabs[workspace];
-  await browser.storage.local.set({ savedTabs });
+// Debounced save: collects rapid changes, saves after 500ms idle
+function scheduleSave() {
+  if (savePending) return;
+  savePending = true;
+  setTimeout(async () => {
+    savePending = false;
+    if (lastWorkspace) {
+      await saveTabsForWorkspace(lastWorkspace);
+    }
+  }, 500);
 }
 
-// ── Tab restoring ───────────────────────────────────────────
+// Listen to all tab events that should trigger a save
+browser.tabs.onCreated.addListener(scheduleSave);
+browser.tabs.onRemoved.addListener(scheduleSave);
+browser.tabs.onUpdated.addListener((_tabId, changeInfo) => {
+  // Save on URL changes and title changes (navigation complete)
+  if (changeInfo.url || changeInfo.title) {
+    scheduleSave();
+  }
+});
+browser.tabs.onMoved.addListener(scheduleSave);
+browser.tabs.onActivated.addListener(scheduleSave);
+browser.tabs.onAttached.addListener(scheduleSave);
+browser.tabs.onDetached.addListener(scheduleSave);
 
-// Restore tabs into a window, removing the initial blank tab
+// ── Tab restoring (from workspace file) ─────────────────────
+
 async function restoreTabsInWindow(tabDataList, windowId) {
   let activeTabId = null;
   for (const tab of tabDataList) {
@@ -204,19 +257,17 @@ async function restoreTabsInWindow(tabDataList, windowId) {
   }
 }
 
-// Restore saved tabs for a workspace on the current sway workspace
 async function restoreWorkspace(workspace) {
   if (restoringWorkspaces.has(workspace)) return;
   restoringWorkspaces.add(workspace);
 
   try {
-    const savedTabs = await getSavedTabs();
-    const tabs = savedTabs[workspace];
-    if (!tabs || tabs.length === 0) return;
+    const resp = await sendNative("get_tabs", { workspace });
+    const tabs = resp.tabs || [];
+    if (tabs.length === 0) return;
 
     const newWindow = await browser.windows.create({});
     await restoreTabsInWindow(tabs, newWindow.id);
-    await clearSavedTabs(workspace);
   } catch (e) {
     console.error(`Failed to restore workspace ${workspace}:`, e);
   } finally {
@@ -224,90 +275,29 @@ async function restoreWorkspace(workspace) {
   }
 }
 
-// On startup: restore windows for all currently open workspaces
-async function restoreOnStartup() {
-  const savedTabs = await getSavedTabs();
-  const openWorkspaces = await listWorkspaces();
-  const currentWorkspace = await getCurrentWorkspace();
-
-  // Get the initial window Firefox created (reuse it for current workspace)
-  const initialWindows = await browser.windows.getAll({ populate: true });
-  let initialWindowUsed = false;
-
-  // Restore current workspace first, reusing the initial window
-  if (
-    currentWorkspace &&
-    savedTabs[currentWorkspace] &&
-    savedTabs[currentWorkspace].length > 0 &&
-    openWorkspaces.includes(currentWorkspace)
-  ) {
-    restoringWorkspaces.add(currentWorkspace);
-    try {
-      const win = initialWindows[0];
-      if (win) {
-        await restoreTabsInWindow(savedTabs[currentWorkspace], win.id);
-        initialWindowUsed = true;
-      }
-      await clearSavedTabs(currentWorkspace);
-    } catch (e) {
-      console.error(`Failed to restore current workspace:`, e);
-    } finally {
-      restoringWorkspaces.delete(currentWorkspace);
-    }
-  }
-
-  // Restore other workspaces
-  for (const ws of Object.keys(savedTabs)) {
-    if (ws === currentWorkspace) continue;
-    if (!savedTabs[ws] || savedTabs[ws].length === 0) continue;
-    if (!openWorkspaces.includes(ws)) continue;
-
-    restoringWorkspaces.add(ws);
-    try {
-      await sendNative("goto_workspace", { name: ws });
-      const newWindow = await browser.windows.create({});
-      await restoreTabsInWindow(savedTabs[ws], newWindow.id);
-      await clearSavedTabs(ws);
-    } catch (e) {
-      console.error(`Failed to restore workspace ${ws} on startup:`, e);
-    } finally {
-      restoringWorkspaces.delete(ws);
-    }
-  }
-
-  // Switch back to the original workspace
-  if (currentWorkspace) {
-    await sendNative("goto_workspace", { name: currentWorkspace });
-  }
-
-  // Close the initial window if it wasn't used
-  if (!initialWindowUsed && initialWindows.length > 0) {
-    const allWindows = await browser.windows.getAll();
-    if (allWindows.length > 1) {
-      try {
-        await browser.windows.remove(initialWindows[0].id);
-      } catch (e) {
-        // already closed
-      }
-    }
-  }
-}
-
 // ── Workspace change handling ────────────────────────────────
 
-async function onWorkspaceChange(workspace, restore = true) {
+async function onWorkspaceChange(workspace) {
   if (!workspace || workspace === lastWorkspace) return;
+
+  // Save tabs for the workspace we're leaving
+  if (lastWorkspace) {
+    await saveTabsForWorkspace(lastWorkspace);
+  }
+
   lastWorkspace = workspace;
 
-  // If restore is false, the user chose "New session" — don't restore tabs
-  if (!restore) return;
+  // Don't restore tabs during startup — only after user switches workspace
+  if (!initialized) return;
 
-  // Check if this workspace has saved tabs but no Firefox window
+  // Check if this workspace already has a Firefox window
   const withFirefox = await getWorkspacesWithFirefox();
   if (withFirefox.has(workspace)) return;
 
-  const savedTabs = await getSavedTabs();
-  if (savedTabs[workspace] && savedTabs[workspace].length > 0) {
+  // No Firefox window — restore saved tabs
+  const resp = await sendNative("get_tabs", { workspace });
+  const tabs = resp.tabs || [];
+  if (tabs.length > 0) {
     await restoreWorkspace(workspace);
   }
 }
@@ -329,10 +319,25 @@ async function sendTabToWorkspace(tabId, targetWorkspace) {
         await sendNative("goto_workspace", { name: sourceWorkspace });
       }
     }
+    // Save both workspaces after move
+    scheduleSave();
   } catch (e) {
     console.error(`Failed to send tab to workspace ${targetWorkspace}:`, e);
   }
 }
+
+// Handle messages from the new-workspace popup
+browser.runtime.onMessage.addListener((msg) => {
+  if (
+    msg.action === "sendToNewWorkspace" &&
+    msg.workspace &&
+    pendingNewWorkspaceTabId
+  ) {
+    const tabId = pendingNewWorkspaceTabId;
+    pendingNewWorkspaceTabId = null;
+    sendTabToWorkspace(tabId, msg.workspace);
+  }
+});
 
 // ── Context menu ────────────────────────────────────────────
 
@@ -430,15 +435,31 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 // ── Init ────────────────────────────────────────────────────
 
 async function init() {
+  // Create anchor window immediately — doesn't need native messaging
+  try {
+    await ensureAnchorWindow();
+  } catch (e) {
+    console.error("Failed to create anchor window:", e);
+  }
+
+  // Connect to native host for workspace integration
   connectNative();
   await new Promise((r) => setTimeout(r, 500));
 
-  lastWorkspace = await getCurrentWorkspace();
-  await restoreOnStartup();
-  await rebuildContextMenu();
+  try {
+    lastWorkspace = await getCurrentWorkspace();
+  } catch (e) {
+    console.warn("Failed to get current workspace:", e);
+  }
 
-  // Save tabs periodically
-  setInterval(saveAllTabs, 30000);
+  try {
+    await rebuildContextMenu();
+  } catch (e) {
+    console.warn("Failed to build context menu:", e);
+  }
+
+  // Mark init complete — workspace changes from now on will restore tabs
+  initialized = true;
 }
 
 init();

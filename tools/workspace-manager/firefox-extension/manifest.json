@@ -5,7 +5,6 @@
   "description": "Manage Firefox tabs per workspace, integrated with workspace-manager",
   "permissions": [
     "tabs",
-    "storage",
     "menus",
     "nativeMessaging"
   ],

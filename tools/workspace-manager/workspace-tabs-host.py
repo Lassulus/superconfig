@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Native messaging host for the Workspace Tabs Firefox extension."""
+"""Native messaging host for the Workspace Tabs Firefox extension.
+
+Bridges Firefox extension with workspace-manager daemon and sway.
+Tab persistence goes through the daemon (single writer to workspace files).
+"""
 
 from __future__ import annotations
 
@@ -41,6 +45,30 @@ def run(cmd: list[str]) -> str:
     except (OSError, subprocess.TimeoutExpired):
         return ""
     return r.stdout.strip() if r.returncode == 0 else ""
+
+
+def daemon_query(msg: dict[str, Any]) -> dict[str, Any]:
+    """Send a JSON command to the workspace-manager daemon and return the response."""
+    try:
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        sock.connect(str(SOCKET_PATH))
+        sock.settimeout(5.0)
+        sock.sendall(json.dumps(msg).encode())
+        # Shutdown write side so daemon knows we're done sending
+        sock.shutdown(socket.SHUT_WR)
+        data = b""
+        while True:
+            chunk = sock.recv(65536)
+            if not chunk:
+                break
+            data += chunk
+        sock.close()
+        if data:
+            result: dict[str, Any] = json.loads(data.strip())
+            return result
+    except (OSError, json.JSONDecodeError) as e:
+        print(f"Daemon query failed: {e}", file=sys.stderr)
+    return {}
 
 
 def get_firefox_windows() -> list[dict[str, str]]:
@@ -93,6 +121,15 @@ def handle(msg: dict[str, Any]) -> dict[str, Any]:
         return {"id": mid, "ok": True}
     if cmd == "map_windows":
         return {"id": mid, "windows": get_firefox_windows()}
+    if cmd == "save_tabs":
+        workspace = msg.get("workspace", "")
+        tabs = msg.get("tabs", [])
+        resp = daemon_query({"cmd": "save-tabs", "workspace": workspace, "tabs": tabs})
+        return {"id": mid, "ok": resp.get("ok", False)}
+    if cmd == "get_tabs":
+        workspace = msg.get("workspace", "")
+        resp = daemon_query({"cmd": "get-tabs", "workspace": workspace})
+        return {"id": mid, "tabs": resp.get("tabs", [])}
     return {"id": mid, "error": f"Unknown: {cmd}"}
 
 
@@ -139,7 +176,6 @@ def main() -> None:
                 try:
                     data = sub_sock.recv(4096)
                     if not data:
-                        # Daemon disconnected, try to reconnect
                         sub_sock.close()
                         sub_sock = connect_subscriber()
                         continue
@@ -147,13 +183,11 @@ def main() -> None:
                     while b"\n" in sub_buf:
                         line, sub_buf = sub_buf.split(b"\n", 1)
                         event: dict[str, Any] = json.loads(line)
-                        # Push workspace change event to Firefox
                         write_message(
                             {
                                 "id": 0,
                                 "event": "workspace_change",
                                 "workspace": event.get("new", ""),
-                                "restore": event.get("restore", True),
                             }
                         )
                 except (OSError, json.JSONDecodeError) as e:

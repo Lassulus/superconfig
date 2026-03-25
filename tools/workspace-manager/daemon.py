@@ -2,12 +2,12 @@
 """
 Workspace Manager Daemon
 
-A compositor-agnostic workspace manager that:
-- Subscribes to sway IPC for workspace change events
-- Runs user-defined hooks on workspace enter/leave
-- Provides current workspace and directory info via Unix socket
+Tracks the current sway workspace and provides:
+- Current workspace name and directory via Unix socket
+- Workspace change events to subscribers
 
-Config merging: user config is loaded first, then system config (declarative) overrides per-field
+Config: ~/workspaces/<name>.json with at minimum {"directory": "..."}
+System config (from Nix) takes precedence over user config.
 """
 
 from __future__ import annotations
@@ -16,7 +16,6 @@ import asyncio
 import json
 import os
 import signal
-import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -46,11 +45,6 @@ DEFAULT_DIRECTORY = (
     Path(_default_dir_env).expanduser() if _default_dir_env else Path.home()
 )
 
-TERMINAL_COMMAND = os.environ.get("WORKSPACE_MANAGER_TERMINAL", "kitty")
-
-_on_new_handler_env = os.environ.get("WORKSPACE_MANAGER_ON_NEW_HANDLER")
-ON_NEW_HANDLER: str | None = _on_new_handler_env if _on_new_handler_env else None
-
 
 def load_config_file(config_file: Path) -> dict[str, Any] | None:
     """Load a workspace config file, returning None if it doesn't exist or fails."""
@@ -64,280 +58,42 @@ def load_config_file(config_file: Path) -> dict[str, Any] | None:
         return None
 
 
-class WorkspaceConfig:
-    """Configuration for a workspace.
+def get_workspace_directory(name: str) -> Path:
+    """Get the directory for a workspace by merging user and system config."""
+    merged: dict[str, Any] = {}
 
-    Merges user config with system config (declarative).
-    System config fields take precedence over user config fields.
-    """
+    user_data = load_config_file(CONFIG_DIR / f"{name}.json")
+    if user_data is not None:
+        merged.update(user_data)
 
-    def __init__(self, name: str) -> None:
-        self.name = name
-        self.directory: Path = DEFAULT_DIRECTORY
-        self.on_enter: list[str] = []
-        self.on_leave: list[str] = []
-        self.on_create: list[str] = []
-        self._load()
-
-    def _load(self) -> None:
-        # Load user config first (base)
-        user_config_file = CONFIG_DIR / f"{self.name}.json"
-        user_data = load_config_file(user_config_file)
-
-        # Load system config (declarative, takes precedence)
-        system_data: dict[str, Any] | None = None
-        if SYSTEM_CONFIG_DIR is not None:
-            system_config_file = SYSTEM_CONFIG_DIR / f"{self.name}.json"
-            system_data = load_config_file(system_config_file)
-
-        # Merge: start with user config, override with system config
-        merged: dict[str, Any] = {}
-        if user_data is not None:
-            merged.update(user_data)
+    if SYSTEM_CONFIG_DIR is not None:
+        system_data = load_config_file(SYSTEM_CONFIG_DIR / f"{name}.json")
         if system_data is not None:
             merged.update(system_data)
 
-        # Apply merged config
-        if "directory" in merged:
-            self.directory = Path(str(merged["directory"])).expanduser()
-        if "on_enter" in merged:
-            self.on_enter = list(merged["on_enter"])
-        if "on_leave" in merged:
-            self.on_leave = list(merged["on_leave"])
-        if "on_create" in merged:
-            self.on_create = list(merged["on_create"])
+    if "directory" in merged:
+        return Path(str(merged["directory"])).expanduser()
+    return DEFAULT_DIRECTORY
 
 
 class WorkspaceManager:
-    """Manages workspace state and configuration"""
+    """Tracks current workspace state."""
 
     def __init__(self) -> None:
         self.current_workspace: str | None = None
-        self.configs: dict[str, WorkspaceConfig] = {}
-        self.created_workspaces: set[str] = set()
-
-    def get_config(self, workspace: str) -> WorkspaceConfig:
-        """Get or create config for a workspace (configs are loaded fresh each time)"""
-        # Always reload config to pick up changes
-        self.configs[workspace] = WorkspaceConfig(workspace)
-        return self.configs[workspace]
 
     def get_current_directory(self) -> Path:
-        """Get the directory for the current workspace"""
         if self.current_workspace:
-            config = self.get_config(self.current_workspace)
-            return config.directory
+            return get_workspace_directory(self.current_workspace)
         return DEFAULT_DIRECTORY
 
-    def _tmux_session_exists(self, session_name: str) -> bool:
-        """Check if a tmux session already exists"""
-        try:
-            result = subprocess.run(
-                ["tmux", "has-session", "-t", session_name],
-                capture_output=True,
-            )
-            return result.returncode == 0
-        except FileNotFoundError:
-            print("Warning: tmux not found", file=sys.stderr)
-            return False
-
-    async def _run_on_create(self, workspace: str, config: WorkspaceConfig) -> None:
-        """Start on_create commands each in their own tmux session + terminal.
-
-        For each command, creates a tmux session named <workspace>-start<N>
-        running the command, then opens a terminal window attached to it.
-        If the terminal is closed, reattach with: tmux attach -t <workspace>-start<N>
-        """
-        if not config.on_create:
-            return
-
-        work_dir = str(config.directory)
-
-        for i, cmd in enumerate(config.on_create, start=1):
-            session_name = f"{workspace}-start{i}"
-
-            # Skip if tmux session already exists (e.g. from a previous run)
-            if self._tmux_session_exists(session_name):
-                print(
-                    f"Tmux session '{session_name}' already exists, skipping",
-                    file=sys.stderr,
-                )
-                continue
-
-            # Create a detached tmux session running the command
-            try:
-                subprocess.run(
-                    [
-                        "tmux",
-                        "new-session",
-                        "-d",
-                        "-s",
-                        session_name,
-                        "-c",
-                        work_dir,
-                        cmd,
-                    ],
-                    check=True,
-                )
-                print(
-                    f"Created tmux session '{session_name}': {cmd}",
-                    file=sys.stderr,
-                )
-            except (OSError, subprocess.CalledProcessError) as e:
-                print(
-                    f"Failed to create tmux session '{session_name}': {e}",
-                    file=sys.stderr,
-                )
-                continue
-
-            # Open a terminal window attached to the tmux session
-            try:
-                subprocess.Popen(
-                    [
-                        TERMINAL_COMMAND,
-                        "-T",
-                        session_name,
-                        "tmux",
-                        "attach",
-                        "-t",
-                        session_name,
-                    ],
-                    start_new_session=True,
-                )
-                print(
-                    f"Opened terminal for tmux session '{session_name}'",
-                    file=sys.stderr,
-                )
-            except OSError as e:
-                print(
-                    f"Failed to open terminal for '{session_name}': {e}",
-                    file=sys.stderr,
-                )
-
-    def _workspace_has_windows(self, workspace: str) -> bool:
-        """Check if a workspace already has windows (via sway tree)."""
-        try:
-            result = subprocess.run(
-                ["swaymsg", "-t", "get_tree", "-r"],
-                capture_output=True,
-                text=True,
-                timeout=2,
-            )
-            if result.returncode != 0:
-                return False
-            tree: dict[str, Any] = json.loads(result.stdout)
-            # Find the workspace node and check for app containers
-            for output in tree.get("nodes", []):
-                for ws in output.get("nodes", []):
-                    if ws.get("name") == workspace:
-
-                        def has_apps(node: dict[str, Any]) -> bool:
-                            if node.get("type") == "con" and (
-                                node.get("app_id") or node.get("pid")
-                            ):
-                                return True
-                            for child in node.get("nodes", []) + node.get(
-                                "floating_nodes", []
-                            ):
-                                if has_apps(child):
-                                    return True
-                            return False
-
-                        return has_apps(ws)
-        except (OSError, json.JSONDecodeError, subprocess.TimeoutExpired) as e:
-            print(f"Failed to check workspace windows: {e}", file=sys.stderr)
-        return False
-
-    async def _ask_on_new(self, workspace: str) -> bool:
-        """Ask the user whether to restore a workspace via the on-new handler.
-
-        Returns True if on_create should be run, False to skip.
-        If no handler is configured, always returns True (auto-restore).
-        Skips the prompt if the workspace already has windows.
-        """
-        if self._workspace_has_windows(workspace):
-            return True
-        if ON_NEW_HANDLER is None:
-            return True
-        try:
-            proc = await asyncio.create_subprocess_exec(
-                ON_NEW_HANDLER,
-                workspace,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-            )
-            _, stderr = await proc.communicate()
-            if stderr:
-                print(
-                    f"on-new handler stderr: {stderr.decode().strip()}",
-                    file=sys.stderr,
-                )
-            # Exit 0 = restore, anything else = skip
-            return proc.returncode == 0
-        except FileNotFoundError:
-            print(
-                f"on-new handler not found: {ON_NEW_HANDLER}",
-                file=sys.stderr,
-            )
-            return True
-        except Exception as e:
-            print(f"on-new handler error: {e}", file=sys.stderr)
-            return True
-
-    async def handle_workspace_change(
+    def handle_workspace_change(
         self, old_workspace: str | None, new_workspace: str
-    ) -> bool:
-        """Handle a workspace focus change event.
-
-        Returns True if the workspace should be restored, False to start fresh.
-        """
-        # Run on_leave hooks for old workspace
-        if old_workspace:
-            old_config = self.get_config(old_workspace)
-            for hook in old_config.on_leave:
-                await self._run_hook(hook, "on_leave", old_workspace)
-
-        # Update current workspace
+    ) -> None:
         self.current_workspace = new_workspace
-
-        # Run on_create hooks if this is the first time entering the workspace
-        should_restore = True
-        new_config = self.get_config(new_workspace)
-        if new_workspace not in self.created_workspaces:
-            self.created_workspaces.add(new_workspace)
-            should_restore = await self._ask_on_new(new_workspace)
-            if should_restore:
-                await self._run_on_create(new_workspace, new_config)
-
-        # Run on_enter hooks for new workspace
-        for hook in new_config.on_enter:
-            await self._run_hook(hook, "on_enter", new_workspace)
-
-        # Write state file
         self._write_state()
 
-        return should_restore
-
-    async def _run_hook(self, command: str, hook_type: str, workspace: str) -> None:
-        """Run a hook command in the background"""
-        try:
-            # Run in background, don't wait
-            subprocess.Popen(
-                command,
-                shell=True,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                start_new_session=True,
-            )
-            print(f"Ran {hook_type} hook for {workspace}: {command}", file=sys.stderr)
-        except OSError as e:
-            print(
-                f"Failed to run {hook_type} hook for {workspace}: {e}",
-                file=sys.stderr,
-            )
-
     def _write_state(self) -> None:
-        """Write current state to state file"""
         state: dict[str, Any] = {
             "workspace": self.current_workspace,
             "directory": str(self.get_current_directory()),
@@ -356,9 +112,7 @@ manager = WorkspaceManager()
 subscribers: list[tuple[asyncio.StreamWriter, asyncio.Event]] = []
 
 
-async def notify_subscribers(
-    old_workspace: str | None, new_workspace: str, *, restore: bool = True
-) -> None:
+async def notify_subscribers(old_workspace: str | None, new_workspace: str) -> None:
     """Notify all subscribers of a workspace change."""
     event = (
         json.dumps(
@@ -366,7 +120,6 @@ async def notify_subscribers(
                 "event": "workspace_change",
                 "old": old_workspace,
                 "new": new_workspace,
-                "restore": restore,
             }
         ).encode()
         + b"\n"
@@ -380,7 +133,7 @@ async def notify_subscribers(
 
 
 async def subscribe_sway() -> None:
-    """Subscribe to sway IPC workspace events"""
+    """Subscribe to sway IPC workspace events."""
     print("Starting sway workspace subscription...", file=sys.stderr)
 
     while True:
@@ -414,16 +167,11 @@ async def subscribe_sway() -> None:
                                 f"Workspace change: {old_name} -> {new_name}",
                                 file=sys.stderr,
                             )
-                            restore = await manager.handle_workspace_change(
-                                old_name, new_name
-                            )
-                            await notify_subscribers(
-                                old_name, new_name, restore=restore
-                            )
+                            manager.handle_workspace_change(old_name, new_name)
+                            await notify_subscribers(old_name, new_name)
                 except json.JSONDecodeError as e:
                     print(f"Failed to parse sway event: {e}", file=sys.stderr)
 
-            # If swaymsg exits, wait a bit and retry
             await proc.wait()
             print("swaymsg exited, retrying in 5 seconds...", file=sys.stderr)
             await asyncio.sleep(5)
@@ -439,18 +187,64 @@ async def subscribe_sway() -> None:
             await asyncio.sleep(5)
 
 
+def load_user_config(workspace: str) -> dict[str, Any]:
+    """Load user workspace config, returning empty dict if not found."""
+    config_file = CONFIG_DIR / f"{workspace}.json"
+    return load_config_file(config_file) or {}
+
+
+def save_user_config(workspace: str, updates: dict[str, Any]) -> bool:
+    """Merge updates into user workspace config and write to disk."""
+    config_file = CONFIG_DIR / f"{workspace}.json"
+    try:
+        existing = load_user_config(workspace)
+        existing.update(updates)
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        with open(config_file, "w") as f:
+            json.dump(existing, f, indent=2)
+        return True
+    except OSError as e:
+        print(f"Failed to save config for {workspace}: {e}", file=sys.stderr)
+        return False
+
+
 async def handle_client(
     reader: asyncio.StreamReader, writer: asyncio.StreamWriter
 ) -> None:
-    """Handle a client connection to the Unix socket"""
+    """Handle a client connection to the Unix socket."""
     try:
-        data = await reader.read(1024)
-        command = data.decode().strip()
+        data = await reader.read(65536)
+        raw = data.decode().strip()
 
         response: dict[str, Any]
-        if command == "subscribe":
-            # Keep connection open and send workspace change events.
-            # Disconnection is detected in notify_subscribers when write fails.
+
+        # Try JSON command first, fall back to simple text commands
+        msg: dict[str, Any] | None = None
+        try:
+            msg = json.loads(raw)
+        except json.JSONDecodeError:
+            pass
+
+        if msg is not None:
+            cmd = msg.get("cmd", "")
+            if cmd == "save-tabs":
+                workspace = msg.get("workspace", "")
+                tabs: list[Any] = msg.get("tabs", [])
+                if workspace:
+                    ok = save_user_config(workspace, {"tabs": tabs})
+                    response = {"ok": ok}
+                else:
+                    response = {"ok": False, "error": "No workspace specified"}
+            elif cmd == "get-tabs":
+                workspace = msg.get("workspace", "")
+                if workspace:
+                    config = load_user_config(workspace)
+                    response = {"tabs": config.get("tabs", [])}
+                else:
+                    response = {"tabs": []}
+            else:
+                response = {"error": f"Unknown JSON command: {cmd}"}
+        elif raw == "subscribe":
             done = asyncio.Event()
             subscribers.append((writer, done))
             print("New subscriber connected", file=sys.stderr)
@@ -462,18 +256,18 @@ async def handle_client(
                 subscribers[:] = [(w, d) for w, d in subscribers if w is not writer]
                 print("Subscriber disconnected", file=sys.stderr)
             return
-        elif command == "dir":
+        elif raw == "dir":
             response = {"directory": str(manager.get_current_directory())}
-        elif command == "workspace":
+        elif raw == "workspace":
             response = {"workspace": manager.current_workspace}
-        elif command == "status":
+        elif raw == "status":
             response = {
                 "workspace": manager.current_workspace,
                 "directory": str(manager.get_current_directory()),
                 "running": True,
             }
         else:
-            response = {"error": f"Unknown command: {command}"}
+            response = {"error": f"Unknown command: {raw}"}
 
         writer.write(json.dumps(response).encode() + b"\n")
         await writer.drain()
@@ -485,17 +279,13 @@ async def handle_client(
 
 
 async def socket_server() -> None:
-    """Run the Unix socket server for CLI queries"""
-    # Ensure socket directory exists
+    """Run the Unix socket server."""
     SOCKET_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Remove stale socket if exists
     if SOCKET_PATH.exists():
         SOCKET_PATH.unlink()
 
     server = await asyncio.start_unix_server(handle_client, path=str(SOCKET_PATH))
-
-    # Make socket accessible
     os.chmod(SOCKET_PATH, 0o600)
 
     print(f"Socket server listening on {SOCKET_PATH}", file=sys.stderr)
@@ -505,7 +295,7 @@ async def socket_server() -> None:
 
 
 async def get_current_workspace() -> str | None:
-    """Get the current workspace from sway"""
+    """Get the current workspace from sway."""
     try:
         proc = await asyncio.create_subprocess_exec(
             "swaymsg",
@@ -526,23 +316,30 @@ async def get_current_workspace() -> str | None:
 
 
 async def main() -> None:
-    """Main entry point"""
-    # Ensure user config directory exists (system config is read-only from nix store)
+    """Main entry point."""
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Log config directories
     if SYSTEM_CONFIG_DIR:
         print(f"System config dir: {SYSTEM_CONFIG_DIR}", file=sys.stderr)
     print(f"User config dir: {CONFIG_DIR}", file=sys.stderr)
 
-    # Get initial workspace
+    # Register sway rule to hide Firefox anchor window before Firefox starts
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            "swaymsg",
+            'for_window [title="^workspace-anchor"] move scratchpad',
+        )
+        await proc.wait()
+        print("Registered sway rule for anchor window", file=sys.stderr)
+    except Exception as e:
+        print(f"Failed to register anchor sway rule: {e}", file=sys.stderr)
+
     initial_workspace = await get_current_workspace()
     if initial_workspace:
         manager.current_workspace = initial_workspace
         manager._write_state()
         print(f"Initial workspace: {initial_workspace}", file=sys.stderr)
 
-    # Handle shutdown gracefully
     loop = asyncio.get_event_loop()
 
     def shutdown(sig: signal.Signals) -> None:
@@ -553,7 +350,6 @@ async def main() -> None:
     for sig in (signal.SIGTERM, signal.SIGINT):
         loop.add_signal_handler(sig, shutdown, sig)
 
-    # Run both tasks concurrently
     try:
         await asyncio.gather(
             subscribe_sway(),
@@ -562,7 +358,6 @@ async def main() -> None:
     except asyncio.CancelledError:
         print("Shutdown complete", file=sys.stderr)
     finally:
-        # Cleanup socket
         if SOCKET_PATH.exists():
             SOCKET_PATH.unlink()
 

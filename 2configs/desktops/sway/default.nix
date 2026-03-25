@@ -28,15 +28,21 @@ in
   # Make goto-workspace available system-wide for workspace switching
   environment.systemPackages = [ gotoWorkspace ];
 
-  # Firefox as a systemd user service, started on login
+  # Firefox as a persistent systemd user service — starts after workspace-manager
+  # so the sway rule to hide the anchor window is already registered
   systemd.user.services.firefox = {
     description = "Firefox Web Browser";
     partOf = [ "sway-session.target" ];
     wantedBy = [ "sway-session.target" ];
-    after = [ "sway-session.target" ];
+    after = [
+      "sway-session.target"
+      "workspace-manager.service"
+    ];
     serviceConfig = {
       Type = "simple";
       ExecStart = lib.getExe self.packages.${pkgs.system}.firefox;
+      Restart = "always";
+      RestartSec = 2;
     };
   };
   imports = [

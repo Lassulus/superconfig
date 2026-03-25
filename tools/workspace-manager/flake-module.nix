@@ -16,21 +16,6 @@
             type = lib.types.str;
             description = "Directory to use for this workspace";
           };
-          on_enter = lib.mkOption {
-            type = lib.types.listOf lib.types.str;
-            default = [ ];
-            description = "Commands to run when entering this workspace";
-          };
-          on_leave = lib.mkOption {
-            type = lib.types.listOf lib.types.str;
-            default = [ ];
-            description = "Commands to run when leaving this workspace";
-          };
-          on_create = lib.mkOption {
-            type = lib.types.listOf lib.types.str;
-            default = [ ];
-            description = "Commands to run in a tmux session when the workspace is first entered. Each command gets its own tmux window with visible logs. Reattach with: tmux attach -t ws-<name>";
-          };
         };
       };
 
@@ -38,16 +23,7 @@
       systemConfigDir = pkgs.linkFarm "workspace-manager-configs" (
         lib.mapAttrsToList (name: ws: {
           name = "${name}.json";
-          path = pkgs.writeText "${name}.json" (
-            builtins.toJSON {
-              inherit (ws)
-                directory
-                on_enter
-                on_leave
-                on_create
-                ;
-            }
-          );
+          path = pkgs.writeText "${name}.json" (builtins.toJSON { inherit (ws) directory; });
         }) cfg.workspaces
       );
     in
@@ -67,13 +43,8 @@
           description = "Declarative workspace configurations (take precedence over user configs)";
           example = lib.literalExpression ''
             {
-              dev = {
-                directory = "/home/user/src/myproject";
-                on_enter = [ "notify-send 'Entered dev workspace'" ];
-              };
-              music = {
-                directory = "/home/user/Music";
-              };
+              dev = { directory = "/home/user/src/myproject"; };
+              music = { directory = "/home/user/Music"; };
             }
           '';
         };
@@ -88,18 +59,6 @@
           type = lib.types.str;
           default = "~";
           description = "Default directory for workspaces without configuration";
-        };
-
-        terminalCommand = lib.mkOption {
-          type = lib.types.str;
-          default = "kitty";
-          description = "Terminal emulator to use for on_create commands. Must support '-T title' for setting the window title.";
-        };
-
-        onNewHandler = lib.mkOption {
-          type = lib.types.nullOr lib.types.str;
-          default = "${self.packages.${pkgs.system}.workspace-on-new}/bin/workspace-on-new";
-          description = "Script called when entering a workspace for the first time. Exit 0 to restore (run on_create), non-zero to skip.";
         };
       };
 
@@ -117,9 +76,7 @@
               "WORKSPACE_MANAGER_CONFIG_DIR=${cfg.configDir}"
               "WORKSPACE_MANAGER_SYSTEM_CONFIG_DIR=${systemConfigDir}"
               "WORKSPACE_MANAGER_DEFAULT_DIR=${cfg.defaultDirectory}"
-              "WORKSPACE_MANAGER_TERMINAL=${cfg.terminalCommand}"
-            ]
-            ++ lib.optional (cfg.onNewHandler != null) "WORKSPACE_MANAGER_ON_NEW_HANDLER=${cfg.onNewHandler}";
+            ];
           };
         };
       };
@@ -152,25 +109,14 @@
           pkgs.jq
           pkgs.rofi
           pkgs.libnotify
-          pkgs.tmux
           pkgs.kitty
           pkgs.findutils
           pkgs.gnused
           pkgs.coreutils
           pkgs.gnugrep
+          pkgs.firefox
         ];
         text = builtins.readFile ./workspace-menu.sh;
-      };
-
-      packages.workspace-on-new = pkgs.writeShellApplication {
-        name = "workspace-on-new";
-        runtimeInputs = [
-          pkgs.jq
-          pkgs.rofi
-          pkgs.coreutils
-          pkgs.gnused
-        ];
-        text = builtins.readFile ./workspace-on-new.sh;
       };
 
       packages.workspace-manager-daemon = pkgs.stdenv.mkDerivation {
@@ -196,7 +142,7 @@
           cp daemon.py $out/bin/workspace-manager-daemon
           chmod +x $out/bin/workspace-manager-daemon
           wrapProgram $out/bin/workspace-manager-daemon \
-            --prefix PATH : ${python}/bin:${pkgs.sway}/bin:${pkgs.tmux}/bin
+            --prefix PATH : ${python}/bin:${pkgs.sway}/bin
           runHook postInstall
         '';
         meta.mainProgram = "workspace-manager-daemon";
