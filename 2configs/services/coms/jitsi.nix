@@ -26,9 +26,12 @@
     };
   };
 
-  # Disable AWS harvester (not needed)
+  # Disable AWS harvester (not needed) and configure NAT harvester
+  # so clients can establish media connections through NAT
   services.jitsi-videobridge.extraProperties = {
     "org.ice4j.ice.harvest.DISABLE_AWS_HARVESTER" = "true";
+    "org.ice4j.ice.harvest.NAT_HARVESTER_LOCAL_ADDRESS" = "0.0.0.0";
+    "org.ice4j.ice.harvest.NAT_HARVESTER_PUBLIC_ADDRESS" = "95.217.192.59";
   };
 
   services.prosody.checkConfig = false;
