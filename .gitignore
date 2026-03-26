@@ -2,3 +2,5 @@
 result*
 .null-ls_*
 .pi
+tools/.DS_Store
+tools/stt/__pycache__/
