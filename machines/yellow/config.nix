@@ -15,6 +15,7 @@ in
     ../../2configs/retiolum.nix
     ../../2configs/services/flix
     ../../2configs/autoupdate.nix
+    ../../2configs/services/archiver-bot.nix
   ];
 
   # we need to configure another port for the mycelium admin interface, because it conflicts with sonarr.
