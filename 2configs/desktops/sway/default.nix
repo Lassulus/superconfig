@@ -241,11 +241,12 @@ in
         bindsym $mod+Shift+Right move right
     # Layout stuff:
     #
-        # You can "split" the current object of your focus with
-        # $mod+b or $mod+v, for horizontal and vertical splits
-        # respectively.
+        # Autotiling handles split direction automatically.
+        # Use $mod+b/$mod+v only when you explicitly want to force a direction.
         bindsym $mod+b splith
         bindsym $mod+v splitv
+        # Flatten a nested container back (undo accidental sub-containers)
+        bindsym $mod+Shift+e split none
 
         # Switch the current container between different layout styles
         bindsym $mod+s layout stacking
@@ -415,6 +416,7 @@ in
     exec ${pkgs.copyq}/bin/copyq --start-server
     exec ydotoold
     exec_always pkill kanshi; exec ${pkgs.kanshi}/bin/kanshi
+    exec_always pkill autotiling; exec ${pkgs.autotiling}/bin/autotiling
 
     # theme and env specific stuff
     exec_always ${pkgs.writers.writeDash "dbus-sway-environment" ''
