@@ -38,6 +38,7 @@
     self.packages.${pkgs.system}.mpv
     self.packages.${pkgs.system}.s
     pkgs.gh
+    pkgs.radicle-node
   ];
 
   documentation.nixos.enable = true;
