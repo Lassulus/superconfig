@@ -231,32 +231,6 @@ browser.tabs.onDetached.addListener(scheduleSave);
 
 // ── Tab restoring (from workspace file) ─────────────────────
 
-async function restoreTabsInWindow(tabDataList, windowId) {
-  let activeTabId = null;
-  for (const tab of tabDataList) {
-    const created = await browser.tabs.create({
-      windowId,
-      url: tab.url,
-      pinned: tab.pinned,
-      active: tab.active,
-    });
-    if (tab.active) activeTabId = created.id;
-  }
-
-  // Remove initial blank tab
-  const allTabs = await browser.tabs.query({ windowId });
-  for (const t of allTabs) {
-    if (
-      (t.url === "about:blank" || t.url === "about:newtab") &&
-      t.id !== activeTabId &&
-      allTabs.length > 1
-    ) {
-      await browser.tabs.remove(t.id);
-      break;
-    }
-  }
-}
-
 async function restoreWorkspace(workspace) {
   if (restoringWorkspaces.has(workspace)) return;
   restoringWorkspaces.add(workspace);
@@ -266,8 +240,25 @@ async function restoreWorkspace(workspace) {
     const tabs = resp.tabs || [];
     if (tabs.length === 0) return;
 
-    const newWindow = await browser.windows.create({});
-    await restoreTabsInWindow(tabs, newWindow.id);
+    // Create window with the first tab to avoid a blank "new tab"
+    const first = tabs[0];
+    const newWindow = await browser.windows.create({ url: first.url });
+    const windowId = newWindow.id;
+
+    // Pin the first tab if needed
+    if (first.pinned && newWindow.tabs && newWindow.tabs[0]) {
+      await browser.tabs.update(newWindow.tabs[0].id, { pinned: true });
+    }
+
+    // Create remaining tabs
+    for (let i = 1; i < tabs.length; i++) {
+      await browser.tabs.create({
+        windowId,
+        url: tabs[i].url,
+        pinned: tabs[i].pinned,
+        active: tabs[i].active,
+      });
+    }
   } catch (e) {
     console.error(`Failed to restore workspace ${workspace}:`, e);
   } finally {
