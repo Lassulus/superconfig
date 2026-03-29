@@ -8,6 +8,12 @@
     enable = true;
     host = "127.0.0.1";
     port = 3200;
+    extraConfig = {
+      SMTP_ADDRESS = "localhost";
+      SMTP_PORT = "25";
+      SMTP_DOMAIN = "lassul.us";
+      SMTP_ENABLE_STARTTLS = "false";
+    };
   };
 
   clan.core.vars.generators.docuseal = {
