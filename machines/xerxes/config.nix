@@ -14,6 +14,7 @@
     ../../2configs/android-webcam.nix
     ../../2configs/radicle.nix
     ../../2configs/steam.nix
+    ../../2configs/games.nix
     ../../2configs/auto-timezone.nix
     self.wrapperModules.workspace-manager
   ];
