@@ -74,6 +74,11 @@
             self.legacyPackages.${pkgs.system}.skills.hedgedoc
           }/share/hedgedoc $out/lib/node_modules/shitty-extensions/skills/hedgedoc
 
+          # Add reverse-engineering skill
+          ln -s ${
+            self.legacyPackages.${pkgs.system}.skills.reverse-engineering
+          }/share/reverse-engineering $out/lib/node_modules/shitty-extensions/skills/reverse-engineering
+
           # Patch permission extension to use pw-play for peon sounds on Linux
           ${pkgs.lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
             ${pkgs.python3}/bin/python3 ${./patch-permission-sound.py} \
