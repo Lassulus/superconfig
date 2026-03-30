@@ -247,39 +247,7 @@ in
 
         # Switch the current container between different layout styles
         bindsym $mod+s layout stacking
-    bindsym $mod+w exec ${
-      lib.getExe (
-        pkgs.writeShellApplication {
-          name = "sway-tabbed";
-          runtimeInputs = [
-            pkgs.sway
-            pkgs.jq
-          ];
-          text = ''
-            # Get all leaf window IDs on the focused workspace
-            ids=$(swaymsg -t get_tree | jq -r '
-              .. | select(.type? == "workspace") |
-              select(.. | .focused? // false) |
-              [.. | select(.type? == "con" and (.nodes? | length) == 0 and .pid? > 0)] |
-              .[].id
-            ')
-            count=$(echo "$ids" | wc -l)
-            if [ "$count" -le 1 ]; then
-              swaymsg layout tabbed
-              exit 0
-            fi
-            # Move all windows to scratchpad, then back — this flattens the tree
-            for id in $ids; do
-              swaymsg "[con_id=$id]" move scratchpad
-            done
-            swaymsg layout tabbed
-            for id in $ids; do
-              swaymsg "[con_id=$id]" move workspace current
-            done
-          '';
-        }
-      )
-    }
+        bindsym $mod+w layout tabbed
         bindsym $mod+e layout toggle split
 
         # Make the current focus fullscreen
@@ -361,31 +329,7 @@ in
 
     bindsym $mod+y exec /run/current-system/sw/bin/switch-theme toggle
 
-    bindsym $mod+Tab exec ${
-      lib.getExe (
-        pkgs.writeShellApplication {
-          name = "sway-focus-next";
-          runtimeInputs = [
-            pkgs.sway
-            pkgs.jq
-          ];
-          text = ''
-            swaymsg -t get_tree | jq -r '
-              # Find the focused workspace
-              .. | select(.type? == "workspace") |
-              select(.. | .focused? // false) |
-              # Collect all leaf windows (containers with a pid) in tree order
-              [.. | select(.type? == "con" and (.nodes? | length) == 0 and .pid? > 0)] |
-              # Find focused index and pick next (wrapping)
-              (map(.focused) | index(true)) as $i |
-              if $i == null then empty
-              else .[(($i + 1) % length)].id
-              end
-            ' | head -n1 | xargs -I{} swaymsg '[con_id={}]' focus
-          '';
-        }
-      )
-    }
+    bindsym $mod+Tab exec ${pkgs.sway-overfocus}/bin/sway-overfocus split-rw group-dw split-dw
     bindsym $mod+Escape workspace back_and_forth
 
     # Focus primary output
