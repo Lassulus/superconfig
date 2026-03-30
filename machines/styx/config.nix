@@ -13,6 +13,7 @@
     ../../2configs/yellow-mounts/samba.nix
     ../../2configs/gg23.nix
     ../../2configs/hass
+    ../../2configs/n8n.nix
     ../../2configs/green-host.nix
     ../../2configs/syncthing.nix
     ../../2configs/ppp/umts-stick.nix
