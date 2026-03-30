@@ -96,4 +96,12 @@
 
   # for usb internet
   hardware.usbWwan.enable = true;
+
+  swapDevices = [
+    {
+      device = "/swapfile";
+      size = 8192;
+    }
+  ];
+  services.earlyoom.enable = true;
 }
