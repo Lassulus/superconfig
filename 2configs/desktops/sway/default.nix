@@ -243,7 +243,7 @@ in
     #
         # Split bindings removed to avoid accidental sub-containers.
         # Use $mod+w to flatten into tabs, $mod+e to toggle split direction.
-        bindsym $mod+Shift+e split none
+        bindsym $mod+n split none
 
         # Switch the current container between different layout styles
         bindsym $mod+s layout stacking
@@ -329,7 +329,7 @@ in
 
     bindsym $mod+y exec /run/current-system/sw/bin/switch-theme toggle
 
-    bindsym $mod+Tab exec ${pkgs.sway-overfocus}/bin/sway-overfocus split-rw group-dw split-dw
+    bindsym $mod+Tab exec ${pkgs.sway-overfocus}/bin/sway-overfocus split-rw group-rw split-dw group-dw
     bindsym $mod+Escape workspace back_and_forth
 
     # Focus primary output
@@ -420,7 +420,7 @@ in
       set -efux
       dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP=sway
       systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP
-      systemctl --user restart --no-block sway-session.target
+      systemctl --user start --no-block sway-session.target
       systemctl --user stop xdg-desktop-portal xdg-desktop-portal-wlr
       systemctl --user start xdg-desktop-portal xdg-desktop-portal-wlr
     ''}
