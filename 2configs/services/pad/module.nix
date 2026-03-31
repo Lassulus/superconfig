@@ -53,6 +53,9 @@
     systemd.services.hedgedoc.serviceConfig.SystemCallFilter = [
       "fchown"
     ];
+    systemd.services.hedgedoc.serviceConfig.MemoryMax = "1G";
+    systemd.services.hedgedoc.serviceConfig.Restart = "always";
+    systemd.services.hedgedoc.environment.NODE_OPTIONS = "--max-old-space-size=512";
 
     systemd.services.hedgedoc.serviceConfig.EnvironmentFile = [
       config.clan.core.vars.generators.hedgedoc.files."hedgedoc.env".path
