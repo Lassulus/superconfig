@@ -1,5 +1,6 @@
 {
   pkgs,
+  pinentry-auto ? pkgs.callPackage ../pinentry-auto/package.nix { },
   ...
 }:
 let
@@ -17,14 +18,8 @@ pkgs.writeShellApplication {
   ];
   text = ''
     if ! rbw unlocked 2>/dev/null; then
-      if [ -t 0 ]; then
-        rbw unlock
-      else
-        saved_pinentry=$(rbw config show | ${pkgs.jq}/bin/jq -r '.pinentry')
-        rbw config set pinentry ${pkgs.pinentry-rofi}/bin/pinentry-rofi
-        trap 'rbw config set pinentry "$saved_pinentry"' EXIT
-        rbw unlock
-      fi
+      rbw config set pinentry ${pinentry-auto}/bin/pinentry-auto
+      rbw unlock
     fi
     ${python}/bin/python ${./kagi_search.py} "$@"
   '';
