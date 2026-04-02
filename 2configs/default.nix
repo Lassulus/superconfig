@@ -33,7 +33,6 @@
     ./networkd.nix
     ./pinned-registry.nix
     ./zerotier.nix
-    ./nether.nix
     ./nix.nix
 
     # Import stockholm modules
