@@ -48,6 +48,7 @@
           extensions = [
             ./questionnaire.ts
             ./auto-theme.ts
+            ./websearch.ts
           ];
           defaultProvider = "anthropic";
           defaultModel = "claude-opus-4-6";
@@ -60,6 +61,11 @@
             "nix fmt *"
           ];
         };
+
+        extraPackages = [
+          self.packages.${pkgs.system}.kagi-search
+          pkgs.curl
+        ];
 
         pluginOverrides = ''
           # Fix keybinding conflicts in extension source
