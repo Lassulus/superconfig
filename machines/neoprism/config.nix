@@ -76,6 +76,9 @@
 
     # backups
     ./backup.nix
+
+    # IPFS
+    ../../2configs/services/flix/ipfs.nix
   ];
 
   # lassul.us shouldn't be the default vhost here (nginx.nix already sets one)
