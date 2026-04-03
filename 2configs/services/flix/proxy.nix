@@ -1,5 +1,13 @@
 { pkgs, ... }:
 {
+  services.nginx.virtualHosts."ipfs.lassul.us" = {
+    forceSSL = true;
+    enableACME = true;
+    locations."/" = {
+      proxyPass = "http://localhost:8089";
+      recommendedProxySettings = true;
+    };
+  };
   services.nginx.virtualHosts."flix.lassul.us" = {
     forceSSL = true;
     enableACME = true;

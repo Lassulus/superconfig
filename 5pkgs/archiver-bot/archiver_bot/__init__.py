@@ -34,6 +34,11 @@ MATRIX_DEVICE_ID = os.environ.get("MATRIX_DEVICE_ID", "ARCHIVER")
 STORE_PATH = os.environ.get("STORE_PATH", "/var/lib/archiver-bot")
 WEBHOOK_PORT = int(os.environ.get("WEBHOOK_PORT", "8099"))
 FLAX_URL = os.environ.get("FLAX_URL", "https://flax.lassul.us")
+FLIX_URL = os.environ.get("FLIX_URL", "https://flix.lassul.us")
+JELLYFIN_URL = os.environ.get("JELLYFIN_URL", "http://localhost:8096")
+JELLYFIN_API_KEY = os.environ.get("JELLYFIN_API_KEY", "")
+IPFS_GATEWAY_URL = os.environ.get("IPFS_GATEWAY_URL", "https://ipfs.lassul.us")
+IPFS_BIN = os.environ.get("IPFS_BIN", "ipfs")
 MEDIA_PATH_PREFIX = os.environ.get("MEDIA_PATH_PREFIX", "/var/download/")
 
 # Persistent tracking of requested media -> rooms
@@ -80,6 +85,134 @@ def make_flax_link(path: str) -> str:
     if relative.startswith(MEDIA_PATH_PREFIX):
         relative = relative[len(MEDIA_PATH_PREFIX):]
     return f"{FLAX_URL}/{quote(relative)}"
+
+
+async def compute_cid(path: str) -> str | None:
+    """Compute the IPFS CID for a file using ipfs add --only-hash."""
+    try:
+        ipfs_path = "/tmp/ipfs-hash-repo"
+        if not os.path.exists(os.path.join(ipfs_path, "config")):
+            init_proc = await asyncio.create_subprocess_exec(
+                IPFS_BIN, "init",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                env={**os.environ, "IPFS_PATH": ipfs_path},
+            )
+            await init_proc.communicate()
+        env = {**os.environ, "IPFS_PATH": ipfs_path}
+        proc = await asyncio.create_subprocess_exec(
+            IPFS_BIN, "add", "--only-hash", "--quieter", path,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            env=env,
+        )
+        try:
+            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=30)
+        except asyncio.TimeoutError:
+            proc.kill()
+            await proc.communicate()
+            log.warning(f"ipfs add --only-hash timed out for {path}")
+            return None
+        if proc.returncode == 0:
+            cid = stdout.decode().strip()
+            if cid:
+                return cid
+        else:
+            log.warning(f"ipfs add --only-hash failed for {path}: {stderr.decode().strip()}")
+    except Exception as e:
+        log.warning(f"Failed to compute CID for {path}: {e}")
+    return None
+
+
+async def trigger_jellyfin_scan(session: aiohttp.ClientSession):
+    """Trigger a Jellyfin library scan and Jellyseerr sync."""
+    try:
+        async with session.post(
+            f"{JELLYFIN_URL}/Library/Refresh",
+            headers={"X-Emby-Token": JELLYFIN_API_KEY},
+        ) as resp:
+            log.info(f"Triggered Jellyfin library scan: {resp.status}")
+        # also trigger Jellyseerr sync so it picks up the new jellyfinMediaId
+        await jellyseerr_request(session, "/settings/jellyfin/sync", method="POST")
+        log.info("Triggered Jellyseerr sync")
+    except Exception as e:
+        log.warning(f"Failed to trigger library scan: {e}")
+
+
+async def lookup_jellyfin_id(session: aiohttp.ClientSession, media_type: str, tmdb_id: int) -> str | None:
+    """Look up Jellyfin item ID via Jellyseerr's mediaInfo or Jellyfin API."""
+    # Try Jellyseerr first — it tracks the Jellyfin media ID
+    # Try Jellyseerr first
+    try:
+        endpoint = f"/movie/{tmdb_id}" if media_type == "movie" else f"/tv/{tmdb_id}"
+        details = await jellyseerr_request(session, endpoint)
+        media_info = details.get("mediaInfo")
+        if media_info:
+            jf_id = media_info.get("jellyfinMediaId")
+            if jf_id:
+                log.info(f"Jellyfin ID from Jellyseerr for {media_type}:{tmdb_id} = {jf_id}")
+                return jf_id
+    except Exception as e:
+        log.warning(f"Jellyseerr Jellyfin ID lookup failed for {media_type}:{tmdb_id}: {e}")
+
+    # Fallback: query Jellyfin directly, searching by provider ID
+    if JELLYFIN_API_KEY:
+        try:
+            item_type = "Movie" if media_type == "movie" else "Series"
+            async with session.get(
+                f"{JELLYFIN_URL}/Items",
+                params={
+                    "IncludeItemTypes": item_type,
+                    "Recursive": "true",
+                    "Fields": "ProviderIds",
+                },
+                headers={"X-Emby-Token": JELLYFIN_API_KEY},
+            ) as resp:
+                data = await resp.json()
+                for item in data.get("Items", []):
+                    provider_ids = item.get("ProviderIds", {})
+                    if str(provider_ids.get("Tmdb")) == str(tmdb_id):
+                        jf_id = item.get("Id")
+                        log.info(f"Jellyfin ID from Jellyfin API for {media_type}:{tmdb_id} = {jf_id}")
+                        return jf_id
+        except Exception as e:
+            log.warning(f"Jellyfin API lookup failed for {media_type}:{tmdb_id}: {e}")
+
+    log.info(f"No Jellyfin ID found for {media_type}:{tmdb_id}")
+    return None
+
+
+async def make_media_links(path: str, is_dir: bool = False, jellyfin_id: str | None = None) -> tuple[str, str]:
+    """Generate plain and HTML text with all available links for a media path."""
+    from urllib.parse import quote
+
+    lines_plain = []
+    lines_html = []
+
+    # Flax link (direct file download)
+    flax = make_flax_link(path)
+    lines_plain.append(f"📁 Download: {flax}")
+    lines_html.append(f'📁 Download: <a href="{flax}">{flax}</a>')
+
+    # Jellyfin link (streaming)
+    if jellyfin_id:
+        flix_link = f"{FLIX_URL}/web/#/details?id={jellyfin_id}"
+    else:
+        flix_link = FLIX_URL
+    lines_plain.append(f"🎬 Stream: {flix_link}")
+    lines_html.append(f'🎬 Stream: <a href="{flix_link}">{flix_link}</a>')
+
+    # IPFS link (compute CID for the file)
+    if not is_dir:
+        cid = await compute_cid(path)
+        if cid:
+            ipfs_link = f"{IPFS_GATEWAY_URL}/ipfs/{cid}"
+            lines_plain.append(f"🌐 IPFS: {ipfs_link}")
+            lines_html.append(f'🌐 IPFS: <a href="{ipfs_link}">{ipfs_link}</a>')
+            lines_plain.append(f"    ipfs get {cid}")
+            lines_html.append(f"    <code>ipfs get {cid}</code>")
+
+    return ("\n".join(lines_plain), "<br>".join(lines_html))
 
 
 async def jellyseerr_request(session: aiohttp.ClientSession, path: str, **kwargs) -> dict:
@@ -189,8 +322,10 @@ async def request_media(session: aiohttp.ClientSession, media: dict, room_id: st
         if status == 5:
             path = await lookup_media_path(session, media_type, media_id)
             if path:
-                link = make_flax_link(path)
-                return (f"✅ {display} is already available!\n{link}", f'✅ <b>{display}</b> is already available!<br><a href="{link}">{link}</a>')
+                is_dir = media_type == "tv"
+                jf_id = await lookup_jellyfin_id(session, media_type, media_id)
+                links_plain, links_html = await make_media_links(path, is_dir=is_dir, jellyfin_id=jf_id)
+                return (f"✅ {display} is already available!\n{links_plain}", f"✅ <b>{display}</b> is already available!<br>{links_html}")
             return (f"✅ {display} is already available!", f"✅ <b>{display}</b> is already available!")
         elif status in (2, 3, 4):
             track_request(media_type, media_id, room_id)
@@ -203,10 +338,12 @@ async def request_media(session: aiohttp.ClientSession, media: dict, room_id: st
     # Check if Radarr/Sonarr already has the file before requesting
     existing_path = await lookup_media_path(session, media_type, media_id)
     if existing_path:
-        link = make_flax_link(existing_path)
+        is_dir = media_type == "tv"
+        jf_id = await lookup_jellyfin_id(session, media_type, media_id)
+        links_plain, links_html = await make_media_links(existing_path, is_dir=is_dir, jellyfin_id=jf_id)
         # Still send the request to Jellyseerr so it's tracked there too
         await jellyseerr_request(session, "/request", method="POST", json=payload)
-        return (f"✅ {display} is already available!\n{link}", f'✅ <b>{display}</b> is already available!<br><a href="{link}">{link}</a>')
+        return (f"✅ {display} is already available!\n{links_plain}", f"✅ <b>{display}</b> is already available!<br>{links_html}")
 
     result = await jellyseerr_request(session, "/request", method="POST", json=payload)
 
@@ -329,9 +466,14 @@ async def handle_radarr_webhook(request):
                 rooms = pop_tracked("movie", tmdb_id)
                 if rooms:
                     client = request.app["matrix_client"]
-                    link = make_flax_link(file_path)
-                    plain = f"✅ {display} has been downloaded and is now available!\n{link}"
-                    html = f'✅ <b>{display}</b> has been downloaded and is now available!<br><a href="{link}">{link}</a>'
+                    http = request.app["http_session"]
+                    # trigger library scan so Jellyfin picks up the new file
+                    await trigger_jellyfin_scan(http)
+                    await asyncio.sleep(10)
+                    jf_id = await lookup_jellyfin_id(http, "movie", tmdb_id)
+                    links_plain, links_html = await make_media_links(file_path, jellyfin_id=jf_id)
+                    plain = f"✅ {display} has been downloaded and is now available!\n{links_plain}"
+                    html = f"✅ <b>{display}</b> has been downloaded and is now available!<br>{links_html}"
                     for room_id in rooms:
                         try:
                             await send_notice(client, room_id, plain, html)
@@ -367,10 +509,15 @@ async def handle_sonarr_webhook(request):
                 rooms = pop_tracked("tv", tmdb_id)
                 if rooms:
                     client = request.app["matrix_client"]
+                    http = request.app["http_session"]
                     folder_path = series.get("path", "")
-                    link = make_flax_link(folder_path)
-                    plain = f"✅ {display}{ep_info} has been downloaded and is now available!\n{link}"
-                    html = f'✅ <b>{display}</b>{ep_info} has been downloaded and is now available!<br><a href="{link}">{link}</a>'
+                    # trigger library scan so Jellyfin picks up the new file
+                    await trigger_jellyfin_scan(http)
+                    await asyncio.sleep(10)
+                    jf_id = await lookup_jellyfin_id(http, "tv", tmdb_id)
+                    links_plain, links_html = await make_media_links(folder_path, is_dir=True, jellyfin_id=jf_id)
+                    plain = f"✅ {display}{ep_info} has been downloaded and is now available!\n{links_plain}"
+                    html = f"✅ <b>{display}</b>{ep_info} has been downloaded and is now available!<br>{links_html}"
                     for room_id in rooms:
                         try:
                             await send_notice(client, room_id, plain, html)
@@ -413,6 +560,7 @@ async def run():
     # Start webhook server for Radarr/Sonarr notifications
     app = web.Application()
     app["matrix_client"] = client
+    app["http_session"] = http
     app.router.add_post("/webhook/radarr", handle_radarr_webhook)
     app.router.add_post("/webhook/sonarr", handle_sonarr_webhook)
     runner = web.AppRunner(app)
