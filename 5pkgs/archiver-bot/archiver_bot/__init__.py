@@ -10,6 +10,7 @@ import aiohttp
 from aiohttp import web
 from nio import (
     AsyncClient,
+    AsyncClientConfig,
     InviteMemberEvent,
     LoginResponse,
     MatrixRoom,
@@ -338,8 +339,23 @@ async def request_media(session: aiohttp.ClientSession, media: dict, room_id: st
         return (f"❌ Failed to request {display}: {error}", f"❌ Failed to request <b>{display}</b>: {error}")
 
 
+async def trust_room_devices(client: AsyncClient, room_id: str):
+    """Trust all devices of all members in a room."""
+    if not client.olm:
+        return
+    room = client.rooms.get(room_id)
+    if not room:
+        return
+    for user_id in room.users:
+        for device in client.device_store.active_user_devices(user_id):
+            if not client.olm.is_device_verified(device):
+                client.verify_device(device)
+                log.info(f"Verified device {device.device_id} of {user_id}")
+
+
 async def send_notice(client: AsyncClient, room_id: str, plain: str, html: str):
     """Send a notice message to a room."""
+    await trust_room_devices(client, room_id)
     await client.room_send(
         room_id,
         "m.room.message",
@@ -514,14 +530,21 @@ async def handle_sonarr_webhook(request):
 
 async def run():
     """Main bot loop."""
+    client_config = AsyncClientConfig(
+        store_sync_tokens=True,
+        encryption_enabled=True,
+    )
     client = AsyncClient(
         MATRIX_HOMESERVER,
         MATRIX_USER_ID,
         device_id=MATRIX_DEVICE_ID,
         store_path=STORE_PATH,
+        config=client_config,
     )
     client.access_token = MATRIX_ACCESS_TOKEN
     client.user_id = MATRIX_USER_ID
+    client.load_store()
+    log.info(f"Crypto store loaded, olm={client.olm is not None}")
 
     http = aiohttp.ClientSession()
 
@@ -535,6 +558,21 @@ async def run():
         await http.close()
         await client.close()
         sys.exit(1)
+
+    # E2EE setup
+    if client.olm:
+        log.info("Uploading device keys...")
+        key_upload = await client.keys_upload()
+        log.info(f"Key upload result: {key_upload}")
+
+        # Trust all known device keys so we can decrypt messages
+        for user_id in client.device_store.users:
+            for device in client.device_store.active_user_devices(user_id):
+                if not client.olm.is_device_verified(device):
+                    client.verify_device(device)
+                    log.info(f"Verified device {device.device_id} of {user_id}")
+    else:
+        log.warning("Olm not available after sync — E2EE will not work")
 
     # Register event callbacks only after initial sync
     client.add_event_callback(lambda room, event: on_message(client, room, event, http), RoomMessageText)

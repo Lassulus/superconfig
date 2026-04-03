@@ -12,8 +12,9 @@ python3Packages.buildPythonApplication {
   build-system = [ python3Packages.setuptools ];
 
   dependencies = with python3Packages; [
-    matrix-nio
+    (matrix-nio.override { withOlm = true; })
     aiohttp
+    cffi
   ];
 
   meta = {

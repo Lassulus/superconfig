@@ -1,5 +1,4 @@
 {
-  self,
   config,
   pkgs,
   ...
@@ -54,7 +53,7 @@
       export RADARR_API_KEY="$(${pkgs.libxml2}/bin/xmllint --xpath 'string(//ApiKey)' "$CREDENTIALS_DIRECTORY/radarr-config")"
       export SONARR_API_KEY="$(${pkgs.libxml2}/bin/xmllint --xpath 'string(//ApiKey)' "$CREDENTIALS_DIRECTORY/sonarr-config")"
       export JELLYFIN_API_KEY="$(cat "$CREDENTIALS_DIRECTORY/jellyfin-api-key")"
-      exec ${self.packages.${pkgs.system}.archiver-bot}/bin/archiver-bot
+      exec ${pkgs.callPackage ../../5pkgs/archiver-bot/package.nix { }}/bin/archiver-bot
     '';
 
     serviceConfig = {
