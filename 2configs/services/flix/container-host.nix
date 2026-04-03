@@ -16,10 +16,7 @@
     hostPath = "/var/download";
     isReadOnly = false;
   };
-  containers.yellow.bindMounts."/var/lib/ipfs/cid-map.txt" = {
-    hostPath = "/var/lib/ipfs/cid-map.txt";
-    isReadOnly = true;
-  };
+
   networking.firewall.allowedTCPPorts = [
     8096
     8920
