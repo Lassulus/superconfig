@@ -31,7 +31,6 @@
     ];
     wants = [ "network-online.target" ];
 
-    path = [ pkgs.kubo ];
     environment = {
       MATRIX_HOMESERVER = "https://matrix.lassul.us";
       MATRIX_USER_ID = "@archiver:lassul.us";
@@ -43,6 +42,8 @@
       JELLYFIN_URL = "http://localhost:8096";
 
       MEDIA_PATH_PREFIX = "/var/download/";
+      IPFS_CID_MAP = "/var/lib/ipfs/cid-map.txt";
+      IPFS_PATH_PREFIX = "/var/lib/ipfs/download/";
       WEBHOOK_PORT = "8099";
       STORE_PATH = "/var/lib/archiver-bot";
     };
