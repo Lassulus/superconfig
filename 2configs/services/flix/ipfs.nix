@@ -79,31 +79,12 @@ let
     done < "$CID_MAP"
     log "Cleanup complete"
 
-    # watch a new subdirectory for files
-    watch_new_dir() {
+    # add all files in a newly appeared directory
+    scan_new_dir() {
       local dir="$1"
-      log "Watching new directory: $dir"
-      # first add any files already in it
+      log "Scanning new directory: $dir"
       ${pkgs.findutils}/bin/find "$dir" -type f | while read -r f; do
         add_file "$f"
-      done
-      # then watch for new files
-      $INOTIFYWAIT -m -r \
-        -e close_write \
-        -e moved_to \
-        -e moved_from \
-        -e delete \
-        "$dir" |
-      while read -r d event f; do
-        path="''${d}''${f}"
-        case "$event" in
-          CLOSE_WRITE*|MOVED_TO*)
-            add_file "$path"
-            ;;
-          DELETE*|MOVED_FROM*)
-            remove_file "$path"
-            ;;
-        esac
       done
     }
 
@@ -120,7 +101,7 @@ let
       path="''${dir}''${file}"
       case "$event" in
         CREATE,ISDIR*|MOVED_TO,ISDIR*)
-          watch_new_dir "$path" &
+          scan_new_dir "$path"
           ;;
         CLOSE_WRITE*|MOVED_TO*)
           add_file "$path"
