@@ -90,14 +90,14 @@ let
 
     # watch for changes
     log "Watching directories: ${lib.concatStringsSep ", " watchDirs}"
-    $INOTIFYWAIT -m -r \
+    $INOTIFYWAIT -m -r --format $'%w\t%e\t%f' \
       -e close_write \
       -e moved_to \
       -e moved_from \
       -e delete \
       -e create \
       ${lib.escapeShellArgs watchDirs} |
-    while read -r dir event file; do
+    while IFS=$'\t' read -r dir event file; do
       path="''${dir}''${file}"
       case "$event" in
         CREATE,ISDIR*|MOVED_TO,ISDIR*)
