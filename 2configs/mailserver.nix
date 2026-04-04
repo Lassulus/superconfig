@@ -308,25 +308,27 @@ in
         export NOTMUCH_CONFIG="${
           self.packages.${pkgs.system}.notmuch.passthru.configuration.configFile.path
         }"
+        # First, pick up any IMAP flag changes into notmuch
+        ${pkgs.notmuch}/bin/notmuch new --quiet 2>/dev/null || true
         # Add S flag to files notmuch considers read but that lack it
         ${pkgs.notmuch}/bin/notmuch search --output=files 'NOT tag:unread' \
-          | ${pkgs.gnugrep}/bin/grep -v ',.*S' \
           | ${pkgs.gnugrep}/bin/grep '/cur/' \
           | while IFS= read -r f; do
               [ -f "$f" ] || continue
-              base="''${f%:2,*}"
               flags="''${f##*:2,}"
+              case "$flags" in *S*) continue ;; esac
+              base="''${f%:2,*}"
               mv "$f" "''${base}:2,''${flags}S"
             done
         # Remove S flag from files notmuch considers unread but that have it
         ${pkgs.notmuch}/bin/notmuch search --output=files 'tag:unread' \
-          | ${pkgs.gnugrep}/bin/grep ',.*S' \
           | ${pkgs.gnugrep}/bin/grep '/cur/' \
           | while IFS= read -r f; do
               [ -f "$f" ] || continue
-              base="''${f%:2,*}"
               flags="''${f##*:2,}"
-              newflags="$(echo "$flags" | ${pkgs.gnused}/bin/sed 's/S//g')"
+              case "$flags" in *S*) ;; *) continue ;; esac
+              base="''${f%:2,*}"
+              newflags="''${flags//S/}"
               mv "$f" "''${base}:2,''${newflags}"
             done
         # Update notmuch DB with the renames
