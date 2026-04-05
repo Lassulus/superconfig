@@ -115,17 +115,18 @@ async def compute_cid(path: str) -> str | None:
     if not video:
         log.warning(f"No video file found for {path}")
         return None
+    import tempfile
+    import shutil
+    ipfs_path = tempfile.mkdtemp(prefix="ipfs-hash-")
     try:
-        ipfs_path = "/tmp/ipfs-hash-repo"
-        if not os.path.exists(os.path.join(ipfs_path, "config")):
-            init_proc = await asyncio.create_subprocess_exec(
-                IPFS_BIN, "init",
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-                env={**os.environ, "IPFS_PATH": ipfs_path},
-            )
-            await init_proc.communicate()
         env = {**os.environ, "IPFS_PATH": ipfs_path}
+        init_proc = await asyncio.create_subprocess_exec(
+            IPFS_BIN, "init",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            env=env,
+        )
+        await init_proc.communicate()
         proc = await asyncio.create_subprocess_exec(
             IPFS_BIN, "add", "--only-hash", "--raw-leaves", "--quieter", video,
             stdout=asyncio.subprocess.PIPE,
@@ -133,7 +134,7 @@ async def compute_cid(path: str) -> str | None:
             env=env,
         )
         try:
-            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=120)
+            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=300)
         except asyncio.TimeoutError:
             proc.kill()
             await proc.communicate()
@@ -147,6 +148,8 @@ async def compute_cid(path: str) -> str | None:
             log.warning(f"ipfs add --only-hash failed for {video}: {stderr.decode().strip()}")
     except Exception as e:
         log.warning(f"Failed to compute CID for {video}: {e}")
+    finally:
+        shutil.rmtree(ipfs_path, ignore_errors=True)
     return None
 
 
@@ -228,8 +231,15 @@ async def make_media_links(path: str, is_dir: bool = False, jellyfin_id: str | N
     lines_plain.append(f"🎬 Stream: {flix_link}")
     lines_html.append(f'🎬 Stream: <a href="{flix_link}">{flix_link}</a>')
 
-    # IPFS link (compute CID for the file)
-    cid = await compute_cid(path)
+    # IPFS link (compute CID for the file, retry up to 3 times)
+    cid = None
+    for attempt in range(3):
+        cid = await compute_cid(path)
+        if cid:
+            break
+        log.warning(f"IPFS hash attempt {attempt + 1}/3 failed for {path}")
+        await asyncio.sleep(2)
+
     if cid:
         ipfs_link = f"{IPFS_GATEWAY_URL}/ipfs/{cid}"
         lines_plain.append(f"🌐 IPFS: {ipfs_link}")
@@ -237,6 +247,7 @@ async def make_media_links(path: str, is_dir: bool = False, jellyfin_id: str | N
         lines_plain.append(f"    ipfs get {cid}")
         lines_html.append(f"    <code>ipfs get {cid}</code>")
     else:
+        log.error(f"IPFS hash failed after 3 attempts for {path}, not posting message")
         return None
 
     return ("\n".join(lines_plain), "<br>".join(lines_html))
@@ -355,7 +366,7 @@ async def request_media(session: aiohttp.ClientSession, media: dict, room_id: st
                 jf_id = await lookup_jellyfin_id(session, media_type, media_id)
                 links = await make_media_links(path, is_dir=is_dir, jellyfin_id=jf_id)
                 if not links:
-                    return (f"❌ {display} is available but IPFS hash failed.", f"❌ <b>{display}</b> is available but IPFS hash failed.")
+                    log.error(f"IPFS hash failed for {display}, not posting"); return None
                 links_plain, links_html = links
                 return (f"✅ {display} is already available!\n{links_plain}", f"✅ <b>{display}</b> is already available!<br>{links_html}")
             return (f"✅ {display} is already available!", f"✅ <b>{display}</b> is already available!")
@@ -376,7 +387,7 @@ async def request_media(session: aiohttp.ClientSession, media: dict, room_id: st
         # Still send the request to Jellyseerr so it's tracked there too
         await jellyseerr_request(session, "/request", method="POST", json=payload)
         if not links:
-            return (f"❌ {display} is available but IPFS hash failed.", f"❌ <b>{display}</b> is available but IPFS hash failed.")
+            log.error(f"IPFS hash failed for {display}, not posting"); return None
         links_plain, links_html = links
         return (f"✅ {display} is already available!\n{links_plain}", f"✅ <b>{display}</b> is already available!<br>{links_html}")
 
@@ -481,8 +492,10 @@ async def on_message(client: AsyncClient, room: MatrixRoom, event: RoomMessageTe
             log.warning(f"Failed to fetch TMDB TV {tmdb_id}: {e}")
         results.append(await request_media(http, media, room.room_id))
 
-    for plain, html in results:
-        await send_notice(client, room.room_id, plain, html)
+    for result in results:
+        if result is not None:
+            plain, html = result
+            await send_notice(client, room.room_id, plain, html)
 
 
 async def on_invite(client: AsyncClient, room: MatrixRoom, event: InviteMemberEvent):
@@ -523,9 +536,9 @@ async def handle_radarr_webhook(request):
                     jf_id = await lookup_jellyfin_id(http, "movie", tmdb_id)
                     links = await make_media_links(file_path, jellyfin_id=jf_id)
                     if not links:
-                        links_plain = links_html = "❌ IPFS hash failed"
-                    else:
-                        links_plain, links_html = links
+                        log.error(f"IPFS hash failed for {display}, not notifying")
+                        return web.Response(text="ok")
+                    links_plain, links_html = links
                     plain = f"✅ {display} has been downloaded and is now available!\n{links_plain}"
                     html = f"✅ <b>{display}</b> has been downloaded and is now available!<br>{links_html}"
                     for room_id in rooms:
@@ -571,9 +584,9 @@ async def handle_sonarr_webhook(request):
                     jf_id = await lookup_jellyfin_id(http, "tv", tmdb_id)
                     links = await make_media_links(folder_path, is_dir=True, jellyfin_id=jf_id)
                     if not links:
-                        links_plain = links_html = "❌ IPFS hash failed"
-                    else:
-                        links_plain, links_html = links
+                        log.error(f"IPFS hash failed for {display}, not notifying")
+                        return web.Response(text="ok")
+                    links_plain, links_html = links
                     plain = f"✅ {display}{ep_info} has been downloaded and is now available!\n{links_plain}"
                     html = f"✅ <b>{display}</b>{ep_info} has been downloaded and is now available!<br>{links_html}"
                     for room_id in rooms:
