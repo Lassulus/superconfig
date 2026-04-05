@@ -20,7 +20,7 @@ from nio import (
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("archiver-bot")
 
-IMDB_RE = re.compile(r"https?://(?:www\.)?imdb\.com/title/(tt\d+)")
+IMDB_RE = re.compile(r"https?://(?:www\.)?imdb\.com/(?:[a-z]{2}/)?title/(tt\d+)")
 TMDB_MOVIE_RE = re.compile(r"https?://(?:www\.)?themoviedb\.org/movie/(\d+)")
 TMDB_TV_RE = re.compile(r"https?://(?:www\.)?themoviedb\.org/tv/(\d+)")
 

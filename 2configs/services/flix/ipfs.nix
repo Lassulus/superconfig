@@ -30,12 +30,12 @@ let
       local path="$1"
       [ -f "$path" ] || return 0
       case "$(basename "$path")" in
-        .* | *.part | *.tmp) return 0 ;;
+        .* | *.part | *.tmp | *.synced.*) return 0 ;;
       esac
 
       log "Adding $path"
-      cid=$($IPFS add --nocopy --pin --quieter "$path" 2>&1) || {
-        log "Failed to add $path: $cid"
+      cid=$($IPFS add --nocopy --pin --quieter "$path" 2>/dev/null) || {
+        log "Failed to add $path"
         return 0
       }
       log "Pinned $path -> $cid"
