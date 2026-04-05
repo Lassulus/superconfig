@@ -315,11 +315,13 @@ async def lookup_media_path(session: aiohttp.ClientSession, media_type: str, tmd
             ) as resp:
                 results = await resp.json()
                 if results and len(results) > 0:
-                    # Return direct file path if available, otherwise folder
-                    movie_file = results[0].get("movieFile", {})
+                    movie = results[0]
+                    if not movie.get("hasFile"):
+                        return None
+                    movie_file = movie.get("movieFile", {})
                     if movie_file and movie_file.get("path"):
                         return movie_file["path"]
-                    return results[0].get("path") or results[0].get("folderName")
+                    return None
         else:
             async with session.get(
                 f"http://localhost:8989/api/v3/series?tvdbId={tmdb_id}",
