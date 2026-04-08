@@ -122,6 +122,10 @@ in
   services.kubo = {
     enable = true;
     settings = {
+      # kubo 0.40 deprecated Reprovider in favor of Provide; the nixpkgs
+      # module still injects a default Reprovider block, so null it out
+      # explicitly or kubo refuses to start.
+      Reprovider = null;
       Experimental.FilestoreEnabled = true;
       Addresses = {
         API = [
@@ -154,6 +158,10 @@ in
       # autoclient would skip provide announcements and make our content
       # invisible to bitswap.
       Routing.Type = "dhtclient";
+      Provide = {
+        Strategy = "pinned";
+        DHT.Interval = "12h";
+      };
     };
   };
 
