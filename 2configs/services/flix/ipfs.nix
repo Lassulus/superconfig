@@ -136,15 +136,15 @@ in
       Datastore.StorageMax = "100GB";
       # limit bandwidth: 5MB/s out, 5MB/s in
       Swarm.ConnMgr = {
-        LowWater = 20;
-        HighWater = 50;
-        GracePeriod = "10s";
+        LowWater = 100;
+        HighWater = 400;
+        GracePeriod = "20s";
       };
       Swarm.Transports.Network.TCP = true;
-      Swarm.Transports.Network.QUIC = false;
+      Swarm.Transports.Network.QUIC = true;
       Swarm.ResourceMgr = {
         Enabled = true;
-        MaxMemory = "256MB";
+        MaxMemory = "2GB";
       };
       # disable relay to reduce overhead
       Swarm.RelayClient.Enabled = false;
