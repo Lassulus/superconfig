@@ -193,6 +193,7 @@
         ./games/flake-module.nix
 
         ./wrapperModules/pi/flake-module.nix
+        ./wrapperModules/claude-code/flake-module.nix
         {
           options.flake.wrapperModules = nixpkgs.lib.mkOption {
             type = nixpkgs.lib.types.lazyAttrsOf nixpkgs.lib.types.raw;
