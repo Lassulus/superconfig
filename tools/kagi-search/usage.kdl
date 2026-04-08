@@ -1,0 +1,2 @@
+bin "kagi-search"
+about "Search the web via Kagi (uses rbw for credential storage)"
