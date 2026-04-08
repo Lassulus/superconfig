@@ -134,12 +134,12 @@ in
         ];
       };
       Datastore.StorageMax = "100GB";
+      # limit bandwidth: 5MB/s out, 5MB/s in
       Swarm.ConnMgr = {
         LowWater = 20;
         HighWater = 50;
         GracePeriod = "10s";
       };
-      # limit bandwidth: 5MB/s out, 5MB/s in
       Swarm.Transports.Network.TCP = true;
       Swarm.Transports.Network.QUIC = false;
       Swarm.ResourceMgr = {

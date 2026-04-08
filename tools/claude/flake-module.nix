@@ -7,6 +7,8 @@
         imports = [ self.wrapperModules.claude-code ];
         inherit pkgs;
 
+        package = self.lib.halalify self.legacyPackages.${system}.llm.claude-code;
+
         claudeMd = ./CLAUDE.md;
 
         mcpServers = {
@@ -18,13 +20,126 @@
           };
         };
 
-        # Seed permission rules from the same set we trust in pi.
+        skills = {
+          hedgedoc = "${self.legacyPackages.${system}.skills.hedgedoc}/share/hedgedoc";
+          reverse-engineering = "${
+            self.legacyPackages.${system}.skills.reverse-engineering
+          }/share/reverse-engineering";
+          websearch = "${self.legacyPackages.${system}.skills.websearch}/share/websearch";
+        };
+
         permissions = {
           allow = [
+            # nix operations
             "Bash(nix build:*)"
             "Bash(nix eval:*)"
             "Bash(nix fmt:*)"
+            "Bash(nix flake:*)"
+            "Bash(nix develop:*)"
+            "Bash(nix run:*)"
+            "Bash(nix search:*)"
+            "Bash(nix log:*)"
+            "Bash(nix path-info:*)"
+            "Bash(nix store:*)"
+            "Bash(nix derivation:*)"
+            "Bash(nix hash:*)"
+            "Bash(nix-build:*)"
+            "Bash(nix-instantiate:*)"
+            "Bash(nix-locate:*)"
+            "Bash(nix-prefetch-url:*)"
+            "Bash(nixos-rebuild:*)"
+            "Bash(darwin-rebuild:*)"
+            # clan
+            "Bash(clan:*)"
+            # git read operations
+            "Bash(git status:*)"
+            "Bash(git diff:*)"
+            "Bash(git log:*)"
+            "Bash(git show:*)"
+            "Bash(git branch:*)"
+            "Bash(git remote:*)"
+            "Bash(git stash list:*)"
+            "Bash(git rev-parse:*)"
+            "Bash(git describe:*)"
+            "Bash(git tag:*)"
+            "Bash(git ls-files:*)"
+            "Bash(git ls-remote:*)"
+            # git write operations
+            "Bash(git add:*)"
+            "Bash(git commit:*)"
+            "Bash(git checkout:*)"
+            "Bash(git switch:*)"
+            "Bash(git merge:*)"
+            "Bash(git rebase:*)"
+            "Bash(git stash:*)"
+            "Bash(git cherry-pick:*)"
+            "Bash(git fetch:*)"
+            "Bash(git pull:*)"
+            # common read-only tools
+            "Bash(cat:*)"
+            "Bash(ls:*)"
+            "Bash(find:*)"
+            "Bash(grep:*)"
+            "Bash(rg:*)"
+            "Bash(fd:*)"
+            "Bash(head:*)"
+            "Bash(tail:*)"
+            "Bash(wc:*)"
+            "Bash(sort:*)"
+            "Bash(uniq:*)"
+            "Bash(jq:*)"
+            "Bash(tree:*)"
+            "Bash(file:*)"
+            "Bash(which:*)"
+            "Bash(realpath:*)"
+            "Bash(readlink:*)"
+            "Bash(dirname:*)"
+            "Bash(basename:*)"
+            "Bash(stat:*)"
+            "Bash(du:*)"
+            "Bash(df:*)"
+            "Bash(env:*)"
+            "Bash(echo:*)"
+            "Bash(printf:*)"
+            "Bash(test:*)"
+            "Bash(tr:*)"
+            "Bash(sed:*)"
+            "Bash(awk:*)"
+            "Bash(cut:*)"
+            "Bash(diff:*)"
+            "Bash(tee:*)"
+            "Bash(xargs:*)"
+            "Bash(mkdir:*)"
+            "Bash(cp:*)"
+            "Bash(mv:*)"
+            "Bash(touch:*)"
+            "Bash(chmod:*)"
+            "Bash(ln:*)"
+            # dev tools
+            "Bash(gh:*)"
+            "Bash(shellcheck:*)"
+            "Bash(ruff:*)"
+            "Bash(kagi-search:*)"
+            "Bash(curl:*)"
+            # file edits
+            "Edit"
+            "Write"
+            "Read"
           ];
+        };
+
+        extraPackages = [
+          self.packages.${system}.kagi-search
+          pkgs.curl
+          pkgs.jq
+          pkgs.ripgrep
+          pkgs.fd
+          pkgs.tree
+        ];
+
+        settings = {
+          # Prefer compact output for better context usage
+          verbose = true;
         };
       };
     in
