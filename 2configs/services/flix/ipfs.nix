@@ -149,8 +149,11 @@ in
       # disable relay to reduce overhead
       Swarm.RelayClient.Enabled = false;
       Swarm.RelayService.Enabled = false;
-      # reduce DHT overhead - client mode only announces, doesn't route for others
-      Routing.Type = "autoclient";
+      # dhtclient: announces our provider records (so peers can find content
+      # we host by CID) but does not serve DHT routing queries for others.
+      # autoclient would skip provide announcements and make our content
+      # invisible to bitswap.
+      Routing.Type = "dhtclient";
     };
   };
 
