@@ -221,6 +221,42 @@ let
     $IPFS routing provide "$root" >/dev/null 2>&1 || true
     ${pkgs.coreutils}/bin/rm -f "$DIRTY_FLAG"
   '';
+
+  # Periodic reconciliation: walks cid-map.txt and repairs stale state for
+  # files that no longer exist on disk. Protects against inotify event
+  # drops (e.g. queue overflow during bulk renames/deletes) and any other
+  # path that leaves cid-map/MFS out of sync with the filesystem.
+  reconcileScript = pkgs.writers.writeBash "flix-index-reconcile" ''
+    set -efu
+
+    IPFS="${pkgs.kubo}/bin/ipfs"
+    CID_MAP="${cidMapFile}"
+    DOWNLOAD_ROOT="${downloadRoot}"
+    FLIX_INDEX="${flixIndexMfs}"
+    DIRTY_FLAG="${dirtyFlag}"
+
+    [ -f "$CID_MAP" ] || exit 0
+
+    removed=0
+    while IFS=' ' read -r cid path; do
+      [ -n "$cid" ] || continue
+      if [ ! -e "$path" ]; then
+        rel="''${path#$DOWNLOAD_ROOT/}"
+        $IPFS files rm "$FLIX_INDEX/$rel" >/dev/null 2>&1 || true
+        $IPFS pin rm "$cid" >/dev/null 2>&1 || true
+        # drop this exact line from cid-map. small race with the watcher
+        # (same tool it uses in remove_file), acceptable since reconcile
+        # is idempotent across runs.
+        ${pkgs.gnused}/bin/sed -i "\|^$cid $path$|d" "$CID_MAP"
+        removed=$((removed + 1))
+      fi
+    done < "$CID_MAP"
+
+    if [ "$removed" -gt 0 ]; then
+      echo "reconciled: removed $removed stale entries"
+      touch "$DIRTY_FLAG"
+    fi
+  '';
 in
 {
   # symlink /var/download into IPFS root so --nocopy works
@@ -312,6 +348,29 @@ in
       OnBootSec = "5min";
       OnUnitActiveSec = "2min";
       Unit = "flix-index-publish.service";
+    };
+  };
+
+  systemd.services.flix-index-reconcile = {
+    description = "Reconcile flix MFS index / cid-map against filesystem";
+    after = [ "ipfs.service" ];
+    requires = [ "ipfs.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      Environment = [ "IPFS_PATH=/var/lib/ipfs" ];
+      ExecStart = reconcileScript;
+      User = config.services.kubo.user;
+      Group = config.services.kubo.group;
+    };
+  };
+
+  systemd.timers.flix-index-reconcile = {
+    description = "Reconcile flix MFS index hourly";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "15min";
+      OnUnitActiveSec = "1h";
+      Unit = "flix-index-reconcile.service";
     };
   };
 
