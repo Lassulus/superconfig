@@ -237,24 +237,31 @@ let
 
     [ -f "$CID_MAP" ] || exit 0
 
+    # Rebuild cid-map in one pass, collecting stale entries to clean up.
+    # Avoids sed regex issues with special chars like [ ] in paths.
+    # Small race with pin-watcher's concurrent appends — any line the
+    # watcher writes during this loop may be lost, but will be re-added
+    # on the next inotify event or watcher restart.
+    tmp=$(${pkgs.coreutils}/bin/mktemp)
     removed=0
     while IFS=' ' read -r cid path; do
       [ -n "$cid" ] || continue
-      if [ ! -e "$path" ]; then
+      if [ -e "$path" ]; then
+        echo "$cid $path" >> "$tmp"
+      else
         rel="''${path#$DOWNLOAD_ROOT/}"
         $IPFS files rm "$FLIX_INDEX/$rel" >/dev/null 2>&1 || true
         $IPFS pin rm "$cid" >/dev/null 2>&1 || true
-        # drop this exact line from cid-map. small race with the watcher
-        # (same tool it uses in remove_file), acceptable since reconcile
-        # is idempotent across runs.
-        ${pkgs.gnused}/bin/sed -i "\|^$cid $path$|d" "$CID_MAP"
         removed=$((removed + 1))
       fi
     done < "$CID_MAP"
 
     if [ "$removed" -gt 0 ]; then
+      ${pkgs.coreutils}/bin/mv "$tmp" "$CID_MAP"
       echo "reconciled: removed $removed stale entries"
       touch "$DIRTY_FLAG"
+    else
+      ${pkgs.coreutils}/bin/rm -f "$tmp"
     fi
   '';
 in
