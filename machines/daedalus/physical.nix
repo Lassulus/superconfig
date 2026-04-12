@@ -12,6 +12,7 @@
     };
     "/boot" = {
       device = "/dev/sda2";
+      fsType = "ext4";
     };
     "/home" = {
       device = "/dev/mapper/pool-home";
