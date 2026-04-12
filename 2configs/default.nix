@@ -182,6 +182,7 @@
   environment.systemPackages = with pkgs; [
     self.packages.${pkgs.system}.nvim
     self.packages.${pkgs.system}.tmux
+    self.packages.${pkgs.system}.s
 
     git
     git-absorb

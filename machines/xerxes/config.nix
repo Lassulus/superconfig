@@ -38,7 +38,6 @@
     self.legacyPackages.${pkgs.system}.llm.claude-code
     pkgs.ripgrep
     self.packages.${pkgs.system}.mpv
-    self.packages.${pkgs.system}.s
     pkgs.gh
     pkgs.radicle-node
   ];

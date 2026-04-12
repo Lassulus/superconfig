@@ -79,7 +79,6 @@ in
     packages = [
       pkgs.tmux
       pkgs.git
-      self.packages.${pkgs.system}.s
       (pkgs.writeShellScriptBin "kannix-ctl" ''
         cd ${srcDir}
         exec "$(nix build .# --no-link --print-out-paths)/bin/kannix-ctl" "$@"
