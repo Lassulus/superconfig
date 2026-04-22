@@ -139,6 +139,39 @@
           '';
         };
 
+        plugins = lib.mkOption {
+          type = lib.types.listOf lib.types.path;
+          default = [ ];
+          example = lib.literalExpression ''
+            [
+              # A fetched plugin from GitHub:
+              (pkgs.fetchFromGitHub {
+                owner = "Myr-Aya";
+                repo = "GouvernAI-claude-code-plugin";
+                rev = "main";
+                hash = "sha256-AAAA...";
+                # The plugin directory is a subdirectory of the repo:
+              } + "/gouvernai")
+
+              # A local plugin directory (must contain .claude-plugin/plugin.json):
+              ./my-local-plugin
+
+              # A plugin built by a Nix derivation:
+              my-plugin-package
+            ]
+          '';
+          description = ''
+            Additional Claude Code plugin directories to load. Each entry
+            must be a path to a directory containing `.claude-plugin/plugin.json`.
+            Passed as extra `--plugin-dir` flags alongside the bundled plugin.
+
+            Plugins can provide skills, commands, agents, and hooks. Use this
+            to declaratively install third-party plugins (e.g. from GitHub)
+            or locally developed ones without going through the Claude Code
+            marketplace.
+          '';
+        };
+
         mcpServers = lib.mkOption {
           type = jsonFormat.type;
           default = { };
@@ -269,7 +302,7 @@
       # Always inject our plugin dir + settings file into every invocation.
       # `--plugin-dir` is repeatable so users can still pass more on the CLI.
       config.flags."--plugin-dir" = {
-        value = [ "${pluginDir}" ];
+        value = [ "${pluginDir}" ] ++ map toString config.plugins;
         order = 100;
       };
       config.flags."--settings" = {
