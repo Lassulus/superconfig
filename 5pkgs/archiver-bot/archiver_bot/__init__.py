@@ -14,6 +14,7 @@ from nio import (
     InviteMemberEvent,
     LoginResponse,
     MatrixRoom,
+    MegolmEvent,
     RoomMessageText,
 )
 
@@ -498,6 +499,27 @@ async def on_message(client: AsyncClient, room: MatrixRoom, event: RoomMessageTe
             await send_notice(client, room.room_id, plain, html)
 
 
+async def on_megolm(client: AsyncClient, room: MatrixRoom, event: MegolmEvent):
+    """Handle messages we couldn't decrypt."""
+    log.warning(
+        f"Failed to decrypt message from {event.sender} in {room.display_name} "
+        f"(session {event.session_id}): {event.message}"
+    )
+    # Request the keys we're missing
+    if client.olm:
+        try:
+            resp = await client.request_room_key(event)
+            log.info(f"Requested room key for session {event.session_id}: {resp}")
+        except Exception as e:
+            log.warning(f"Failed to request room key: {e}")
+    await send_notice(
+        client,
+        room.room_id,
+        "🔒 I couldn't decrypt your message. Please try again or re-invite me to this room.",
+        "🔒 I couldn't decrypt your message. Please try again or re-invite me to this room.",
+    )
+
+
 async def on_invite(client: AsyncClient, room: MatrixRoom, event: InviteMemberEvent):
     """Auto-join rooms when invited."""
     log.info(f"Invite event in {room.room_id}: state_key={event.state_key}, sender={event.sender}, membership={event.membership}, our_id={client.user_id}")
@@ -631,6 +653,12 @@ async def run():
         await client.close()
         sys.exit(1)
 
+    # Join any rooms we were invited to while offline
+    for room_id, room in client.invited_rooms.items():
+        log.info(f"Joining pending invite for {room_id}...")
+        result = await client.join(room_id)
+        log.info(f"Join result for {room_id}: {result}")
+
     # E2EE setup
     if client.olm:
         try:
@@ -652,6 +680,7 @@ async def run():
     # Register event callbacks only after initial sync
     client.add_event_callback(lambda room, event: on_message(client, room, event, http), RoomMessageText)
     client.add_event_callback(lambda room, event: on_invite(client, room, event), InviteMemberEvent)
+    client.add_event_callback(lambda room, event: on_megolm(client, room, event), MegolmEvent)
 
     # Start webhook server for Radarr/Sonarr notifications
     app = web.Application()
