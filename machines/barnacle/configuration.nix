@@ -21,8 +21,8 @@
     self.packages.${pkgs.system}.tmux
     self.packages.${pkgs.system}.mutt
     self.packages.${pkgs.system}.notmuch
-    self.packages.${pkgs.system}.claude
     self.packages.${pkgs.system}.mpv
+    self.packages.${pkgs.system}.s
 
     self.packages.${pkgs.system}.secretive
 
