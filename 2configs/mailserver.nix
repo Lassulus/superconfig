@@ -185,11 +185,6 @@ in
     '';
   };
 
-  # Dovecot virtual mailbox + ACL-restricted shared namespace for bot
-  services.dovecot2.mailPlugins.globally.enable = [
-    "virtual"
-    "acl"
-  ];
   # Provision virtual mailbox config to a writable directory (nix store is read-only,
   # and the ACL plugin needs to write dovecot-acl-list next to the virtual config)
   systemd.tmpfiles.settings."dovecot-virtual" = {
@@ -222,34 +217,35 @@ in
     };
   };
 
-  services.dovecot2.extraConfig = ''
-    plugin {
-      acl = vfile
-      acl_shared_dict = file:/var/vmail/shared-mailboxes.db
-    }
+  # Dovecot virtual mailbox + ACL-restricted shared namespace for bot
+  services.dovecot2.settings = {
+    mail_plugins = {
+      virtual = true;
+      acl = true;
+    };
 
-    namespace shared {
-      type = shared
-      separator = .
-      prefix = shared.%%n.
-      location = maildir:/var/vmail/lassul.us/%%n/mail:LAYOUT=Maildir++
-      subscriptions = no
-      list = children
-    }
+    # ACL plugin settings (top-level since dovecot 2.4)
+    acl = "vfile";
+    acl_shared_dict = "file:/var/vmail/shared-mailboxes.db";
 
-    namespace virtual {
-      prefix = virtual.
-      separator = .
-      location = virtual:/var/vmail/virtual-config:INDEX=/var/vmail/virtual-indexes/%u
-      subscriptions = no
-      mailbox Unread {
-        auto = subscribe
-      }
-      mailbox All {
-        auto = subscribe
-      }
-    }
-  '';
+    "namespace shared" = {
+      type = "shared";
+      separator = ".";
+      prefix = "shared.%{user | username}.";
+      location = "maildir:/var/vmail/lassul.us/%{user | username}/mail:LAYOUT=Maildir++";
+      subscriptions = false;
+      list = "children";
+    };
+
+    "namespace virtual" = {
+      prefix = "virtual.";
+      separator = ".";
+      location = "virtual:/var/vmail/virtual-config:INDEX=/var/vmail/virtual-indexes/%{user}";
+      subscriptions = false;
+      "mailbox Unread".auto = "subscribe";
+      "mailbox All".auto = "subscribe";
+    };
+  };
 
   # Write dovecot-acl files to grant bot read-only + flag access to lass's mail
   systemd.services.dovecot-acl-sync = {
