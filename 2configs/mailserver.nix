@@ -224,15 +224,24 @@ in
       acl = true;
     };
 
-    # ACL plugin settings (top-level since dovecot 2.4)
-    acl = "vfile";
-    acl_shared_dict = "file:/var/vmail/shared-mailboxes.db";
+    # ACL plugin (dovecot 2.4): `acl_driver` is top-level; per-identifier
+    # default rights live in `acl <identifier> { acl_rights = ...; }` named
+    # filters where <identifier> is owner/anyone/authenticated/user=.../etc.
+    # `acl_shared_dict` was removed; the bot accesses shared mail via
+    # explicit subscriptions.
+    acl_driver = "vfile";
+    "acl owner" = {
+      acl_rights = "lrwstipekxa";
+    };
 
+    # In dovecot 2.4 the per-namespace `location = "driver:path:opts"` was
+    # replaced by separate mail_driver / mail_path / mail_index_path settings.
     "namespace shared" = {
       type = "shared";
       separator = ".";
       prefix = "shared.%{user | username}.";
-      location = "maildir:/var/vmail/lassul.us/%{user | username}/mail:LAYOUT=Maildir++";
+      mail_driver = "maildir";
+      mail_path = "/var/vmail/lassul.us/%{user | username}/mail";
       subscriptions = false;
       list = "children";
     };
@@ -240,7 +249,11 @@ in
     "namespace virtual" = {
       prefix = "virtual.";
       separator = ".";
-      location = "virtual:/var/vmail/virtual-config:INDEX=/var/vmail/virtual-indexes/%{user}";
+      mail_driver = "virtual";
+      mail_path = "/var/vmail/virtual-config";
+      mail_index_path = "/var/vmail/virtual-indexes/%{user}";
+      # virtual storage doesn't support maildir++ layout, override the global
+      mailbox_list_layout = "fs";
       subscriptions = false;
       "mailbox Unread".auto = "subscribe";
       "mailbox All".auto = "subscribe";
