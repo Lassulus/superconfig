@@ -3,13 +3,6 @@
   perSystem =
     { pkgs, system, ... }:
     let
-      gouvernai = pkgs.fetchFromGitHub {
-        owner = "Myr-Aya";
-        repo = "GouvernAI-claude-code-plugin";
-        rev = "main";
-        hash = "sha256-Qv+SV5GBf/UphhkfM5azqv9PzPOr8qdR6nkoV6Rezs4=";
-      };
-
       claude = inputs.wrappers.lib.wrapModule {
         imports = [ self.wrapperModules.claude-code ];
         inherit pkgs;
@@ -17,10 +10,6 @@
         package = self.lib.halalify self.legacyPackages.${system}.llm.claude-code;
 
         claudeMd = ./CLAUDE.md;
-
-        plugins = [
-          (gouvernai + "/gouvernai")
-        ];
 
         mcpServers = {
           git-mcp = {
@@ -38,6 +27,7 @@
         };
 
         permissions = {
+          defaultMode = "auto";
           allow = [
             # nix operations
             "Bash(nix build:*)"
@@ -153,8 +143,6 @@
           # Prefer compact output for better context usage
           verbose = true;
         };
-
-        flags."--dangerously-skip-permissions" = true;
       };
     in
     {
