@@ -6,6 +6,8 @@ import re
 import sys
 from pathlib import Path
 
+from urllib.parse import quote
+
 import aiohttp
 from aiohttp import web
 from nio import (
@@ -17,6 +19,8 @@ from nio import (
     MegolmEvent,
     RoomMessageText,
 )
+from nio.api import Api
+from nio.responses import JoinError, JoinResponse
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("archiver-bot")
@@ -520,14 +524,55 @@ async def on_megolm(client: AsyncClient, room: MatrixRoom, event: MegolmEvent):
     )
 
 
+def _server_name(matrix_id: str | None) -> str | None:
+    if matrix_id and ":" in matrix_id:
+        return matrix_id.split(":", 1)[1]
+    return None
+
+
+async def try_join(client: AsyncClient, room_id: str, via: str | None = None, attempts: int = 6) -> bool:
+    # client.join doesn't expose server_name; pass it through to help our
+    # homeserver resolve the room over federation. Retry with backoff because
+    # invites delivered via sync can briefly race against the server's own
+    # room-state view (M_FORBIDDEN even though the invite just arrived).
+    method, path = Api.join(client.access_token, room_id)
+    if via:
+        path += "&server_name=" + quote(via)
+    for attempt in range(1, attempts + 1):
+        result = await client._send(JoinResponse, method, path)
+        if not isinstance(result, JoinError):
+            log.info(f"Joined {room_id} on attempt {attempt}")
+            return True
+        log.warning(f"Join attempt {attempt}/{attempts} for {room_id} failed: {result}")
+        if attempt < attempts:
+            await asyncio.sleep(2 ** (attempt - 1))
+    log.error(f"Gave up joining {room_id} after {attempts} attempts")
+    return False
+
+
+async def fetch_pending_invites(client: AsyncClient, http: aiohttp.ClientSession) -> list[str]:
+    # nio's incremental sync uses the persisted next_batch and synapse will
+    # not re-deliver invites that were already seen in a prior session, so
+    # client.invited_rooms misses anything the bot saw and failed to join
+    # before a restart. Ask the server explicitly with a fresh /sync.
+    url = f"{client.homeserver}/_matrix/client/v3/sync?timeout=0"
+    headers = {"Authorization": f"Bearer {client.access_token}"}
+    try:
+        async with http.get(url, headers=headers) as resp:
+            data = await resp.json()
+            return list(data.get("rooms", {}).get("invite", {}).keys())
+    except Exception as e:
+        log.warning(f"Failed to fetch pending invites: {e}")
+        return []
+
+
 async def on_invite(client: AsyncClient, room: MatrixRoom, event: InviteMemberEvent):
     """Auto-join rooms when invited."""
     log.info(f"Invite event in {room.room_id}: state_key={event.state_key}, sender={event.sender}, membership={event.membership}, our_id={client.user_id}")
     if event.state_key != client.user_id:
         return
     log.info(f"Joining {room.room_id} (invited by {event.sender})...")
-    result = await client.join(room.room_id)
-    log.info(f"Join result for {room.room_id}: {result}")
+    await try_join(client, room.room_id, via=_server_name(event.sender))
 
 
 async def handle_radarr_webhook(request):
@@ -653,11 +698,12 @@ async def run():
         await client.close()
         sys.exit(1)
 
-    # Join any rooms we were invited to while offline
-    for room_id, room in client.invited_rooms.items():
+    # Join any rooms we have a pending invite for (server-side truth; see
+    # fetch_pending_invites for why we can't rely on client.invited_rooms).
+    pending = await fetch_pending_invites(client, http)
+    for room_id in pending:
         log.info(f"Joining pending invite for {room_id}...")
-        result = await client.join(room_id)
-        log.info(f"Join result for {room_id}: {result}")
+        await try_join(client, room_id, via=_server_name(room_id))
 
     # E2EE setup
     if client.olm:
