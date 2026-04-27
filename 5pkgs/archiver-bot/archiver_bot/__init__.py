@@ -52,11 +52,22 @@ TRACKING_FILE = Path(STORE_PATH) / "tracked_requests.json"
 
 
 def load_tracked() -> dict:
-    """Load tracked requests from disk. Keys are 'movie:TMDBID' or 'tv:TMDBID', values are lists of room_ids."""
+    """Load tracked requests. Schema: {key: [{"room": id, "event": id|None}, ...]}.
+    Legacy entries (bare room_id strings) are normalized to event=None."""
     try:
-        return json.loads(TRACKING_FILE.read_text())
+        raw = json.loads(TRACKING_FILE.read_text())
     except Exception:
         return {}
+    out = {}
+    for key, entries in raw.items():
+        normalized = []
+        for e in entries:
+            if isinstance(e, str):
+                normalized.append({"room": e, "event": None})
+            elif isinstance(e, dict) and e.get("room"):
+                normalized.append({"room": e["room"], "event": e.get("event")})
+        out[key] = normalized
+    return out
 
 
 def save_tracked(tracked: dict):
@@ -64,24 +75,30 @@ def save_tracked(tracked: dict):
     TRACKING_FILE.write_text(json.dumps(tracked))
 
 
-def track_request(media_type: str, tmdb_id: int, room_id: str):
-    """Track that a room requested this media."""
+def track_request(media_type: str, tmdb_id: int, room_id: str, event_id: str | None = None):
+    """Track that a room requested this media; event_id is the originating
+    message so download notifications can thread back into that conversation."""
     tracked = load_tracked()
     key = f"{media_type}:{tmdb_id}"
-    rooms = tracked.get(key, [])
-    if room_id not in rooms:
-        rooms.append(room_id)
-    tracked[key] = rooms
+    entries = tracked.get(key, [])
+    for entry in entries:
+        if entry["room"] == room_id:
+            if event_id is not None:
+                entry["event"] = event_id
+            break
+    else:
+        entries.append({"room": room_id, "event": event_id})
+    tracked[key] = entries
     save_tracked(tracked)
 
 
-def pop_tracked(media_type: str, tmdb_id: int) -> list[str]:
-    """Get and remove tracked rooms for this media."""
+def pop_tracked(media_type: str, tmdb_id: int) -> list[dict]:
+    """Get and remove tracked entries for this media."""
     tracked = load_tracked()
     key = f"{media_type}:{tmdb_id}"
-    rooms = tracked.pop(key, [])
+    entries = tracked.pop(key, [])
     save_tracked(tracked)
-    return rooms
+    return entries
 
 
 def make_flax_link(path: str) -> str:
@@ -351,7 +368,7 @@ async def lookup_media_path(session: aiohttp.ClientSession, media_type: str, tmd
     return None
 
 
-async def request_media(session: aiohttp.ClientSession, media: dict, room_id: str) -> tuple[str, str]:
+async def request_media(session: aiohttp.ClientSession, media: dict, room_id: str, event_id: str | None = None) -> tuple[str, str]:
     """Request a movie or TV show via Jellyseerr. Returns (plain, html) status message."""
     media_type = media["mediaType"]
     media_id = media["id"]
@@ -376,7 +393,7 @@ async def request_media(session: aiohttp.ClientSession, media: dict, room_id: st
                 return (f"✅ {display} is already available!\n{links_plain}", f"✅ <b>{display}</b> is already available!<br>{links_html}")
             return (f"✅ {display} is already available!", f"✅ <b>{display}</b> is already available!")
         elif status in (2, 3, 4):
-            track_request(media_type, media_id, room_id)
+            track_request(media_type, media_id, room_id, event_id)
             return (f"⏳ {display} has already been requested and is being processed.", f"⏳ <b>{display}</b> has already been requested and is being processed.")
 
     payload = {"mediaType": media_type, "mediaId": media_id}
@@ -399,7 +416,7 @@ async def request_media(session: aiohttp.ClientSession, media: dict, room_id: st
     result = await jellyseerr_request(session, "/request", method="POST", json=payload)
 
     if "id" in result:
-        track_request(media_type, media_id, room_id)
+        track_request(media_type, media_id, room_id, event_id)
         return (f"🎬 Successfully requested {display}! I'll notify you when it's downloaded.", f"🎬 Successfully requested <b>{display}</b>! I'll notify you when it's downloaded.")
     else:
         error = result.get("message", json.dumps(result))
@@ -420,14 +437,34 @@ async def trust_room_devices(client: AsyncClient, room_id: str):
                 log.info(f"Verified device {device.device_id} of {user_id}")
 
 
-async def send_notice(client: AsyncClient, room_id: str, plain: str, html: str):
-    """Send a notice message to a room."""
+async def send_notice(client: AsyncClient, room_id: str, plain: str, html: str, thread_root: str | None = None):
+    """Send a notice message to a room. If thread_root is given, the message
+    becomes a reply within that thread (with the in_reply_to fallback so
+    non-threaded clients still render a quote)."""
     await trust_room_devices(client, room_id)
-    await client.room_send(
-        room_id,
-        "m.room.message",
-        {"msgtype": "m.notice", "body": plain, "format": "org.matrix.custom.html", "formatted_body": html},
-    )
+    content = {
+        "msgtype": "m.notice",
+        "body": plain,
+        "format": "org.matrix.custom.html",
+        "formatted_body": html,
+    }
+    if thread_root:
+        content["m.relates_to"] = {
+            "rel_type": "m.thread",
+            "event_id": thread_root,
+            "is_falling_back": True,
+            "m.in_reply_to": {"event_id": thread_root},
+        }
+    await client.room_send(room_id, "m.room.message", content)
+
+
+def thread_root_for(event) -> str:
+    """If event is already part of a thread, return that thread's root;
+    otherwise return event's own id (start a new thread on it)."""
+    rel = (getattr(event, "source", None) or {}).get("content", {}).get("m.relates_to") or {}
+    if rel.get("rel_type") == "m.thread" and rel.get("event_id"):
+        return rel["event_id"]
+    return event.event_id
 
 
 async def on_message(client: AsyncClient, room: MatrixRoom, event: RoomMessageText, http: aiohttp.ClientSession):
@@ -438,6 +475,7 @@ async def on_message(client: AsyncClient, room: MatrixRoom, event: RoomMessageTe
 
     body = event.body
     log.info(f"Message from {event.sender} in {room.display_name}: {body[:100]}")
+    thread_root = thread_root_for(event)
 
     # Help command
     if body.strip().lower() in ("help", "!help"):
@@ -459,7 +497,7 @@ async def on_message(client: AsyncClient, room: MatrixRoom, event: RoomMessageTe
             "<code>https://www.themoviedb.org/movie/603</code><br>"
             "<code>https://www.themoviedb.org/tv/1399</code>"
         )
-        await send_notice(client, room.room_id, plain, html)
+        await send_notice(client, room.room_id, plain, html, thread_root=thread_root)
         return
 
     # Collect all media references from the message
@@ -471,7 +509,7 @@ async def on_message(client: AsyncClient, room: MatrixRoom, event: RoomMessageTe
         if media is None:
             results.append((f"❓ Could not find anything for {imdb_id}.", f"❓ Could not find anything for <code>{imdb_id}</code>."))
         else:
-            results.append(await request_media(http, media, room.room_id))
+            results.append(await request_media(http, media, room.room_id, thread_root))
 
     for tmdb_id in set(TMDB_MOVIE_RE.findall(body)):
         log.info(f"Found TMDB movie link {tmdb_id} in {room.display_name} from {event.sender}")
@@ -483,7 +521,7 @@ async def on_message(client: AsyncClient, room: MatrixRoom, event: RoomMessageTe
             media["mediaInfo"] = details.get("mediaInfo")
         except Exception as e:
             log.warning(f"Failed to fetch TMDB movie {tmdb_id}: {e}")
-        results.append(await request_media(http, media, room.room_id))
+        results.append(await request_media(http, media, room.room_id, thread_root))
 
     for tmdb_id in set(TMDB_TV_RE.findall(body)):
         log.info(f"Found TMDB TV link {tmdb_id} in {room.display_name} from {event.sender}")
@@ -495,12 +533,12 @@ async def on_message(client: AsyncClient, room: MatrixRoom, event: RoomMessageTe
             media["mediaInfo"] = details.get("mediaInfo")
         except Exception as e:
             log.warning(f"Failed to fetch TMDB TV {tmdb_id}: {e}")
-        results.append(await request_media(http, media, room.room_id))
+        results.append(await request_media(http, media, room.room_id, thread_root))
 
     for result in results:
         if result is not None:
             plain, html = result
-            await send_notice(client, room.room_id, plain, html)
+            await send_notice(client, room.room_id, plain, html, thread_root=thread_root)
 
 
 async def on_megolm(client: AsyncClient, room: MatrixRoom, event: MegolmEvent):
@@ -521,6 +559,7 @@ async def on_megolm(client: AsyncClient, room: MatrixRoom, event: MegolmEvent):
         room.room_id,
         "🔒 I couldn't decrypt your message. Please try again or re-invite me to this room.",
         "🔒 I couldn't decrypt your message. Please try again or re-invite me to this room.",
+        thread_root=event.event_id,
     )
 
 
@@ -593,8 +632,8 @@ async def handle_radarr_webhook(request):
             file_path = movie_file.get("path") or movie.get("folderPath", "")
 
             if event_type == "Download" and tmdb_id:
-                rooms = pop_tracked("movie", tmdb_id)
-                if rooms:
+                entries = pop_tracked("movie", tmdb_id)
+                if entries:
                     client = request.app["matrix_client"]
                     http = request.app["http_session"]
                     # trigger library scan so Jellyfin picks up the new file
@@ -608,9 +647,10 @@ async def handle_radarr_webhook(request):
                     links_plain, links_html = links
                     plain = f"✅ {display} has been downloaded and is now available!\n{links_plain}"
                     html = f"✅ <b>{display}</b> has been downloaded and is now available!<br>{links_html}"
-                    for room_id in rooms:
+                    for entry in entries:
+                        room_id = entry["room"]
                         try:
-                            await send_notice(client, room_id, plain, html)
+                            await send_notice(client, room_id, plain, html, thread_root=entry.get("event"))
                         except Exception as e:
                             log.warning(f"Failed to notify room {room_id}: {e}")
     except Exception as e:
@@ -640,8 +680,8 @@ async def handle_sonarr_webhook(request):
                 ep_info = f" ({', '.join(ep_nums)})"
 
             if event_type == "Download" and tmdb_id:
-                rooms = pop_tracked("tv", tmdb_id)
-                if rooms:
+                entries = pop_tracked("tv", tmdb_id)
+                if entries:
                     client = request.app["matrix_client"]
                     http = request.app["http_session"]
                     folder_path = series.get("path", "")
@@ -656,9 +696,10 @@ async def handle_sonarr_webhook(request):
                     links_plain, links_html = links
                     plain = f"✅ {display}{ep_info} has been downloaded and is now available!\n{links_plain}"
                     html = f"✅ <b>{display}</b>{ep_info} has been downloaded and is now available!<br>{links_html}"
-                    for room_id in rooms:
+                    for entry in entries:
+                        room_id = entry["room"]
                         try:
-                            await send_notice(client, room_id, plain, html)
+                            await send_notice(client, room_id, plain, html, thread_root=entry.get("event"))
                         except Exception as e:
                             log.warning(f"Failed to notify room {room_id}: {e}")
     except Exception as e:
