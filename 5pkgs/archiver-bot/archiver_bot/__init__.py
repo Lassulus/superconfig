@@ -503,7 +503,7 @@ async def on_megolm(client: AsyncClient, room: MatrixRoom, event: MegolmEvent):
     """Handle messages we couldn't decrypt."""
     log.warning(
         f"Failed to decrypt message from {event.sender} in {room.display_name} "
-        f"(session {event.session_id}): {event.message}"
+        f"(session {event.session_id})"
     )
     # Request the keys we're missing
     if client.olm:
@@ -700,6 +700,7 @@ async def run():
         await client.sync_forever(timeout=30000, full_state=True)
     except Exception:
         log.exception("sync_forever crashed")
+        raise
     finally:
         await runner.cleanup()
         await http.close()
