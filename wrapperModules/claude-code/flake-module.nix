@@ -268,6 +268,24 @@
           '';
         };
 
+        projectStateWipeKeys = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [ "mcpServers" ];
+          description = ''
+            Keys to delete from every `projects.<dir>` entry of
+            `~/.claude.json` on each invocation. Use this to purge
+            unmanaged runtime drift that the wrapper otherwise can't
+            override — most notably stale `mcpServers` registrations
+            created by `claude mcp add`, which pin GC-able `/nix/store`
+            paths and shadow the canonical set the wrapper writes via
+            `--settings`.
+
+            Anything not listed here is left alone, so new fields
+            claude-code may add in future versions are preserved by
+            default. Set to `[ ]` to disable the cleanup step.
+          '';
+        };
+
         claudeMdMergeThreshold = lib.mkOption {
           type = lib.types.float;
           default = 0.15;
@@ -310,16 +328,36 @@
         order = 101;
       };
 
-      config.preHook = lib.optionalString (config.claudeMd != null) ''
-        CLAUDE_MD_DIR="''${CLAUDE_MD_DIR:-$HOME/.claude}"
-        mkdir -p "$CLAUDE_MD_DIR"
-        touch "$CLAUDE_MD_DIR/CLAUDE.md"
-        ${levenshtein}/bin/levenshtein-merge merge \
-          ${config.claudeMd} \
-          "$CLAUDE_MD_DIR/CLAUDE.md" \
-          ${toString config.claudeMdMergeThreshold} \
-          || echo "levenshtein merge failed; leaving CLAUDE.md untouched" >&2
-      '';
+      config.preHook =
+        lib.optionalString (config.claudeMd != null) ''
+          CLAUDE_MD_DIR="''${CLAUDE_MD_DIR:-$HOME/.claude}"
+          mkdir -p "$CLAUDE_MD_DIR"
+          touch "$CLAUDE_MD_DIR/CLAUDE.md"
+          ${levenshtein}/bin/levenshtein-merge merge \
+            ${config.claudeMd} \
+            "$CLAUDE_MD_DIR/CLAUDE.md" \
+            ${toString config.claudeMdMergeThreshold} \
+            || echo "levenshtein merge failed; leaving CLAUDE.md untouched" >&2
+        ''
+        + lib.optionalString (config.projectStateWipeKeys != [ ]) ''
+          CLAUDE_JSON="$HOME/.claude.json"
+          if [ -f "$CLAUDE_JSON" ]; then
+            CLAUDE_JSON_TMP=$(mktemp "$CLAUDE_JSON.XXXXXX")
+            if ${pkgs.jq}/bin/jq \
+                --argjson wipe ${lib.escapeShellArg (builtins.toJSON config.projectStateWipeKeys)} '
+                  if .projects then
+                    .projects |= with_entries(
+                      .value |= reduce $wipe[] as $k (.; del(.[$k]))
+                    )
+                  else . end
+                ' "$CLAUDE_JSON" > "$CLAUDE_JSON_TMP"; then
+              mv "$CLAUDE_JSON_TMP" "$CLAUDE_JSON"
+            else
+              rm -f "$CLAUDE_JSON_TMP"
+              echo "claude.json projects-state cleanup failed; leaving file untouched" >&2
+            fi
+          fi
+        '';
 
       config.meta.maintainers = [
         {
