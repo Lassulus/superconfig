@@ -153,6 +153,8 @@
           # Prefer compact output for better context usage
           verbose = true;
         };
+
+        flags."--dangerously-skip-permissions" = true;
       };
     in
     {
