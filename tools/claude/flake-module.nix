@@ -26,9 +26,6 @@
           git-mcp = {
             command = "${self.packages.${system}.git-mcp}/bin/git-mcp";
           };
-          tmux-mcp = {
-            command = "${self.packages.${system}.tmux-mcp}/bin/tmux-mcp";
-          };
         };
 
         skills = {
@@ -36,6 +33,7 @@
           reverse-engineering = "${
             self.legacyPackages.${system}.skills.reverse-engineering
           }/share/reverse-engineering";
+          tmux = "${self.legacyPackages.${system}.skills.tmux}/share/tmux";
           websearch = "${self.legacyPackages.${system}.skills.websearch}/share/websearch";
         };
 
@@ -132,6 +130,7 @@
             "Bash(ruff:*)"
             "Bash(kagi-search:*)"
             "Bash(curl:*)"
+            "Bash(tmux:*)"
             # file edits
             "Edit"
             "Write"
@@ -143,8 +142,10 @@
           self.packages.${system}.kagi-search
           pkgs.curl
           pkgs.jq
+          pkgs.python3
           pkgs.ripgrep
           pkgs.fd
+          pkgs.tmux
           pkgs.tree
         ];
 

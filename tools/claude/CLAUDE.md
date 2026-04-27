@@ -13,7 +13,7 @@ Global guidance for Claude Code across all projects.
 - Use the `gh` tool to interact with GitHub.
 - Do not include "claude" in commit messages.
 - Take extra care not to commit lines with trailing whitespace.
-- Use tmux-mcp for long-running tasks. Use a session with a `claude-` prefix — create one if no idle session exists.
+- Use the `tmux` skill for long-running tasks. Use a session with a `claude-` prefix — create one if no idle session exists.
 - Use git-mcp for advanced git operations (interactive staging, stash management, bisecting).
 
 ## Nix
