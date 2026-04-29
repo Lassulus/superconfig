@@ -27,7 +27,7 @@
           pass git pull --rebase
 
           # Deploy
-          clan machines update "$@"
+          clan machines update --debug "$@"
 
           # Push any secret changes after deploy
           pass git push
