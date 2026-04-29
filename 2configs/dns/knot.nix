@@ -56,7 +56,7 @@ in
         }
         {
           id = "hetzner_ip4_2";
-          address = "213.133.105.6@53";
+          address = "213.133.100.103@53";
         }
         {
           id = "hetzner_ip4_3";
@@ -68,7 +68,7 @@ in
         }
         {
           id = "hetzner_ip6_2";
-          address = "2a01:4f8:d0a:2004::2@53";
+          address = "2a01:4f8:0:1::5ddc:2@53";
         }
         {
           id = "hetzner_ip6_3";
