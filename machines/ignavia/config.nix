@@ -10,7 +10,7 @@
     ../../2configs
     ../../2configs/retiolum.nix
     # ../../2configs/baseX.nix
-    ../../2configs/desktops/qtile/nixos.nix
+    ../../2configs/desktops/sway/default.nix
     # ../../2configs/desktops/xmonad
     ../../2configs/power-action.nix
     ../../2configs/yubikey.nix
@@ -65,7 +65,6 @@
     self.packages.${pkgs.system}.bank
     pkgs.mycelium
     pkgs.tmate
-    pkgs.claude-code
   ];
 
   krebs.hosts.styx.nets.retiolum.tinc.extraConfig = "Address = 10.42.0.1 655";
