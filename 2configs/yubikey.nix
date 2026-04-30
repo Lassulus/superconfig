@@ -13,4 +13,13 @@
   services.udev.packages = with pkgs; [ yubikey-personalization ];
 
   services.pcscd.enable = true;
+
+  programs.gnupg.agent = {
+    enable = true;
+    # Don't use enableSSHSupport: it would override SSH_AUTH_SOCK system-wide.
+    # We still want gpg-agent to expose its ssh socket so it can be used
+    # on demand via:
+    #   SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)" ssh ...
+    settings.enable-ssh-support = true;
+  };
 }
