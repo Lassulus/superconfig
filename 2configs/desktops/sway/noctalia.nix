@@ -5,26 +5,7 @@
   ...
 }:
 let
-  sway-focus-workspace = pkgs.writeShellScript "sway-focus-workspace" ''
-    # Bring a workspace to the currently focused output
-    ws="$1"
-    current_output=$(${pkgs.sway}/bin/swaymsg -t get_workspaces | ${pkgs.jq}/bin/jq -r '.[] | select(.focused) | .output')
-    ${pkgs.sway}/bin/swaymsg "workspace $ws, move workspace to output $current_output"
-  '';
-  # Patch noctalia-shell for sway:
-  # - Use workspace name instead of number (activate() sends "workspace number <num>" which fails for named workspaces)
-  # - Show all workspaces on all screens (globalWorkspaces)
-  # - Bring workspace to current screen on click instead of jumping to its screen
-  noctalia-shell-patched = pkgs.noctalia-shell.overrideAttrs (old: {
-    postInstall = (old.postInstall or "") + ''
-          substituteInPlace $out/share/noctalia-shell/Services/Compositor/SwayService.qml \
-            --replace-fail 'workspace.handle.activate();' \
-              'Quickshell.execDetached(["${sway-focus-workspace}", workspace.name]);' \
-            --replace-fail 'property bool initialized: false' \
-              'property bool globalWorkspaces: true
-      property bool initialized: false'
-    '';
-  });
+  noctalia-shell = self.packages.${pkgs.system}.noctalia-shell;
 in
 {
   systemd.user.services.noctalia-shell = {
@@ -47,13 +28,13 @@ in
       pkgs.wl-clipboard
     ];
     serviceConfig = {
-      ExecStart = "${noctalia-shell-patched}/bin/noctalia-shell";
+      ExecStart = "${noctalia-shell}/bin/noctalia-shell";
       Restart = "on-failure";
     };
   };
 
   environment.systemPackages = [
-    noctalia-shell-patched
+    noctalia-shell
     # ryzenadj and power-profile for power profile control
     pkgs.ryzenadj
     self.packages.${pkgs.system}.power-profile
@@ -85,22 +66,4 @@ in
   services.udev.extraRules = ''
     SUBSYSTEM=="powercap", ACTION=="add", RUN+="${pkgs.coreutils}/bin/chmod a+r /sys/class/powercap/%k/energy_uj"
   '';
-
-  # Configure noctalia darkModeChange hook to trigger switch-theme
-  # This makes noctalia's dark mode button also switch the system theme
-  system.activationScripts.noctalia-hooks.text =
-    let
-      jq = "${pkgs.jq}/bin/jq";
-      settingsFile = "/home/${config.users.users.mainUser.name}/.config/noctalia/settings.json";
-    in
-    ''
-      if [ -f "${settingsFile}" ]; then
-        ${jq} '
-          .hooks.enabled = true |
-          .hooks.darkModeChange = "if [ \"$1\" = \"true\" ]; then switch-theme dark; else switch-theme light; fi"
-        ' "${settingsFile}" > "${settingsFile}.tmp" && \
-          mv "${settingsFile}.tmp" "${settingsFile}" && \
-          chown ${config.users.users.mainUser.name}:users "${settingsFile}" || true
-      fi
-    '';
 }
