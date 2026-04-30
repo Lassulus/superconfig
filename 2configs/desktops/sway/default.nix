@@ -196,6 +196,9 @@ in
       input "2321:21128:HTIX5288:00_0911:5288_Touchpad" {
           tap enabled
       }
+      input "2362:628:PIXA3854:00_093A:0274_Touchpad" {
+          tap enabled
+      }
     #
     # You can get the names of your inputs by running: swaymsg -t get_inputs
     # Read `man 5 sway-input` for more information about this section.
