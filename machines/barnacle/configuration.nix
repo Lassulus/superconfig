@@ -45,6 +45,7 @@
     pkgs.gh
     pkgs.tea
     pkgs.rbw
+    pkgs.radicle-node
   ];
 
   environment.variables = {
