@@ -12,15 +12,6 @@
     hostPath = "/var/lib/sync-containers3/orange/state";
     isReadOnly = false;
   };
-  services.nginx.virtualHosts."lassul.us" = {
-    # enableACME = config.security;
-    # forceSSL = true;
-    locations."/" = {
-      recommendedProxySettings = true;
-      proxyWebsockets = true;
-      proxyPass = "http://orange.r";
-    };
-  };
   clan.core.vars.generators.orange-container = {
     files."orange.sync.key" = { };
     migrateFact = "orange-container";

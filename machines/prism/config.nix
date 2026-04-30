@@ -26,7 +26,6 @@ in
     ../../2configs/ssh-redirect.nix
     ../../2configs/retiolum.nix
     ../../2configs/libvirt.nix
-    ../../2configs/websites/lassulus.nix
     ../../2configs/services/git/proxy.nix
     ../../2configs/monitoring/telegraf.nix
     ../../2configs/consul.nix
@@ -129,27 +128,10 @@ in
     # paste.nix removed - paste/cyberlocker now runs on neoprism, proxied below
     ../../2configs/syncthing.nix
     ../../2configs/container-networking.nix
-    ../../2configs/bgt-bot
     (self.inputs.stockholm + "/krebs/2configs/mastodon-proxy.nix")
     {
       services.tor = {
         enable = true;
-      };
-    }
-    {
-      imports = [
-        ../../2configs/realwallpaper.nix
-      ];
-      services.nginx.virtualHosts."lassul.us".locations = {
-        "= /wallpaper-marker.png".extraConfig = ''
-          alias /var/realwallpaper/realwallpaper-marker.png;
-        '';
-        "= /wallpaper.png".extraConfig = ''
-          alias /var/realwallpaper/realwallpaper.png;
-        '';
-        "= /wallpaper-stars-berlin.png".extraConfig = ''
-          alias /var/realwallpaper/realwallpaper-krebs-stars-berlin.png;
-        '';
       };
     }
     ../../2configs/minecraft.nix
@@ -215,7 +197,6 @@ in
     ../../2configs/services/coms/murmur.nix
     {
       # acme fallback for neoprism migration
-      services.nginx.virtualHosts."lassul.us".acmeFallbackHost = "orange.r";
       services.nginx.virtualHosts."radio.lassul.us".acmeFallbackHost = "neoprism.r";
       services.nginx.virtualHosts."flix.lassul.us".acmeFallbackHost = "neoprism.r";
       services.nginx.virtualHosts."jitsi.lassul.us".acmeFallbackHost = "neoprism.r";

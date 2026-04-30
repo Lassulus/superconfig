@@ -62,6 +62,12 @@
     # lassul.us website
     ../../2configs/websites/lassulus.nix
 
+    # realwallpaper generator
+    ../../2configs/realwallpaper.nix
+
+    # binaergewitter announce bot
+    # ../../2configs/bgt-bot
+
     # paste + cyberlocker
     ../../2configs/paste.nix
 
@@ -82,7 +88,20 @@
   ];
 
   # lassul.us shouldn't be the default vhost here (nginx.nix already sets one)
-  services.nginx.virtualHosts."lassul.us".default = lib.mkForce false;
+  services.nginx.virtualHosts."lassul.us" = {
+    default = lib.mkForce false;
+    locations = {
+      "= /wallpaper-marker.png".extraConfig = ''
+        alias /var/realwallpaper/realwallpaper-marker.png;
+      '';
+      "= /wallpaper.png".extraConfig = ''
+        alias /var/realwallpaper/realwallpaper.png;
+      '';
+      "= /wallpaper-stars-berlin.png".extraConfig = ''
+        alias /var/realwallpaper/realwallpaper-krebs-stars-berlin.png;
+      '';
+    };
+  };
 
   services.ollama.enable = true;
 
