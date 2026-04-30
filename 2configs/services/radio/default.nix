@@ -145,7 +145,6 @@ in
       ICECAST_HOST = "localhost";
     };
     path = [
-      pkgs.yt-dlp
       pkgs.bubblewrap
     ];
     serviceConfig.User = lib.mkForce "radio";
@@ -157,7 +156,6 @@ in
         bubblewrap
         curl
         ffmpeg
-        yt-dlp
       ];
     };
     icecast = opkgs.icecast.overrideAttrs (old: rec {
