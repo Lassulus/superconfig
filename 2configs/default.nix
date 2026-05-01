@@ -210,6 +210,9 @@
     #stuff for dl
     aria2
 
+    # decentralized git hosting
+    radicle-node
+
     #neat utils
     file
     xkcdpass
