@@ -30,7 +30,21 @@ detect_age_keys() {
         fi
     fi
 
-    # Check for YubiKeys (third priority)
+    # Check for gpg-agent with an encryption subkey (third priority).
+    # Frictionless after the first decrypt because gpg-agent caches the
+    # passphrase / smartcard PIN, so we prefer it over yubikey/solo2.
+    if command -v gpg-connect-agent >/dev/null 2>&1 \
+        && gpg-connect-agent /bye >/dev/null 2>&1 \
+        && gpg --list-secret-keys --with-colons 2>/dev/null \
+             | awk -F: '$1 == "ssb" && $12 ~ /e/ { found=1 } END { exit !found }'; then
+        echo "AGE-PLUGIN-GPG-1H40XPM" > "$temp_identities"
+        echo "IDENTITY_FILE=$temp_identities"
+        echo "DETECTED_KEY=gpg"
+        echo "KEY_TYPE=gpg"
+        return
+    fi
+
+    # Check for YubiKeys (fourth priority)
     if command -v ykman >/dev/null 2>&1; then
         local yubikey_serial
         yubikey_serial=$(ykman info 2>/dev/null | grep "Serial number:" | cut -d: -f2 | tr -d ' ' || true)
@@ -85,7 +99,7 @@ case "${1:-detect}" in
         echo "  DETECTED_KEY=<name>   - Name of the detected key (e.g., yubi1, solo2, se)"
         echo "  KEY_TYPE=<type>       - Type of key (yubikey, solo2, se)"
         echo ""
-        echo "Priority order: se > tpm > yubikey > solo2"
+        echo "Priority order: se > tpm > gpg > yubikey > solo2"
         ;;
     *)
         echo "Unknown command: $1" >&2
