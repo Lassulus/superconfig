@@ -20,6 +20,8 @@
     # We still want gpg-agent to expose its ssh socket so it can be used
     # on demand via:
     #   SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)" ssh ...
-    settings.enable-ssh-support = true;
+    # Use "" (not true): gpg-agent treats enable-ssh-support as a flag and
+    # rejects any argument; the keyValue formatter renders true as `key true`.
+    settings.enable-ssh-support = "";
   };
 }
