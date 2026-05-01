@@ -35,6 +35,7 @@
       "/var/vmail"
       "/var/dkim"
       "/var/sieve"
+      "/var/lib/heisenbridge"
     ];
     exclude = [
       "*.pyc"
@@ -67,6 +68,13 @@
       # Dump matrix-synapse PostgreSQL database (14GB, compresses well)
       ${pkgs.sudo}/bin/sudo -u postgres ${config.services.postgresql.package}/bin/pg_dump \
         matrix-synapse | ${pkgs.gzip}/bin/gzip > /var/backup/postgresql/matrix-synapse.sql.gz
+
+      # Dump bridge PostgreSQL databases — portal mappings, sessions, tokens.
+      # Losing these = relogin everywhere + every existing Matrix room orphaned.
+      for db in mautrix-whatsapp mautrix-signal mautrix-telegram mautrix-discord; do
+        ${pkgs.sudo}/bin/sudo -u postgres ${config.services.postgresql.package}/bin/pg_dump \
+          "$db" | ${pkgs.gzip}/bin/gzip > "/var/backup/postgresql/$db.sql.gz"
+      done
 
       # Dump hedgedoc SQLite database (172MB) safely
       ${pkgs.sqlite}/bin/sqlite3 /var/lib/hedgedoc/db.sqlite ".backup /var/backup/hedgedoc.sqlite"
