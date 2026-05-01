@@ -14,6 +14,7 @@
           pkgs.age-plugin-fido2-hmac
           pkgs.age-plugin-yubikey
           pkgs.age-plugin-tpm
+          self.packages.${system}.age-plugin-gpg
           self.packages.${system}.pass-otp
           self.packages.${system}.age-detect
         ]
