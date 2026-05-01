@@ -1,8 +1,13 @@
-{ ... }:
+{ self, ... }:
 {
 
-  nixpkgs.config.permittedInsecurePackages = [
-    "jitsi-meet-1.0.8792"
+  # jitsi-meet 1.0.8792 is marked insecure in nixpkgs; secureify via overlay
+  # rather than nixpkgs.config.permittedInsecurePackages (which doesn't
+  # list-merge across modules and gets clobbered).
+  nixpkgs.overlays = [
+    (_final: prev: {
+      jitsi-meet = self.lib.secureify prev.jitsi-meet;
+    })
   ];
   services.jitsi-meet = {
     enable = true;
