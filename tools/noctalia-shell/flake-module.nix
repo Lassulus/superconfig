@@ -18,8 +18,10 @@
         };
 
         settingsPatches = [
-          # Show workspace names instead of indices in the bar.
-          ''.bar.widgets.center |= map(if .id == "Workspace" then .labelMode = "name" else . end)''
+          # Show workspace names (not indices) in the bar, and don't
+          # truncate them. The widget caps to 2 chars on vertical bars
+          # regardless; this only affects horizontal bars.
+          ''.bar.widgets.center |= map(if .id == "Workspace" then .labelMode = "name" | .characterCount = 20 else . end)''
         ];
       };
     in
