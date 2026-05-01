@@ -1,5 +1,6 @@
 {
   pkgs,
+  lib,
   ...
 }:
 {
@@ -16,12 +17,15 @@
 
   programs.gnupg.agent = {
     enable = true;
-    # Don't use enableSSHSupport: it would override SSH_AUTH_SOCK system-wide.
-    # We still want gpg-agent to expose its ssh socket so it can be used
-    # on demand via:
+    # Sets up the gpg-agent-ssh.socket unit so gpg-agent (running in
+    # --supervised mode) actually receives an ssh listen fd. The module
+    # also exports SSH_AUTH_SOCK in environment.extraInit, which we
+    # don't want system-wide — unset it again below so users opt in via:
     #   SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)" ssh ...
-    # Use "" (not true): gpg-agent treats enable-ssh-support as a flag and
-    # rejects any argument; the keyValue formatter renders true as `key true`.
-    settings.enable-ssh-support = "";
+    enableSSHSupport = true;
   };
+
+  environment.extraInit = lib.mkAfter ''
+    unset SSH_AUTH_SOCK
+  '';
 }
