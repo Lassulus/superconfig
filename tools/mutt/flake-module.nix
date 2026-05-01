@@ -12,6 +12,11 @@
         let
           notmuchConfig = self.packages.${system}.notmuch.passthru.configuration.configFile.path;
 
+          # nixpkgs's autotools elinks is broken against gettext 0.23.1.
+          # Use our local meson build (5pkgs/elinks) until upstream PR
+          # #515347 lands.
+          elinks = self.packages.${system}.elinks;
+
           # Generate virtual-mailboxes from Maildir folder structure at build time
           # This discovers sieve folders dynamically — no hardcoded list needed
           genVirtualMailboxes = pkgs.writeShellScript "gen-virtual-mailboxes" ''
@@ -27,7 +32,7 @@
           '';
 
           mailcap = pkgs.writeText "mailcap" ''
-            text/html; ${pkgs.elinks}/bin/elinks -dump ; copiousoutput;
+            text/html; ${elinks}/bin/elinks -dump ; copiousoutput;
           '';
 
           # Script to view HTML emails in browser with embedded images
@@ -320,7 +325,7 @@
           package = pkgs.neomutt;
           aliases = [ "mutt" ];
           runtimeInputs = [
-            pkgs.elinks
+            elinks
             pkgs.msmtp
             pkgs.notmuch
             pkgs.openssh
