@@ -15,6 +15,7 @@
 
     ../../2configs/services/matrix
     ../../2configs/services/matrix/proxy.nix
+    ../../2configs/services/matrix/bridges/mautrix-whatsapp.nix
 
     ../../2configs/services/pad
 
