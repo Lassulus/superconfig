@@ -18,6 +18,7 @@
     ../../2configs/services/matrix/bridges/mautrix-whatsapp.nix
     ../../2configs/services/matrix/bridges/mautrix-signal.nix
     ../../2configs/services/matrix/bridges/heisenbridge.nix
+    ../../2configs/services/matrix/bridges/mautrix-telegram.nix
 
     ../../2configs/services/pad
 
