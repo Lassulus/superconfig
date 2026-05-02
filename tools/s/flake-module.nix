@@ -56,6 +56,8 @@
             local flake
             if [[ -d "$HOME/src/superconfig" ]]; then
               flake="$HOME/src/superconfig"
+            elif [[ -d "$HOME/sync/superconfig" ]]; then
+              flake="$HOME/sync/superconfig"
             else
               flake="${self}"
             fi
@@ -101,6 +103,8 @@
             # Use local checkout if it exists, otherwise fall back to self
             if [ -d "$HOME/src/superconfig" ]; then
               flake="$HOME/src/superconfig"
+            elif [ -d "$HOME/sync/superconfig" ]; then
+              flake="$HOME/sync/superconfig"
             else
               flake="${self}"
             fi
