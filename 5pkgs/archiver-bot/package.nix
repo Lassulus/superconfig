@@ -1,7 +1,21 @@
 {
   python3Packages,
   lib,
+  olm,
 }:
+let
+  olmSafe = python3Packages."python-olm".override {
+    olm = olm.overrideAttrs (old: {
+      meta = (old.meta or { }) // {
+        knownVulnerabilities = [ ];
+      };
+    });
+  };
+  matrix-nio-safe = python3Packages.matrix-nio.override {
+    withOlm = true;
+    "python-olm" = olmSafe;
+  };
+in
 python3Packages.buildPythonApplication {
   pname = "archiver-bot";
   version = "0.1.0";
@@ -12,7 +26,7 @@ python3Packages.buildPythonApplication {
   build-system = [ python3Packages.setuptools ];
 
   dependencies = with python3Packages; [
-    (matrix-nio.override { withOlm = true; })
+    matrix-nio-safe
     aiohttp
     cffi
   ];
