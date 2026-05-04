@@ -17,9 +17,6 @@
     locations."/".extraConfig = ''
       root /srv/http/lassul.us;
     '';
-    locations."= /retiolum-hosts.tar.bz2".extraConfig = ''
-      alias ${config.krebs.tinc.retiolum.hostsArchive};
-    '';
     locations."= /hosts".extraConfig = ''
       alias ${pkgs.krebs-hosts_combined};
     '';

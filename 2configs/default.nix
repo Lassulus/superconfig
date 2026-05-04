@@ -41,7 +41,6 @@
     self.inputs.stockholm.nixosModules.kartei
     self.inputs.stockholm.nixosModules.build
     self.inputs.stockholm.nixosModules.dns
-    self.inputs.stockholm.nixosModules.tinc
     self.inputs.stockholm.nixosModules.iptables
     self.inputs.stockholm.nixosModules.secret
     self.inputs.stockholm.nixosModules.setuid
