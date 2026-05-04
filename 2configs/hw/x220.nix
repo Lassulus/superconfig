@@ -59,6 +59,7 @@
     };
     "/boot" = {
       device = "/dev/sda2";
+      fsType = "vfat";
     };
     "/home" = {
       device = "/dev/mapper/pool-home";
