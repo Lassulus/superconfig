@@ -1,5 +1,7 @@
 { ... }:
 {
+  security.acme.acceptTerms = true;
+
   services.murmur = {
     enable = true;
     # allowHtml = false;
