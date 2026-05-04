@@ -209,9 +209,7 @@ function scheduleSave() {
   savePending = true;
   setTimeout(async () => {
     savePending = false;
-    if (lastWorkspace) {
-      await saveTabsForWorkspace(lastWorkspace);
-    }
+    await saveAllTabs();
   }, 500);
 }
 
