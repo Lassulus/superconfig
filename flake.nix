@@ -276,6 +276,14 @@
                           default = null;
                           description = "Dummy option for extra-container compatibility";
                         };
+                        options.services.openssh = {
+                          enable = lib.mkOption {
+                            type = lib.types.bool;
+                            default = false;
+                            description = "Dummy option for extra-container compatibility";
+                          };
+                          package = lib.mkPackageOption pkgs "openssh" { };
+                        };
                       }
                     )
                   ];
