@@ -1,4 +1,20 @@
-{ config, pkgs, ... }:
+{
+  self,
+  config,
+  pkgs,
+  ...
+}:
+
+let
+  tincr = self.packages.${pkgs.system}.tincr;
+  # krebs.tinc invokes ${tincPackage}/sbin/{tinc,tincd}; tincr ships in /bin.
+  tincrPkg = pkgs.runCommand "tincr-sbin-${tincr.version}" { } ''
+    mkdir -p $out
+    cp -r ${tincr}/* $out/
+    chmod -R u+w $out
+    ln -s bin $out/sbin
+  '';
+in
 
 {
 
@@ -7,6 +23,7 @@
 
   krebs.tinc.retiolum = {
     enable = true;
+    tincPackage = tincrPkg;
     connectTo = [
       "neoprism"
       "prism"
@@ -55,11 +72,7 @@
     };
   };
 
-  nixpkgs.config.packageOverrides = pkgs: {
-    tinc = pkgs.tinc_pre;
-  };
-
   environment.systemPackages = [
-    pkgs.tinc
+    tincrPkg
   ];
 }
