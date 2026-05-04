@@ -102,7 +102,12 @@ mkIf (hasAttr "wiregrill" config.krebs.build.host.nets) {
             hasAttr "wiregrill" h.nets
             && hasAttr "wireguard" h.nets.wiregrill
             && !isNull h.nets.wiregrill.wireguard
-            && !isNull h.nets.wiregrill.wireguard.pubkey
+            && (
+              let
+                pk = builtins.tryEval h.nets.wiregrill.wireguard.pubkey;
+              in
+              pk.success && !isNull pk.value
+            )
           ) config.krebs.hosts
         );
   };
