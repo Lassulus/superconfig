@@ -447,6 +447,18 @@ async function init() {
 
   // Mark init complete — workspace changes from now on will restore tabs
   initialized = true;
+
+  // Restore tabs for the initial workspace if it has saved tabs
+  if (lastWorkspace) {
+    const withFirefox = await getWorkspacesWithFirefox();
+    if (!withFirefox.has(lastWorkspace)) {
+      const resp = await sendNative("get_tabs", { workspace: lastWorkspace });
+      const tabs = resp.tabs || [];
+      if (tabs.length > 0) {
+        await restoreWorkspace(lastWorkspace);
+      }
+    }
+  }
 }
 
 init();
