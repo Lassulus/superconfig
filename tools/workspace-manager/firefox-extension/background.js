@@ -269,10 +269,8 @@ async function restoreWorkspace(workspace) {
 async function onWorkspaceChange(workspace) {
   if (!workspace || workspace === lastWorkspace) return;
 
-  // Save tabs for the workspace we're leaving
-  if (lastWorkspace) {
-    await saveTabsForWorkspace(lastWorkspace);
-  }
+  // Save all workspaces' tabs before switching
+  await saveAllTabs();
 
   lastWorkspace = workspace;
 
