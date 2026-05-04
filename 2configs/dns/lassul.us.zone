@@ -2,17 +2,17 @@
 
 ;;@ 3600 IN NS ns1
 @ 3600 IN NS ns1
-@ 3600 IN NS oxygen.ns.hetzner.com.
-@ 3600 IN NS hydrogen.ns.hetzner.com.
-@ 3600 IN NS helium.ns.hetzner.de.
+@ 3600 IN NS ns1.first-ns.de.
+@ 3600 IN NS robotns2.second-ns.de.
+@ 3600 IN NS robotns3.second-ns.com.
 
 
 $TTL 600
 
 ;; NS Records
-he IN NS oxygen.ns.hetzner.com.
-he IN NS hydrogen.ns.hetzner.com.
-he IN NS helium.ns.hetzner.de.
+he IN NS ns1.first-ns.de.
+he IN NS robotns2.second-ns.de.
+he IN NS robotns3.second-ns.com.
 
 @ IN A 95.217.192.59
 @ IN AAAA 2a01:4f9:4a:4f1a::2
