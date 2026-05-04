@@ -422,14 +422,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 // ── Init ────────────────────────────────────────────────────
 
 async function init() {
-  // Create anchor window immediately — doesn't need native messaging
-  try {
-    await ensureAnchorWindow();
-  } catch (e) {
-    console.error("Failed to create anchor window:", e);
-  }
-
-  // Connect to native host for workspace integration
+  // Connect to native host first — we need it to save existing tabs
   connectNative();
   await new Promise((r) => setTimeout(r, 500));
 
@@ -437,6 +430,25 @@ async function init() {
     lastWorkspace = await getCurrentWorkspace();
   } catch (e) {
     console.warn("Failed to get current workspace:", e);
+  }
+
+  const hadExistingWindows = (await browser.windows.getAll()).length > 0;
+
+  // Save all existing tabs before creating the anchor window
+  // (ensureAnchorWindow closes all windows, so save first)
+  if (hadExistingWindows) {
+    try {
+      await saveAllTabs();
+    } catch (e) {
+      console.error("Failed to save existing tabs before anchor creation:", e);
+    }
+  }
+
+  // Create anchor window — closes existing windows via the for_window rule
+  try {
+    await ensureAnchorWindow();
+  } catch (e) {
+    console.error("Failed to create anchor window:", e);
   }
 
   try {
@@ -448,7 +460,7 @@ async function init() {
   // Mark init complete — workspace changes from now on will restore tabs
   initialized = true;
 
-  // Restore tabs for the initial workspace if it has saved tabs
+  // Restore tabs for the initial workspace if it has saved tabs from a previous session
   if (lastWorkspace) {
     const withFirefox = await getWorkspacesWithFirefox();
     if (!withFirefox.has(lastWorkspace)) {
