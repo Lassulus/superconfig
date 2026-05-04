@@ -11,6 +11,7 @@
     ../../2configs/retiolum.nix
     # ../../2configs/baseX.nix
     ../../2configs/desktops/sway/default.nix
+    self.wrapperModules.workspace-manager
     # ../../2configs/desktops/xmonad
     ../../2configs/power-action.nix
     ../../2configs/yubikey.nix
@@ -50,6 +51,8 @@
     enable = true;
     client.enable = true;
   };
+
+  lass.workspace-manager.enable = true;
 
   documentation.nixos.enable = true;
   boot.binfmt.emulatedSystems = [
