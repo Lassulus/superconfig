@@ -305,11 +305,10 @@ in
       # disable relay to reduce overhead
       Swarm.RelayClient.Enabled = false;
       Swarm.RelayService.Enabled = false;
-      # dhtclient: announces our provider records (so peers can find content
-      # we host by CID) but does not serve DHT routing queries for others.
-      # autoclient would skip provide announcements and make our content
-      # invisible to bitswap.
-      Routing.Type = "dhtclient";
+      # autoclient: DHT client (no server queries) + IPNI/cid.contact HTTP
+      # announcements. Content is discoverable by both DHT peers and lassie
+      # (which uses IPNI for provider discovery).
+      Routing.Type = "autoclient";
       Provide = {
         Strategy = "pinned";
         DHT.Interval = "12h";
