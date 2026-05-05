@@ -1,4 +1,10 @@
-{ self, modulesPath, ... }:
+{
+  self,
+  modulesPath,
+  pkgs,
+  lib,
+  ...
+}:
 {
   imports = [
     ./config.nix
@@ -32,6 +38,18 @@
 
   hardware.graphics.enable = true;
   hardware.acpilight.enable = true;
+
+  # Use latest kernel (7.0) for better Strix Point GPU support
+  boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
+
+  # Disable MES (Micro Engine Scheduler) - known to cause GPU ring hangs on RDNA3+
+  # The hang manifests as: screen goes off 1-2s, comes back but frozen
+  boot.kernelParams = [ "amdgpu.mes=0" ];
+
+  # iwlwifi (Intel AX210) crashes after suspend with 0x5A5A5A5A in all registers
+  # (PCIe device doesn't come back from low-power state)
+  # enable_ini=0 disables the new UEFI-style firmware loading which fails on resume
+  boot.extraModprobeConfig = "options iwlwifi enable_ini=0";
 
   boot.initrd.availableKernelModules = [
     "nvme"
