@@ -34,6 +34,7 @@ in
 
   networking.useHostResolvConf = false;
   networking.useNetworkd = true;
+  networking.resolvconf.enable = false;
   # we need to set a namserver here that can be also be reached from the transmission network namespace
   environment.etc."resolv.conf".text = ''
     options edns0
