@@ -1,5 +1,12 @@
 { ... }:
 {
+  # The upstream module creates /var/lib/mautrix-discord with mode 0770 owned
+  # by mautrix-discord:mautrix-discord, while matrix-synapse only gets the
+  # `mautrix-discord-registration` supplementary group. That blocks
+  # matrix-synapse from traversing the directory to read the registration
+  # file. Granting it the `mautrix-discord` group as well lets it `chdir` in.
+  systemd.services.matrix-synapse.serviceConfig.SupplementaryGroups = [ "mautrix-discord" ];
+
   services.mautrix-discord = {
     enable = true;
     registerToSynapse = true;
