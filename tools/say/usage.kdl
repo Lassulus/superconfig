@@ -1,0 +1,4 @@
+bin "say"
+about "Speak a message via TTS and post a desktop notification to get the user's attention"
+
+arg "[message...]" help="Message to speak (default: 'Attention requested.')"

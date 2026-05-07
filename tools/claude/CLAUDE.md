@@ -14,6 +14,7 @@ Global guidance for Claude Code across all projects.
 - Do not include "claude" in commit messages.
 - Take extra care not to commit lines with trailing whitespace.
 - Use the `tmux` skill for long-running tasks. Use a session with a `claude-` prefix — create one if no idle session exists.
+- Use the `notify` skill (`s say "..."`) to get the user's attention when a long task finishes, you need input to continue, or something needs human review.
 - Use git-mcp for advanced git operations (interactive staging, stash management, bisecting).
 
 ## Nix

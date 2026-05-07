@@ -19,6 +19,7 @@
 
         skills = {
           hedgedoc = "${self.legacyPackages.${system}.skills.hedgedoc}/share/hedgedoc";
+          notify = "${self.legacyPackages.${system}.skills.notify}/share/notify";
           reverse-engineering = "${
             self.legacyPackages.${system}.skills.reverse-engineering
           }/share/reverse-engineering";
@@ -121,6 +122,7 @@
             "Bash(kagi-search:*)"
             "Bash(curl:*)"
             "Bash(tmux:*)"
+            "Bash(s:*)"
             # file edits
             "Edit"
             "Write"
