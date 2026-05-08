@@ -38,10 +38,10 @@ def write_message(msg: dict[str, Any]) -> None:
     sys.stdout.buffer.flush()
 
 
-def run(cmd: list[str]) -> str:
+def run(cmd: list[str], timeout: float = 2) -> str:
     """Run a command and return stripped stdout, or empty string on failure."""
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=2)  # noqa: S603
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)  # noqa: S603
     except (OSError, subprocess.TimeoutExpired):
         return ""
     return r.stdout.strip() if r.returncode == 0 else ""
@@ -71,12 +71,20 @@ def daemon_query(msg: dict[str, Any]) -> dict[str, Any]:
     return {}
 
 
-def get_firefox_windows() -> list[dict[str, str]]:
-    """Get all Firefox windows and their workspaces from sway tree."""
+def get_firefox_windows() -> list[dict[str, str]] | None:
+    """Get all Firefox windows and their workspaces from sway tree.
+
+    Returns None if the sway tree could not be queried (so callers can
+    distinguish "no Firefox windows" from "we don't know"). Otherwise
+    returns the list of Firefox windows, possibly empty.
+    """
+    raw = run(["swaymsg", "-t", "get_tree", "-r"], timeout=5)
+    if not raw:
+        return None
     try:
-        tree: dict[str, Any] = json.loads(run(["swaymsg", "-t", "get_tree", "-r"]))
+        tree: dict[str, Any] = json.loads(raw)
     except (json.JSONDecodeError, ValueError):
-        return []
+        return None
 
     results: list[dict[str, str]] = []
 
@@ -120,7 +128,10 @@ def handle(msg: dict[str, Any]) -> dict[str, Any]:
         run(["swaymsg", "move", "container", "to", "workspace", msg.get("name", "")])
         return {"id": mid, "ok": True}
     if cmd == "map_windows":
-        return {"id": mid, "windows": get_firefox_windows()}
+        windows = get_firefox_windows()
+        if windows is None:
+            return {"id": mid, "error": "Failed to query sway tree"}
+        return {"id": mid, "windows": windows}
     if cmd == "save_tabs":
         workspace = msg.get("workspace", "")
         tabs = msg.get("tabs", [])

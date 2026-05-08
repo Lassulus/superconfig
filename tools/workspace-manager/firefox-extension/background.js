@@ -88,45 +88,42 @@ async function listWorkspaces() {
 
 // ── Firefox window <-> workspace mapping ────────────────────
 
+// Throws on query failure so callers can distinguish "no Firefox windows"
+// from "we don't know" — a silent empty result here under load caused
+// duplicate window restoration.
 async function getFirefoxWindowMappings() {
-  try {
-    const resp = await sendNative("map_windows");
-    if (!resp.windows) return new Map();
+  const resp = await sendNative("map_windows");
+  if (resp.error) throw new Error(resp.error);
+  if (!resp.windows) throw new Error("map_windows: no windows field");
 
-    const allWindows = await browser.windows.getAll({ populate: true });
-    const result = new Map();
-    const matched = new Set();
+  const allWindows = await browser.windows.getAll({ populate: true });
+  const result = new Map();
+  const matched = new Set();
 
-    for (const mapping of resp.windows) {
-      const swayTitle = mapping.windowTitle || "";
-      for (const win of allWindows) {
-        if (matched.has(win.id) || win.id === anchorWindowId) continue;
-        const activeTab = win.tabs && win.tabs.find((t) => t.active);
-        if (
-          activeTab &&
-          activeTab.title &&
-          swayTitle.startsWith(activeTab.title)
-        ) {
-          result.set(mapping.workspace, win.id);
-          matched.add(win.id);
-          break;
-        }
+  for (const mapping of resp.windows) {
+    const swayTitle = mapping.windowTitle || "";
+    for (const win of allWindows) {
+      if (matched.has(win.id) || win.id === anchorWindowId) continue;
+      const activeTab = win.tabs && win.tabs.find((t) => t.active);
+      if (
+        activeTab &&
+        activeTab.title &&
+        swayTitle.startsWith(activeTab.title)
+      ) {
+        result.set(mapping.workspace, win.id);
+        matched.add(win.id);
+        break;
       }
     }
-    return result;
-  } catch (e) {
-    return new Map();
   }
+  return result;
 }
 
 async function getWorkspacesWithFirefox() {
-  try {
-    const resp = await sendNative("map_windows");
-    if (!resp.windows) return new Set();
-    return new Set(resp.windows.map((w) => w.workspace));
-  } catch (e) {
-    return new Set();
-  }
+  const resp = await sendNative("map_windows");
+  if (resp.error) throw new Error(resp.error);
+  if (!resp.windows) throw new Error("map_windows: no windows field");
+  return new Set(resp.windows.map((w) => w.workspace));
 }
 
 // ── Anchor window (keeps Firefox alive) ─────────────────────
@@ -173,10 +170,9 @@ browser.windows.onRemoved.addListener((windowId) => {
 
 // ── Tab saving (to workspace file) ─────────────────────────
 
-async function saveTabsForWorkspace(workspace) {
+async function saveTabsForWorkspace(workspace, mappings) {
   if (!workspace) return;
 
-  const mappings = await getFirefoxWindowMappings();
   const windowId = mappings.get(workspace);
   if (!windowId) return;
 
@@ -197,9 +193,15 @@ async function saveTabsForWorkspace(workspace) {
 }
 
 async function saveAllTabs() {
-  const mappings = await getFirefoxWindowMappings();
+  let mappings;
+  try {
+    mappings = await getFirefoxWindowMappings();
+  } catch (e) {
+    console.warn("Skipping save — could not query window mappings:", e);
+    return;
+  }
   for (const [workspace] of mappings) {
-    await saveTabsForWorkspace(workspace);
+    await saveTabsForWorkspace(workspace, mappings);
   }
 }
 
@@ -277,8 +279,16 @@ async function onWorkspaceChange(workspace) {
   // Don't restore tabs during startup — only after user switches workspace
   if (!initialized) return;
 
-  // Check if this workspace already has a Firefox window
-  const withFirefox = await getWorkspacesWithFirefox();
+  // Check if this workspace already has a Firefox window. If we can't tell
+  // (e.g. swaymsg timed out under load), skip — restoring blindly would
+  // duplicate an existing window.
+  let withFirefox;
+  try {
+    withFirefox = await getWorkspacesWithFirefox();
+  } catch (e) {
+    console.warn(`Skipping restore for ${workspace} — query failed:`, e);
+    return;
+  }
   if (withFirefox.has(workspace)) return;
 
   // No Firefox window — restore saved tabs
@@ -462,7 +472,13 @@ async function init() {
 
   // Restore tabs for the initial workspace if it has saved tabs from a previous session
   if (lastWorkspace) {
-    const withFirefox = await getWorkspacesWithFirefox();
+    let withFirefox;
+    try {
+      withFirefox = await getWorkspacesWithFirefox();
+    } catch (e) {
+      console.warn("Skipping initial restore — query failed:", e);
+      return;
+    }
     if (!withFirefox.has(lastWorkspace)) {
       const resp = await sendNative("get_tabs", { workspace: lastWorkspace });
       const tabs = resp.tabs || [];
