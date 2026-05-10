@@ -771,11 +771,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1778093558,
-        "narHash": "sha256-WaZ/8gB794qjJmXx/FZnu0z7N0rnPRC2PZdEfPIzLlg=",
+        "lastModified": 1778402755,
+        "narHash": "sha256-4/x0dMgd+rLRTxga4fyZDYcR47tdavf6ioHm6+Pqb+0=",
         "ref": "refs/heads/master",
-        "rev": "9fb0f25412139432a7a5377e20daacd9b2c7a5f0",
-        "revCount": 12208,
+        "rev": "cd45957c2d2275283d5c6e3cd8c1e346d27b852c",
+        "revCount": 12210,
         "submodules": true,
         "type": "git",
         "url": "https://github.com/krebs/stockholm"
