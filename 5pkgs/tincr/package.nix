@@ -7,13 +7,13 @@
 
 rustPlatform.buildRustPackage {
   pname = "tincr";
-  version = "0-unstable-2026-04-29";
+  version = "0-unstable-2026-05-11-lass-udpfix";
 
   src = fetchFromGitHub {
-    owner = "Mic92";
+    owner = "Lassulus";
     repo = "tincr";
-    rev = "acb15fc2e203652f70d2a8c24d2c35d73c396572";
-    hash = "sha256-qQ35osywm1Z8zfN+GYy7wxhG9bQ7U7X1Y+ETmZ6p2nw=";
+    rev = "a25eec05b639a48bb164b41b5a1ae770ea6252d2";
+    hash = "sha256-kobvGKOcB56efbOq0xSM4dLF5JhQPne+VQ+KRrU/kjo=";
   };
 
   cargoHash = "sha256-3zq9SoOiBRqwXWr7N0NRW+oM2OLu8/IY3B3WCCZ0Chw=";
