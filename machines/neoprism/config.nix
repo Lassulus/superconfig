@@ -49,6 +49,9 @@
     # video strreaming
     ../../2configs/cast.nix
 
+    # c-base ollama tunnel
+    ../../2configs/c-base-ai-tunnel.nix
+
     # debug stuff
     ../../2configs/websites/mergebot.lassul.us.nix
 
