@@ -49,6 +49,7 @@
             ./questionnaire.ts
             ./auto-theme.ts
             ./websearch.ts
+            ./ollama.ts
           ];
           defaultProvider = "openrouter";
           defaultModel = "deepseek/deepseek-v4-pro";

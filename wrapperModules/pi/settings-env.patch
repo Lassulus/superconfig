@@ -1,8 +1,8 @@
---- /tmp/settings-manager.js.orig	2026-02-18 23:29:05.967146474 +0100
-+++ /tmp/settings-manager.js	2026-02-18 23:29:12.452952321 +0100
-@@ -97,7 +97,16 @@
+--- a/dist/core/settings-manager.js
++++ b/dist/core/settings-manager.js
+@@ -130,7 +130,16 @@
      /** Create a SettingsManager that loads from files */
-     static create(cwd = process.cwd(), agentDir = getAgentDir()) {
+     static create(cwd, agentDir = getAgentDir()) {
          const storage = new FileSettingsStorage(cwd, agentDir);
 -        return SettingsManager.fromStorage(storage);
 +        const manager = SettingsManager.fromStorage(storage);
@@ -18,3 +18,17 @@
      }
      /** Create a SettingsManager from an arbitrary storage backend */
      static fromStorage(storage) {
+@@ -250,6 +259,13 @@
+             this.projectSettingsLoadError = projectLoad.error;
+             this.recordError("project", projectLoad.error);
+         }
++        const baseFile = process.env.PI_SETTINGS_FILE;
++        if (baseFile) {
++            try {
++                const baseSettings = JSON.parse(readFileSync(baseFile, "utf-8"));
++                this.globalSettings = deepMergeSettings(this.globalSettings, baseSettings);
++            } catch (e) {}
++        }
+         this.settings = deepMergeSettings(this.globalSettings, this.projectSettings);
+     }
+     /** Apply additional overrides on top of current settings */
