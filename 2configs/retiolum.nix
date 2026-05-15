@@ -94,4 +94,11 @@ in
   environment.systemPackages = [
     tincrPkg
   ];
+
+  # Upstream nixos/tinc preStart chowns hosts/ and invitations/ but not
+  # the network dir itself, so tincr (and tinc 1.1pre18) can't persist
+  # its address-cache there. Drop this once nixpkgs#520533 lands.
+  systemd.tmpfiles.rules = [
+    "z /etc/tinc/retiolum 0755 tinc-retiolum - -"
+  ];
 }
