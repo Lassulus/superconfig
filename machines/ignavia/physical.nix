@@ -46,11 +46,6 @@
   # The hang manifests as: screen goes off 1-2s, comes back but frozen
   boot.kernelParams = [ "amdgpu.mes=0" ];
 
-  # iwlwifi (Intel AX210) crashes after suspend with 0x5A5A5A5A in all registers
-  # (PCIe device doesn't come back from low-power state)
-  # enable_ini=0 disables the new UEFI-style firmware loading which fails on resume
-  boot.extraModprobeConfig = "options iwlwifi enable_ini=0";
-
   boot.initrd.availableKernelModules = [
     "nvme"
     "thunderbolt"
