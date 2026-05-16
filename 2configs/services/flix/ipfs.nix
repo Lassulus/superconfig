@@ -29,6 +29,7 @@ let
     IPNS_NAME_FILE="${ipnsNameFile}"
 
     touch "$CID_MAP"
+    ${pkgs.coreutils}/bin/chmod 0644 "$CID_MAP"
 
     log() {
       echo "[$(date -Iseconds)] $*"
@@ -78,7 +79,7 @@ let
       local path="$1"
       [ -f "$path" ] || return 0
       case "$(basename "$path")" in
-        .* | *.part | *.tmp | *.synced.*) return 0 ;;
+        .* | *.part | *.tmp | *.synced.* | *.aria2) return 0 ;;
       esac
 
       log "Adding $path"
@@ -257,6 +258,7 @@ let
     done < "$CID_MAP"
 
     if [ "$removed" -gt 0 ]; then
+      ${pkgs.coreutils}/bin/chmod 0644 "$tmp"
       ${pkgs.coreutils}/bin/mv "$tmp" "$CID_MAP"
       echo "reconciled: removed $removed stale entries"
       touch "$DIRTY_FLAG"
