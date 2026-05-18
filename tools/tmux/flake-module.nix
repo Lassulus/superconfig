@@ -40,9 +40,6 @@
         set -s extended-keys on
         set -as terminal-features 'xterm*:extkeys'
 
-        # Auto-destroy sessions when no clients attached (handles terminal close)
-        set -g destroy-unattached on
-
         # Enable kitty graphics protocol passthrough
         set -g allow-passthrough on
         set -ga update-environment TERM
