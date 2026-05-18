@@ -121,6 +121,7 @@
           createHome = true;
           useDefaultShell = true;
           isNormalUser = true;
+          linger = true;
           extraGroups = [
             "audio"
             "video"
