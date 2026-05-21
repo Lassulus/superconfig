@@ -16,6 +16,7 @@
     ../../2configs/power-action.nix
     ../../2configs/yubikey.nix
     ../../2configs/pipewire.nix
+    ../../2configs/udisks.nix
     ../../2configs/browsers.nix
     ../../2configs/network-manager.nix
     ../../2configs/syncthing.nix
