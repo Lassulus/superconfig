@@ -396,19 +396,21 @@ in
   # blockstore-only duplicates of files that already live in
   # /var/lib/ipfs/download.
   environment.systemPackages = [
-    (lib.hiPrio (pkgs.writeShellScriptBin "ipfs" ''
-      if [ "''${1-}" = "add" ]; then
-        for a in "$@"; do
-          case "$a" in
-            --nocopy|--nocopy=true) exec ${pkgs.kubo}/bin/ipfs "$@" ;;
-          esac
-        done
-        echo "refused: 'ipfs add' without --nocopy is forbidden on this host." >&2
-        echo "         Use 'ipfs add --nocopy <path>' so the file is referenced via filestore" >&2
-        echo "         instead of duplicated into the blockstore." >&2
-        exit 1
-      fi
-      exec ${pkgs.kubo}/bin/ipfs "$@"
-    ''))
+    (lib.hiPrio (
+      pkgs.writeShellScriptBin "ipfs" ''
+        if [ "''${1-}" = "add" ]; then
+          for a in "$@"; do
+            case "$a" in
+              --nocopy|--nocopy=true) exec ${pkgs.kubo}/bin/ipfs "$@" ;;
+            esac
+          done
+          echo "refused: 'ipfs add' without --nocopy is forbidden on this host." >&2
+          echo "         Use 'ipfs add --nocopy <path>' so the file is referenced via filestore" >&2
+          echo "         instead of duplicated into the blockstore." >&2
+          exit 1
+        fi
+        exec ${pkgs.kubo}/bin/ipfs "$@"
+      ''
+    ))
   ];
 }
