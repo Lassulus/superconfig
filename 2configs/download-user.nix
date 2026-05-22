@@ -1,4 +1,4 @@
-{ self, ... }:
+{ self, config, ... }:
 {
   users.users.download = {
     isNormalUser = true;
@@ -14,6 +14,7 @@
       self.keys.ssh.solo2.public
       self.keys.ssh.xerxes.public
       self.keys.ssh.massulus.public
+      config.krebs.users.makefu.pubkey
     ];
   };
 
