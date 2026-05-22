@@ -37,6 +37,7 @@
     # ../../2configs/sunshine.nix
     # ../../2configs/br.nix
     # ../../2configs/c-base.nix
+    ../../2configs/pradille.nix
   ];
 
   system.stateVersion = "23.11";
