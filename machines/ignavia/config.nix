@@ -77,6 +77,15 @@
   virtualisation.podman.enable = true;
 
   hardware.keyboard.qmk.enable = true;
+  hardware.xpadneo.enable = true;
+  hardware.bluetooth.settings.General = {
+    # Xbox Wireless Controllers fail LE authentication without these:
+    # JustWorksRepairing lets bluez accept fresh pairings without manual remove,
+    # Privacy = device makes the host use a static address so the controller's
+    # bond key doesn't get invalidated by RPA rotation.
+    JustWorksRepairing = "always";
+    Privacy = "device";
+  };
 
   users.users.mainUser.extraGroups = [ "wireshark" ];
   programs.wireshark.enable = true;
