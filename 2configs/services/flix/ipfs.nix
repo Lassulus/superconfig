@@ -278,8 +278,13 @@ in
     # Staging area for ipfs-upload: same filesystem as the destination, but
     # outside the pin-watcher's watch dirs (movies/shows/games) so inotify
     # never fires on in-flight uploads.
-    "d /var/download/incoming 0775 ${config.services.kubo.user} download -"
-    "d /var/download/incoming/uploader 0775 ${config.services.kubo.user} download -"
+    "d /var/download/incoming 0755 ${config.services.kubo.user} ${config.services.kubo.group} -"
+    "d /var/download/incoming/uploader 0755 ${config.services.kubo.user} ${config.services.kubo.group} -"
+    # Let the ipfs-upload service write into /var/download/games. Owner
+    # = ipfs so the service has write; group = users + setgid so existing
+    # CLI users (lass) keep write via group and new uploads inherit
+    # group=users.
+    "z /var/download/games 2775 ${config.services.kubo.user} users -"
   ];
 
   services.kubo = {
