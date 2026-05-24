@@ -1,11 +1,28 @@
 { pkgs, ... }:
 {
+  # POST → ipfs-upload backend (writes file to /var/lib/ipfs/download/<path>
+  # and returns the CID). Anything else → the kubo gateway.
+  services.nginx.upstreams.ipfs-gateway.servers."127.0.0.1:8089" = { };
+  services.nginx.upstreams.ipfs-upload.servers."127.0.0.1:8090" = { };
+  services.nginx.appendHttpConfig = ''
+    map $request_method $ipfs_lassul_upstream {
+      default ipfs-gateway;
+      POST    ipfs-upload;
+    }
+  '';
+
   services.nginx.virtualHosts."ipfs.lassul.us" = {
     forceSSL = true;
     enableACME = true;
     locations."/" = {
-      proxyPass = "http://localhost:8089";
+      proxyPass = "http://$ipfs_lassul_upstream";
       recommendedProxySettings = true;
+      extraConfig = ''
+        client_max_body_size 0;
+        proxy_request_buffering off;
+        proxy_read_timeout 1h;
+        proxy_send_timeout 1h;
+      '';
     };
   };
   services.nginx.virtualHosts."flix.lassul.us" = {

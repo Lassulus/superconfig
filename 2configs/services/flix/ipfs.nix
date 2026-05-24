@@ -227,6 +227,10 @@ let
   # files that no longer exist on disk. Protects against inotify event
   # drops (e.g. queue overflow during bulk renames/deletes) and any other
   # path that leaves cid-map/MFS out of sync with the filesystem.
+  uploadServer = pkgs.writers.writePython3Bin "ipfs-upload-server" {
+    flakeIgnore = [ "E501" ];
+  } ./ipfs_upload.py;
+
   reconcileScript = pkgs.writers.writeBash "flix-index-reconcile" ''
     set -efu
 
@@ -271,6 +275,11 @@ in
   # symlink /var/download into IPFS root so --nocopy works
   systemd.tmpfiles.rules = [
     "L+ /var/lib/ipfs/download - - - - /var/download"
+    # Staging area for ipfs-upload: same filesystem as the destination, but
+    # outside the pin-watcher's watch dirs (movies/shows/games) so inotify
+    # never fires on in-flight uploads.
+    "d /var/download/incoming 0775 ${config.services.kubo.user} download -"
+    "d /var/download/incoming/uploader 0775 ${config.services.kubo.user} download -"
   ];
 
   services.kubo = {
@@ -333,6 +342,31 @@ in
       User = config.services.kubo.user;
       Group = config.services.kubo.group;
       SupplementaryGroups = [ "radio_container" ];
+    };
+  };
+
+  systemd.services.ipfs-upload = {
+    description = "HTTP upload endpoint that writes files under /var/lib/ipfs/download and pins them";
+    after = [ "ipfs.service" ];
+    requires = [ "ipfs.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Environment = [
+        "IPFS_PATH=/var/lib/ipfs"
+        "IPFS_BIN=${pkgs.kubo}/bin/ipfs"
+        "DOWNLOAD_ROOT=/var/lib/ipfs/download"
+        "BIND=127.0.0.1"
+        "PORT=8090"
+      ];
+      ExecStart = "${uploadServer}/bin/ipfs-upload-server";
+      Restart = "always";
+      RestartSec = "10s";
+      User = config.services.kubo.user;
+      Group = config.services.kubo.group;
+      # /var/download is owned by ipfs:ipfs on neoprism, so no extra
+      # groups needed. Existing subdirs owned by other users (e.g. games
+      # → lass:users) are not writable by this service; uploads to those
+      # paths will get a 500 unless ownership is adjusted out-of-band.
     };
   };
 
