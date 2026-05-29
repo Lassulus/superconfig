@@ -2,7 +2,6 @@
   self,
   modulesPath,
   pkgs,
-  lib,
   ...
 }:
 {
@@ -39,24 +38,9 @@
   hardware.graphics.enable = true;
   hardware.acpilight.enable = true;
 
-  # Use latest kernel (7.0) for better Strix Point GPU support.
-  # Patch in upstream e3ac0d9f1a20 to fix MT7925 Bluetooth init regression
-  # introduced by 634a4408c061 ("validate WMT event SKB length") in 7.0.7+.
-  boot.kernelPackages = lib.mkDefault (
-    pkgs.linuxPackagesFor (
-      pkgs.linux_latest.override {
-        kernelPatches = pkgs.linux_latest.kernelPatches ++ [
-          {
-            name = "btmtk-accept-too-short-wmt-funcc";
-            patch = pkgs.fetchpatch {
-              url = "https://github.com/torvalds/linux/commit/e3ac0d9f1a205f33a43fba3b79ef74d2f604c78b.patch";
-              hash = "sha256-ByGMwBkEDv0yf9DfJjwILzmPBJBTcb0art8/lscbwUI=";
-            };
-          }
-        ];
-      }
-    )
-  );
+  # Use latest kernel for better Strix Point GPU support. The MT7925 BT init
+  # regression fix (e3ac0d9f1a20) landed upstream in 7.0.10.
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Disable MES (Micro Engine Scheduler) - known to cause GPU ring hangs on RDNA3+
   # The hang manifests as: screen goes off 1-2s, comes back but frozen
