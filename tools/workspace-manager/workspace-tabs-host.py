@@ -93,11 +93,18 @@ def get_firefox_windows() -> list[dict[str, str]] | None:
         if node_type == "workspace":
             workspace = node.get("name", workspace)
         app_id = node.get("app_id", "") or ""
-        if "firefox" in app_id.lower() and node_type == "con":
+        name = node.get("name", "") or ""
+        # Skip the hidden workspace-manager anchor window — it must never be
+        # mapped to a real workspace, or it gets saved as a phantom tab.
+        if (
+            "firefox" in app_id.lower()
+            and node_type == "con"
+            and not name.startswith("workspace-anchor")
+        ):
             results.append(
                 {
                     "workspace": workspace,
-                    "windowTitle": node.get("name", ""),
+                    "windowTitle": name,
                 }
             )
         for child in node.get("nodes", []) + node.get("floating_nodes", []):

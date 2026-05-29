@@ -45,6 +45,19 @@
   xdg.portal.config.common.default = "wlr";
   fonts.enableDefaultPackages = true;
 
+  # PipeWire runs system-wide and is usually not ready yet when sway starts the
+  # screencast portal at login. The default unit retries every 100ms and trips
+  # the start-limit within a second, then stays dead for the whole session —
+  # which silently breaks screensharing. Keep retrying with a sane delay and no
+  # give-up so it comes up as soon as PipeWire accepts connections.
+  systemd.user.services.xdg-desktop-portal-wlr = {
+    startLimitIntervalSec = 0;
+    serviceConfig = {
+      Restart = lib.mkForce "on-failure";
+      RestartSec = lib.mkForce 2;
+    };
+  };
+
   security.polkit.enable = true;
   security.pam.services.swaylock = { };
   security.pam.services.swaylock-plugin = { };

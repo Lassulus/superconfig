@@ -9,6 +9,16 @@
 const HOST_NAME = "workspace_tabs";
 const ANCHOR_TITLE = "workspace-anchor";
 
+// Only real web pages belong in a workspace file. Internal pages — most
+// importantly the anchor window's moz-extension:// page, but also about:* and
+// blank tabs — must never be persisted or restored, otherwise a transient
+// startup window gets saved and later reappears as a phantom browser window.
+function isRestorableUrl(url) {
+  return (
+    !!url && (url.startsWith("http://") || url.startsWith("https://"))
+  );
+}
+
 let port = null;
 let pendingRequests = new Map();
 let requestId = 0;
@@ -179,7 +189,7 @@ async function saveTabsForWorkspace(workspace, mappings) {
   try {
     const tabs = await browser.tabs.query({ windowId });
     const tabData = tabs
-      .filter((t) => t.url && !t.url.startsWith("about:"))
+      .filter((t) => isRestorableUrl(t.url))
       .map((t) => ({
         url: t.url,
         pinned: t.pinned,
@@ -237,7 +247,9 @@ async function restoreWorkspace(workspace) {
 
   try {
     const resp = await sendNative("get_tabs", { workspace });
-    const tabs = resp.tabs || [];
+    // Drop any non-web entries (e.g. a previously-saved anchor page) so stale
+    // bad data in existing workspace files can't resurrect a phantom window.
+    const tabs = (resp.tabs || []).filter((t) => isRestorableUrl(t.url));
     if (tabs.length === 0) return;
 
     // Create window with the first tab to avoid a blank "new tab"

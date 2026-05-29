@@ -38,6 +38,11 @@ in
       "sway-session.target"
       "workspace-manager.service"
     ];
+    # Never restart on `nixos-rebuild switch` — that would kill all open
+    # browser windows. A new Firefox build is only picked up at the next
+    # sway session start.
+    restartIfChanged = false;
+    stopIfChanged = false;
     serviceConfig = {
       Type = "simple";
       ExecStart = lib.getExe self.packages.${pkgs.system}.firefox;
@@ -441,6 +446,12 @@ in
       xkb_variant altgr-intl
       xkb_options caps:hyper
     }
+
+    # Hide the workspace-manager Firefox anchor window. Registered statically
+    # here (not just by the daemon at runtime) so the rule exists before the
+    # firefox.service starts, otherwise the anchor flashes onto the current
+    # workspace and gets captured as a phantom tab.
+    for_window [title="^workspace-anchor"] move scratchpad
 
     # flameshot
     for_window [app_id="flameshot"] border pixel 0, floating enable, fullscreen disable, move absolute position 0 0
