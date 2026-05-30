@@ -43,6 +43,7 @@ let
     Vicuñas
     Goldwandsänger
     Nachtechsen
+    Halbmond-Lanzenotter
   '';
   systemPlugin = {
     plugin = "system";
