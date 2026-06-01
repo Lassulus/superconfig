@@ -25,6 +25,10 @@ let
 
     # Disable bell
     enable_audio_bell no
+
+    # Don't reset the terminal on ctrl+shift+delete; it's too close to
+    # shift+insert (paste) and the reset scrambles running programs.
+    map ctrl+shift+delete no_op
   '';
 
   kitty = pkgs.symlinkJoin {
