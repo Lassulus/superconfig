@@ -34,6 +34,7 @@ import re
 import socketserver
 import subprocess
 import sys
+import threading
 
 DOWNLOAD_ROOT = os.environ.get("DOWNLOAD_ROOT", "/var/lib/ipfs/download")
 STAGING_DIR = os.environ.get("STAGING_DIR", "/var/lib/ipfs/download/incoming/uploader")
@@ -60,6 +61,23 @@ def staging_path(rel: str) -> str:
     return os.path.join(STAGING_DIR, f"{sid}.upload")
 
 
+_locks_mu = threading.Lock()
+_locks: dict[str, threading.Lock] = {}
+
+
+def lock_for(rel: str) -> threading.Lock:
+    # Serializes concurrent POSTs targeting the same staging file. Without
+    # this, two threads handling the same chunk (e.g. a client retry after a
+    # lost response) can both pass the start==current_size check and both
+    # open("ab"), duplicating bytes and shifting the resume offset.
+    with _locks_mu:
+        lock = _locks.get(rel)
+        if lock is None:
+            lock = threading.Lock()
+            _locks[rel] = lock
+        return lock
+
+
 class Handler(http.server.BaseHTTPRequestHandler):
     server_version = "ipfs-upload/1"
 
@@ -81,6 +99,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
         cr_header = self.headers.get("Content-Range")
         staging = staging_path(rel)
 
+        with lock_for(rel):
+            self._handle_locked(rel, length, cr_header, staging)
+
+    def _handle_locked(
+        self, rel: str, length: int, cr_header: str | None, staging: str
+    ) -> None:
         # Status check: empty body + no Content-Range.
         if length == 0 and not cr_header:
             try:
