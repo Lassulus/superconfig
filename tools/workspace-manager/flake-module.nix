@@ -113,7 +113,9 @@
           pkgs.gnused
           pkgs.coreutils
           pkgs.gnugrep
-          pkgs.firefox
+          # The wrapped Dev Edition daemon, not upstream stable firefox —
+          # otherwise "Restore tabs" launches a separate browser/profile.
+          self.packages.${pkgs.system}.firefox
         ];
         text = builtins.readFile ./workspace-menu.sh;
       };

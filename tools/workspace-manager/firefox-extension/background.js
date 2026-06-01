@@ -196,6 +196,11 @@ async function saveTabsForWorkspace(workspace, mappings) {
         active: t.active,
       }));
 
+    // Never overwrite a saved workspace with an empty list. A mapped window
+    // showing only internal pages (e.g. the transient blank window right after
+    // a Firefox restart) would otherwise wipe that workspace's real tabs.
+    if (tabData.length === 0) return;
+
     await sendNative("save_tabs", { workspace, tabs: tabData });
   } catch (e) {
     console.error(`Failed to save tabs for ${workspace}:`, e);

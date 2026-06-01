@@ -57,9 +57,11 @@ in
   programs.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
-    extraSessionCommands = ''
-      export SWAYSOCK=/run/user/$(id -u)/sway-ipc.sock
-    '';
+    # Do NOT hardcode SWAYSOCK here: sway >=1.11 ignores an inherited value and
+    # creates its own per-pid socket (sway-ipc.$uid.$pid.sock). Exporting a
+    # fixed path baked a dead socket into the firefox/workspace-manager user
+    # services, breaking all swaymsg calls (and thus tab restore). Let sway
+    # advertise the real socket; the import-environment below propagates it.
   };
 
   # Enable realtime scheduling for sway
