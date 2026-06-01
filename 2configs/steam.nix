@@ -34,6 +34,8 @@
         ''
           export LD_LIBRARY_PATH="${gmLib}:$LD_LIBRARY_PATH"
           export PATH="${pkgs.gamescope}/bin:$PATH"
+          # xpadneo owns the hidraw node; force SDL to use evdev for Xbox pads
+          export SDL_JOYSTICK_HIDAPI_XBOX=0
         '';
     };
   };
