@@ -428,7 +428,12 @@ in
     # theme and env specific stuff
     exec_always ${pkgs.writers.writeDash "dbus-sway-environment" ''
       set -efux
-      dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP=sway
+      # XDG_SESSION_TYPE=wayland must be exported here: with DISPLAY set but
+      # XDG_SESSION_TYPE unset, Firefox (and other apps) started from the systemd
+      # user manager pick the X11/XWayland screencast path, which captures a black
+      # screen under sway. Setting it explicitly makes them use the PipeWire portal.
+      dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP=sway XDG_SESSION_TYPE=wayland
+      systemctl --user set-environment XDG_SESSION_TYPE=wayland
       systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP
       systemctl --user start --no-block sway-session.target
       systemctl --user stop xdg-desktop-portal xdg-desktop-portal-wlr
