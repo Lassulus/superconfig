@@ -66,7 +66,11 @@ in
       memoryLimit = 500;
     };
 
-    stateVersion = 3;
+    # 5: Sieve scripts now live in each user's Dovecot home (~/sieve) instead of
+    # the old global /var/sieve. Before deploying this bump, run the migration
+    # against /var/sieve on neoprism (see migrations/nixos-mailserver-migration-05.py
+    # in the nixos-mailserver input, or the migration docs).
+    stateVersion = 5;
 
     # virtual.All mailbox needs more memory to sync all folders
     imapMemoryLimit = 1024;
