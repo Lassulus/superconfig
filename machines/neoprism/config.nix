@@ -93,6 +93,9 @@
 
     # IPFS
     ../../2configs/services/flix/ipfs.nix
+
+    # n2n supernode (n2n.lassul.us)
+    ../../2configs/n2n-supernode.nix
   ];
 
   # lassul.us shouldn't be the default vhost here (nginx.nix already sets one)
