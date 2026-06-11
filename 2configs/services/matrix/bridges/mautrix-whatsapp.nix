@@ -31,8 +31,10 @@
         };
       };
       matrix = {
-        delivery_receipts = false;
-        message_status_events = false;
+        # positive per-message confirmation: sends went undelivered silently
+        # for over a week in 2026-06 with no error surfaced to the client
+        delivery_receipts = true;
+        message_status_events = true;
       };
       encryption = {
         allow = false;
