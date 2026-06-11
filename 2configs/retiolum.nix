@@ -23,7 +23,10 @@ in
 
   services.tinc.networks.retiolum = {
     package = tincrPkg;
-    debugLevel = 3;
+    # 1+ maps to per-packet Debug/Trace in tincr, which floods journald
+    # (tens of thousands of suppressed messages per minute) and rotates
+    # all other units' logs out of the journal within hours
+    debugLevel = 0;
     hosts = lib.mapAttrs' (name: host: lib.nameValuePair name host.nets.retiolum.tinc.config) (
       lib.filterAttrs (_: host: host.nets.retiolum.tinc.config or null != null) config.krebs.hosts
     );
