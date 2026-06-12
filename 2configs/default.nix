@@ -32,7 +32,6 @@
     ./tor-ssh.nix
     ./networkd.nix
     ./pinned-registry.nix
-    ./zerotier.nix
     ./nix.nix
 
     # Import stockholm modules
