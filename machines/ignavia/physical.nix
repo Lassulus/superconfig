@@ -33,6 +33,10 @@
     device = "/dev/nvme0n1";
     efiSupport = true;
     efiInstallAsRemovable = true;
+    # The ESP is only 1 GiB (see disk.nix); without a cap GRUB keeps every
+    # generation's kernel+initrd (~50-90 MiB each) until /boot fills and
+    # deploys fail. ~10 generations fits with headroom.
+    configurationLimit = 10;
   };
 
   hardware.graphics.enable = true;
