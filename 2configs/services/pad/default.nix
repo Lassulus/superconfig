@@ -4,7 +4,6 @@
   clan.hedgedoc.domain = "pad.lassul.us";
   clan.core.vars.generators.hedgedoc-github-auth = {
     files."hedgedoc.env" = { };
-    migrateFact = "hedgedoc-github-auth";
     prompts."hedgedoc.env" = {
       description = ''
         goto https://github.com/settings/applications/2352617 and paste the data in the following format:

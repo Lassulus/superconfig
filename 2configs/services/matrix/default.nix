@@ -53,7 +53,6 @@
 
   clan.core.vars.generators.matrix-synapse = {
     files."synapse-registration_shared_secret" = { };
-    migrateFact = "matrix-synapse";
     runtimeInputs = with pkgs; [
       coreutils
       pwgen

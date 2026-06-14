@@ -8,7 +8,6 @@
   clan.core.vars.generators.nix-serve = {
     files."nix-serve.key" = { };
     files."nix-serve.pub" = { };
-    migrateFact = "nix-serve";
     runtimeInputs = with pkgs; [
       coreutils
       nix

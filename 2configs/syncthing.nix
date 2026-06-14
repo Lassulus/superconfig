@@ -79,7 +79,6 @@ in
   };
 
   clan.core.vars.generators.syncthing = {
-    migrateFact = "syncthing";
     files."syncthing.key" = { };
     files."syncthing.cert" = { };
     files."syncthing.pub".secret = false;

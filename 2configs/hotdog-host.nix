@@ -16,7 +16,6 @@
   clan.core.vars.generators.hotdog-container = {
     files."hotdog.sync.key" = { };
     files."hotdog.sync.pub".secret = false;
-    migrateFact = "hotdog-container";
     runtimeInputs = with pkgs; [
       coreutils
       openssh

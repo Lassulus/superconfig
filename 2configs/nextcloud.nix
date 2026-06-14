@@ -27,7 +27,6 @@
 
   clan.core.vars.generators.nextcloud = {
     files."nextcloud_adminpass" = { };
-    migrateFact = "nextcloud";
     prompts.password = {
       description = "please enter the admin password for nextcloud";
       type = "hidden";

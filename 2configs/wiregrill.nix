@@ -52,7 +52,6 @@ mkIf (hasAttr "wiregrill" config.krebs.build.host.nets) {
   clan.core.vars.generators.wiregrill = {
     files."wiregrill.key" = { };
     files."wiregrill.pub" = { };
-    migrateFact = "wiregrill";
     runtimeInputs = with pkgs; [
       coreutils
       wireguard-tools

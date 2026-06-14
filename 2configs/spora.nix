@@ -23,7 +23,6 @@
     files."mycelium_key" = { };
     files."mycelium_ip".secret = false;
     files."mycelium_pubkey".secret = false;
-    migrateFact = "mycelium";
     runtimeInputs = [
       pkgs.mycelium
       pkgs.coreutils
