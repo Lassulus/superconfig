@@ -52,4 +52,28 @@
     "xhci_pci"
     "usbhid"
   ];
+
+  # IO latency tuning. The whole system (/, /home, /nix) lives on one
+  # btrfs-on-LUKS-on-NVMe device, so bulk writes (downloads, builds) can starve
+  # latency-sensitive reads — e.g. launching a terminal stalls for seconds.
+  # Three independent causes, three fixes:
+
+  # 1. NVMe defaults to scheduler "none" (FIFO, no read/write fairness), so a
+  #    read queues behind up to nr_requests (1023) writes. mq-deadline gives
+  #    reads deadline priority over bulk writes.
+  services.udev.extraRules = ''
+    ACTION=="add|change", KERNEL=="nvme0n1", ATTR{queue/scheduler}="mq-deadline"
+  '';
+
+  # 2. Default dirty-page limits are ratio-based: ~6.2 GB background / ~12.4 GB
+  #    hard on 62 GB RAM. Writes pool in RAM then flush in multi-GB bursts that
+  #    flood the queue and freeze everything (PSI full IO). Small fixed byte
+  #    limits make writeback continuous instead of bursty.
+  boot.kernel.sysctl."vm.dirty_bytes" = 268435456; # 256 MiB
+  boot.kernel.sysctl."vm.dirty_background_bytes" = 67108864; # 64 MiB
+
+  # 3. dm-crypt funnels all IO through the kcryptd workqueue, a serialization
+  #    point under load. AES-NI is present so inline crypto is cheap — bypass
+  #    the queues to cut crypt-layer latency. Device name from disk.nix.
+  boot.initrd.luks.devices.aergia1.bypassWorkqueues = true;
 }
