@@ -140,10 +140,11 @@
     '';
   };
 
-  # throttle downloads when /var/download runs low, so a full disk can no
-  # longer hard-wedge sabnzbd with an unrecoverable "Disk full! Forcing Pause".
-  # below THRESH GiB free: cap sabnzbd + transmission to a trickle.
-  # below FLOOR GiB free: pause sabnzbd entirely (auto-resumes when space frees).
+  # pause downloads when /var/download runs low, so a full disk can no longer
+  # hard-wedge sabnzbd with an unrecoverable "Disk full! Forcing Pause".
+  # sabnzbd pauses itself once free disk drops below download_free/complete_free
+  # (auto-resuming above); this guard keeps those set to THRESH GiB and, since
+  # transmission has no equivalent, throttles its downloads below the threshold.
   systemd.services.download-space-guard = {
     wantedBy = [ "multi-user.target" ];
     after = [ "sabnzbd.service" ];
@@ -159,31 +160,32 @@
       set -efu
       DIR=/var/download
       THRESH=100
-      FLOOR=15
 
       avail=$(df -Pk "$DIR" | awk 'NR==2 {print int($4 / 1024 / 1024)}')
 
-      key=$(grep -E '^api_key' /var/lib/sabnzbd/sabnzbd.ini | head -1 | cut -d= -f2 | tr -d ' ')
+      INI=/var/lib/sabnzbd/sabnzbd.ini
+      key=$(grep -E '^api_key' "$INI" | head -1 | cut -d= -f2 | tr -d ' ')
       sab() {
-        curl -fsS --max-time 15 "http://127.0.0.1:8080/api?output=json&apikey=$key&$1" >/dev/null
+        curl -fsS --max-time 15 "http://127.0.0.1:8080/api?output=json&apikey=$key&$1" >/dev/null || :
       }
+
+      # sabnzbd pauses continuously once free disk drops below these (and
+      # auto-resumes above). Keep them at THRESH GiB; re-assert only if changed.
+      for k in download_free complete_free; do
+        grep -qxF "$k = ''${THRESH}G" "$INI" \
+          || sab "mode=set_config&section=misc&keyword=$k&value=''${THRESH}G"
+      done
+
+      # transmission has no built-in low-disk guard: throttle its downloads to a
+      # trickle below the threshold (seeding keeps running), lift it above.
       tr_remote() {
         transmission-remote 128.0.0.1:9091 "$@" >/dev/null || :
       }
-
-      if [ "$avail" -lt "$FLOOR" ]; then
-        echo "free ''${avail}G < ''${FLOOR}G floor: pausing sabnzbd, throttling transmission to 500 KB/s"
-        sab "mode=pause"
-        tr_remote -d 500
-      elif [ "$avail" -lt "$THRESH" ]; then
-        echo "free ''${avail}G < ''${THRESH}G: throttling sabnzbd to 5 MB/s, transmission to 2 MB/s"
-        sab "mode=resume"
-        sab "mode=config&name=speedlimit&value=5M"
-        tr_remote -d 2000
+      if [ "$avail" -lt "$THRESH" ]; then
+        echo "free ''${avail}G < ''${THRESH}G: sabnzbd paused by download_free, throttling transmission"
+        tr_remote -d 1
       else
-        echo "free ''${avail}G >= ''${THRESH}G: removing download speed limits"
-        sab "mode=resume"
-        sab "mode=config&name=speedlimit&value=0"
+        echo "free ''${avail}G >= ''${THRESH}G: downloads unrestricted"
         tr_remote -D
       fi
     '';
