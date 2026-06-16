@@ -372,8 +372,14 @@
       ExecStart = pkgs.writers.writeDash "flix-index" ''
         set -efu
         index(){
-          find . -type f > "$DIR"/index.tmp
-          mv "$DIR"/index.tmp "$DIR"/index
+          # /var/download churns constantly (download temp files appearing and
+          # vanishing), so find can exit non-zero when an entry disappears
+          # mid-scan. Ignore that — the entries we did enumerate are still valid
+          # — but only replace the live index if we actually produced one.
+          find . -type f > "$DIR"/index.tmp || :
+          if [ -s "$DIR"/index.tmp ]; then
+            mv "$DIR"/index.tmp "$DIR"/index
+          fi
         }
 
         DIR=/var/download
