@@ -140,6 +140,59 @@
     '';
   };
 
+  # throttle downloads when /var/download runs low, so a full disk can no
+  # longer hard-wedge sabnzbd with an unrecoverable "Disk full! Forcing Pause".
+  # below THRESH GiB free: cap sabnzbd + transmission to a trickle.
+  # below FLOOR GiB free: pause sabnzbd entirely (auto-resumes when space frees).
+  systemd.services.download-space-guard = {
+    wantedBy = [ "multi-user.target" ];
+    after = [ "sabnzbd.service" ];
+    startAt = "*:0/5";
+    path = [
+      pkgs.curl
+      pkgs.coreutils
+      pkgs.gnugrep
+      pkgs.gawk
+      pkgs.transmission_4
+    ];
+    script = ''
+      set -efu
+      DIR=/var/download
+      THRESH=100
+      FLOOR=15
+
+      avail=$(df -Pk "$DIR" | awk 'NR==2 {print int($4 / 1024 / 1024)}')
+
+      key=$(grep -E '^api_key' /var/lib/sabnzbd/sabnzbd.ini | head -1 | cut -d= -f2 | tr -d ' ')
+      sab() {
+        curl -fsS --max-time 15 "http://127.0.0.1:8080/api?output=json&apikey=$key&$1" >/dev/null
+      }
+      tr_remote() {
+        transmission-remote 128.0.0.1:9091 "$@" >/dev/null || :
+      }
+
+      if [ "$avail" -lt "$FLOOR" ]; then
+        echo "free ''${avail}G < ''${FLOOR}G floor: pausing sabnzbd, throttling transmission to 500 KB/s"
+        sab "mode=pause"
+        tr_remote -d 500
+      elif [ "$avail" -lt "$THRESH" ]; then
+        echo "free ''${avail}G < ''${THRESH}G: throttling sabnzbd to 5 MB/s, transmission to 2 MB/s"
+        sab "mode=resume"
+        sab "mode=config&name=speedlimit&value=5M"
+        tr_remote -d 2000
+      else
+        echo "free ''${avail}G >= ''${THRESH}G: removing download speed limits"
+        sab "mode=resume"
+        sab "mode=config&name=speedlimit&value=0"
+        tr_remote -D
+      fi
+    '';
+    serviceConfig = {
+      Type = "oneshot";
+      User = "root";
+    };
+  };
+
   security.acme.defaults.email = "spam@krebsco.de";
   security.acme.acceptTerms = true;
   security.acme.certs."yellow.r".server = config.krebs.ssl.acmeURL;
