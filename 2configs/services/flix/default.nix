@@ -143,8 +143,9 @@
   # pause downloads when /var/download runs low, so a full disk can no longer
   # hard-wedge sabnzbd with an unrecoverable "Disk full! Forcing Pause".
   # sabnzbd pauses itself once free disk drops below download_free/complete_free
-  # (auto-resuming above); this guard keeps those set to THRESH GiB and, since
-  # transmission has no equivalent, throttles its downloads below the threshold.
+  # (auto-resuming above); this guard keeps those set to THRESH GiB. Transmission
+  # has no equivalent, so below the threshold the guard stops all its torrents
+  # (restarting them on recovery) and posts a Matrix alert on each transition.
   systemd.services.download-space-guard = {
     wantedBy = [ "multi-user.target" ];
     after = [ "sabnzbd.service" ];
@@ -154,12 +155,16 @@
       pkgs.coreutils
       pkgs.gnugrep
       pkgs.gawk
+      pkgs.jq
       pkgs.transmission_4
     ];
     script = ''
       set -efu
       DIR=/var/download
       THRESH=100
+      # !MRjkvAaFPsjdYCpeiZ:lassul.us, URL-encoded for the API path
+      ROOM=%21MRjkvAaFPsjdYCpeiZ%3Alassul.us
+      STATE="$STATE_DIRECTORY/state"
 
       avail=$(df -Pk "$DIR" | awk 'NR==2 {print int($4 / 1024 / 1024)}')
 
@@ -167,6 +172,17 @@
       key=$(grep -E '^api_key' "$INI" | head -1 | cut -d= -f2 | tr -d ' ')
       sab() {
         curl -fsS --max-time 15 "http://127.0.0.1:8080/api?output=json&apikey=$key&$1" >/dev/null || :
+      }
+      tr_remote() {
+        transmission-remote 128.0.0.1:9091 "$@" >/dev/null || :
+      }
+      notify() {
+        token=$(cat "$CREDENTIALS_DIRECTORY/matrix-token")
+        body=$(jq -nc --arg b "$1" '{msgtype: "m.text", body: $b}')
+        curl -fsS --max-time 15 -X POST \
+          -H "Authorization: Bearer $token" -H 'Content-Type: application/json' \
+          "https://matrix.lassul.us/_matrix/client/v3/rooms/$ROOM/send/m.room.message" \
+          --data "$body" >/dev/null || :
       }
 
       # sabnzbd pauses continuously once free disk drops below these (and
@@ -176,22 +192,31 @@
           || sab "mode=set_config&section=misc&keyword=$k&value=''${THRESH}G"
       done
 
-      # transmission has no built-in low-disk guard: throttle its downloads to a
-      # trickle below the threshold (seeding keeps running), lift it above.
-      tr_remote() {
-        transmission-remote 128.0.0.1:9091 "$@" >/dev/null || :
-      }
-      if [ "$avail" -lt "$THRESH" ]; then
-        echo "free ''${avail}G < ''${THRESH}G: sabnzbd paused by download_free, throttling transmission"
-        tr_remote -d 1
-      else
-        echo "free ''${avail}G >= ''${THRESH}G: downloads unrestricted"
-        tr_remote -D
+      prev=ok
+      if [ -f "$STATE" ]; then prev=$(cat "$STATE"); fi
+      if [ "$avail" -lt "$THRESH" ]; then cur=low; else cur=ok; fi
+
+      if [ "$cur" = low ]; then
+        # stop everything each run so newly-grabbed torrents can't fill the disk
+        tr_remote -t all --stop
+        if [ "$prev" != low ]; then
+          echo "free ''${avail}G < ''${THRESH}G: stopped transmission, alerting"
+          notify "⚠️ yellow: /var/download down to ''${avail} GiB free (< ''${THRESH} GiB). Stopped all transmission torrents; sabnzbd auto-paused via download_free."
+        fi
+      elif [ "$prev" = low ]; then
+        echo "free ''${avail}G >= ''${THRESH}G: resumed transmission, alerting"
+        tr_remote -t all --start
+        notify "✅ yellow: /var/download recovered to ''${avail} GiB free. Restarted transmission torrents."
       fi
+      echo "$cur" > "$STATE"
     '';
     serviceConfig = {
       Type = "oneshot";
       User = "root";
+      StateDirectory = "download-space-guard";
+      LoadCredential = [
+        "matrix-token:${config.clan.core.vars.generators.archiver-matrix.files."matrix-access-token".path}"
+      ];
     };
   };
 
