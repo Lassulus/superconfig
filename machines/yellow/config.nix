@@ -59,10 +59,12 @@ in
     path = [
       pkgs.iproute2
       pkgs.wireguard-tools
+      pkgs.gnused
+      pkgs.gawk
     ];
     script = ''
       set -efux
-      until ${pkgs.dig.host}/bin/host europe.vpn.airdns.org; do sleep; done
+      until ${pkgs.dig.host}/bin/host europe.vpn.airdns.org; do sleep 1; done
 
       ip link del t2 || :
       ip -n transmission link set lo up
@@ -71,9 +73,17 @@ in
       ip link set airvpn netns transmission
       ip -n transmission addr add 10.176.43.231/32 dev airvpn
       ip -n transmission addr add fd7d:76ee:e68f:a993:41b3:846b:d271:30d8/128 dev airvpn
-      ip netns exec transmission wg syncconf airvpn <(wg-quick strip ${
-        config.clan.core.vars.generators.airvpn.files."airvpn.conf".path
-      })
+      # The transmission netns has no route until the tunnel is up, so wg must
+      # not resolve the endpoint from inside it: recent wireguard-tools resolve
+      # in the current netns, which stalls the deploy on ~70s of DNS retries.
+      # Resolve here in the main netns and hand wg a numeric Endpoint.
+      conf=$(wg-quick strip ${config.clan.core.vars.generators.airvpn.files."airvpn.conf".path})
+      ep=$(printf '%s\n' "$conf" | sed -n 's/^Endpoint *= *//p')
+      ephost=''${ep%:*}
+      epport=''${ep##*:}
+      epip=$(${pkgs.dig.host}/bin/host "$ephost" | awk '/has address/ { print $NF; exit }')
+      ip netns exec transmission wg syncconf airvpn \
+        <(printf '%s\n' "$conf" | sed "s|$ephost:$epport|$epip:$epport|")
       ip -n transmission link set airvpn up
       ip -n transmission route add default dev airvpn
       ip -6 -n transmission route add default dev airvpn
