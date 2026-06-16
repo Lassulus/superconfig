@@ -14,9 +14,7 @@ const ANCHOR_TITLE = "workspace-anchor";
 // blank tabs — must never be persisted or restored, otherwise a transient
 // startup window gets saved and later reappears as a phantom browser window.
 function isRestorableUrl(url) {
-  return (
-    !!url && (url.startsWith("http://") || url.startsWith("https://"))
-  );
+  return !!url && (url.startsWith("http://") || url.startsWith("https://"));
 }
 
 let port = null;
