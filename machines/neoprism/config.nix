@@ -20,6 +20,7 @@
     ../../2configs/services/matrix/bridges/heisenbridge.nix
     ../../2configs/services/matrix/bridges/mautrix-telegram.nix
     ../../2configs/services/matrix/bridges/mautrix-discord.nix
+    ../../2configs/services/matrix/bridges/matrix-zulip-bridge.nix
 
     ../../2configs/services/pad
 
