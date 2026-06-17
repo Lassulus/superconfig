@@ -19,11 +19,6 @@
       "nginx"
     ];
 
-    security.dhparams = {
-      enable = true;
-      params.hedgedoc = { };
-    };
-
     services.hedgedoc = {
       enable = true;
       settings = {
@@ -46,9 +41,26 @@
         sslCAPath = [ "/etc/ssl/certs/ca-certificates.crt" ];
         sslCertPath = "/var/lib/acme/${config.clan.hedgedoc.domain}/cert.pem";
         sslKeyPath = "/var/lib/acme/${config.clan.hedgedoc.domain}/key.pem";
-        dhParamPath = config.security.dhparams.params.hedgedoc.path;
+        dhParamPath = "/var/lib/dhparams/hedgedoc.pem";
       };
     };
+
+    # security.dhparams was removed from nixpkgs (RFC 7919), but HedgeDoc's
+    # HTTPS listener unconditionally reads dhParamPath. Generate the params
+    # ourselves if missing so the service stays self-contained.
+    systemd.services.hedgedoc.serviceConfig.ExecStartPre = [
+      (
+        "+"
+        + pkgs.writeShellScript "hedgedoc-dhparam" ''
+          set -eu
+          if [ ! -s /var/lib/dhparams/hedgedoc.pem ]; then
+            mkdir -p /var/lib/dhparams
+            ${pkgs.openssl}/bin/openssl dhparam -out /var/lib/dhparams/hedgedoc.pem 2048
+            chmod 644 /var/lib/dhparams/hedgedoc.pem
+          fi
+        ''
+      )
+    ];
 
     systemd.services.hedgedoc.serviceConfig.SystemCallFilter = [
       "fchown"
