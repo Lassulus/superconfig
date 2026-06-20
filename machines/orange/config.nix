@@ -6,7 +6,6 @@
     ../../2configs
     ../../2configs/retiolum.nix
     ../../2configs/mumble-reminder.nix
-    ../../2configs/services/git
     ../../2configs/nginx.nix
   ];
 
