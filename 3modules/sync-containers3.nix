@@ -86,7 +86,16 @@ in
                 NIX_REMOTE = "daemon";
               };
               wantedBy = [ "multi-user.target" ];
-              serviceConfig.ExecStart = pkgs.writers.writeDash "autoswitch" ctr.startCommand;
+              serviceConfig = {
+                ExecStart = pkgs.writers.writeDash "autoswitch" ctr.startCommand;
+                # keep retrying transient failures (e.g. a GitHub 5xx while
+                # resolving the flake at boot) so we self-heal instead of
+                # staying silently stale. RestartSec is well above the default
+                # StartLimitIntervalSec, so the restart rate limiter never trips
+                # and we retry until it succeeds.
+                Restart = "on-failure";
+                RestartSec = "120s";
+              };
               unitConfig.X-StopOnRemoval = false;
             };
             # get rid of stateVersion not set warning;
