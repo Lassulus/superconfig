@@ -116,7 +116,31 @@
     };
   };
 
-  services.ollama.enable = true;
+  # riot VM (HFOS): fresh libvirt guest on a dedicated bridged public IP.
+  # Bridged onto ext-br with its own Hetzner MAC, so libvirt manages no
+  # iptables for it -> no nat-chain race, no restart-iptables hack (cf. hfos.nix).
+  virtualisation.libvirtd.enable = true;
+  security.polkit.enable = true;
+  users.users.riot = {
+    isNormalUser = true;
+    extraGroups = [ "libvirtd" ];
+    openssh.authorizedKeys.keys = [
+      "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCwcI8EKqUwYVd4IlnTTaNY3qVMDe2M1sVPMdWaTJ8FnAXixBcZozFHyJ9bvGn6c/vFGBEACZk6QCxC2+sTxbaodCOUIyhAtxqAGO7jINmGrVWjg2NW8qBi+e+ekr2+jlhizxgMPgMcbawuazpMzrozi6sfJfRelJRqe6TxrK/SBO+V5pf8v2ubAfHHF6bJrqAykC247d2NmsHEyM/nGOOb2AlJx2vrK1FbFWr2fBAvnhJww9wqrfDYSM6+oRF/vrYKkT9cU8yjtCkyaJZTqRufF2pzc9a0X3Z4LHEIUykAl2aVmi5Wzh8CZj3qCeVb9Ju0ZGQIa5pvG5CbH5SUJOr9y6zhTx1xbqL+JYGkJqgHPMOCFiNIvWnFaNlnvFf4C9KcTf/VMOEvNdDklpjoWm+ptuQIciAhWKuUHd/6MqaRjmlvUqjl49EkRvYOGn9vasKt66MYrtfvbZ3tcqh5w9EEKhrcygiUXhIJzhu2s1BseAVRLjCsQ24BNbzrYiCO+vuk8/hdeHB1rP6Sas2v7jvYb3zQd647OTq+HrZWN8aCjCs5h8Y0QxrQzsLru0zKDRaNDlbSshNBAw7PzSXQAf9fISH7v6sC4nstf5jk+87ua/7xjWG4NYp5Y9FMFCsuE3XVmUCAbauq18RmN6V4s2TxCEs9bxONO0Vba4zwPnvMlw== cardno:000619250765"
+    ];
+  };
+  # the only forwarding the VM needs: accept traffic to/from its public IP.
+  krebs.iptables.tables.filter.FORWARD.rules = lib.mkBefore [
+    {
+      v6 = false;
+      predicate = "--destination 95.217.192.52";
+      target = "ACCEPT";
+    }
+    {
+      v6 = false;
+      predicate = "--source 95.217.192.52";
+      target = "ACCEPT";
+    }
+  ];
 
   krebs.build.host = config.krebs.hosts.neoprism;
   system.stateVersion = "24.05";

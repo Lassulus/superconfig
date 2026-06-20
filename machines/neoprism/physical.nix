@@ -39,25 +39,14 @@
     config = {
       networkConfig.SpeedMeter = true;
     };
-    # netdevs.ext-br.netdevConfig = {
-    #   Kind = "bridge";
-    #   Name = "ext-br";
-    #   MACAddress = "a8:a1:59:0f:2d:69";
-    # };
-    # networks.ext-br = {
-    #   name = "ext-br";
-    #   address = [
-    #     "95.217.192.59/26"
-    #     "2a01:4f9:4a:4f1a::1/64"
-    #   ];
-    #   gateway = [
-    #     "95.217.192.1"
-    #     "fe80::1"
-    #   ];
-    # };
-    networks."01-enp" = {
-      #bridge = [ "ext-br" ];
-      matchConfig.Name = "enp35s0";
+    netdevs.ext-br.netdevConfig = {
+      Kind = "bridge";
+      Name = "ext-br";
+      # keep the host's NIC MAC bound to the host IP on Hetzner's switch
+      MACAddress = "a8:a1:59:0f:2d:69";
+    };
+    networks.ext-br = {
+      matchConfig.Name = "ext-br";
       address = [
         "95.217.192.59/26"
         "2a01:4f9:4a:4f1a::2/64"
@@ -66,6 +55,11 @@
         "95.217.192.1"
         "fe80::1"
       ];
+    };
+    networks."01-enp" = {
+      matchConfig.Name = "enp35s0";
+      # enslave the physical NIC to ext-br; the host IP lives on the bridge now
+      bridge = [ "ext-br" ];
     };
   };
 
