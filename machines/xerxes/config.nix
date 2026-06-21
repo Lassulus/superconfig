@@ -21,6 +21,15 @@
   ];
   system.stateVersion = "25.05";
 
+  # bitwarden-desktop pulls electron_39, which nixpkgs marks insecure (EOL).
+  # secureify it via an overlay rather than nixpkgs.config.permittedInsecurePackages,
+  # which doesn't list-merge across modules. See lib/secureify.nix.
+  nixpkgs.overlays = [
+    (_final: prev: {
+      electron_39 = self.lib.secureify prev.electron_39;
+    })
+  ];
+
   boot.tmp.cleanOnBoot = true;
 
   krebs.build.host = self.inputs.stockholm.kartei.hosts.xerxes;
