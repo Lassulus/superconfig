@@ -12,9 +12,11 @@ Protocol:
   POST /<path>  body=N bytes, Content-Range: bytes <start>-<end>/<total>
         Chunked upload. `start` must equal the current staging size, or 0
         to truncate and start fresh. When the staging size reaches `total`,
-        the staging file is moved to /var/lib/ipfs/download/<path> and
-        `ipfs add --nocopy --pin` is run. Returns 200 with the CID on
-        completion, 308 with `Upload-Offset: <size>` while incomplete.
+        the staging file is moved to /var/lib/ipfs/download/<path>; the
+        ipfs-pin-watcher then pins it (it is the sole pinner). This handler
+        only computes the CID (`ipfs add --only-hash`) to return. Returns 200
+        with the CID on completion, 308 with `Upload-Offset: <size>` while
+        incomplete.
 
   POST /<path>  body=0, no Content-Range
         Status check. Returns 200 with `Upload-Offset: <size>` if a
@@ -202,7 +204,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self.send_error(500, f"truncate failed: {e}")
                 return
 
-        # Complete: move staging → dst and pin.
+        # Complete: move staging → dst. The os.replace() below fires the
+        # ipfs-pin-watcher's inotify MOVED_TO, and the watcher is the SOLE
+        # pinner (`ipfs add --nocopy --pin`). We must NOT also pin here: two
+        # concurrent `--nocopy` adds of the same file corrupt the filestore
+        # into an incomplete DAG. So we only compute the CID to return to the
+        # client (--only-hash writes nothing). The watcher's single-threaded
+        # loop is then the only thing mutating the filestore. Pinning is
+        # therefore async — the watcher finishes a beat after this returns.
         dst = os.path.join(DOWNLOAD_ROOT, rel)
         dst_dir = os.path.dirname(dst) or DOWNLOAD_ROOT
         try:
@@ -214,7 +223,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
         try:
             result = subprocess.run(
-                [IPFS_BIN, "add", "--nocopy", "--pin", "--quieter", dst],
+                [IPFS_BIN, "add", "--only-hash", "--raw-leaves", "--quieter", dst],
                 check=True,
                 capture_output=True,
                 text=True,
