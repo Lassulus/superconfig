@@ -946,7 +946,7 @@ index 5a96e6a..d36dbf1 100644
        <>
          {eventId && (
 diff --git a/src/app/features/room/RoomViewHeader.tsx b/src/app/features/room/RoomViewHeader.tsx
-index 8089b5e..0ed8efd 100644
+index 8089b5e..754d44a 100644
 --- a/src/app/features/room/RoomViewHeader.tsx
 +++ b/src/app/features/room/RoomViewHeader.tsx
 @@ -1,5 +1,6 @@
@@ -987,7 +987,7 @@ index 8089b5e..0ed8efd 100644
  
    const pinnedEvents = useRoomPinnedEvents(room);
    const encryptionEvent = useStateEvent(room, StateEvent.RoomEncryption);
-@@ -416,6 +424,106 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
+@@ -416,6 +424,114 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
      : undefined;
  
    const [peopleDrawer, setPeopleDrawer] = useSetting(settingsAtom, 'isPeopleDrawer');
@@ -1084,17 +1084,25 @@ index 8089b5e..0ed8efd 100644
 +    room.on(ThreadEvent.New, updateThreadCounts as any);
 +    room.on(ThreadEvent.Update, updateThreadCounts as any);
 +    room.on(ThreadEvent.NewReply, updateThreadCounts as any);
++    // Read receipts (including our own local echo when a thread is marked read)
++    // and notification-count recomputes do not emit ThreadEvent.*, so subscribe
++    // to them too — otherwise the badge keeps a stale count until unrelated
++    // thread activity happens to fire.
++    room.on(RoomEvent.Receipt, updateThreadCounts as any);
++    room.on(RoomEvent.UnreadNotifications, updateThreadCounts as any);
 +
 +    return () => {
 +      room.removeListener(ThreadEvent.New, updateThreadCounts as any);
 +      room.removeListener(ThreadEvent.Update, updateThreadCounts as any);
 +      room.removeListener(ThreadEvent.NewReply, updateThreadCounts as any);
++      room.removeListener(RoomEvent.Receipt, updateThreadCounts as any);
++      room.removeListener(RoomEvent.UnreadNotifications, updateThreadCounts as any);
 +    };
 +  }, [room]);
  
    const handleSearchClick = () => {
      const searchParams: _SearchPathSearchParams = {
-@@ -442,6 +550,10 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
+@@ -442,6 +558,10 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
        openSettings(room.roomId, parentSpace?.roomId, RoomSettingsPage.MembersPage);
        return;
      }
@@ -1105,7 +1113,7 @@ index 8089b5e..0ed8efd 100644
      setPeopleDrawer(!peopleDrawer);
    };
  
-@@ -597,6 +709,56 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
+@@ -597,6 +717,56 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
            {!room.isCallRoom() && livekitSupported && rtcSupported && hasCallPermission && (
              <CallButton />
            )}
@@ -1162,7 +1170,7 @@ index 8089b5e..0ed8efd 100644
            {screenSize === ScreenSize.Desktop && (
              <TooltipProvider
                position="Bottom"
-@@ -612,8 +774,17 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
+@@ -612,8 +782,17 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
                }
              >
                {(triggerRef) => (
