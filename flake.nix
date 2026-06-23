@@ -284,6 +284,21 @@
                           };
                           package = lib.mkPackageOption pkgs "openssh" { };
                         };
+                        # systemd.nix sets environment.variables.SYSTEMD_XKB_DIRECTORY,
+                        # but the minimal module set omits config/system-environment.nix
+                        # which declares the option.
+                        options.environment.variables = lib.mkOption {
+                          type = lib.types.attrsOf lib.types.anything;
+                          default = { };
+                          description = "Dummy option for extra-container compatibility";
+                        };
+                        # systemd.nix reads config.i18n.imperativeLocale, but the
+                        # minimal module set omits config/i18n.nix which declares it.
+                        options.i18n.imperativeLocale = lib.mkOption {
+                          type = lib.types.bool;
+                          default = true;
+                          description = "Dummy option for extra-container compatibility";
+                        };
                       }
                     )
                   ];
