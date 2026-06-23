@@ -1643,10 +1643,10 @@ index 0000000..b579e74
 +});
 diff --git a/src/app/features/room/ThreadDrawer.tsx b/src/app/features/room/ThreadDrawer.tsx
 new file mode 100644
-index 0000000..9de30c5
+index 0000000..d3c98ba
 --- /dev/null
 +++ b/src/app/features/room/ThreadDrawer.tsx
-@@ -0,0 +1,724 @@
+@@ -0,0 +1,751 @@
 +import React, { MouseEventHandler, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 +import { Box, Header, Icon, IconButton, Icons, Scroll, Text, config } from 'folds';
 +import { RelationType } from 'matrix-js-sdk/lib/@types/event';
@@ -2043,10 +2043,37 @@ index 0000000..9de30c5
 +      const thread = room.getThread(threadRootId);
 +      if (!thread) return;
 +
-+      const events = thread.events || [];
-+      if (events.length === 0) return;
-+
-+      const lastEvent = events[events.length - 1];
++      // The receipt must target the latest genuine *in-thread reply*. The SDK's
++      // threadIdForReceipt() routes a receipt for the thread root — or for a
++      // relation to it, e.g. a reaction to the root — to the "main" timeline,
++      // which clears the room's main unread but never the thread's unread
++      // bucket. And it must be the thread's *true* latest reply: receipting an
++      // older event leaves a residual server-side count, so the notification
++      // reappears on the next sync/reload even for threads we opened.
++      //
++      // thread.lastReply() is the SDK's own canonical latest m.thread reply,
++      // taken from the authoritative thread timeline (which includes the
++      // server-bundled latest_event from /threads) and is the same event the
++      // SDK uses for its read-up-to comparison. Prefer it; fall back to a
++      // newest-first scan of the live timeline / rendered replies only when the
++      // Thread object is not yet hydrated.
++      const pickLastReply = (evs: MatrixEvent[]): MatrixEvent | undefined => {
++        for (let i = evs.length - 1; i >= 0; i -= 1) {
++          const ev = evs[i];
++          if (
++            ev.getId() !== threadRootId &&
++            ev.threadRootId === threadRootId &&
++            !ev.isSending()
++          ) {
++            return ev;
++          }
++        }
++        return undefined;
++      };
++      const lastEvent =
++        thread.lastReply() ??
++        pickLastReply(thread.events || []) ??
++        pickLastReply(replyEventsRef.current);
 +      if (!lastEvent || lastEvent.isSending()) return;
 +
 +      const userId = mx.getUserId();
