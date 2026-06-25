@@ -17,8 +17,20 @@ let
   };
 in
 {
-  services.nginx.virtualHosts."matrix.lassul.us".locations."/" = {
+  services.nginx.virtualHosts."matrix.lassul.us" = {
     root = cinny-threads;
-    tryFiles = "$uri /index.html";
+    locations = {
+      "/".tryFiles = "$uri /index.html";
+      # Store files have mtime=1970; without an explicit Cache-Control a browser
+      # may heuristically cache the entry HTML for a long time and not pick up a
+      # new build on reload. Force revalidation of index.html (cheap via etag),
+      # and let the content-hashed assets cache hard.
+      "= /index.html".extraConfig = ''
+        add_header Cache-Control "no-cache";
+      '';
+      "/assets/".extraConfig = ''
+        add_header Cache-Control "public, max-age=31536000, immutable";
+      '';
+    };
   };
 }
