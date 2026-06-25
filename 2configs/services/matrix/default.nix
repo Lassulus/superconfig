@@ -4,6 +4,18 @@
     enable = true;
     settings = {
       server_name = "lassul.us";
+      # Bot accounts (Hermes, bridges) burst many events per turn — thinking
+      # panes, reactions, redactions, chunked replies — and hit the default
+      # caps (rc_message 1/s burst 10), causing "M_LIMIT_EXCEEDED / Too Many
+      # Requests" dropped sends. Raise message + redaction rate limits.
+      rc_message = {
+        per_second = 100;
+        burst_count = 1000;
+      };
+      rc_admin_redaction = {
+        per_second = 100;
+        burst_count = 1000;
+      };
       database = {
         args.user = "matrix-synapse";
         args.database = "matrix-synapse";
