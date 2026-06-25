@@ -16,6 +16,10 @@ let
   flixIndexMfs = "/flix-index";
   dirtyFlag = "/var/lib/ipfs/flix-index.dirty";
   ipnsNameFile = "/var/lib/ipfs/flix-index.name";
+  # Serializes `ipfs add --nocopy` between the pin-watcher and the
+  # reconcile sweep: two concurrent --nocopy adds of the same file corrupt
+  # the filestore into an incomplete DAG.
+  pinAddLock = "/var/lib/ipfs/pin-add.lock";
 
   pinWatcherScript = pkgs.writers.writeBash "ipfs-pin-watcher" ''
     set -efu
@@ -27,6 +31,7 @@ let
     FLIX_INDEX="${flixIndexMfs}"
     DIRTY_FLAG="${dirtyFlag}"
     IPNS_NAME_FILE="${ipnsNameFile}"
+    PIN_LOCK="${pinAddLock}"
 
     touch "$CID_MAP"
     ${pkgs.coreutils}/bin/chmod 0644 "$CID_MAP"
@@ -83,7 +88,8 @@ let
       esac
 
       log "Adding $path"
-      cid=$($IPFS add --nocopy --pin --quieter "$path" 2>/dev/null) || {
+      cid=$(${pkgs.util-linux}/bin/flock "$PIN_LOCK" \
+        $IPFS add --nocopy --pin --quieter "$path" 2>/dev/null) || {
         log "Failed to add $path"
         return 0
       }
@@ -223,14 +229,22 @@ let
     ${pkgs.coreutils}/bin/rm -f "$DIRTY_FLAG"
   '';
 
-  # Periodic reconciliation: walks cid-map.txt and repairs stale state for
-  # files that no longer exist on disk. Protects against inotify event
-  # drops (e.g. queue overflow during bulk renames/deletes) and any other
-  # path that leaves cid-map/MFS out of sync with the filesystem.
   uploadServer = pkgs.writers.writePython3Bin "ipfs-upload-server" {
     flakeIgnore = [ "E501" ];
   } ./ipfs_upload.py;
 
+  # Periodic reconciliation, BOTH directions, so cid-map/MFS/pins stay in
+  # sync with the filesystem even when inotify drops events:
+  #   reverse - drop cid-map entries / pins for files no longer on disk
+  #             (e.g. queue overflow during bulk renames/deletes).
+  #   forward - pin files present on disk but missing from cid-map. The
+  #             pin-watcher loop is single-threaded and blocks 1-2 min on each
+  #             multi-GB `ipfs add`; while blocked, a concurrent upload's
+  #             CREATE,ISDIR + MOVED_TO for a brand-new game subdir can overflow
+  #             the inotify queue and be dropped, leaving a fully-written file
+  #             that is never pinned. The forward sweep heals that within an hour
+  #             (without it a dropped event is permanent until a watcher restart
+  #             re-runs the startup sync).
   reconcileScript = pkgs.writers.writeBash "flix-index-reconcile" ''
     set -efu
 
@@ -239,6 +253,7 @@ let
     DOWNLOAD_ROOT="${downloadRoot}"
     FLIX_INDEX="${flixIndexMfs}"
     DIRTY_FLAG="${dirtyFlag}"
+    PIN_LOCK="${pinAddLock}"
 
     [ -f "$CID_MAP" ] || exit 0
 
@@ -269,6 +284,34 @@ let
     else
       ${pkgs.coreutils}/bin/rm -f "$tmp"
     fi
+
+    # Forward sweep: pin on-disk files that inotify missed (see header).
+    # Only files older than 10 min, so the flock + this margin guarantee we
+    # never collide with the pin-watcher mid-add on a fresh upload (a file
+    # that old and still absent from cid-map was dropped, not in-flight).
+    for dir in ${lib.escapeShellArgs watchDirs}; do
+      [ -d "$dir" ] || continue
+      ${pkgs.findutils}/bin/find "$dir" -type f -mmin +10 | while read -r f; do
+        case "$(${pkgs.coreutils}/bin/basename "$f")" in
+          .* | *.part | *.tmp | *.synced.* | *.aria2) continue ;;
+        esac
+        if ${pkgs.gnugrep}/bin/grep -q " $f$" "$CID_MAP" 2>/dev/null; then
+          continue
+        fi
+        cid=$(${pkgs.util-linux}/bin/flock "$PIN_LOCK" \
+          $IPFS add --nocopy --pin --quieter "$f" 2>/dev/null) || {
+          echo "reconcile: failed to add $f"
+          continue
+        }
+        echo "$cid $f" >> "$CID_MAP"
+        rel="''${f#$DOWNLOAD_ROOT/}"
+        $IPFS files mkdir -p "$FLIX_INDEX/$(${pkgs.coreutils}/bin/dirname "$rel")" \
+          >/dev/null 2>&1 || true
+        $IPFS files cp "/ipfs/$cid" "$FLIX_INDEX/$rel" >/dev/null 2>&1 || true
+        touch "$DIRTY_FLAG"
+        echo "reconcile: pinned missed file $f -> $cid"
+      done
+    done
   '';
 in
 {
