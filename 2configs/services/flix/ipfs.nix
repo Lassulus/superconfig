@@ -12,10 +12,6 @@ let
   ];
 
   cidMapFile = "/var/lib/ipfs/cid-map.txt";
-  # Serializes `ipfs add --nocopy` between the pin-watcher and the reconcile
-  # sweep: two concurrent --nocopy adds of the same file corrupt the filestore
-  # into an incomplete DAG.
-  pinAddLock = "/var/lib/ipfs/pin-add.lock";
 
   pinWatcherScript = pkgs.writers.writeBash "ipfs-pin-watcher" ''
     set -efu
@@ -23,7 +19,6 @@ let
     IPFS="${pkgs.kubo}/bin/ipfs"
     INOTIFYWAIT="${pkgs.inotify-tools}/bin/inotifywait"
     CID_MAP="${cidMapFile}"
-    PIN_LOCK="${pinAddLock}"
 
     touch "$CID_MAP"
     ${pkgs.coreutils}/bin/chmod 0644 "$CID_MAP"
@@ -40,8 +35,7 @@ let
       esac
 
       log "Adding $path"
-      cid=$(${pkgs.util-linux}/bin/flock "$PIN_LOCK" \
-        $IPFS add --nocopy --pin --quieter "$path" 2>/dev/null) || {
+      cid=$($IPFS add --nocopy --pin --quieter "$path" 2>/dev/null) || {
         log "Failed to add $path"
         return 0
       }
@@ -139,7 +133,6 @@ let
 
     IPFS="${pkgs.kubo}/bin/ipfs"
     CID_MAP="${cidMapFile}"
-    PIN_LOCK="${pinAddLock}"
 
     [ -f "$CID_MAP" ] || exit 0
 
@@ -168,8 +161,10 @@ let
     fi
 
     # Forward: pin on-disk files missing from cid-map. Only files older than
-    # 10 min, so the flock + margin never collide with the watcher mid-add on a
-    # fresh upload (a file that old and still absent was dropped, not in-flight).
+    # 10 min -- a file that old and still absent from cid-map was dropped by the
+    # watcher, not in-flight. No lock against the watcher: concurrent
+    # `add --nocopy` of the same file is idempotent (verified), so a rare
+    # double-add is harmless.
     for dir in ${lib.escapeShellArgs watchDirs}; do
       [ -d "$dir" ] || continue
       ${pkgs.findutils}/bin/find "$dir" -type f -mmin +10 | while read -r f; do
@@ -179,8 +174,7 @@ let
         if ${pkgs.gnugrep}/bin/grep -q " $f$" "$CID_MAP" 2>/dev/null; then
           continue
         fi
-        cid=$(${pkgs.util-linux}/bin/flock "$PIN_LOCK" \
-          $IPFS add --nocopy --pin --quieter "$f" 2>/dev/null) || {
+        cid=$($IPFS add --nocopy --pin --quieter "$f" 2>/dev/null) || {
           echo "reconcile: failed to add $f"
           continue
         }
