@@ -12,13 +12,9 @@ let
   ];
 
   cidMapFile = "/var/lib/ipfs/cid-map.txt";
-  downloadRoot = "/var/lib/ipfs/download";
-  flixIndexMfs = "/flix-index";
-  dirtyFlag = "/var/lib/ipfs/flix-index.dirty";
-  ipnsNameFile = "/var/lib/ipfs/flix-index.name";
-  # Serializes `ipfs add --nocopy` between the pin-watcher and the
-  # reconcile sweep: two concurrent --nocopy adds of the same file corrupt
-  # the filestore into an incomplete DAG.
+  # Serializes `ipfs add --nocopy` between the pin-watcher and the reconcile
+  # sweep: two concurrent --nocopy adds of the same file corrupt the filestore
+  # into an incomplete DAG.
   pinAddLock = "/var/lib/ipfs/pin-add.lock";
 
   pinWatcherScript = pkgs.writers.writeBash "ipfs-pin-watcher" ''
@@ -27,10 +23,6 @@ let
     IPFS="${pkgs.kubo}/bin/ipfs"
     INOTIFYWAIT="${pkgs.inotify-tools}/bin/inotifywait"
     CID_MAP="${cidMapFile}"
-    DOWNLOAD_ROOT="${downloadRoot}"
-    FLIX_INDEX="${flixIndexMfs}"
-    DIRTY_FLAG="${dirtyFlag}"
-    IPNS_NAME_FILE="${ipnsNameFile}"
     PIN_LOCK="${pinAddLock}"
 
     touch "$CID_MAP"
@@ -39,46 +31,6 @@ let
     log() {
       echo "[$(date -Iseconds)] $*"
     }
-
-    mark_dirty() {
-      touch "$DIRTY_FLAG"
-    }
-
-    # strip $DOWNLOAD_ROOT/ prefix to get the relative path used inside MFS
-    relpath() {
-      echo "''${1#$DOWNLOAD_ROOT/}"
-    }
-
-    mfs_add() {
-      local cid="$1" path="$2"
-      local rel dir
-      rel=$(relpath "$path")
-      dir=$(${pkgs.coreutils}/bin/dirname "$rel")
-      # kubo's `files rm/cp/mkdir` write detailed errors to stdout, not
-      # stderr, so both FDs need redirection to keep backfill quiet.
-      $IPFS files mkdir -p "$FLIX_INDEX/$dir" >/dev/null 2>&1 || true
-      $IPFS files rm "$FLIX_INDEX/$rel" >/dev/null 2>&1 || true
-      $IPFS files cp "/ipfs/$cid" "$FLIX_INDEX/$rel" >/dev/null 2>&1 || true
-      mark_dirty
-    }
-
-    mfs_rm() {
-      local path="$1"
-      local rel
-      rel=$(relpath "$path")
-      $IPFS files rm "$FLIX_INDEX/$rel" >/dev/null 2>&1 || true
-      mark_dirty
-    }
-
-    # ensure IPNS key + MFS root exist (idempotent)
-    if ! $IPFS key list | ${pkgs.gnugrep}/bin/grep -qx flix-index; then
-      log "Generating flix-index IPNS key"
-      $IPFS key gen --type=ed25519 flix-index > "$IPNS_NAME_FILE" || true
-    fi
-    if [ -f "$IPNS_NAME_FILE" ]; then
-      log "flix-index IPNS name: $(cat "$IPNS_NAME_FILE")"
-    fi
-    $IPFS files mkdir -p "$FLIX_INDEX" >/dev/null 2>&1 || true
 
     add_file() {
       local path="$1"
@@ -96,7 +48,6 @@ let
       log "Pinned $path -> $cid"
       ${pkgs.gnused}/bin/sed -i "\|^[^ ]* $path$|d" "$CID_MAP"
       echo "$cid $path" >> "$CID_MAP"
-      mfs_add "$cid" "$path"
     }
 
     remove_file() {
@@ -104,8 +55,6 @@ let
       cid=$(${pkgs.gawk}/bin/awk -v p="$path" '$0 ~ p {print $1; exit}' "$CID_MAP")
       if [ -n "$cid" ]; then
         log "Unpinning $cid ($path)"
-        # remove from MFS first so the implicit MFS pin doesn't keep it alive
-        mfs_rm "$path"
         $IPFS pin rm "$cid" 2>/dev/null || true
         ${pkgs.gnused}/bin/sed -i "\|^[^ ]* $path$|d" "$CID_MAP"
       else
@@ -113,7 +62,7 @@ let
       fi
     }
 
-    # initial sync
+    # initial sync: pin any file in the watch dirs not already in cid-map
     log "Starting initial sync..."
     for dir in ${lib.escapeShellArgs watchDirs}; do
       if [ -d "$dir" ]; then
@@ -126,40 +75,19 @@ let
     done
     log "Initial sync complete"
 
-    # clean stale entries
+    # clean stale entries: unpin files that no longer exist on disk
     log "Cleaning stale entries..."
     while IFS=' ' read -r cid path; do
       if [ ! -f "$path" ]; then
         log "Stale entry: $path (CID: $cid)"
-        mfs_rm "$path"
         $IPFS pin rm "$cid" 2>/dev/null || true
         ${pkgs.gnused}/bin/sed -i "\|^[^ ]* $path$|d" "$CID_MAP"
       fi
     done < "$CID_MAP"
     log "Cleanup complete"
 
-    # backfill MFS index from cid-map.txt once (sentinel-guarded so we run
-    # exactly once per machine, independently of whether the initial sync
-    # happened to create any MFS entries incrementally).
-    BACKFILL_SENTINEL="/var/lib/ipfs/flix-index.backfilled"
-    if [ ! -f "$BACKFILL_SENTINEL" ]; then
-      log "Backfilling MFS index from cid-map.txt..."
-      n=0
-      while IFS=' ' read -r cid path; do
-        [ -f "$path" ] || continue
-        # skip entries already present (idempotent re-runs)
-        rel=$(relpath "$path")
-        if $IPFS files stat "$FLIX_INDEX/$rel" >/dev/null 2>&1; then
-          continue
-        fi
-        mfs_add "$cid" "$path"
-        n=$((n + 1))
-      done < "$CID_MAP"
-      touch "$BACKFILL_SENTINEL"
-      log "Backfill complete ($n entries added)"
-    fi
-
-    # add all files in a newly appeared directory
+    # pin all files in a newly appeared directory (covers the inotify
+    # recursive-watch race when a brand-new subdir is created + filled fast)
     scan_new_dir() {
       local dir="$1"
       log "Scanning new directory: $dir"
@@ -193,75 +121,32 @@ let
     done
   '';
 
-  publishScript = pkgs.writers.writeBash "flix-index-publish" ''
-    set -efu
-
-    IPFS="${pkgs.kubo}/bin/ipfs"
-    CID_MAP="${cidMapFile}"
-    DOWNLOAD_ROOT="${downloadRoot}"
-    FLIX_INDEX="${flixIndexMfs}"
-    DIRTY_FLAG="${dirtyFlag}"
-
-    [ -f "$DIRTY_FLAG" ] || exit 0
-
-    # regenerate index.tsv from cid-map.txt
-    tmp=$(${pkgs.coreutils}/bin/mktemp)
-    printf 'cid\tpath\tsize\n' > "$tmp"
-    while IFS=' ' read -r cid path; do
-      [ -f "$path" ] || continue
-      rel="''${path#$DOWNLOAD_ROOT/}"
-      size=$(${pkgs.coreutils}/bin/stat -c %s "$path" 2>/dev/null || echo 0)
-      printf '%s\t%s\t%s\n' "$cid" "$rel" "$size" >> "$tmp"
-    done < "$CID_MAP"
-
-    $IPFS files rm "$FLIX_INDEX/index.tsv" >/dev/null 2>&1 || true
-    $IPFS files write --create --truncate "$FLIX_INDEX/index.tsv" < "$tmp"
-    ${pkgs.coreutils}/bin/rm -f "$tmp"
-
-    root=$($IPFS files stat --hash "$FLIX_INDEX")
-    echo "Publishing $root to IPNS (flix-index)"
-    $IPFS name publish --key=flix-index --lifetime=48h --ttl=1m "/ipfs/$root"
-    # Announce the MFS root to the DHT so public gateways can find us.
-    # MFS directory blocks are only kept alive by an implicit pin that
-    # Provide.Strategy="pinned" ignores, so we provide them explicitly here.
-    echo "Announcing $root to DHT"
-    $IPFS routing provide "$root" >/dev/null 2>&1 || true
-    ${pkgs.coreutils}/bin/rm -f "$DIRTY_FLAG"
-  '';
-
   uploadServer = pkgs.writers.writePython3Bin "ipfs-upload-server" {
     flakeIgnore = [ "E501" ];
   } ./ipfs_upload.py;
 
-  # Periodic reconciliation, BOTH directions, so cid-map/MFS/pins stay in
-  # sync with the filesystem even when inotify drops events:
-  #   reverse - drop cid-map entries / pins for files no longer on disk
-  #             (e.g. queue overflow during bulk renames/deletes).
-  #   forward - pin files present on disk but missing from cid-map. The
-  #             pin-watcher loop is single-threaded and blocks 1-2 min on each
-  #             multi-GB `ipfs add`; while blocked, a concurrent upload's
-  #             CREATE,ISDIR + MOVED_TO for a brand-new game subdir can overflow
-  #             the inotify queue and be dropped, leaving a fully-written file
-  #             that is never pinned. The forward sweep heals that within an hour
-  #             (without it a dropped event is permanent until a watcher restart
-  #             re-runs the startup sync).
-  reconcileScript = pkgs.writers.writeBash "flix-index-reconcile" ''
+  # Periodic reconciliation so cid-map/pins stay in sync with the filesystem
+  # even when the inotify watcher drops events:
+  #   reverse - unpin + drop cid-map entries for files no longer on disk.
+  #   forward - pin files present on disk but missing from cid-map. The watcher
+  #             loop is single-threaded and blocks 1-2 min on each multi-GB
+  #             `ipfs add`; while blocked, a concurrent upload's CREATE,ISDIR +
+  #             MOVED_TO for a brand-new subdir can overflow the inotify queue
+  #             and be dropped, leaving a fully-written file never pinned. The
+  #             forward sweep heals that within an hour.
+  reconcileScript = pkgs.writers.writeBash "ipfs-pin-reconcile" ''
     set -efu
 
     IPFS="${pkgs.kubo}/bin/ipfs"
     CID_MAP="${cidMapFile}"
-    DOWNLOAD_ROOT="${downloadRoot}"
-    FLIX_INDEX="${flixIndexMfs}"
-    DIRTY_FLAG="${dirtyFlag}"
     PIN_LOCK="${pinAddLock}"
 
     [ -f "$CID_MAP" ] || exit 0
 
-    # Rebuild cid-map in one pass, collecting stale entries to clean up.
-    # Avoids sed regex issues with special chars like [ ] in paths.
-    # Small race with pin-watcher's concurrent appends — any line the
-    # watcher writes during this loop may be lost, but will be re-added
-    # on the next inotify event or watcher restart.
+    # Reverse: rebuild cid-map, unpinning entries whose file is gone. One pass
+    # avoids sed regex issues with special chars like [ ] in paths. Small race
+    # with the watcher's concurrent appends -- a line written during this loop
+    # may be lost, but is re-added on the next inotify event or watcher restart.
     tmp=$(${pkgs.coreutils}/bin/mktemp)
     removed=0
     while IFS=' ' read -r cid path; do
@@ -269,8 +154,6 @@ let
       if [ -e "$path" ]; then
         echo "$cid $path" >> "$tmp"
       else
-        rel="''${path#$DOWNLOAD_ROOT/}"
-        $IPFS files rm "$FLIX_INDEX/$rel" >/dev/null 2>&1 || true
         $IPFS pin rm "$cid" >/dev/null 2>&1 || true
         removed=$((removed + 1))
       fi
@@ -280,15 +163,13 @@ let
       ${pkgs.coreutils}/bin/chmod 0644 "$tmp"
       ${pkgs.coreutils}/bin/mv "$tmp" "$CID_MAP"
       echo "reconciled: removed $removed stale entries"
-      touch "$DIRTY_FLAG"
     else
       ${pkgs.coreutils}/bin/rm -f "$tmp"
     fi
 
-    # Forward sweep: pin on-disk files that inotify missed (see header).
-    # Only files older than 10 min, so the flock + this margin guarantee we
-    # never collide with the pin-watcher mid-add on a fresh upload (a file
-    # that old and still absent from cid-map was dropped, not in-flight).
+    # Forward: pin on-disk files missing from cid-map. Only files older than
+    # 10 min, so the flock + margin never collide with the watcher mid-add on a
+    # fresh upload (a file that old and still absent was dropped, not in-flight).
     for dir in ${lib.escapeShellArgs watchDirs}; do
       [ -d "$dir" ] || continue
       ${pkgs.findutils}/bin/find "$dir" -type f -mmin +10 | while read -r f; do
@@ -304,11 +185,6 @@ let
           continue
         }
         echo "$cid $f" >> "$CID_MAP"
-        rel="''${f#$DOWNLOAD_ROOT/}"
-        $IPFS files mkdir -p "$FLIX_INDEX/$(${pkgs.coreutils}/bin/dirname "$rel")" \
-          >/dev/null 2>&1 || true
-        $IPFS files cp "/ipfs/$cid" "$FLIX_INDEX/$rel" >/dev/null 2>&1 || true
-        touch "$DIRTY_FLAG"
         echo "reconcile: pinned missed file $f -> $cid"
       done
     done
@@ -418,31 +294,8 @@ in
     };
   };
 
-  systemd.services.flix-index-publish = {
-    description = "Publish flix MFS index to IPNS";
-    after = [ "ipfs.service" ];
-    requires = [ "ipfs.service" ];
-    serviceConfig = {
-      Type = "oneshot";
-      Environment = [ "IPFS_PATH=/var/lib/ipfs" ];
-      ExecStart = publishScript;
-      User = config.services.kubo.user;
-      Group = config.services.kubo.group;
-    };
-  };
-
-  systemd.timers.flix-index-publish = {
-    description = "Publish flix MFS index to IPNS periodically";
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnBootSec = "5min";
-      OnUnitActiveSec = "2min";
-      Unit = "flix-index-publish.service";
-    };
-  };
-
-  systemd.services.flix-index-reconcile = {
-    description = "Reconcile flix MFS index / cid-map against filesystem";
+  systemd.services.ipfs-pin-reconcile = {
+    description = "Reconcile pins / cid-map against the filesystem";
     after = [ "ipfs.service" ];
     requires = [ "ipfs.service" ];
     serviceConfig = {
@@ -454,13 +307,13 @@ in
     };
   };
 
-  systemd.timers.flix-index-reconcile = {
-    description = "Reconcile flix MFS index hourly";
+  systemd.timers.ipfs-pin-reconcile = {
+    description = "Reconcile pins / cid-map hourly";
     wantedBy = [ "timers.target" ];
     timerConfig = {
       OnBootSec = "15min";
       OnUnitActiveSec = "1h";
-      Unit = "flix-index-reconcile.service";
+      Unit = "ipfs-pin-reconcile.service";
     };
   };
 
