@@ -60,6 +60,14 @@
     # In rooms Hermes requires an @mention by default; DMs always respond.
     settings.matrix.session_scope = "room";
 
+    # Matrix is a Tier-2 platform whose default tool-progress preview caps
+    # commands at 40 chars (so a `terminal` call shows only `curl -X POST -H
+    # "Content-Type: applic...`). "verbose" makes the gateway render the FULL
+    # command — multi-line — as a fenced code block instead of the truncated
+    # one-liner. Trade-off: verbose also prints full JSON args for every other
+    # tool call, so the channel is chattier.
+    settings.display.platforms.matrix.tool_progress = "verbose";
+
     # Non-secret connection + SECURITY gate. Invites are auto-accepted and that
     # cannot be disabled, so the agent may join any room it's invited to. Joining
     # is harmless on its own — what matters is who can *trigger* the agent, which
