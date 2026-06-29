@@ -21,6 +21,14 @@
     # SDK + liboqs for optional E2EE; Linux-only).
     extraDependencyGroups = [ "matrix" ];
 
+    # Put the Claude Code CLI on the agent's PATH so its bundled "claude-code"
+    # skill can delegate coding via `terminal(command="claude -p '...'")`.
+    # extraPackages lands in both the systemd service PATH and the hermes
+    # user's profile. Auth is separate (run `claude` once as the hermes user).
+    extraPackages = [
+      self.legacyPackages.${pkgs.system}.llm.claude-code
+    ];
+
     settings.model = {
       # Nous does NOT recommend the Hermes-4 chat models for Hermes Agent — it
       # wants a dedicated *agentic* model. Community/Nous consensus agentic pick
