@@ -46,9 +46,23 @@
   # regression fix (e3ac0d9f1a20) landed upstream in 7.0.10.
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
-  # Disable MES (Micro Engine Scheduler) - known to cause GPU ring hangs on RDNA3+
-  # The hang manifests as: screen goes off 1-2s, comes back but frozen
-  boot.kernelParams = [ "amdgpu.mes=0" ];
+  # MT7925 WiFi: wcid poll-list corruption on station removal during AP
+  # roaming -> list_add corruption -> kernel BUG at lib/list_debug.c:32
+  # -> hard freeze. Three freezes on 2026-07-03 alone (multi-AP ESS).
+  # Local fix, see patch header for full analysis; related upstream work:
+  # https://github.com/zbowling/mt7925 (series not yet merged, and the
+  # already-merged parts in 7.1.x do not close this race).
+  # Drop once the fix (or equivalent) lands upstream.
+  boot.kernelPatches = [
+    {
+      name = "mt76-wcid-poll-race";
+      patch = ./mt76-wcid-poll-race.patch;
+    }
+  ];
+
+  # amdgpu.mes=0 (old RDNA3+ MES ring-hang workaround) was removed here:
+  # since kernel ~7.x the parameter no longer exists ("amdgpu: unknown
+  # parameter 'mes' ignored") and the GPU has been stable without it.
 
   boot.initrd.availableKernelModules = [
     "nvme"
