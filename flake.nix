@@ -312,8 +312,6 @@
           ) self.containerConfigurations;
           devShells.default = pkgs.mkShell {
             packages = [
-              nixpkgs.legacyPackages.${system}.nil
-              nixpkgs.legacyPackages.${system}.nixd
               self.packages.${pkgs.system}.pass
               (self.legacyPackages.${system}.bin_shim {
                 name = "clan";
