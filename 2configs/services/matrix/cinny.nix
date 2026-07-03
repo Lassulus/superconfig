@@ -8,6 +8,11 @@ let
   cinny-threads = pkgs.cinny.override {
     cinny-unwrapped = pkgs.cinny-unwrapped.overrideAttrs (old: {
       patches = (old.patches or [ ]) ++ [ ./cinny-threads-ui.patch ];
+      # Quack (https://www.youtube.com/watch?v=Fw3RB7xnb80) instead of the
+      # stock chime; vite content-hashes it into assets/ at build time.
+      postPatch = (old.postPatch or "") + ''
+        cp ${./notification.ogg} public/sound/notification.ogg
+      '';
     });
     conf = {
       defaultHomeserver = 0;
