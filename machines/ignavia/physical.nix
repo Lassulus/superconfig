@@ -46,19 +46,13 @@
   # regression fix (e3ac0d9f1a20) landed upstream in 7.0.10.
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
-  # MT7925 WiFi: wcid poll-list corruption on station removal during AP
-  # roaming -> list_add corruption -> kernel BUG at lib/list_debug.c:32
-  # -> hard freeze. Three freezes on 2026-07-03 alone (multi-AP ESS).
-  # Local fix, see patch header for full analysis; related upstream work:
-  # https://github.com/zbowling/mt7925 (series not yet merged, and the
-  # already-merged parts in 7.1.x do not close this race).
-  # Drop once the fix (or equivalent) lands upstream.
-  boot.kernelPatches = [
-    {
-      name = "mt76-wcid-poll-race";
-      patch = ./mt76-wcid-poll-race.patch;
-    }
-  ];
+  # MT7925 WiFi roam freezes (list_add corruption -> kernel BUG at
+  # lib/list_debug.c:32, 10 hard freezes 2026-07-03..07-07): generic
+  # mt76_sta_add() re-ran mt76_wcid_init() on a wcid the mt7925 sta_add
+  # had already published, so the rx/txs softirq could link it into
+  # sta_poll_list right before the second INIT_LIST_HEAD self-looped it.
+  # Fixed upstream in 7.1.3 by 20b126920a25 ("wifi: mt76: add wcid
+  # publish check in mt76_sta_add") - keep kernel >= 7.1.3.
 
   # amdgpu.mes=0 (old RDNA3+ MES ring-hang workaround) was removed here:
   # since kernel ~7.x the parameter no longer exists ("amdgpu: unknown
