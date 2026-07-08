@@ -1,6 +1,5 @@
 {
   self,
-  config,
   pkgs,
   ...
 }:
@@ -15,11 +14,7 @@
       self.keys.ssh.yubi1.public
       self.keys.ssh.yubi2.public
       self.keys.ssh.solo2.public
-      config.krebs.users.mic92.pubkey
-      "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIJ4yq7oHBO2iPs4xj797a//0ypnBr27sSadKUeL2NsK6AAAABHNzaDo=" # janik
-      "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIOYg513QZsVzoyVycXZjg4F3T3+OwtcY3WAhrlfyLgLTAAAABHNzaDo=" # janik
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBLZxVITpJ8xbiCa/u2gjSSIupeiqOnRh+8tFIoVhCON" # janik
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJXGRXiq61BQBUkQLBn720pzxiAZqchHWm504gWa2rE2" # kenji
+      "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBCTwBH0KIRE+9SC4n7hRAGAA7Lf/+PuCHFZzZDajy9lmYrcQdvD5SgP6Q5OikUxycniI0Zse5Xeitq9qkJNg6Lw= PIV AUTH pubkey" # pinpox
     ];
   };
 
