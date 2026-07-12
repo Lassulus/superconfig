@@ -8,6 +8,10 @@
   nixpkgs.overlays = [
     (_final: prev: {
       olm = self.lib.secureify prev.olm;
+      # nixpkgs default python3 moved to 3.14, but tulir_telethon (the pinned
+      # Telethon fork mautrix-telegram depends on) declares no 3.14 support, so
+      # the build errors out. Pin the bridge to python312 until upstream bumps.
+      mautrix-telegram = prev.mautrix-telegram.override { python3 = prev.python312; };
     })
   ];
 
