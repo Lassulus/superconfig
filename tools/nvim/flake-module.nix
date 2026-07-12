@@ -4,6 +4,12 @@
     { system, pkgs, ... }:
     {
       packages.nvim = inputs.nixvim.legacyPackages.${system}.makeNixvim {
+        # The options-reference manpage builds via nixvim's docs/pkgs.nix, which
+        # patches nixos-render-docs with nixpkgs PR#538502 (admonition support).
+        # That PR is already merged in our nixpkgs, so the patch fails to apply
+        # and breaks the build. We follow a single nixpkgs, so we can't feed
+        # nixvim an older one — just drop the manpage (irrelevant to the editor).
+        enableMan = false;
         vimAlias = true;
         colorschemes = {
           ayu = {
