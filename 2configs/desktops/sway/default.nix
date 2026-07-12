@@ -398,8 +398,9 @@ in
       )
     }
 
-    # screenlock
-    bindsym $mod+F11 exec ${lib.getExe' pkgs.systemd "systemctl"} --user start lock.target
+    # screenlock (via noctalia's lock screen)
+    bindsym $mod+F11 exec ${lib.getExe self.packages.${pkgs.system}.noctalia-shell} ipc call lockScreen lock
+    bindsym $mod+l exec ${lib.getExe self.packages.${pkgs.system}.noctalia-shell} ipc call lockScreen lock
 
     # kill window (xkill-like)
     mode "kill" {
