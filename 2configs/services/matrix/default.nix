@@ -16,6 +16,34 @@
         per_second = 100;
         burst_count = 1000;
       };
+      # Bridge portal rooms have many ghost users (signal_*, whatsapp_*, ...)
+      # join at once, exhausting the per-room join limiter (default 1/s burst
+      # 10) and causing "M_LIMIT_EXCEEDED / Too Many Requests / 429" for the
+      # human trying to join. Raise join + invite limits to match.
+      rc_joins = {
+        local = {
+          per_second = 100;
+          burst_count = 1000;
+        };
+        remote = {
+          per_second = 100;
+          burst_count = 1000;
+        };
+      };
+      rc_joins_per_room = {
+        per_second = 100;
+        burst_count = 1000;
+      };
+      rc_invites = {
+        per_room = {
+          per_second = 100;
+          burst_count = 1000;
+        };
+        per_user = {
+          per_second = 100;
+          burst_count = 1000;
+        };
+      };
       database = {
         args.user = "matrix-synapse";
         args.database = "matrix-synapse";
