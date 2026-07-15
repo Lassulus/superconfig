@@ -15,6 +15,10 @@
             # Mirror noctalia's dark mode toggle to the system theme.
             darkModeChange = ''if [ "$1" = "true" ]; then switch-theme dark; else switch-theme light; fi'';
           };
+          # The live desktop wallpaper is rendered by mpvpaper on the
+          # background layer (see 2configs/desktops/sway/wallpaper.nix), so
+          # noctalia's own wallpaper is turned off to let it show through.
+          wallpaper.enabled = false;
         };
 
         settingsPatches = [

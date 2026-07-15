@@ -53,6 +53,7 @@ in
   imports = [
     ../lib/wayland.nix
     ./noctalia.nix
+    ./wallpaper.nix
   ];
   programs.sway = {
     enable = true;
@@ -401,9 +402,9 @@ in
       )
     }
 
-    # screenlock (via noctalia's lock screen)
-    bindsym $mod+F11 exec ${lib.getExe self.packages.${pkgs.system}.noctalia-shell} ipc call lockScreen lock
-    bindsym $mod+l exec ${lib.getExe self.packages.${pkgs.system}.noctalia-shell} ipc call lockScreen lock
+    # screenlock (random live video/image from ~/wallpaper via swaylock-plugin)
+    bindsym $mod+F11 exec ${lib.getExe' pkgs.systemd "systemctl"} --user start lock.target
+    bindsym $mod+l exec ${lib.getExe' pkgs.systemd "systemctl"} --user start lock.target
 
     # kill window (xkill-like)
     mode "kill" {

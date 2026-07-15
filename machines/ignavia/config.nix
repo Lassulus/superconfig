@@ -23,7 +23,6 @@
     # ../../2configs/games.nix
     ../../2configs/steam.nix
     # ../../2configs/wine.nix
-    ../../2configs/fetchWallpaper.nix
     ../../2configs/yellow-mounts/samba.nix
     ../../2configs/pass.nix
     ../../2configs/mail.nix
