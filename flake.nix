@@ -2,6 +2,9 @@
   description = "lassulus superconfig";
 
   inputs = {
+    # tracking nixos-unstable; if a bump lands an uncached firefox-devedition (beta channel
+    # isn't channel-gating on Hydra) it builds from source. Check first: s firefox-devedition-watch
+    # then pin a cached rev here if needed: github:nixos/nixpkgs/<rev>
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     # nixpkgs.url = "github:lassulus/nixpkgs/nixos-unstable";
     # nixpkgs.url = "path:/home/lass/tmp/nixpkgs-disk-debug";
