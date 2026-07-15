@@ -88,4 +88,29 @@
   #    point under load. AES-NI is present so inline crypto is cheap — bypass
   #    the queues to cut crypt-layer latency. Device name from disk.nix.
   boot.initrd.luks.devices.aergia1.bypassWorkqueues = true;
+
+  # MT7925 wifi stability. The dominant cause of the "drops every few
+  # minutes" was a dual-manager conflict (systemd-networkd AND NM both
+  # running DHCP on the wifi) - fixed in 2configs/network-manager.nix by
+  # handing wifi solely to NM. The remainder below addresses a *separate*,
+  # secondary mt7925 firmware bug: the card intermittently tears the link
+  # down during scans (wpa_supplicant "reason=3 locally_generated=1" next
+  # to "Reject scan trigger since one is already pending"; iwd shows it
+  # mid-roam) - a driver bug with no fix below the kernel. We need
+  # aggressive roaming (event with ~100 APs) so we cannot disable the scans
+  # that trigger it; we only cut how often it fires. When it does fire, NM
+  # re-associates on its own in a few seconds (a gateway-ping watchdog was
+  # tried and removed: bornhack's gateway drops ICMP, so it false-fired and
+  # bounced a working link every 90 s).
+  #
+  # 1. Stay on the default wpa_supplicant backend. iwd roams well but
+  #    busy-loops at 100% CPU in this dense ~100-AP environment (it chokes
+  #    on the flood of HE-capability beacons) and wedged the link hard
+  #    enough to need a driver reload - not usable here.
+  #
+  # 2. Kill NIC power management. powersave and PCIe ASPM both let the
+  #    firmware abort/miss a scan mid-connection on this chip; disabling
+  #    both is the most-reported mt7925 stability mitigation.
+  networking.networkmanager.wifi.powersave = false;
+  boot.extraModprobeConfig = "options mt7925e disable_aspm=1";
 }
