@@ -183,6 +183,9 @@ in
     #
     # You can get the names of your outputs by running: swaymsg -t get_outputs
 
+    # Per-machine output overrides (scale, resolution, position) live here.
+    include /etc/sway/config.d/*.conf
+
     ### Idle configuration
     #
     # Example configuration:

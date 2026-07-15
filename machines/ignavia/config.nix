@@ -55,6 +55,13 @@
 
   lass.workspace-manager.enable = true;
 
+  # Framework 13 panel (2256x1504). wlroots' HiDPI heuristic auto-picks
+  # scale 2 on every sway start, which is far too large. Pin the internal
+  # panel to 1.0; external outputs keep sway's default.
+  environment.etc."sway/config.d/scale.conf".text = ''
+    output eDP-1 scale 1
+  '';
+
   documentation.nixos.enable = true;
   boot.binfmt.emulatedSystems = [
     "aarch64-linux"
