@@ -1,14 +1,14 @@
 {
   config,
-  lib,
   pkgs,
   ...
 }:
 let
-  # Always pull the newest launcher straight from the public flake instead of
-  # pinning it as an input, so the game grid tracks upstream on every (re)launch.
-  # The launcher itself only shells out to `nix run <flake>#<slug>` per game, so
-  # its closure stays tiny; games bring their own nested gamescope/proton.
+  # Run the patched launcher from the on-disk strom checkout at
+  # /home/strom/strom (it carries STROM_NO_GAMESCOPE support until that lands
+  # upstream). With the kiosk itself being a gamescope session (below), games
+  # are launched as <slug>.no-gamescope so they render directly in the session
+  # compositor instead of nesting a per-game gamescope.
   strom-session = pkgs.writeShellScript "strom-session" ''
     set -u
     # xpadneo owns the Xbox pad's hidraw node, so force SDL (pygame launcher and
@@ -23,13 +23,42 @@ let
     # joystick (not keyboard) events while unfocused - so keyboard works but the
     # pad does not. Allow joystick events regardless of focus.
     export SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS=1
-    # Relaunch whenever the couch launcher exits (gamepad B / Esc) so the kiosk
-    # never drops to a blank tty. Keeping the loop as cage's child means the
-    # compositor stays up across relaunches.
-    while true; do
-      ${config.nix.package}/bin/nix run --refresh github:kraftwerk-gaming/strom#scripts.launcher
-      sleep 2
+    # The kiosk compositor is already gamescope on DRM (see services.greetd
+    # below), so tell the launcher to run games directly in it rather than
+    # nesting a per-game gamescope (which double-nests and, on this GPU, storms
+    # the Vulkan swapchain and crashes games like Baba Is You).
+    export STROM_NO_GAMESCOPE=1
+    # strom-run (the per-game supervisor) needs a delegated cgroup v2 so it can
+    # mkdir a child cgroup and cgroup.kill the game tree atomically. The greetd
+    # PAM session drops us into a root-owned logind session scope
+    # (user-1011.slice/session-cN.scope) that is NOT delegated, so strom-run dies
+    # with "could not create cgroup (Permission denied)" and the game never
+    # launches. Re-parent into a delegated transient scope under the user manager
+    # (user@UID.service, which logind DOES delegate). Wait for the user bus first:
+    # on boot the PAM session opens slightly before the user manager's bus socket.
+    rd="''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+    for _ in $(seq 1 50); do
+      [ -S "$rd/bus" ] && break
+      sleep 0.2
     done
+    # Relaunch whenever the couch launcher exits (gamepad B / Esc) so the kiosk
+    # never drops to a blank screen. The loop runs inside the delegated scope so
+    # every game inherits a writable cgroup; the gamescope compositor stays up
+    # (it is the session's other child) across relaunches.
+    #
+    # setpriv --ambient-caps=-all: the login session may carry an ambient
+    # capability (e.g. cap_wake_alarm) that every child inherits. bwrap refuses
+    # to start when it sees capabilities in its permitted set without being
+    # setuid ("Unexpected capabilities but not setuid, old file caps config?"),
+    # which instant-crashes every sandboxed game. Drop the ambient set for the
+    # whole launcher tree so bwrap (and thus each game) starts clean.
+    exec ${pkgs.systemd}/bin/systemd-run --user --scope -p Delegate=yes \
+      --quiet --collect -- \
+      ${pkgs.util-linux}/bin/setpriv --ambient-caps=-all \
+      ${pkgs.bash}/bin/bash -c 'while true; do
+        ${config.nix.package}/bin/nix run /home/strom/strom#scripts.launcher
+        sleep 2
+      done'
   '';
 
   # Bluetooth pairing helper for Xbox Wireless Controllers. Run `strom-pair`
@@ -146,21 +175,26 @@ in
     ];
   };
 
-  # Kiosk autostart. After the initrd ZFS/LUKS unlock hands off to the running
-  # system, graphical.target pulls up cage on tty1, which logs the strom user
-  # in with no prompt and runs the fullscreen launcher as its sole Wayland
-  # client. This is the canonical NixOS single-app kiosk path.
-  services.cage = {
+  # Kiosk autostart: a gamescope session on DRM (via greetd autologin),
+  # replacing cage. gamescope presents straight to the display, so there is no
+  # nested Wayland swapchain for RADV to storm on this Vega iGPU. greetd gives
+  # the strom user a real seat/VT (DRM master) and a delegated user manager,
+  # which the launcher's systemd-run --user --scope relies on for game cgroups.
+  services.greetd = {
     enable = true;
-    user = "strom";
-    program = strom-session;
-  };
-
-  # Recover the compositor itself if it ever crashes (the session loop above
-  # already handles a launcher exit without tearing cage down).
-  systemd.services.cage-tty1.serviceConfig = {
-    Restart = lib.mkDefault "always";
-    RestartSec = 2;
+    settings =
+      let
+        session = {
+          command = "${pkgs.gamescope}/bin/gamescope -- ${strom-session}";
+          user = "strom";
+        };
+      in
+      {
+        # initial_session autologins on boot with no prompt; default_session
+        # re-runs it (also autologin) if the gamescope session ever exits.
+        initial_session = session;
+        default_session = session;
+      };
   };
 
   # The panel comes up at ~1% backlight, unreadable for a couch setup. Ship
