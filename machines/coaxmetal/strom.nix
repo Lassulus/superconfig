@@ -136,5 +136,26 @@ in
     # back on (otherwise bonded pads bond but never re-link). Fine on a
     # mains-powered kiosk.
     FastConnectable = true;
+    # In this busy-RF LAN environment the cache fills with hundreds of stray
+    # BLE devices; evict non-bonded ones ~30s after they leave range so they
+    # do not pile up and saturate the adapter.
+    TemporaryTimeout = 30;
+  };
+
+  # Persistent JustWorks pairing agent. Xbox pads pair via JustWorks, and on
+  # reconnect a pad whose bond went stale re-initiates pairing. bluez needs a
+  # registered agent to auto-confirm that; bluetuith only provides one while you
+  # are actively pairing in it, so an autonomous re-pair hits "No agent
+  # available for request type 2" and the link drops. Keep a NoInputNoOutput
+  # agent registered at all times so pairing/re-pairing just works.
+  systemd.services.bt-agent = {
+    wantedBy = [ "multi-user.target" ];
+    after = [ "bluetooth.service" ];
+    requires = [ "bluetooth.service" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.bluez-tools}/bin/bt-agent -c NoInputNoOutput";
+      Restart = "always";
+      RestartSec = 2;
+    };
   };
 }
