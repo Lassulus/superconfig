@@ -4,11 +4,25 @@
   ...
 }:
 let
-  # Run the patched launcher from the on-disk strom checkout at
-  # /home/strom/strom (it carries STROM_NO_GAMESCOPE support until that lands
-  # upstream). With the kiosk itself being a gamescope session (below), games
-  # are launched as <slug>.no-gamescope so they render directly in the session
-  # compositor instead of nesting a per-game gamescope.
+  # Run the launcher + games from the on-disk strom checkout at
+  # /home/strom/strom when it exists, else the public github flake (see the
+  # STROM_FLAKE selection in strom-session below).
+  #
+  # Compositor: sway (wlroots) via greetd autologin - NOT cage, and NOT an outer
+  # gamescope session. Each game still brings its own gamescope, nested ONCE
+  # inside sway.
+  #
+  # Why sway and not cage: a game's nested gamescope prefers its WAYLAND backend,
+  # which needs wlroots protocols that cage (a minimal kiosk compositor) does not
+  # expose. Under cage gamescope's wayland backend fails ("Couldn't create
+  # Wayland objects") and silently falls back to its SDL backend, whose Vulkan
+  # swapchain remake loops and aborts on this RADV RENOIR iGPU
+  # (rendervulkan.cpp vulkan_remake_swapchain) - that is what crashed Baba Is You
+  # a couple seconds in. sway exposes those protocols, so gamescope inits its
+  # wayland backend and never touches the crashing SDL path. (An outer gamescope
+  # session instead double-nests gamescope-in-gamescope, which is worse.)
+  # Keeping per-game gamescope preserves render resolution/scaling, the in-game
+  # exit chord, and bare-tty portability - hence no STROM_NO_GAMESCOPE.
   strom-session = pkgs.writeShellScript "strom-session" ''
     set -u
     # xpadneo owns the Xbox pad's hidraw node, so force SDL (pygame launcher and
@@ -19,15 +33,21 @@ let
     # powered on after the launcher starts is never seen. Force SDL to poll
     # /dev/input instead, which reliably picks up pads as they connect/disconnect.
     export SDL_JOYSTICK_DISABLE_UDEV=1
-    # Under cage the launcher window never reports input focus, and SDL suppresses
-    # joystick (not keyboard) events while unfocused - so keyboard works but the
-    # pad does not. Allow joystick events regardless of focus.
+    # In the kiosk the launcher window may not report input focus, and SDL
+    # suppresses joystick (not keyboard) events while unfocused - so allow
+    # joystick events regardless of focus.
     export SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS=1
-    # The kiosk compositor is already gamescope on DRM (see services.greetd
-    # below), so tell the launcher to run games directly in it rather than
-    # nesting a per-game gamescope (which double-nests and, on this GPU, storms
-    # the Vulkan swapchain and crashes games like Baba Is You).
-    export STROM_NO_GAMESCOPE=1
+    # Resolve the strom flake once: prefer the on-disk checkout at
+    # /home/strom/strom (edit + test there before pushing to github), and fall
+    # back to the public flake when it is absent. The launcher runs from this
+    # ref, and pkgs/launcher resolves each game's ref from STROM_FLAKE too (it
+    # sets the default with := so this export wins).
+    if [ -d /home/strom/strom ]; then
+      STROM_FLAKE=/home/strom/strom
+    else
+      STROM_FLAKE=github:kraftwerk-gaming/strom
+    fi
+    export STROM_FLAKE
     # strom-run (the per-game supervisor) needs a delegated cgroup v2 so it can
     # mkdir a child cgroup and cgroup.kill the game tree atomically. The greetd
     # PAM session drops us into a root-owned logind session scope
@@ -43,8 +63,8 @@ let
     done
     # Relaunch whenever the couch launcher exits (gamepad B / Esc) so the kiosk
     # never drops to a blank screen. The loop runs inside the delegated scope so
-    # every game inherits a writable cgroup; the gamescope compositor stays up
-    # (it is the session's other child) across relaunches.
+    # every game inherits a writable cgroup; sway stays up (the launcher is just
+    # one of its clients) across relaunches.
     #
     # setpriv --ambient-caps=-all: the login session may carry an ambient
     # capability (e.g. cap_wake_alarm) that every child inherits. bwrap refuses
@@ -56,11 +76,26 @@ let
       --quiet --collect -- \
       ${pkgs.util-linux}/bin/setpriv --ambient-caps=-all \
       ${pkgs.bash}/bin/bash -c 'while true; do
-        ${config.nix.package}/bin/nix run /home/strom/strom#scripts.launcher
+        ${config.nix.package}/bin/nix run "$STROM_FLAKE#scripts.launcher"
         sleep 2
       done'
   '';
 
+  # Bare wlroots kiosk: no window chrome, every toplevel fullscreen, no idle
+  # blanking. Its whole reason to exist over cage is that it exposes the wlroots
+  # protocols each game's nested gamescope needs for its wayland backend (see
+  # the top-of-file note).
+  sway-kiosk = pkgs.writeText "sway-kiosk.conf" ''
+    default_border none
+    default_floating_border none
+    gaps inner 0
+    gaps outer 0
+    # Fullscreen every toplevel: the launcher grid and each game's gamescope.
+    for_window [app_id=".*"] fullscreen enable
+    for_window [class=".*"] fullscreen enable
+    # No swaybar / no swayidle -> no bar, no DPMS blank (mains-powered kiosk).
+    exec ${strom-session}
+  '';
 in
 {
   # Dedicated, unprivileged kiosk user. Gamepad input comes through evdev
@@ -76,23 +111,19 @@ in
     ];
   };
 
-  # Kiosk autostart: a gamescope session on DRM (via greetd autologin),
-  # replacing cage. gamescope presents straight to the display, so there is no
-  # nested Wayland swapchain for RADV to storm on this Vega iGPU. greetd gives
-  # the strom user a real seat/VT (DRM master) and a delegated user manager,
-  # which the launcher's systemd-run --user --scope relies on for game cgroups.
+  # Kiosk autostart: greetd autologins the strom user on tty1 into sway, which
+  # runs the couch launcher as its sole fullscreen client. default_session
+  # re-runs the same session if sway ever exits.
   services.greetd = {
     enable = true;
     settings =
       let
         session = {
-          command = "${pkgs.gamescope}/bin/gamescope -- ${strom-session}";
+          command = "${pkgs.sway}/bin/sway --config ${sway-kiosk}";
           user = "strom";
         };
       in
       {
-        # initial_session autologins on boot with no prompt; default_session
-        # re-runs it (also autologin) if the gamescope session ever exits.
         initial_session = session;
         default_session = session;
       };
