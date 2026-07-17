@@ -66,23 +66,40 @@ let
   # `ssh root@coaxmetal.r strom-pair`): put the pad in pairing mode (hold the
   # Xbox button to power on, then hold the small round sync button on the top
   # edge until the light flashes rapidly) and the script blocks until it pairs
-  # that one fresh pad, then exits. Already-bonded pads are skipped, so just run
-  # it again for the next controller. Bonded+trusted pads reconnect on their own
-  # on every later boot. Pass a MAC (`strom-pair AA:BB:...`) to pair just one.
+  # that one pad, then exits. A pad currently paired to another device is
+  # re-paired here (its stale bond is cleared); a pad already connected and
+  # working is left alone. Run once per controller. Bonded+trusted pads
+  # reconnect on their own on every later boot. Pass a MAC to pair just one.
   strom-pair = pkgs.writeShellApplication {
     name = "strom-pair";
     runtimeInputs = [ pkgs.bluez ];
     text = ''
-      # Find one not-yet-bonded Xbox pad, echoing its MAC (empty if none). A
-      # foreground timed scan is reliable; a backgrounded `scan on` exits at once
-      # without a tty and never actually scans.
-      find_unpaired() {
-        local m
-        bluetoothctl --timeout 12 scan on >/dev/null 2>&1 || true
-        mapfile -t cand < <(bluetoothctl devices 2>/dev/null | grep -i xbox | awk '{print $2}')
-        for m in "''${cand[@]:-}"; do
+      # Find one Xbox pad that is here right now (advertising in pairing mode)
+      # and not already connected; echo its MAC (empty if none). We key off what
+      # actually shows up in THIS scan, not the bonded-device list: a pad that
+      # was since re-paired to another host still lingers as "bonded" here but
+      # only appears in a scan when it is genuinely present and pairable.
+      find_target() {
+        local sl m
+        local -a bonded present
+        sl=$(mktemp)
+        bluetoothctl --timeout 12 scan on > "$sl" 2>&1 || true
+        mapfile -t bonded < <(bluetoothctl devices 2>/dev/null | grep -i xbox | awk '{print $2}')
+        # MACs of xbox pads that showed up in this scan (present + advertising).
+        mapfile -t present < <(
+          {
+            # freshly discovered pads announce their name
+            grep -i xbox "$sl" | grep -oiE '([0-9a-f]{2}:){5}[0-9a-f]{2}'
+            # known/bonded pads emit nameless RSSI lines; match their MAC in-scan
+            for m in "''${bonded[@]:-}"; do
+              [ -n "$m" ] && grep -qiF "$m" "$sl" && printf '%s\n' "$m"
+            done
+          } | sort -uf
+        )
+        rm -f "$sl"
+        for m in "''${present[@]:-}"; do
           [ -n "$m" ] || continue
-          bluetoothctl info "$m" 2>/dev/null | grep -q "Bonded: yes" && continue
+          bluetoothctl info "$m" 2>/dev/null | grep -q "Connected: yes" && continue
           printf '%s\n' "$m"
           return 0
         done
@@ -91,10 +108,14 @@ let
 
       # Pair one pad. Xbox controllers use JustWorks pairing, which needs a
       # NoInputNoOutput agent held in the SAME bluetoothctl session as `pair`
-      # (plus disable_ertm, set system-wide below). `connect` succeeds even when
-      # pairing fails, so success is judged by "Bonded: yes", not by connect.
+      # (plus disable_ertm, set system-wide below). Remove any existing bond
+      # first: a pad re-paired to another host still shows bonded here but never
+      # reconnects, and bluez refuses a fresh pair while that stale bond exists.
+      # `connect` succeeds even when pairing fails, so success is judged by
+      # "Bonded: yes", not by connect.
       pair_one() {
         local mac="$1"
+        bluetoothctl remove "$mac" >/dev/null 2>&1 || true
         {
           echo "power on"
           echo "agent NoInputNoOutput"
@@ -119,7 +140,7 @@ let
 
       bluetoothctl power on >/dev/null 2>&1 || true
 
-      # Single-pad mode: pair exactly the given MAC and exit.
+      # Single-pad mode: (re)pair exactly the given MAC and exit.
       if [ -n "''${1:-}" ]; then
         if pair_one "$1"; then
           echo ">> paired, trusted, connected: $1"
@@ -129,24 +150,16 @@ let
         exit 1
       fi
 
-      # Default: wait for one fresh (unbonded) pad, pair it, then exit. Run once
-      # per controller; already-bonded pads are ignored so each run grabs the
-      # next one.
+      # Default: wait for a pad that is present and in pairing mode, (re)pair it,
+      # then exit. Run once per controller. A pad that was paired to another
+      # device in the meantime is re-paired here (its stale bond is cleared)
+      # rather than skipped; a pad already connected and working is left alone.
       echo ">> put a controller in pairing mode: hold the Xbox button to power"
       echo "   on, then hold the small round sync button on the top edge until"
       echo "   the light flashes rapidly. Waiting... (Ctrl-C to abort)"
       while true; do
         echo ">> scanning..."
-        mac=$(find_unpaired)
-        # Show which Xbox pads are visible and whether they are already bonded,
-        # so it's obvious if the pad is being detected at all.
-        bluetoothctl devices 2>/dev/null | grep -i xbox | while read -r _ m _; do
-          if bluetoothctl info "$m" 2>/dev/null | grep -q "Bonded: yes"; then
-            echo "   seen $m (already bonded, skipping)"
-          else
-            echo "   seen $m (pairable)"
-          fi
-        done
+        mac=$(find_target)
         if [ -n "$mac" ]; then
           printf '>> pairing %s ... ' "$mac"
           if pair_one "$mac"; then
