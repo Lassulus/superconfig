@@ -24,7 +24,7 @@
               exit 0
             fi
             exec mpvpaper -p \
-              -o "no-audio loop-file=inf image-display-duration=inf hwdec=auto-safe" \
+              -o "no-audio loop-file=inf image-display-duration=inf hwdec=auto-safe msg-level=all=no" \
               '*' "$FILE"
           '';
         }).overrideAttrs
