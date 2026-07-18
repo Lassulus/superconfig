@@ -1,4 +1,4 @@
-@ 3600 IN SOA lassul.us. ns1.lassul.us. 2026060706 7200 3600 86400 3600
+@ 3600 IN SOA lassul.us. ns1.lassul.us. 2026060707 7200 3600 86400 3600
 
 ;;@ 3600 IN NS ns1
 @ 3600 IN NS ns1
@@ -56,7 +56,6 @@ cal IN CNAME neoprism
 kanban IN CNAME neoprism
 n2n IN CNAME neoprism
 id IN CNAME neoprism
-auth IN CNAME neoprism
 
 ;; Mail
 @ IN MX 3 mail

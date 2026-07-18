@@ -9,9 +9,9 @@ in
 }:
 {
   # Pocket ID: passkey-based OIDC provider. Serves as the SSO IdP for other
-  # services on this host (e.g. the SilverBullet editing instance via
-  # oauth2-proxy). First-run bootstrap (admin user + OIDC client registration)
-  # happens through its web UI at https://id.lassul.us.
+  # services on this host (e.g. HedgeDoc login at pad.lassul.us). First-run
+  # bootstrap (admin user + OIDC client registration) happens through its web
+  # UI at https://id.lassul.us.
 
   # v2 requires ENCRYPTION_KEY (>=16 bytes) to encrypt keys at rest.
   clan.core.vars.generators.pocket-id = {

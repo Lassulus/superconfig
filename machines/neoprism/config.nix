@@ -101,8 +101,6 @@
 
     # pocket-id SSO IdP (id.lassul.us)
     ../../2configs/pocket-id.nix
-    # shared oauth2-proxy forward-auth against pocket-id (auth.lassul.us)
-    ../../2configs/oauth2-proxy.nix
   ];
 
   # lassul.us shouldn't be the default vhost here (nginx.nix already sets one)
