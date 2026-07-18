@@ -57,6 +57,8 @@ kanban IN CNAME neoprism
 n2n IN CNAME neoprism
 id IN CNAME neoprism
 auth IN CNAME neoprism
+wiki IN CNAME neoprism
+wiki-rw IN CNAME neoprism
 
 ;; Mail
 @ IN MX 3 mail
