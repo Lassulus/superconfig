@@ -98,6 +98,9 @@
 
     # n2n supernode (n2n.lassul.us)
     ../../2configs/n2n-supernode.nix
+
+    # pocket-id SSO IdP (id.lassul.us)
+    ../../2configs/pocket-id.nix
   ];
 
   # lassul.us shouldn't be the default vhost here (nginx.nix already sets one)
