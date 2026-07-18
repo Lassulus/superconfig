@@ -103,8 +103,6 @@
     ../../2configs/pocket-id.nix
     # shared oauth2-proxy forward-auth against pocket-id (auth.lassul.us)
     ../../2configs/oauth2-proxy.nix
-    # silverbullet wiki: wiki.lassul.us (public read) + wiki-rw.lassul.us (SSO write)
-    ../../2configs/silverbullet.nix
   ];
 
   # lassul.us shouldn't be the default vhost here (nginx.nix already sets one)
