@@ -11,7 +11,24 @@
       # nixpkgs default python3 moved to 3.14, but tulir_telethon (the pinned
       # Telethon fork mautrix-telegram depends on) declares no 3.14 support, so
       # the build errors out. Pin the bridge to python312 until upstream bumps.
-      mautrix-telegram = prev.mautrix-telegram.override { python3 = prev.python312; };
+      #
+      # python312's setuptools (>=81) dropped the bundled pkg_resources module,
+      # which mautrix-telegram 0.15.3 still imports in its web UI → the bridge
+      # crashes on startup with ModuleNotFoundError. Upstream's own fix was to
+      # pin setuptools; we instead rewrite the three call sites onto the stdlib
+      # importlib.resources equivalents (--replace-fail so a version bump that
+      # changes this file fails the build loudly instead of silently skipping).
+      mautrix-telegram =
+        (prev.mautrix-telegram.override { python3 = prev.python312; }).overrideAttrs
+          (old: {
+            postPatch = (old.postPatch or "") + ''
+              substituteInPlace mautrix_telegram/web/public/__init__.py \
+                --replace-fail "import pkg_resources" "import importlib.resources" \
+                --replace-fail 'pkg_resources.resource_string("mautrix_telegram", "web/public/login.html.mako")' '(importlib.resources.files("mautrix_telegram") / "web/public/login.html.mako").read_bytes()' \
+                --replace-fail 'pkg_resources.resource_string("mautrix_telegram", "web/public/matrix-login.html.mako")' '(importlib.resources.files("mautrix_telegram") / "web/public/matrix-login.html.mako").read_bytes()' \
+                --replace-fail 'pkg_resources.resource_filename("mautrix_telegram", "web/public/")' 'str(importlib.resources.files("mautrix_telegram") / "web/public")'
+            '';
+          });
     })
   ];
 
