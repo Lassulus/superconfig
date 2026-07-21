@@ -82,6 +82,9 @@
     nixos-mailserver.url = "gitlab:simple-nixos-mailserver/nixos-mailserver";
     nixos-mailserver.inputs.nixpkgs.follows = "nixpkgs";
 
+    covibe.url = "github:lassulus/covibe";
+    covibe.inputs.nixpkgs.follows = "nixpkgs";
+
   };
 
   outputs =

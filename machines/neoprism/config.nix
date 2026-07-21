@@ -101,6 +101,9 @@
 
     # pocket-id SSO IdP (id.lassul.us)
     ../../2configs/pocket-id.nix
+
+    # covibe co-vibing dashboard (covibe.lassul.us)
+    ../../2configs/covibe.nix
   ];
 
   # lassul.us shouldn't be the default vhost here (nginx.nix already sets one)
