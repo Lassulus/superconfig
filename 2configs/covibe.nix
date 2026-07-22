@@ -41,7 +41,7 @@ in
     enable = true;
     user = "pairprogramming";
     ompPackage = self.legacyPackages.${pkgs.stdenv.hostPlatform.system}.llm.omp;
-    relay = "wss://my.omp.sh";
+    webUrl = "https://${domain}";
     dashboard = {
       addr = "127.0.0.1:${toString port}";
       workspaceRoot = "/home/pairprogramming/covibe";
