@@ -1,0 +1,91 @@
+diff --git a/packages/coding-agent/src/collab/host.ts b/packages/coding-agent/src/collab/host.ts
+index 74a021a..45df271 100644
+--- a/packages/coding-agent/src/collab/host.ts
++++ b/packages/coding-agent/src/collab/host.ts
+@@ -21,6 +21,7 @@ import type {
+ 	AgentEvent as WireAgentEvent,
+ 	SessionEntry as WireSessionEntry,
+ } from "@oh-my-pi/pi-wire";
++import { ROOM_KEY_BYTES, WRITE_TOKEN_BYTES } from "@oh-my-pi/pi-wire";
+ import type { InteractiveModeContext } from "../modes/types";
+ import { AgentLifecycleManager } from "../registry/agent-lifecycle";
+ import { type AgentRef, AgentRegistry } from "../registry/agent-registry";
+@@ -207,10 +208,14 @@ export class CollabHost {
+ 		}
+ 	}
+ 
+-	async start(relayUrl: string, webUrl = ""): Promise<void> {
+-		const rawKey = generateRoomKey();
+-		const writeToken = generateWriteToken();
+-		const roomId = generateRoomId();
++	async start(
++		relayUrl: string,
++		webUrl = "",
++		preset?: { roomId: string; key: Uint8Array; writeToken: Uint8Array },
++	): Promise<void> {
++		const rawKey = preset?.key ?? generateRoomKey();
++		const writeToken = preset?.writeToken ?? generateWriteToken();
++		const roomId = preset?.roomId ?? generateRoomId();
+ 		this.#writeToken = writeToken;
+ 		this.#link = formatCollabLink(relayUrl, roomId, rawKey, writeToken);
+ 		this.#webLink = formatCollabWebLink(relayUrl, roomId, rawKey, writeToken, webUrl);
+@@ -688,3 +693,32 @@ export class CollabHost {
+ 		this.#ctx.ui.requestRender();
+ 	}
+ }
++
++/**
++ * covibe integration: when OMP_COLLAB_RELAY is set, start hosting headlessly on
++ * boot using a caller-provided room id + key (OMP_COLLAB_ROOM / OMP_COLLAB_KEY,
++ * base64url of key‖writeToken) so the orchestrator owns a stable, enumerable
++ * link with no minting or scraping. Returns the live host, or undefined when no
++ * relay is configured.
++ */
++export async function maybeAutostartCollab(ctx: InteractiveModeContext): Promise<CollabHost | undefined> {
++	const relay = process.env.OMP_COLLAB_RELAY;
++	if (!relay) return undefined;
++	const webUrl = process.env.OMP_COLLAB_WEB ?? "";
++	const roomId = process.env.OMP_COLLAB_ROOM;
++	const keyB64 = process.env.OMP_COLLAB_KEY;
++	let preset: { roomId: string; key: Uint8Array; writeToken: Uint8Array } | undefined;
++	if (roomId && keyB64) {
++		const secret = new Uint8Array(Buffer.from(keyB64, "base64url"));
++		if (secret.byteLength === ROOM_KEY_BYTES + WRITE_TOKEN_BYTES) {
++			preset = {
++				roomId,
++				key: secret.subarray(0, ROOM_KEY_BYTES),
++				writeToken: secret.subarray(ROOM_KEY_BYTES),
++			};
++		}
++	}
++	const host = new CollabHost(ctx);
++	await host.start(relay, webUrl, preset);
++	return host;
++}
+diff --git a/packages/coding-agent/src/modes/interactive-mode.ts b/packages/coding-agent/src/modes/interactive-mode.ts
+index c2008d5..447f69b 100644
+--- a/packages/coding-agent/src/modes/interactive-mode.ts
++++ b/packages/coding-agent/src/modes/interactive-mode.ts
+@@ -54,6 +54,7 @@ import chalk from "chalk";
+ import { reset as resetCapabilities } from "../capability";
+ import type { CollabGuestLink } from "../collab/guest";
+ import type { CollabHost } from "../collab/host";
++import { maybeAutostartCollab } from "../collab/host";
+ import { KeybindingsManager } from "../config/keybindings";
+ import type { ResolvedModelRoleValue } from "../config/model-resolver";
+ import { applyProviderGlobalsFromSettings } from "../config/provider-globals";
+@@ -1091,6 +1092,14 @@ export class InteractiveMode implements InteractiveModeContext {
+ 		this.statusLine.watchBranch(() => {
+ 			this.ui.requestRender();
+ 		});
++
++		// covibe: headless collab autostart from env (OMP_COLLAB_*). Fire-and-forget
++		// so the TUI is not blocked on the relay connect; attaches when it opens.
++		void maybeAutostartCollab(this)
++			.then(host => {
++				if (host) this.collabHost = host;
++			})
++			.catch((err: unknown) => logger.warn(`collab autostart failed: ${String(err)}`));
+ 	}
+ 
+ 	/** Reload the title-generation system prompt override for the provided working

@@ -40,8 +40,10 @@ in
   services.covibe = {
     enable = true;
     user = "pairprogramming";
-    ompPackage = self.legacyPackages.${pkgs.stdenv.hostPlatform.system}.llm.omp;
-    webUrl = "https://${domain}";
+    ompPackage = (self.legacyPackages.${pkgs.stdenv.hostPlatform.system}.llm.omp).overrideAttrs (o: {
+      patches = (o.patches or [ ]) ++ [ ./omp-collab-autostart.patch ];
+    });
+    relayHost = domain;
     dashboard = {
       addr = "127.0.0.1:${toString port}";
       workspaceRoot = "/home/pairprogramming/covibe";
