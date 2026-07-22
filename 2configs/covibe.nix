@@ -8,11 +8,37 @@ in
   self,
   ...
 }:
+let
+  # Patched omp: env-driven headless collab autostart, plus a self-hosted
+  # collab-web SPA (base path /c/, external analytics stripped) installed to
+  # share/collab-web so covibe can serve the browser client itself — nothing
+  # loads from my.omp.sh.
+  ompPatched = (self.legacyPackages.${pkgs.stdenv.hostPlatform.system}.llm.omp).overrideAttrs (o: {
+    patches = (o.patches or [ ]) ++ [ ./omp-collab-autostart.patch ];
+    postBuild = (o.postBuild or "") + ''
+      echo "Building self-hosted collab-web (base /c/)..."
+      sed -i '/um\.can\.ac/d' packages/collab-web/index.html
+      (
+        cd packages/collab-web
+        bun build ./index.html --outdir dist --minify \
+          --entry-naming '[hash].[ext]' --chunk-naming '[hash].[ext]' --asset-naming '[hash].[ext]' \
+          --public-path /c/
+        mv dist/*.html dist/index.html
+        cp -R public/. dist/
+      )
+    '';
+    postInstall = (o.postInstall or "") + ''
+      mkdir -p $out/share
+      cp -R packages/collab-web/dist $out/share/collab-web
+    '';
+  });
+in
 {
   # covibe: co-vibing dashboard. Launches omp sessions in zellij as the
   # pairprogramming user, shows live sessions + collab QR codes, and exposes a
   # REST API. Browser auth via the local pocket-id IdP (id.lassul.us); the REST
-  # surface additionally accepts a generated API key.
+  # surface additionally accepts a generated API key. Collab uses omp's native
+  # stack against a self-hosted relay + self-hosted collab-web (no my.omp.sh).
   imports = [ self.inputs.covibe.nixosModules.default ];
 
   # Cookie-signing secret + REST API key (generated), plus the pocket-id client
@@ -40,9 +66,8 @@ in
   services.covibe = {
     enable = true;
     user = "pairprogramming";
-    ompPackage = (self.legacyPackages.${pkgs.stdenv.hostPlatform.system}.llm.omp).overrideAttrs (o: {
-      patches = (o.patches or [ ]) ++ [ ./omp-collab-autostart.patch ];
-    });
+    ompPackage = ompPatched;
+    webRoot = "${ompPatched}/share/collab-web";
     relayHost = domain;
     dashboard = {
       addr = "127.0.0.1:${toString port}";
