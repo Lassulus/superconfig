@@ -57,6 +57,11 @@
   # Suspend on power button press instead of shutting down.
   services.logind.settings.Login.HandlePowerKey = "suspend";
 
+  # Auto-GC during builds when store free space drops below 10 GB,
+  # freeing down to 20 GB free. (gc.automatic is off for ignavia.)
+  nix.settings.min-free = 10240 * 1024 * 1024;
+  nix.settings.max-free = 20480 * 1024 * 1024;
+
   # Framework 13 panel (2256x1504). wlroots' HiDPI heuristic auto-picks
   # scale 2 on every sway start, which is far too large. Pin the internal
   # panel to 1.0; external outputs keep sway's default.
