@@ -54,6 +54,9 @@
 
   lass.workspace-manager.enable = true;
 
+  # Suspend on power button press instead of shutting down.
+  services.logind.settings.Login.HandlePowerKey = "suspend";
+
   # Framework 13 panel (2256x1504). wlroots' HiDPI heuristic auto-picks
   # scale 2 on every sway start, which is far too large. Pin the internal
   # panel to 1.0; external outputs keep sway's default.
