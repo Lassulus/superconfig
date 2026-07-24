@@ -37,6 +37,32 @@ let
   );
 in
 {
+  # Upstream zulip-emoji-mapping (a bridge dependency) is a Poetry project
+  # (version lives in [tool.poetry]) with no [build-system] table, but nixpkgs
+  # builds it with setuptools. Setuptools can't read the poetry version, so the
+  # wheel metadata gets 0.0.0 while the derivation declares 1.0.1, tripping
+  # pythonMetadataCheckPhase. Build with poetry-core and add the missing
+  # [build-system] table so the version is picked up correctly.
+  nixpkgs.overlays = [
+    (final: prev: {
+      pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+        (pyfinal: pyprev: {
+          zulip-emoji-mapping = pyprev.zulip-emoji-mapping.overridePythonAttrs (old: {
+            build-system = [ pyfinal.poetry-core ];
+            postPatch = (old.postPatch or "") + ''
+              cat >> pyproject.toml <<'EOF'
+
+              [build-system]
+              requires = ["poetry-core"]
+              build-backend = "poetry.core.masonry.api"
+              EOF
+            '';
+          });
+        })
+      ];
+    })
+  ];
+
   systemd.services.matrix-zulip-bridge = {
     description = "Matrix<->Zulip bridge";
     before = [ "matrix-synapse.service" ]; # So the registration file can be used by Synapse
