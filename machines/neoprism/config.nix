@@ -158,6 +158,17 @@
   # mode (which has no network and bricks the box).
   fileSystems."/var/lib/radicle".options = [ "nofail" ];
 
+  # Fleet-wide safety net: this box is headless (Hetzner, console only via
+  # KVM), so a failed critical target must never strand us at the emergency
+  # shell. With emergency mode disabled systemd keeps booting instead of
+  # dropping to a console -> network + sshd still come up, so a bad deploy
+  # (e.g. a missing dataset, as happened once) leaves the box reachable to
+  # fix and redeploy rather than bricked. Mirrors nixpkgs' headless profile.
+  # Note: we intentionally do NOT auto-roll-back to the previous generation;
+  # our config is pulled from git by system.autoUpgrade, so a rollback would
+  # just re-pull the same broken config on the next run (a rollback loop).
+  systemd.enableEmergencyMode = false;
+
   krebs.build.host = config.krebs.hosts.neoprism;
   system.stateVersion = "24.05";
 }
