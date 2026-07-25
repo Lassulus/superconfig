@@ -84,6 +84,18 @@ in
   services.nginx.virtualHosts.${domain} = {
     enableACME = true;
     forceSSL = true;
+    # Collab relay websockets (/r/<roomId>) are long-lived and idle between
+    # turns; neither the relay nor omp send keepalive pings, so nginx's default
+    # 60s proxy_read_timeout would sever idle sessions and trigger omp's
+    # "connection lost, reconnecting" loop. Give the relay a long idle window.
+    locations."/r/" = {
+      proxyPass = "http://127.0.0.1:${toString port}";
+      proxyWebsockets = true;
+      extraConfig = ''
+        proxy_read_timeout 1d;
+        proxy_send_timeout 1d;
+      '';
+    };
     locations."/" = {
       proxyPass = "http://127.0.0.1:${toString port}";
       proxyWebsockets = true;
