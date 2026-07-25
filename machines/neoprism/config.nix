@@ -151,6 +151,13 @@
     }
   ];
 
+  # tank/radicle (radicle seed storage) is created by disko at install; on an
+  # already-provisioned host it must be created before deploying:
+  #   zfs create -o mountpoint=/var/lib/radicle -o quota=80G tank/radicle
+  # nofail keeps a missing dataset from failing local-fs.target -> emergency
+  # mode (which has no network and bricks the box).
+  fileSystems."/var/lib/radicle".options = [ "nofail" ];
+
   krebs.build.host = config.krebs.hosts.neoprism;
   system.stateVersion = "24.05";
 }
