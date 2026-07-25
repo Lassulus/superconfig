@@ -1,4 +1,4 @@
 bin "covibe"
-about "Launch omp as a co-vibing collab host on the covibe relay (joinable + browser-viewable from any machine)"
+about "Launch omp as a co-vibing session that registers in the covibe.lassul.us dashboard (joinable + browser-viewable from any machine)"
 
 arg "[omp-args...]" help="Arguments passed through to omp"

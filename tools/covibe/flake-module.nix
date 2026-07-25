@@ -1,57 +1,54 @@
-{ self, ... }:
+{ self, inputs, ... }:
 {
   perSystem =
     { pkgs, system, ... }:
     let
       # Client omp carrying covibe's env-driven headless collab autostart
-      # (OMP_COLLAB_*) -- the exact patch the neoprism covibe service uses. A
-      # session started from any machine hosts natively against the covibe
-      # relay and is immediately joinable / browser-viewable. It does NOT show
-      # up in the covibe dashboard overview: that list is built from a local
-      # spool dir + local pid liveness + a per-session unix socket, so it only
-      # enumerates sessions running on the dashboard host.
+      # (OMP_COLLAB_*) -- the exact patch the neoprism covibe service uses, so a
+      # session hosts natively against the covibe relay. `covibe session` mints
+      # the room and passes OMP_COLLAB_* to this omp.
       ompCollab = self.legacyPackages.${system}.llm.omp.overrideAttrs (o: {
         patches = (o.patches or [ ]) ++ [ ../../2configs/omp-collab-autostart.patch ];
       });
+      covibe = inputs.covibe.packages.${system}.covibe;
     in
     {
+      # Launch omp as a co-vibing session from any machine: `covibe session
+      # --dashboard` registers the session over the dashboard's REST API (with
+      # heartbeat + pane push), so it shows up in the covibe.lassul.us overview
+      # just like a session started locally on neoprism, and is joinable /
+      # browser-viewable via the collab relay.
       packages.covibe =
         (pkgs.writeShellApplication {
           name = "covibe";
-          runtimeInputs = [
-            pkgs.coreutils
-            pkgs.qrencode
-          ];
+          runtimeInputs = [ pkgs.coreutils ];
           text = ''
-            relay="''${COVIBE_RELAY:-wss://covibe.lassul.us}"
-            web="''${COVIBE_WEB:-https://covibe.lassul.us/c}"
+            dashboard="''${COVIBE_DASHBOARD:-https://covibe.lassul.us}"
+            relay="''${COVIBE_LOCAL_RELAY:-wss://covibe.lassul.us}"
+            web="''${COVIBE_WEB_CLIENT:-https://covibe.lassul.us/c}"
             host="''${COVIBE_RELAY_HOST:-covibe.lassul.us}"
+            name="''${COVIBE_NAME:-$(basename "$PWD")}"
 
-            # Mint an omp-compatible collab room, matching covibe's collablink:
-            #   room   = base64url(16 random bytes)                -> 22 chars
-            #   secret = base64url(32-byte AES key + 16-byte token) -> 64 chars
-            # Handing these to omp via OMP_COLLAB_ROOM/KEY makes the shareable
-            # link stable and known up front (no scraping the TUI).
-            room="$(head -c 16 /dev/urandom | basenc --base64url -w0 | tr -d '=')"
-            secret="$(head -c 48 /dev/urandom | basenc --base64url -w0 | tr -d '=')"
+            # Dashboard API key: env, else the password store, else bail.
+            api_key="''${COVIBE_API_KEY:-}"
+            if [ -z "$api_key" ] && command -v pass >/dev/null 2>&1; then
+              api_key="$(pass show covibe/api-key 2>/dev/null || true)"
+            fi
+            if [ -z "$api_key" ]; then
+              echo "covibe: no API key. Set COVIBE_API_KEY or add 'covibe/api-key' to pass." >&2
+              exit 1
+            fi
 
-            join="''${host}/r/''${room}.''${secret}"
-            browser="''${web}/#''${join}"
-
-            export OMP_COLLAB_RELAY="$relay"
-            export OMP_COLLAB_WEB="$web"
-            export OMP_COLLAB_ROOM="$room"
-            export OMP_COLLAB_KEY="$secret"
-
-            {
-              printf '\n  covibe: hosting this session on %s\n\n' "$host"
-              printf '  omp join   %s\n' "$join"
-              printf '  browser    %s\n\n' "$browser"
-              qrencode -t UTF8 -m 2 "$browser" || true
-              printf '\n'
-            } >&2
-
-            exec ${ompCollab}/bin/omp "$@"
+            exec ${covibe}/bin/covibe session \
+              --dashboard "$dashboard" \
+              --api-key "$api_key" \
+              --relay-host "$host" \
+              --web-client "$web" \
+              --local-relay "$relay" \
+              --omp ${ompCollab}/bin/omp \
+              --name "$name" \
+              --dir "$PWD" \
+              -- "$@"
           '';
         }).overrideAttrs
           { passthru.usage = builtins.readFile ./usage.kdl; };
