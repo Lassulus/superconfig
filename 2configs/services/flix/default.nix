@@ -1,5 +1,20 @@
 { config, pkgs, ... }:
 {
+  # sabnzbd hard-depends on cheetah3, whose PyPI dist is `ct3` while nixpkgs
+  # sets pname="cheetah3". pythonMetadataCheckPhase then looks up metadata for
+  # "cheetah3", finds only "ct3", and fails the build with PackageNotFoundError.
+  # Skip that spurious check until nixpkgs fixes the pname/dist mismatch.
+  nixpkgs.overlays = [
+    (_final: prev: {
+      pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+        (_pyfinal: pyprev: {
+          cheetah3 = pyprev.cheetah3.overridePythonAttrs (_: {
+            dontCheckPythonMetadata = true;
+          });
+        })
+      ];
+    })
+  ];
   users.users.download = {
     isSystemUser = true;
     uid = 1001;
