@@ -96,17 +96,26 @@
       };
     in
     {
-      packages.pi = pkgs.writeShellApplication {
-        name = "pi";
-        runtimeInputs = [ pkgs.rbw ];
-        text = ''
-          if [ -z "''${OPENROUTER_API_KEY:-}" ]; then
-            rbw unlock
-            OPENROUTER_API_KEY=$(rbw get -f api_key openrouter.ai)
-            export OPENROUTER_API_KEY
-          fi
-          exec ${pi.wrapper}/bin/pi "$@"
-        '';
-      };
+      packages.pi =
+        let
+          pinentry =
+            if pkgs.stdenv.isDarwin then
+              "${pkgs.pinentry_mac}/${pkgs.pinentry_mac.binaryPath}"
+            else
+              "${self.packages.${pkgs.system}.pinentry-rofi}/bin/pinentry-rofi";
+        in
+        pkgs.writeShellApplication {
+          name = "pi";
+          runtimeInputs = [ pkgs.rbw ];
+          text = ''
+            if [ -z "''${OPENROUTER_API_KEY:-}" ]; then
+              rbw config set pinentry ${pinentry}
+              rbw unlock
+              OPENROUTER_API_KEY=$(rbw get -f api_key openrouter.ai)
+              export OPENROUTER_API_KEY
+            fi
+            exec ${pi.wrapper}/bin/pi "$@"
+          '';
+        };
     };
 }
