@@ -22,22 +22,29 @@
 
     node.openFirewall = true;
 
+    httpd = {
+      enable = true;
+      nginx = {
+        serverName = "radicle.lassul.us";
+        enableACME = true;
+        forceSSL = true;
+      };
+    };
+
     settings = {
       publicExplorer = "https://app.radicle.xyz/nodes/$host/$rid$path";
       preferredSeeds = [
         "z6MkrLMMsiPWUcNPHcRajuMi9mDfYckSoJyPwwnknocNYPm7@seed.radicle.xyz:8776"
-        "z6MkrLMMsiPWUcNPHcRajuMi9mDfYckSoJyPwwnknocNYPm7@irisradizskwweumpydlj4oammoshkxxjur3ztcmo7cou5emc6s5lfid.onion:8776"
         "z6Mkmqogy2qEM2ummccUthFEaaHvyYmYBYh3dbe9W4ebScxo@seed.radicle.garden:8776"
-        "z6Mkmqogy2qEM2ummccUthFEaaHvyYmYBYh3dbe9W4ebScxo@rosarad5bxgdlgjnzzjygnsxrwxmoaj4vn7xinlstwglxvyt64jlnhyd.onion:8776"
       ];
       web.pinned.repositories = [ ];
       cli.hints = true;
       node = {
         alias = config.networking.hostName;
-        listen = [ ];
+        listen = [ "0.0.0.0:8776" ];
         peers.type = "dynamic";
         connect = [ ];
-        externalAddresses = [ ];
+        externalAddresses = [ "radicle.lassul.us:8776" ];
         network = "main";
         log = "INFO";
         relay = "auto";
@@ -65,9 +72,9 @@
         };
         workers = 8;
         seedingPolicy = {
-          default = "block";
+          default = "allow";
+          scope = "all";
         };
-        proxy = "127.0.0.1:9050";
       };
     };
   };

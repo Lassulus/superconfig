@@ -104,6 +104,9 @@
 
     # covibe co-vibing dashboard (covibe.lassul.us)
     ../../2configs/covibe.nix
+
+    # radicle public seed (radicle.lassul.us)
+    ../../2configs/radicle.nix
   ];
 
   # lassul.us shouldn't be the default vhost here (nginx.nix already sets one)

@@ -12,7 +12,6 @@
     ../../2configs/browsers.nix
     ../../2configs/container-bridge.nix
     ../../2configs/android-webcam.nix
-    ../../2configs/radicle.nix
     ../../2configs/ipfs.nix
     ../../2configs/steam.nix
     ../../2configs/games.nix
