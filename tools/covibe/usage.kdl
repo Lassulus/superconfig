@@ -1,0 +1,4 @@
+bin "covibe"
+about "Launch omp as a co-vibing collab host on the covibe relay (joinable + browser-viewable from any machine)"
+
+arg "[omp-args...]" help="Arguments passed through to omp"
