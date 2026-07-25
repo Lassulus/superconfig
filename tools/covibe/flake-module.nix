@@ -14,10 +14,11 @@
     in
     {
       # Launch omp as a co-vibing session from any machine: `covibe session
-      # --dashboard` registers the session over the dashboard's REST API (with
-      # heartbeat + pane push), so it shows up in the covibe.lassul.us overview
-      # just like a session started locally on neoprism, and is joinable /
-      # browser-viewable via the collab relay.
+      # --dashboard` announces the session over the dashboard's keyless REST API
+      # (name + collab links, heartbeat + pane push), so it shows up in the
+      # covibe.lassul.us overview just like a session started locally on
+      # neoprism, and is joinable / browser-viewable via the collab relay. The
+      # dashboard GCs the announcement once the session exits.
       packages.covibe =
         (pkgs.writeShellApplication {
           name = "covibe";
@@ -29,19 +30,8 @@
             host="''${COVIBE_RELAY_HOST:-covibe.lassul.us}"
             name="''${COVIBE_NAME:-$(basename "$PWD")}"
 
-            # Dashboard API key: env, else the password store, else bail.
-            api_key="''${COVIBE_API_KEY:-}"
-            if [ -z "$api_key" ] && command -v pass >/dev/null 2>&1; then
-              api_key="$(pass show covibe/api-key 2>/dev/null || true)"
-            fi
-            if [ -z "$api_key" ]; then
-              echo "covibe: no API key. Set COVIBE_API_KEY or add 'covibe/api-key' to pass." >&2
-              exit 1
-            fi
-
             exec ${covibe}/bin/covibe session \
               --dashboard "$dashboard" \
-              --api-key "$api_key" \
               --relay-host "$host" \
               --web-client "$web" \
               --local-relay "$relay" \
