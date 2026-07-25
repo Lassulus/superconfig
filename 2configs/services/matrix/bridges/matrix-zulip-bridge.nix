@@ -44,7 +44,7 @@ in
   # pythonMetadataCheckPhase. Build with poetry-core and add the missing
   # [build-system] table so the version is picked up correctly.
   nixpkgs.overlays = [
-    (final: prev: {
+    (_final: prev: {
       pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
         (pyfinal: pyprev: {
           zulip-emoji-mapping = pyprev.zulip-emoji-mapping.overridePythonAttrs (old: {
