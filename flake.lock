@@ -82,16 +82,19 @@
     "covibe": {
       "inputs": {
         "flake-utils": "flake-utils",
+        "llm-agents": [
+          "llm-agents"
+        ],
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1785146837,
-        "narHash": "sha256-C1E2rNoK3Dh0DFs+qz9imMkrK3f3vFsmuZiYCqh7R+k=",
+        "lastModified": 1785148849,
+        "narHash": "sha256-Q8UpBJdAM7KYM5BOuvmZtUcM5b/dgivwa+Sm2TYyZTI=",
         "owner": "lassulus",
         "repo": "covibe",
-        "rev": "3be3345e862ebc2828e2fdcd0eefb495fda9c4f3",
+        "rev": "1902e49d62aab3c1c65743d241c81485c32352c3",
         "type": "github"
       },
       "original": {

@@ -84,6 +84,8 @@
 
     covibe.url = "github:lassulus/covibe";
     covibe.inputs.nixpkgs.follows = "nixpkgs";
+    # One omp revision (and one build) for covibe's patched omp and llm.omp.
+    covibe.inputs.llm-agents.follows = "llm-agents";
 
   };
 
