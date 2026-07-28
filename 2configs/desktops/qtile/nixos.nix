@@ -45,7 +45,7 @@ in
 
   # For greetd, we need a shell script into path, which lets us start qtile.service (after importing the environment of the login shell).
   services.greetd.settings.default_session.command =
-    "${pkgs.greetd.tuigreet}/bin/tuigreet --remember --cmd ${pkgs.writeScript "startqtile" ''
+    "${pkgs.tuigreet}/bin/tuigreet --remember --cmd ${pkgs.writeScript "startqtile" ''
       #! ${pkgs.bash}/bin/bash
 
       # first import environment variables from the login manager
