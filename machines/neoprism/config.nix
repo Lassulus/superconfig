@@ -107,6 +107,9 @@
 
     # radicle public seed (radicle.lassul.us)
     ../../2configs/radicle.nix
+
+    # self-hosted iroh relay (relay.lassul.us)
+    ../../2configs/iroh-relay
   ];
 
   # lassul.us shouldn't be the default vhost here (nginx.nix already sets one)
