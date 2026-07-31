@@ -10,10 +10,10 @@
   ];
 
   # Hermes Agent (Nous Research) — autonomous agent run as a native systemd
-  # gateway, reachable over Matrix (@hermes:lassul.us). Model backend is Nous
-  # Portal (one key, 266 models) driving MiniMax M2.5 — an agentic model, per
-  # Nous's own guidance that the Hermes-4 chat models are NOT for the agent.
-  # Any Portal model is a one-line settings.model.default swap.
+  # gateway, reachable over Matrix (@hermes:lassul.us). Model backend is our
+  # shared llama cluster: one vLLM instance behind an OpenAI-compatible
+  # endpoint, so the model is whatever the cluster currently serves and a swap
+  # is a one-line settings.model.default change.
   services.hermes-agent = {
     enable = true;
 
@@ -30,32 +30,52 @@
     ];
 
     settings.model = {
-      # Nous does NOT recommend the Hermes-4 chat models for Hermes Agent — it
-      # wants a dedicated *agentic* model. Community/Nous consensus agentic pick
-      # is the MiniMax M2 family (Nous co-optimizes it for Hermes Agent); M2.5
-      # is the cheapest tool-calling option ($0.12/$0.48 per 1M). All 266 Nous
-      # Portal models share this key, so this is just a model-id swap.
-      # Alternatives: minimax/minimax-m2.7, z-ai/glm-4.6, deepseek/deepseek-v3.2.
-      default = "minimax/minimax-m2.5";
+      # The cluster serves Qwen3.6-27B-FP8 (also aliased as "default" in
+      # /v1/models — both resolve to the same weights); pin the explicit id so
+      # logs and 400s name the actual model. Verified against the live endpoint
+      # that it emits native tool_calls, which Hermes Agent requires.
+      default = "Qwen3.6-27B-FP8";
       # hermes's built-in "nous" provider is OAuth-only and hardcodes the dead
       # host inference.nousresearch.com (NXDOMAIN) — true on both 0.17.0 and
-      # main; "nous-api" exists only in docs, not code. So we drive Nous Portal
-      # through the generic OpenAI-compatible "custom" provider pointed at the
-      # live endpoint, authenticating with the Nous key as OPENAI_API_KEY.
-      provider = "custom";
-      base_url = "https://inference-api.nousresearch.com/v1";
-      # The custom provider can't auto-detect limits, so it left context
-      # uncompressed and defaulted max_tokens to 65536 — once history passed
-      # ~65k tokens, input + max_tokens exceeded the 131072 window and the
-      # endpoint 400'd ("check the model name and other parameters"). Pin both:
-      # context_length so hermes compresses before the window fills, and a sane
-      # output cap (covers thinking + reply) so input + max_tokens stays under.
-      context_length = 204800;
+      # main, so we drive the cluster's OpenAI-compatible endpoint instead.
+      #
+      # It MUST be a *named* custom provider ("custom:<name>" + a
+      # custom_providers entry), not bare "custom". Bare custom resolves its
+      # credential from a host-gated candidate list
+      # (hermes_cli/runtime_provider.py:1244) that only forwards
+      # OPENAI_API_KEY when base_url's host is openai.com — a deliberate
+      # anti-credential-leak measure (upstream #28660 / GHSA-76xc-57q6-vm5m).
+      # For any other host it silently substitutes the literal placeholder
+      # "no-key-required" and the endpoint 401s. A named entry instead reads
+      # the key from its declared key_env (runtime_provider.py:692), which is
+      # not host-gated. Named entries also ignore config.yaml's model.api_key,
+      # so a stray `hermes model` run can no longer shadow this with a stale
+      # key (that is exactly how the Nous→cluster switch broke).
+      provider = "custom:llama";
+      base_url = "https://inference.p0.contact/v1";
+      # The custom provider can't auto-detect limits, so unset it leaves
+      # context uncompressed and defaults max_tokens to 65536 — once history
+      # outgrows the window, input + max_tokens exceeds it and the endpoint
+      # 400s ("check the model name and other parameters"). vLLM reports
+      # max_model_len 262144 for this model: pin that as the window so hermes
+      # compresses in time, and keep a sane output cap (covers thinking +
+      # reply) so input + max_tokens always stays under it.
+      context_length = 262144;
       max_tokens = 16384;
-
-      # Frontier-on-tap alternative (uncomment to default to Claude instead):
-      # default = "anthropic/claude-sonnet-4-6";
     };
+
+    # The endpoint hermes actually authenticates against. key_env names the
+    # env var carrying the token; it comes from the hermes-env generator below
+    # via environmentFiles, so the secret never enters the nix store.
+    # api_mode is pinned because auto-detection only runs as a fallback.
+    settings.custom_providers = [
+      {
+        name = "llama";
+        base_url = "https://inference.p0.contact/v1";
+        key_env = "LLAMA_API_TOKEN";
+        api_mode = "chat_completions";
+      }
+    ];
 
     # In rooms Hermes requires an @mention by default; DMs always respond.
     settings.matrix.session_scope = "room";
@@ -88,7 +108,7 @@
       # MATRIX_ALLOWED_ROOMS = "!yourRoomId:lassul.us";
     };
 
-    # Secrets (MATRIX_ACCESS_TOKEN + NOUS_API_KEY) come from clan vars below,
+    # Secrets (MATRIX_ACCESS_TOKEN + LLAMA_API_TOKEN) come from clan vars below,
     # merged into $HERMES_HOME/.env at activation.
     environmentFiles = [
       config.clan.core.vars.generators.hermes-env.files."hermes.env".path
@@ -122,9 +142,11 @@
     persist = true;
   };
 
-  # Nous Portal API key (portal.nousresearch.com, Plus subscription).
-  clan.core.vars.generators.hermes-nous.prompts.nous-api-key = {
-    description = "Nous Portal API key (NOUS_API_KEY) from portal.nousresearch.com";
+  # API token for the shared llama cluster, surfaced to hermes as
+  # LLAMA_API_TOKEN (the custom_providers key_env above).
+  # persist=true so the prompt value is stored once.
+  clan.core.vars.generators.hermes-llama.prompts.llama-api-token = {
+    description = "API token for the shared llama cluster (inference.p0.contact)";
     type = "hidden";
     persist = true;
   };
@@ -133,16 +155,14 @@
   clan.core.vars.generators.hermes-env = {
     dependencies = [
       "hermes-matrix"
-      "hermes-nous"
+      "hermes-llama"
     ];
     files."hermes.env" = { };
     runtimeInputs = [ pkgs.coreutils ];
     script = ''
-      key=$(cat "$in"/hermes-nous/nous-api-key)
       cat > "$out/hermes.env" <<EOF
       MATRIX_ACCESS_TOKEN=$(cat "$in"/hermes-matrix/matrix-access-token)
-      NOUS_API_KEY=$key
-      OPENAI_API_KEY=$key
+      LLAMA_API_TOKEN=$(cat "$in"/hermes-llama/llama-api-token)
       EOF
     '';
   };
