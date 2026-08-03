@@ -54,7 +54,7 @@ in
   ];
   environment.systemPackages = [
     switch-theme
-    pkgs.dracula-theme
+    pkgs.adw-gtk3
     pkgs.adwaita-icon-theme
   ];
   environment.etc = {
@@ -73,10 +73,10 @@ in
     '';
 
     "themes/dark/gtk-theme".text = ''
-      Dracula
+      adw-gtk3-dark
     '';
     "themes/dark/xsettings.conf".text = ''
-      Net/ThemeName "Dracula"
+      Net/ThemeName "adw-gtk3-dark"
     '';
     "themes/dark/xresources".text = ''
       *background: #000000

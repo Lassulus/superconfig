@@ -449,7 +449,7 @@ in
       set -efux
       export XDG_DATA_DIRS=${pkgs.gsettings-desktop-schemas}:$XDG_DATA_DIRS
       gnome_schema=org.gnome.desktop.interface
-      gsettings set $gnome_schema gtk-theme 'Dracula'
+      gsettings set $gnome_schema gtk-theme 'adw-gtk3-dark'
     ''}
 
     # keyboard
