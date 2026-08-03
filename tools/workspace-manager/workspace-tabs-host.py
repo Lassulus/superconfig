@@ -41,7 +41,9 @@ def write_message(msg: dict[str, Any]) -> None:
 def run(cmd: list[str], timeout: float = 2) -> str:
     """Run a command and return stripped stdout, or empty string on failure."""
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)  # noqa: S603
+        r = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=timeout, check=False
+        )
     except (OSError, subprocess.TimeoutExpired):
         return ""
     return r.stdout.strip() if r.returncode == 0 else ""

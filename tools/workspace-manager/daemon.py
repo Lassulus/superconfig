@@ -179,7 +179,7 @@ async def subscribe_sway() -> None:
         except FileNotFoundError:
             print("swaymsg not found, retrying in 10 seconds...", file=sys.stderr)
             await asyncio.sleep(10)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             print(
                 f"Error in sway subscription: {e}, retrying in 5 seconds...",
                 file=sys.stderr,
@@ -271,7 +271,7 @@ async def handle_client(
 
         writer.write(json.dumps(response).encode() + b"\n")
         await writer.drain()
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"Error handling client: {e}", file=sys.stderr)
     finally:
         writer.close()
@@ -310,7 +310,7 @@ async def get_current_workspace() -> str | None:
             if ws.get("focused"):
                 name = ws.get("name")
                 return str(name) if name is not None else None
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"Failed to get current workspace: {e}", file=sys.stderr)
     return None
 
@@ -331,7 +331,7 @@ async def main() -> None:
         )
         await proc.wait()
         print("Registered sway rule for anchor window", file=sys.stderr)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"Failed to register anchor sway rule: {e}", file=sys.stderr)
 
     initial_workspace = await get_current_workspace()
