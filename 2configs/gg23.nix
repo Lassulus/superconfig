@@ -33,6 +33,19 @@
       DHCPServer = "yes";
       IPv6SendRA = true;
     };
+    # announce ourselves (dnsmasq) as resolver, so *.gg23 resolves for clients
+    dhcpServerConfig = {
+      EmitDNS = true;
+      DNS = "_server_address";
+      EmitDomain = true;
+      Domain = "gg23";
+    };
+    ipv6SendRAConfig = {
+      EmitDNS = true;
+      DNS = [ "fd42:7d6a::1" ];
+      EmitDomains = true;
+      Domains = [ "gg23" ];
+    };
     ipv6Prefixes = [
       {
         ipv6PrefixConfig = {
