@@ -314,9 +314,6 @@
           };
         };
         plugins.treesitter.enable = true;
-        plugins.copilot-cmp.enable = true;
-        plugins.copilot-lua.settings.panel.enabled = false;
-        plugins.copilot-lua.settings.suggestion.enabled = false;
         plugins.cmp_yanky.enable = true;
         plugins.cmp = {
           enable = true;
@@ -331,9 +328,6 @@
                 name = "buffer"; # text within current buffer
                 option.get_bufnrs.__raw = "vim.api.nvim_list_bufs";
                 keywordLength = 2;
-              }
-              {
-                name = "copilot"; # enable copilot
               }
               {
                 name = "path"; # file system paths
@@ -373,7 +367,6 @@
           enableTelescope = true;
         };
         plugins.comment.enable = true;
-        plugins.copilot-chat.enable = true;
         plugins.undotree.enable = true; # seems to be needed for undo history in telescope
         plugins.gitsigns.enable = true;
       };
