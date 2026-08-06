@@ -15,6 +15,9 @@
       self.keys.ssh.yubi2.public
       self.keys.ssh.solo2.public
       "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBCTwBH0KIRE+9SC4n7hRAGAA7Lf/+PuCHFZzZDajy9lmYrcQdvD5SgP6Q5OikUxycniI0Zse5Xeitq9qkJNg6Lw= PIV AUTH pubkey" # pinpox
+      "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBJZGxQmZeh7mm40vj6BQovhb0//meQXUrBEFI4afNXrLfYFtYEVMmXPEEEfTNi9vuoz2D06JCJptGcOtLaAproM= termux@massulus"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHEEkRtBCPyVHtLeXBEVbEkvL6SzgAbxdoa6xF6r/2N9 kenji"
+
     ];
   };
 
