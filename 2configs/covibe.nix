@@ -46,6 +46,10 @@ in
       addr = "127.0.0.1:${toString port}";
       workspaceRoot = "/home/pairprogramming/covibe";
       environmentFile = config.clan.core.vars.generators.covibe.files."env".path;
+      # Without an admin nobody can manage any session: sessions registered
+      # through the keyless announce API have no owner, so canManage is false
+      # for every one of them and the dashboard hides its share/kill controls.
+      admins = [ "lass@lassul.us" ];
       oidc = {
         issuer = "https://id.lassul.us";
         clientId = "a7e4b0aa-f09d-472a-965b-908cd4634f16";
