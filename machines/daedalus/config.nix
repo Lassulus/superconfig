@@ -42,7 +42,6 @@
         pavucontrol
         #firefox
         chromium
-        hexchat
         networkmanagerapplet
         libreoffice
         audacity
