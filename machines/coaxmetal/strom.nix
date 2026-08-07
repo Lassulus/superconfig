@@ -4,6 +4,8 @@
   ...
 }:
 let
+  mainUser = config.users.extraUsers.mainUser;
+
   # Run the launcher + games from the on-disk strom checkout at
   # /home/strom/strom when it exists, else the public github flake (see the
   # STROM_FLAKE selection in strom-session below).
@@ -110,6 +112,17 @@ in
       "pipewire"
     ];
   };
+
+  # Let the main user become `strom` without a password. Everything that makes
+  # this kiosk a kiosk belongs to that account and is unreachable from outside
+  # it: sway owns seat0, XDG_RUNTIME_DIR is 0700, the pad's evdev nodes are
+  # ACL'd to strom (js0 alone is world-readable, and SDL2 does not use it), and
+  # /home/strom holds both the game state and the /home/strom/strom checkout the
+  # launcher resolves STROM_FLAKE from. So testing a game the way a player
+  # actually meets it - on the TV, with the pad - means being strom.
+  security.sudo.extraConfig = ''
+    ${mainUser.name} ALL=(strom) NOPASSWD: ALL
+  '';
 
   # Kiosk autostart: greetd autologins the strom user on tty1 into sway, which
   # runs the couch launcher as its sole fullscreen client. default_session
