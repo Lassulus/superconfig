@@ -30,6 +30,12 @@
         enableACME = true;
         locations."/_matrix" = {
           proxyPass = "http://[::1]:8008";
+          # Without this Synapse sees every client as ::1, because
+          # `x_forwarded = true` falls back to the peer address when no
+          # X-Forwarded-For arrives. rc_login.address then becomes a single
+          # global bucket: one person mistyping a password five times locks
+          # out login for everyone, bridges included.
+          recommendedProxySettings = true;
         };
       };
     };
