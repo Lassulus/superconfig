@@ -90,11 +90,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786353339,
-        "narHash": "sha256-Ks9KfC48XLucfJQJf71XKdmXUc2P9Mg788ZoBEb9Ye0=",
+        "lastModified": 1786370582,
+        "narHash": "sha256-3/l12kKmrE8iUj7D1p/2EifdCXXhlPGqIp2M6ue1U8A=",
         "owner": "lassulus",
         "repo": "covibe",
-        "rev": "e35c81322a359276a04562523b9d98fd905e97d9",
+        "rev": "7ab729aab74638d483e585883244009ab6790c02",
         "type": "github"
       },
       "original": {
