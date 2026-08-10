@@ -17,7 +17,6 @@
     ../../2configs/wine.nix
     ../../2configs/yellow-mounts/samba.nix
     ../../2configs/review.nix
-    ../../2configs/residential-exit.nix
     ./strom.nix
     ./hermes.nix
   ];

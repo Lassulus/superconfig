@@ -110,9 +110,6 @@
 
     # self-hosted iroh relay (relay.lassul.us)
     ../../2configs/iroh-relay
-
-    # invidious youtube frontend (yt.lassul.us), exiting via styx/coaxmetal
-    ../../2configs/services/invidious.nix
   ];
 
   # lassul.us shouldn't be the default vhost here (nginx.nix already sets one)

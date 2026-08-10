@@ -20,7 +20,6 @@
     ../../2configs/snapserver.nix
     ../../2configs/snapclient.nix
     ../../2configs/consul.nix
-    ../../2configs/residential-exit.nix
   ];
 
   krebs.build.host = config.krebs.hosts.styx;
