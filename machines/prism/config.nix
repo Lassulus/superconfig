@@ -128,7 +128,6 @@ in
     # paste.nix removed - paste/cyberlocker now runs on neoprism, proxied below
     ../../2configs/syncthing.nix
     ../../2configs/container-networking.nix
-    (self.inputs.stockholm + "/krebs/2configs/mastodon-proxy.nix")
     {
       services.tor = {
         enable = true;
