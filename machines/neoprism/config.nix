@@ -112,6 +112,9 @@
     # covibe co-vibing dashboard (covibe.lassul.us)
     ../../2configs/covibe.nix
 
+    # omnigent agent meta-harness (omni.lassul.us)
+    ../../2configs/omnigent.nix
+
     # radicle public seed (radicle.lassul.us)
     ../../2configs/radicle.nix
 
