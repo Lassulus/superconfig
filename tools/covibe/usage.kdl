@@ -1,4 +1,6 @@
 bin "covibe"
-about "Launch omp as a co-vibing session that registers in the covibe.lassul.us dashboard (joinable + browser-viewable from any machine)"
+about "Run omp as a session on the omni.lassul.us omnigent dashboard (agent stays local, transcript + diff view + sharing live on the server)"
 
-arg "[omp-args...]" help="Arguments passed through to omp"
+flag "-p --prompt" help="Run one non-interactive turn with this prompt and exit"
+flag "--fork" help="Continue an existing session id from its fork point on this machine"
+arg "[omnigent-run-args...]" help="Arguments passed through to `omnigent run`"
