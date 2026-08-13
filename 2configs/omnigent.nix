@@ -105,6 +105,16 @@ in
       OMNIGENT_OIDC_REDIRECT_URI = "https://${domain}/auth/callback";
       OMNIGENT_OIDC_LOGOUT_REDIRECT_URI = "https://${domain}/";
       OMNIGENT_OIDC_ALLOWED_DOMAINS = "lassul.us";
+      # pocket-id emits `email` *and* `email_verified` in the id_token when the
+      # `email` scope is requested (which omnigent does), but the value of
+      # `email_verified` is the users.email_verified column, whose default comes
+      # from the app-config key `emailsVerified` — shipped as false. omnigent
+      # otherwise hard-rejects the login with "Could not determine user email
+      # from IdP". The gate exists for IdPs where a user can self-assert an
+      # arbitrary address; here users are provisioned by hand in pocket-id
+      # (signups are disabled) and the domain allowlist above still applies, so
+      # the marker carries no information for us.
+      OMNIGENT_OIDC_SKIP_EMAIL_VERIFICATION = "1";
       OMNIGENT_ADMIN_LIST_PATH = "${admins}";
       # The wheel checks PyPI for updates on every start otherwise.
       OMNIGENT_NO_UPDATE_CHECK = "1";
