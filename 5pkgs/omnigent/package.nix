@@ -141,6 +141,20 @@ py.buildPythonApplication rec {
   ++ py.pyjwt.optional-dependencies.crypto
   ++ py.uvicorn.optional-dependencies.standard;
 
+  # The CLI respawns itself as `sys.executable -m omnigent.host._daemon_entry`
+  # (cli.py:2945) for the host daemon, and the daemon spawns runners the same
+  # way. That is the *bare* interpreter, without the site-dirs that
+  # wrapPythonPrograms bakes into the console script, so those children die
+  # with ModuleNotFoundError: No module named 'omnigent' and every session hangs
+  # on "the connect daemon did not come online within 30s". Hand them the
+  # transitive dependency closure through PYTHONPATH, which omnigent's own
+  # daemon/runner env allowlist preserves (host/connect.py) while the agent
+  # spawn allowlist drops it (inner/agent_env.py), so it never reaches omp.
+  postFixup = ''
+    buildPythonPath "$out $pythonPath"
+    wrapProgram $out/bin/omnigent --prefix PYTHONPATH : "$program_PYTHONPATH"
+  '';
+
   pythonImportsCheck = [
     "omnigent"
     "omnigent_client"
