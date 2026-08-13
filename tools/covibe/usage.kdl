@@ -1,6 +1,6 @@
 bin "covibe"
-about "Run omp as a session on the omni.lassul.us omnigent dashboard (agent stays local, transcript + diff view + sharing live on the server)"
+about "Run omp's TUI as a shared session on the omni.lassul.us omnigent dashboard (transcript, diff view and read-only/read-write sharing live on the server)"
 
-flag "-p --prompt" help="Run one non-interactive turn with this prompt and exit"
-flag "--fork" help="Continue an existing session id from its fork point on this machine"
-arg "[omnigent-run-args...]" help="Arguments passed through to `omnigent run`"
+flag "-c --continue" help="Continue the previous omp session in this directory"
+flag "-r --resume" help="Resume an omnigent session (no value opens the picker)"
+arg "[omp-args...]" help="Arguments passed through to omp"

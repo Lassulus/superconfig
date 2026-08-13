@@ -11,65 +11,41 @@
       server = "https://omni.lassul.us";
       omp = inputs.llm-agents.packages.${system}.omp;
 
-      # The agent this machine runs. omp speaks the Agent Client Protocol
-      # (`omp acp`), so omnigent's generic `acp` harness drives it with no
-      # adapter code. The command is the absolute store path because the spec
-      # is consumed by the runner started here, and that path is in this
-      # wrapper's closure — unlike the server-side catalog entry in
-      # 2configs/omnigent.nix, which has to stay unqualified.
-      #
-      # os_env is what unlocks the dashboard's file panel: without it the
-      # runner reports no OS environment and the changed-files/diff endpoints
-      # 404. sandbox none because omp needs its own ~/.omp credential store and
-      # unrestricted egress to the model APIs; confinement, if we want it, has
-      # to happen a layer down (a separate uid, or nspawn), not here.
-      #
-      # omnigent_mcp: false is load-bearing. With it on, omnigent hands omp an
-      # `mcpServers` entry in `session/new` whose command is
-      # `sys.executable -I -m omnigent.claude_native_bridge serve-mcp`; `-I`
-      # (isolated) makes that child ignore PYTHONPATH, so under a nixpkgs
-      # console-script wrapping it cannot import omnigent. omp starts every
-      # declared MCP server eagerly and fails the whole session when one dies —
-      # `ACP session/new failed: Internal error`. The relay only bridges
-      # *omnigent's* builtin tools into the agent, and omp brings its own, so
-      # turning it off costs nothing here.
-      spec = pkgs.writeText "omp-agent.yaml" ''
-        name: omp
-        prompt: You are omp (Oh My Pi), a concise coding assistant.
-
-        executor:
-          harness: acp
-          acp_agent:
-            name: Oh My Pi
-            command: ${omp}/bin/omp acp
-            omnigent_mcp: false
-
-        os_env:
-          type: caller_process
-          cwd: "."
-          sandbox:
-            type: none
-      '';
+      # omnigent's `pi-native` harness runs the agent's own TUI in a tmux pane,
+      # attaches your TTY to it, and mirrors the session (transcript, tool
+      # calls, terminal, files) to the server — the shape covibe always had,
+      # now with omnigent's per-session ACLs behind it. It resolves the CLI by
+      # the literal name `pi` (onboarding/harness_install.py: the readiness gate
+      # is `resolve_cli_binary("pi")`, which ignores OMNIGENT_PI_PATH and the
+      # config override), so omp has to reach it under that name. Version-gated
+      # flags are satisfied by omp reporting 17.x >= pi's declared 0.79.0 floor.
+      piShim = pkgs.writeShellApplication {
+        name = "pi";
+        text = ''
+          OMP_BIN=${omp}/bin/omp
+        ''
+        + builtins.readFile ./pi-shim.sh;
+      };
     in
     {
-      # Launch omp as a session on the omni.lassul.us dashboard: the agent and
-      # its runner stay on this machine (local runner + remote server
-      # topology), while the server holds the transcript, the diff view and the
-      # per-session ACLs, so a session can be shared read-only or read-write
-      # with another pocket-id account. The terminal REPL and the browser drive
-      # the same session.
+      # Launch omp as a session on the omni.lassul.us dashboard: omp's own TUI
+      # runs here, in a tmux pane owned by the local runner, while the server
+      # holds the transcript, the diff view and the per-session ACLs — so a
+      # session can be shared read-only or read-write with another pocket-id
+      # account, and a teammate's message from the browser executes in this
+      # TUI.
       #
       # First use per machine opens a browser for the pocket-id login; the
       # session JWT is cached in ~/.omnigent/auth_tokens.json afterwards.
-      # Arguments go to `omnigent run`, so `covibe -p "fix the tests"` runs one
-      # non-interactive turn and `covibe --fork <session-id>` continues someone
-      # else's session here.
+      # Arguments go through to omp, e.g. `covibe --continue`; `covibe --resume`
+      # (no value) opens omnigent's session picker.
       packages.covibe =
         (pkgs.writeShellApplication {
           name = "covibe";
           runtimeInputs = [
             self'.packages.omnigent
-            omp
+            piShim
+            pkgs.tmux
             pkgs.jq
             pkgs.git
           ];
@@ -80,7 +56,7 @@
               echo "covibe: no session for $server yet, logging in" >&2
               omnigent login "$server"
             fi
-            exec omnigent run ${spec} --server "$server" "$@"
+            exec omnigent pi --server "$server" "$@"
           '';
         }).overrideAttrs
           { passthru.usage = builtins.readFile ./usage.kdl; };
