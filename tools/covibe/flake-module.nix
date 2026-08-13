@@ -23,6 +23,16 @@
       # 404. sandbox none because omp needs its own ~/.omp credential store and
       # unrestricted egress to the model APIs; confinement, if we want it, has
       # to happen a layer down (a separate uid, or nspawn), not here.
+      #
+      # omnigent_mcp: false is load-bearing. With it on, omnigent hands omp an
+      # `mcpServers` entry in `session/new` whose command is
+      # `sys.executable -I -m omnigent.claude_native_bridge serve-mcp`; `-I`
+      # (isolated) makes that child ignore PYTHONPATH, so under a nixpkgs
+      # console-script wrapping it cannot import omnigent. omp starts every
+      # declared MCP server eagerly and fails the whole session when one dies —
+      # `ACP session/new failed: Internal error`. The relay only bridges
+      # *omnigent's* builtin tools into the agent, and omp brings its own, so
+      # turning it off costs nothing here.
       spec = pkgs.writeText "omp-agent.yaml" ''
         name: omp
         prompt: You are omp (Oh My Pi), a concise coding assistant.
@@ -32,6 +42,7 @@
           acp_agent:
             name: Oh My Pi
             command: ${omp}/bin/omp acp
+            omnigent_mcp: false
 
         os_env:
           type: caller_process

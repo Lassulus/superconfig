@@ -28,6 +28,11 @@ let
         acp_agent:
           name: Oh My Pi
           command: omp acp
+          # See tools/covibe/flake-module.nix: omp fails session/new outright
+          # when omnigent's MCP relay cannot start, and the relay's
+          # `python -I -m omnigent…` child cannot import omnigent under a
+          # nixpkgs-wrapped interpreter.
+          omnigent_mcp: false
 
     os_env:
       type: caller_process
