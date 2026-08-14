@@ -14,37 +14,37 @@ let
   # Server-side agent catalog entry so a browser session can pick omp without
   # any per-user config: the generic ACP harness drives `omp acp` (omp speaks
   # the Agent Client Protocol natively). The command is unqualified on purpose
-  # — it is resolved on the *host* that runs the session, not here.
-  ompAgentConfig = pkgs.writeText "omp-config.yaml" ''
-    spec_version: 1
+  # — it is resolved on the *host* that runs the session, not here, so that host
+  # needs omp on PATH (`covibe host` registers one that way).
+  #
+  # This has to be a single-file spec, NOT a bundle directory with config.yaml:
+  # the bundle parser stringifies nested values under `executor.config`, so
+  # `acp_agent` arrives as "{'name': …}" and every turn dies with
+  # "turn setup failed: executor acp_agent must be a mapping with name and
+  # command" — while the session itself sits there looking idle. The single-file
+  # parser keeps it a mapping. `--agent` accepts either shape (spec
+  # materialize_bundle branches on file-vs-directory).
+  ompAgent = pkgs.writeText "omnigent-agent-omp.yaml" ''
     name: omp
     description: Oh My Pi (omp) over ACP — runs on whichever machine hosts the session.
     prompt: You are omp (Oh My Pi), a concise coding assistant.
 
     executor:
-      type: omnigent
-      config:
-        harness: acp
-        acp_agent:
-          name: Oh My Pi
-          command: omp acp
-          # See tools/covibe/flake-module.nix: omp fails session/new outright
-          # when omnigent's MCP relay cannot start, and the relay's
-          # `python -I -m omnigent…` child cannot import omnigent under a
-          # nixpkgs-wrapped interpreter.
-          omnigent_mcp: false
+      harness: acp
+      acp_agent:
+        name: Oh My Pi
+        command: omp acp
+        # See tools/covibe/flake-module.nix: omp fails session/new outright
+        # when omnigent's MCP relay cannot start, and the relay's
+        # `python -I -m omnigent…` child cannot import omnigent under a
+        # nixpkgs-wrapped interpreter.
+        omnigent_mcp: false
 
     os_env:
       type: caller_process
       cwd: "."
       sandbox:
         type: none
-  '';
-
-  # `--agent` takes a bundle *directory* holding config.yaml.
-  ompAgent = pkgs.runCommand "omnigent-agent-omp" { } ''
-    mkdir -p $out
-    cp ${ompAgentConfig} $out/config.yaml
   '';
 
   # One identity per line. Admins bypass every per-session ACL, which is what
