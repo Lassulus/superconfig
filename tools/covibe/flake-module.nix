@@ -52,8 +52,16 @@
           text = ''
             server=${server}
             tokens="$HOME/.omnigent/auth_tokens.json"
-            if ! jq -e --arg s "$server" '.[$s].token // empty' "$tokens" >/dev/null 2>&1; then
-              echo "covibe: no session for $server yet, logging in" >&2
+            # The cached session is a JWT with a server-side TTL
+            # (OMNIGENT_OIDC_SESSION_TTL_HOURS), so "a token exists" is not the
+            # same as "we are logged in": a stale entry makes omnigent fail with
+            # `Pi session creation failed (401): Authentication required`
+            # instead of re-authenticating. Check the recorded expiry (with a
+            # minute of slack, via jq's own clock so this needs no coreutils).
+            if ! jq -e --arg s "$server" \
+                 '((.[$s].expires_at // 0) > (now + 60)) and ((.[$s].token // "") != "")' \
+                 "$tokens" >/dev/null 2>&1; then
+              echo "covibe: no valid session for $server, logging in" >&2
               omnigent login "$server"
             fi
             exec omnigent pi --server "$server" "$@"
