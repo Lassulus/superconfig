@@ -120,6 +120,12 @@ in
       # (signups are disabled) and the domain allowlist above still applies, so
       # the marker carries no information for us.
       OMNIGENT_OIDC_SKIP_EMAIL_VERIFICATION = "1";
+      # Default is 8 hours, which expires the `s covibe` session JWT roughly
+      # once a working day and forces a browser round-trip through pocket-id.
+      # A week is the pragmatic setting for a single-operator host behind an
+      # invite-less IdP; the tokens live 0600 in ~/.omnigent/auth_tokens.json,
+      # so shorten this if a laptop ever leaves the house untrusted.
+      OMNIGENT_OIDC_SESSION_TTL_HOURS = "168";
       OMNIGENT_ADMIN_LIST_PATH = "${admins}";
       # The wheel checks PyPI for updates on every start otherwise.
       OMNIGENT_NO_UPDATE_CHECK = "1";
