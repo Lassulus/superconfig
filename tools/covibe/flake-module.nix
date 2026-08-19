@@ -44,12 +44,24 @@
       # cached in ~/.omnigent/auth_tokens.json for the server's configured TTL.
       # Other arguments go through to omp, e.g. `covibe --continue`;
       # `covibe --resume` (no value) opens omnigent's session picker.
+      #
+      # Note the TUI path runs on a spec omnigent materialises itself
+      # (`pi-native-ui`), so the only terminal it declares is omp's own pane;
+      # extra shells from the dashboard are a property of the *browser-started*
+      # omp agent, whose spec lives in 2configs/omnigent.nix.
       packages.covibe =
         (pkgs.writeShellApplication {
           name = "covibe";
           runtimeInputs = [
             self'.packages.omnigent
             piShim
+            # The host daemon we spawn inherits this PATH, and sessions started
+            # from the *browser* use the server's catalog entry, whose command is
+            # a bare `omp acp` resolved here — without omp on PATH those turns
+            # die with "inner executor error: [Errno 2] No such file or
+            # directory". The `pi` shim alone is not enough: it only covers the
+            # pi-native TUI path.
+            omp
             pkgs.tmux
             pkgs.jq
             pkgs.git
