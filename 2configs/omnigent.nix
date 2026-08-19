@@ -45,6 +45,15 @@ let
       cwd: "."
       sandbox:
         type: none
+
+    # Without a declared terminal the dashboard refuses to open one ("Terminals
+    # can only be created for agents whose spec declares them"), so a session
+    # started from the browser would have no way to poke at the machine it runs
+    # on. One entry is enough; the panel can open several instances of it.
+    terminals:
+      shell:
+        command: bash
+        os_env: inherit
   '';
 
   # One identity per line. Admins bypass every per-session ACL, which is what
