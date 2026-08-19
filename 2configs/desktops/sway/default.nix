@@ -93,6 +93,21 @@ in
     };
   };
 
+  # Keep new windows on the workspace of the process that spawned them instead
+  # of the focused one (sway only tracks this for its own `exec`, and only for
+  # 60s).
+  systemd.user.services.sway-spawn-workspace = {
+    description = "Place new windows on their spawning process's workspace";
+    partOf = [ "sway-session.target" ];
+    wantedBy = [ "sway-session.target" ];
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = lib.getExe self.packages.${pkgs.system}.sway-spawn-workspace;
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+  };
+
   # Inhibit idle when audio is playing (prevents suspend during calls/music)
   systemd.user.services.sway-audio-idle-inhibit = {
     description = "Inhibit idle when audio is playing";
