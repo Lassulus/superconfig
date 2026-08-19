@@ -41,8 +41,18 @@
     pkgs.xdg-desktop-portal-gtk
     pkgs.xdg-desktop-portal-wlr
   ];
-  # xdg.portal.wlr.enable = true;
   xdg.portal.config.common.default = "wlr";
+  # Firefox (and chromium, obs) always ask the ScreenCast portal for
+  # MONITOR|WINDOW. xdg-desktop-portal-wlr then skips the slurp entry of its
+  # default chooser list — slurp cannot pick a window — and falls through to the
+  # dmenu-style entries (wmenu, wofi, rofi, bemenu, ...), none of which nixpkgs
+  # wraps into the portal: NixOS/nixpkgs#471244. So SelectSources died with
+  # "no output found" before any picker appeared and every screenshare failed.
+  # Pin an absolute dmenu chooser, which lists monitors and windows alike.
+  xdg.portal.wlr.settings.screencast = {
+    chooser_type = "dmenu";
+    chooser_cmd = "${lib.getExe pkgs.wofi} -d -n --prompt='Select a source to share:'";
+  };
   fonts.enableDefaultPackages = true;
 
   # PipeWire runs system-wide and is usually not ready yet when sway starts the
