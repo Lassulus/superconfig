@@ -91,7 +91,7 @@
               tls_starttls off
               auth on
               user lassulus
-              passwordeval rbw get --folder c-base login --field password
+              passwordeval rbw get --folder c-base shell.c-base.org --field password
             account clan-infra
               from infra@clan.lol
               host mail.clan.lol
