@@ -81,6 +81,7 @@
     pkgs.android-tools
     pkgs.gh
     self.packages.${pkgs.system}.bank
+    pkgs.ddcutil
     pkgs.mycelium
     pkgs.tmate
     pkgs.rbw
@@ -100,8 +101,8 @@
     JustWorksRepairing = "always";
     Privacy = "device";
   };
-
-  users.users.mainUser.extraGroups = [ "wireshark" ];
+  users.users.mainUser.extraGroups = [ "wireshark" "i2c" ];
+  users.groups.i2c = {};
   programs.wireshark.enable = true;
   programs.wireshark.package = pkgs.wireshark-qt;
 

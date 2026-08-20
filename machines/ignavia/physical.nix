@@ -41,6 +41,8 @@
 
   hardware.graphics.enable = true;
   hardware.acpilight.enable = true;
+  # DDC/CI: expose /dev/i2c-* so ddcutil can drive external monitor brightness
+  boot.kernelModules = [ "i2c-dev" ];
 
   # Use latest kernel for better Strix Point GPU support. The MT7925 BT init
   # regression fix (e3ac0d9f1a20) landed upstream in 7.0.10.
@@ -75,6 +77,8 @@
   #    reads deadline priority over bulk writes.
   services.udev.extraRules = ''
     ACTION=="add|change", KERNEL=="nvme0n1", ATTR{queue/scheduler}="mq-deadline"
+    # ddcutil needs user access to the DP AUX i2c buses for DDC/CI
+    ACTION=="add|change", SUBSYSTEM=="i2c-dev", KERNEL=="i2c-*", MODE="0660", GROUP="i2c"
   '';
 
   # 2. Default dirty-page limits are ratio-based: ~6.2 GB background / ~12.4 GB
