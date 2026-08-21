@@ -101,8 +101,11 @@
     JustWorksRepairing = "always";
     Privacy = "device";
   };
-  users.users.mainUser.extraGroups = [ "wireshark" "i2c" ];
-  users.groups.i2c = {};
+  users.users.mainUser.extraGroups = [
+    "wireshark"
+    "i2c"
+  ];
+  users.groups.i2c = { };
   programs.wireshark.enable = true;
   programs.wireshark.package = pkgs.wireshark-qt;
 

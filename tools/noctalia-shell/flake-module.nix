@@ -19,6 +19,10 @@
           # background layer (see 2configs/desktops/sway/wallpaper.nix), so
           # noctalia's own wallpaper is turned off to let it show through.
           wallpaper.enabled = false;
+          # DDC/CI control for external monitors via ddcutil. Inert on
+          # machines without DDC/CI-capable displays (detection finds
+          # nothing, internal backlight path is used as before).
+          brightness.enableDdcSupport = true;
         };
 
         settingsPatches = [
