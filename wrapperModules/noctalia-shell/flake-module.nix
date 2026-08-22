@@ -23,6 +23,12 @@
       #   "workspace number <num>" which fails for named workspaces)
       # - Show all workspaces on all screens (globalWorkspaces)
       # - Bring workspace to current screen on click instead of jumping
+      # - Periodically resync the workspace model: the upstream QuickShell
+      #   i3 plugin never removes renamed workspaces (a "rename" event is
+      #   looked up by the NEW name, misses the old model object, and only
+      #   logs "Workspace <name> doesn't exist"). A renamed workspace thus
+      #   lingers as a stale pill until a full refresh; clicking that ghost
+      #   pill then re-creates the old name as a real workspace.
       swayPatched = pkgs.noctalia-shell.overrideAttrs (old: {
         postInstall = (old.postInstall or "") + ''
               substituteInPlace $out/share/noctalia-shell/Services/Compositor/SwayService.qml \
@@ -30,7 +36,15 @@
                   'Quickshell.execDetached(["${sway-focus-workspace}", workspace.name]);' \
                 --replace-fail 'property bool initialized: false' \
                   'property bool globalWorkspaces: true
-          property bool initialized: false'
+          property bool initialized: false
+
+          // Drop stale workspace model entries (see patch note above).
+          Timer {
+            interval: 30000
+            repeat: true
+            running: initialized
+            onTriggered: I3.refreshWorkspaces()
+          }'
         '';
       });
 
