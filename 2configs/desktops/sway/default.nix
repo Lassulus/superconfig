@@ -83,6 +83,110 @@ let
       ]
   );
 
+  # Mark a window and jump to it later, per slot. mod+ctrl+<digit> marks
+  # the focused window (by container id) into that slot. mod+<digit> jumps
+  # to the marked window: if its workspace is hidden it is moved to the
+  # current screen, if it is shown on another screen focus switches there.
+  # mod+shift+<digit> always brings the marked window's workspace to the
+  # current screen. A stale mark (window closed) is dropped with a note.
+  windowMark = pkgs.writeShellApplication {
+    name = "sway-window-mark";
+    runtimeInputs = [
+      pkgs.sway
+      pkgs.jq
+      pkgs.coreutils
+      pkgs.libnotify
+    ];
+    text = ''
+      MARKS="$HOME/.config/sway-window-marks"
+      mkdir -p "$MARKS"
+
+      if [ "$1" = "mark" ]; then
+        SLOT="$2"
+        INFO=$(swaymsg -r -t get_tree | jq -r '
+          [ .. | objects | select(.type == "con" and .focused == true) ]
+          | .[0] // empty
+          | [ .id, (.name // "unknown") ] | @tsv')
+        if [ -z "$INFO" ]; then
+          notify-send "Window" "no window focused" 2>/dev/null
+          exit 0
+        fi
+        IFS=$'\t' read -r ID NAME <<< "$INFO"
+        echo "$ID" > "$MARKS/$SLOT"
+        notify-send "Window" "slot $SLOT: $NAME" 2>/dev/null
+        exit 0
+      fi
+
+      SLOT="$1"
+      ID=$(cat "$MARKS/$SLOT" 2>/dev/null || true)
+      if [ -z "$ID" ]; then
+        notify-send "Window" "no window in slot $SLOT" 2>/dev/null
+        exit 0
+      fi
+
+      # Workspace that currently contains the marked window (empty if it died).
+      WS=$(swaymsg -r -t get_tree | jq -r --argjson id "$ID" '
+        . as $t
+        | [ path(.. | objects | select(.id == $id)) ] | .[0] as $p
+        | if $p == null then empty
+          else [ range(1; ($p | length) + 1) as $i
+                | $t | getpath($p[0:$i])
+                | objects | select(.type == "workspace") | .name
+          ] | .[0] // empty
+          end')
+      if [ -z "$WS" ]; then
+        rm -f "$MARKS/$SLOT"
+        notify-send "Window" "slot $SLOT: marked window is gone" 2>/dev/null
+        exit 0
+      fi
+
+      # Screen the user is typing on, captured BEFORE the switch: switching
+      # a workspace moves seat focus to the target's output, so the
+      # focused output after the switch would be the wrong answer.
+      CUR=$(swaymsg -r -t get_outputs | jq -r '.[] | select(.focused == true) | .name')
+      # Shown on any output? A plain jump only brings the workspace when
+      # it is hidden; "bring" always moves it here.
+      SHOWN=$(swaymsg -r -t get_workspaces | jq -r --arg ws "$WS" '[.[] | select(.name == $ws) | .visible] | any')
+      MOVE=false
+      if [ $# -gt 1 ] && [ "$2" = "bring" ]; then
+        MOVE=true
+      elif [ "$SHOWN" != "true" ]; then
+        MOVE=true
+      fi
+      swaymsg workspace "$WS"
+      # Sway 1.12: nameless "move workspace to output <out>" moves the
+      # focused (just-switched) workspace. A named first argument is
+      # parsed as a container move to a workspace literally named
+      # "<ws> to output <out>".
+      if [ "$MOVE" = "true" ]; then
+        swaymsg move workspace to output "$CUR"
+      fi
+      swaymsg "[con_id=$ID] focus"
+    '';
+  };
+
+  # mod+<digit> = jump to window slot, mod+shift+<digit> = bring its
+  # workspace here, mod+ctrl+<digit> = mark focused window into slot.
+  windowBindings = lib.concatStringsSep "\n" (
+    lib.map
+      (n: ''
+        bindsym $mod+${toString n} exec ${lib.getExe windowMark} ${toString n}
+        bindsym $mod+shift+${toString n} exec ${lib.getExe windowMark} ${toString n} bring
+        bindsym $mod+ctrl+${toString n} exec ${lib.getExe windowMark} mark ${toString n}
+      '')
+      [
+        1
+        2
+        3
+        4
+        5
+        6
+        7
+        8
+        9
+      ]
+  );
+
 in
 {
   # Make goto-workspace available system-wide for workspace switching
@@ -425,6 +529,11 @@ in
     # secondary, ...), mod+ctrl+F<n> marks the current screen as the target.
     # While a mark exists, any mod+F<n> jumps to the marked screen.
     ${screenBindings}
+
+    # Window marks: mod+<digit> jumps to the window marked into that slot,
+    # mod+shift+<digit> brings its workspace to the current screen,
+    # mod+ctrl+<digit> marks the focused window into that slot.
+    ${windowBindings}
 
     # screenlock (random live video/image from ~/wallpaper via swaylock-plugin)
     bindsym $mod+F11 exec ${lib.getExe' pkgs.systemd "systemctl"} --user start lock.target
