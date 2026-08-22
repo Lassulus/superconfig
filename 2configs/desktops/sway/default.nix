@@ -23,6 +23,66 @@ let
     '';
   };
 
+  # Switch screens by number. mod+F<n> focuses the screen bound to slot n:
+  # the output assigned via mod+ctrl+F<n> while one exists (so a bound
+  # screen stays reachable after hot-plug renumbering), else the nth
+  # output by position (1 = primary, 2 = first secondary, ...).
+  # mod+ctrl+F<n> binds the currently focused screen to slot n.
+  screenSwitch = pkgs.writeShellApplication {
+    name = "sway-screen-switch";
+    runtimeInputs = [
+      pkgs.sway
+      pkgs.jq
+      pkgs.coreutils
+      pkgs.libnotify
+    ];
+    text = ''
+      MARKS="$HOME/.config/sway-screen-marks"
+      mkdir -p "$MARKS"
+
+      if [ "$1" = "mark" ]; then
+        SLOT="$2"
+        CURRENT=$(swaymsg -r -t get_outputs | jq -r '.[] | select(.focused == true) | .name')
+        if [ -n "$CURRENT" ]; then
+          echo "$CURRENT" > "$MARKS/$SLOT"
+          notify-send "Screen" "F$SLOT -> $CURRENT" 2>/dev/null
+        fi
+        exit 0
+      fi
+
+      MARKED=$(cat "$MARKS/$1" 2>/dev/null || true)
+
+      if [ -n "$MARKED" ]; then
+        swaymsg focus output "$MARKED"
+        exit 0
+      fi
+
+      swaymsg -r -t get_outputs | jq -r 'sort_by(.x, .y) | .[].name' | sed -n "''${1}p" | while read -r TARGET; do
+        [ -n "$TARGET" ] && swaymsg focus output "$TARGET"
+      done
+    '';
+  };
+
+  # mod+F<n> = switch to screen slot n, mod+ctrl+F<n> = bind current screen to slot n.
+  screenBindings = lib.concatStringsSep "\n" (
+    lib.map
+      (n: ''
+        bindsym $mod+F${toString n} exec ${lib.getExe screenSwitch} ${toString n}
+        bindsym $mod+ctrl+F${toString n} exec ${lib.getExe screenSwitch} mark ${toString n}
+      '')
+      [
+        1
+        2
+        3
+        4
+        5
+        6
+        7
+        8
+        9
+      ]
+  );
+
 in
 {
   # Make goto-workspace available system-wide for workspace switching
@@ -361,61 +421,10 @@ in
     bindsym $mod+Tab exec ${pkgs.sway-overfocus}/bin/sway-overfocus split-rw group-rw split-dw group-dw
     bindsym $mod+Escape workspace back_and_forth
 
-    # Focus primary output
-    bindsym $mod+F1 exec ${
-      lib.getExe (
-        pkgs.writeShellApplication {
-          name = "focus-primary-output";
-          runtimeInputs = [
-            pkgs.sway
-            pkgs.jq
-          ];
-          text = ''
-            PRIMARY=$(swaymsg -r -t get_outputs | jq -r 'sort_by(.x, .y) | .[0].name')
-            swaymsg focus output "$PRIMARY"
-          '';
-        }
-      )
-    }
-
-    # Cycle through secondary outputs
-    bindsym $mod+F2 exec ${
-      lib.getExe (
-        pkgs.writeShellApplication {
-          name = "cycle-secondary-outputs";
-          runtimeInputs = [
-            pkgs.sway
-            pkgs.jq
-            pkgs.gnugrep
-            pkgs.coreutils
-          ];
-          text = ''
-            OUTPUTS=$(swaymsg -r -t get_outputs | jq -r 'sort_by(.x, .y)')
-            PRIMARY=$(echo "$OUTPUTS" | jq -r '.[0].name')
-            CURRENT=$(echo "$OUTPUTS" | jq -r '.[] | select(.focused == true).name')
-            SECONDARIES=$(echo "$OUTPUTS" | jq -r '.[1:] | .[].name')
-
-            if [ -z "$SECONDARIES" ]; then
-              exit 0
-            fi
-
-            if [ "$CURRENT" = "$PRIMARY" ]; then
-              # Focus first secondary
-              NEXT=$(echo "$SECONDARIES" | head -n1)
-            else
-              # Find next secondary in the list
-              NEXT=$(echo "$SECONDARIES" | grep -A1 "^$CURRENT$" | tail -n1)
-              # If we're at the end, wrap to first secondary
-              if [ "$NEXT" = "$CURRENT" ]; then
-                NEXT=$(echo "$SECONDARIES" | head -n1)
-              fi
-            fi
-
-            swaymsg focus output "$NEXT"
-          '';
-        }
-      )
-    }
+    # Screen switching: mod+F<n> jumps to screen n (1 = primary, 2 = first
+    # secondary, ...), mod+ctrl+F<n> marks the current screen as the target.
+    # While a mark exists, any mod+F<n> jumps to the marked screen.
+    ${screenBindings}
 
     # screenlock (random live video/image from ~/wallpaper via swaylock-plugin)
     bindsym $mod+F11 exec ${lib.getExe' pkgs.systemd "systemctl"} --user start lock.target
