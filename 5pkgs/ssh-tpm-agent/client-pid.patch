@@ -1,8 +1,8 @@
 diff --git a/agent/agent.go b/agent/agent.go
-index 76a2610..e643575 100644
+index ac39d24..b1e399b 100644
 --- a/agent/agent.go
 +++ b/agent/agent.go
-@@ -25,6 +25,7 @@ import (
+@@ -26,6 +26,7 @@ import (
  	"github.com/google/go-tpm/tpm2/transport"
  	"golang.org/x/crypto/ssh"
  	"golang.org/x/crypto/ssh/agent"
@@ -10,7 +10,7 @@ index 76a2610..e643575 100644
  	"golang.org/x/text/cases"
  	"golang.org/x/text/language"
  )
-@@ -37,17 +38,18 @@ var (
+@@ -39,17 +40,18 @@ var (
  var SSH_TPM_AGENT_ADD = "tpm-add-key"
  
  type Agent struct {
@@ -19,7 +19,7 @@ index 76a2610..e643575 100644
 -	op       func() ([]byte, error)
 -	pin      func(key.SSHTPMKeys) ([]byte, error)
 -	listener *net.UnixListener
--	quit     chan interface{}
+-	quit     chan any
 -	wg       sync.WaitGroup
 -	keyring  func() *keyring.ThreadKeyring
 -	keys     []key.SSHTPMKeys
@@ -30,7 +30,7 @@ index 76a2610..e643575 100644
 +	op        func() ([]byte, error)
 +	pin       func(key.SSHTPMKeys, int) ([]byte, error)
 +	listener  *net.UnixListener
-+	quit      chan interface{}
++	quit      chan any
 +	wg        sync.WaitGroup
 +	keyring   func() *keyring.ThreadKeyring
 +	keys      []key.SSHTPMKeys
@@ -40,7 +40,7 @@ index 76a2610..e643575 100644
  }
  
  var _ agent.ExtendedAgent = &Agent{}
-@@ -118,8 +120,8 @@ func (a *Agent) signers() ([]ssh.Signer, error) {
+@@ -120,8 +122,8 @@ func (a *Agent) signers() ([]ssh.Signer, error) {
  		s, err := ssh.NewSignerFromSigner(k.Signer(
  			a.keyring(), a.op, a.tpm,
  			func(_ *keyfile.TPMKey) ([]byte, error) {
@@ -51,29 +51,35 @@ index 76a2610..e643575 100644
  			}),
  		)
  		if err != nil {
-@@ -225,6 +227,21 @@ func (a *Agent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signature, error) {
+@@ -260,7 +262,7 @@ func (a *Agent) confirmKeyUse(wantKey []byte, peer string) error {
+ 		if peer != "" {
+ 			prompt += "\nRequested by " + peer
+ 		}
+-		ok, err := askpass.AskPermission(prompt)
++		ok, err := askpass.AskPermission(prompt, a.clientPID)
+ 		if err != nil {
+ 			slog.Info("askpass confirmation failed", slog.String("error", err.Error()))
+ 			return ErrUserDeniedConfirm
+@@ -289,6 +291,18 @@ func (c *connAgent) SignWithFlags(key ssh.PublicKey, data []byte, flags agent.Si
  }
  
- func (a *Agent) serveConn(c net.Conn) {
+ func (a *Agent) serveConn(c *net.UnixConn) {
 +	// Extract peer credentials to get the client PID
-+	if uc, ok := c.(*net.UnixConn); ok {
-+		rawConn, err := uc.SyscallConn()
-+		if err == nil {
-+			rawConn.Control(func(fd uintptr) {
-+				if cred, err := unix.GetsockoptUcred(int(fd), unix.SOL_SOCKET, unix.SO_PEERCRED); err == nil {
-+					a.mu.Lock()
-+					a.clientPID = int(cred.Pid)
-+					a.mu.Unlock()
-+					slog.Debug("client connected", slog.Int("pid", int(cred.Pid)))
-+				}
-+			})
-+		}
++	if rc, err := c.SyscallConn(); err == nil {
++		rc.Control(func(fd uintptr) {
++			if cred, err := unix.GetsockoptUcred(int(fd), unix.SOL_SOCKET, unix.SO_PEERCRED); err == nil {
++				a.mu.Lock()
++				a.clientPID = int(cred.Pid)
++				a.mu.Unlock()
++				slog.Debug("client connected", slog.Int("pid", int(cred.Pid)))
++			}
++		})
 +	}
 +
- 	if err := agent.ServeAgent(a, c); err != io.EOF {
+ 	ca := &connAgent{Agent: a, peer: peerChain(c)}
+ 	if err := agent.ServeAgent(ca, c); err != io.EOF {
  		slog.Info("Agent client connection ended unsuccessfully", slog.String("error", err.Error()))
- 	}
-@@ -461,7 +478,7 @@ func LoadKeys(keyDir string) ([]key.SSHTPMKeys, error) {
+@@ -524,7 +538,7 @@ func LoadKeys(keyDir string) ([]key.SSHTPMKeys, error) {
  	return keys, err
  }
  
@@ -96,7 +102,7 @@ index acaec3d..189b607 100644
  	defer ag.Stop()
  
 diff --git a/askpass/askpass.go b/askpass/askpass.go
-index 8ef6370..0653165 100644
+index 9830586..aefe469 100644
 --- a/askpass/askpass.go
 +++ b/askpass/askpass.go
 @@ -8,6 +8,7 @@ import (
@@ -134,31 +140,35 @@ index 8ef6370..0653165 100644
  	var askpass string
  	var err error
  	if s, ok := os.LookupEnv("SSH_ASKPASS"); ok {
-@@ -147,6 +148,11 @@ func SshAskPass(prompt, hint string) ([]byte, error) {
- 	if hint != "" {
- 		os.Setenv("SSH_ASKPASS_PROMPT", hint)
+@@ -144,7 +145,15 @@ func SshAskPass(prompt, hint string) ([]byte, error) {
+ 		}
  	}
-+
-+	if clientPID > 0 {
+ 
++	if clientPID > 0 && os.Getenv("SSH_CLIENT_PID") == "" {
++		// Pass the requesting client's PID to pinentry so it can cache per-client.
 +		os.Setenv("SSH_CLIENT_PID", strconv.Itoa(clientPID))
 +	}
 +
- 	out, err := exec.Command(askpass, prompt).Output()
- 	switch hint {
- 	case "confirm":
-@@ -169,8 +175,8 @@ func SshAskPass(prompt, hint string) ([]byte, error) {
+ 	cmd := exec.Command(askpass, prompt)
++	if clientPID > 0 {
++		cmd.Env = append(os.Environ(), "SSH_CLIENT_PID="+strconv.Itoa(clientPID))
++	}
+ 	if hint != "" {
+ 		// Set SSH_ASKPASS_PROMPT only on the subprocess. os.Setenv() would
+ 		// leak into subsequent passphrase prompts from the same agent
+@@ -173,8 +182,8 @@ func SshAskPass(prompt, hint string) ([]byte, error) {
  
- // AskPremission runs SSH_ASKPASS in with SSH_ASKPASS_PROMPT=confirm set as env
- // it will expect exit code 0 or !0 and return 'yes' and 'no' respectively.
--func AskPermission() (bool, error) {
--	a, err := ReadPassphrase("Confirm touch", RP_USE_ASKPASS|RP_ASK_PERMISSION)
-+func AskPermission(clientPID int) (bool, error) {
-+	a, err := ReadPassphrase("Confirm touch", RP_USE_ASKPASS|RP_ASK_PERMISSION, clientPID)
+ // AskPermission runs SSH_ASKPASS with SSH_ASKPASS_PROMPT=confirm set as env.
+ // It will expect exit code 0 or !0 and return true and false respectively.
+-func AskPermission(prompt string) (bool, error) {
+-	a, err := ReadPassphrase(prompt, RP_USE_ASKPASS|RP_ASK_PERMISSION)
++func AskPermission(prompt string, clientPID int) (bool, error) {
++	a, err := ReadPassphrase(prompt, RP_USE_ASKPASS|RP_ASK_PERMISSION, clientPID)
  	if err != nil {
  		return false, err
  	}
 diff --git a/cmd/ssh-tpm-agent/main.go b/cmd/ssh-tpm-agent/main.go
-index 1b76351..797428c 100644
+index 7c6f397..8e19473 100644
 --- a/cmd/ssh-tpm-agent/main.go
 +++ b/cmd/ssh-tpm-agent/main.go
 @@ -243,7 +243,7 @@ func main() {
@@ -177,21 +187,19 @@ index 1b76351..797428c 100644
 -		func(key key.SSHTPMKeys) ([]byte, error) {
 +		func(key key.SSHTPMKeys, clientPID int) ([]byte, error) {
  			auth, err := agentkeyring.ReadKey(key.Fingerprint())
- 			if err == nil {
- 				slog.Debug("providing cached userauth for key", slog.String("fp", key.Fingerprint()))
-@@ -261,8 +261,8 @@ func main() {
- 				return auth.Read(), nil
- 			} else if errors.Is(err, syscall.ENOKEY) || errors.Is(err, syscall.EACCES) {
+ 			switch {
+ 			case errors.Is(err, syscall.ENOENT):
+@@ -262,7 +262,7 @@ func main() {
+ 			case errors.Is(err, syscall.ENOKEY) || errors.Is(err, syscall.EACCES):
  				keyInfo := fmt.Sprintf("Enter passphrase for (%s): ", key.GetDescription())
--				// TODOt kjk: askpass should box the byte slice
+ 				// TODO: askpass should box the byte slice
 -				userauth, err := askpass.ReadPassphrase(keyInfo, askpass.RP_USE_ASKPASS)
-+				// TODO: askpass should box the byte slice
 +				userauth, err := askpass.ReadPassphrase(keyInfo, askpass.RP_USE_ASKPASS, clientPID)
  				fmt.Println(err)
  				if !noCache && err == nil {
  					slog.Debug("caching userauth for key in keyring", slog.String("fp", key.Fingerprint()))
 diff --git a/cmd/ssh-tpm-agent/main_test.go b/cmd/ssh-tpm-agent/main_test.go
-index 051febf..d2ff3c4 100644
+index 8335058..89697f2 100644
 --- a/cmd/ssh-tpm-agent/main_test.go
 +++ b/cmd/ssh-tpm-agent/main_test.go
 @@ -144,7 +144,7 @@ func runSSHAuth(t *testing.T, keytype tpm2.TPMAlgID, bits int, pin []byte, keyfn
@@ -204,7 +212,7 @@ index 051febf..d2ff3c4 100644
  		},
  	)
 diff --git a/cmd/ssh-tpm-keygen/main.go b/cmd/ssh-tpm-keygen/main.go
-index f5d9421..12073b0 100644
+index 4002026..eae8d39 100644
 --- a/cmd/ssh-tpm-keygen/main.go
 +++ b/cmd/ssh-tpm-keygen/main.go
 @@ -89,11 +89,11 @@ Example:
@@ -239,7 +247,7 @@ index f5d9421..12073b0 100644
  		if err != nil {
  			return err
  		}
-@@ -199,18 +199,18 @@ func doChangePin(tpm transport.TPMCloser, passphrase, keyPin, ownerPassword []by
+@@ -202,18 +202,18 @@ func doChangePin(tpm transport.TPMCloser, passphrase, keyPin, ownerPassword []by
  	}
  
  	if len(passphrase) == 0 {
@@ -261,7 +269,7 @@ index f5d9421..12073b0 100644
  		if err != nil {
  			return err
  		}
-@@ -256,7 +256,7 @@ func doWrapWith(supportedECCBitsizes []int, wrap, wrapWith string, keyParentHand
+@@ -260,7 +260,7 @@ func doWrapWith(supportedECCBitsizes []int, wrap, wrapWith string, keyParentHand
  	rawKey, err = ssh.ParseRawPrivateKey(pem)
  	if errors.As(err, &kerr) {
  		for {
@@ -270,7 +278,7 @@ index f5d9421..12073b0 100644
  			if err != nil {
  				log.Fatal(err)
  			}
-@@ -353,7 +353,7 @@ func supportedECCBitsizes(tpm transport.TPMCloser) []int {
+@@ -358,7 +358,7 @@ func supportedECCBitsizes(tpm transport.TPMCloser) []int {
  func checkFile(f string) error {
  	if utils.FileExists(f) {
  		fmt.Printf("%s already exists.\n", f)
@@ -279,7 +287,7 @@ index f5d9421..12073b0 100644
  		if err != nil {
  			return err
  		}
-@@ -373,7 +373,7 @@ func doImportKey(tpm transport.TPMCloser, keyParentHandle tpm2.TPMHandle, ownerP
+@@ -378,7 +378,7 @@ func doImportKey(tpm transport.TPMCloser, keyParentHandle tpm2.TPMHandle, ownerP
  	rawKey, err = ssh.ParseRawPrivateKey(pem)
  	if errors.As(err, &kerr) {
  		for {
@@ -288,7 +296,7 @@ index f5d9421..12073b0 100644
  			if err != nil {
  				return nil, err
  			}
-@@ -665,7 +665,7 @@ func main() {
+@@ -670,7 +670,7 @@ func main() {
  		// Else create a normal key
  		fmt.Printf("Generating a sealed public/private %s key pair.\n", keyType)
  		if outputFile == "" {
