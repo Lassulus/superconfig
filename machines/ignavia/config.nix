@@ -9,6 +9,7 @@
   imports = [
     ../../2configs
     ../../2configs/retiolum.nix
+    ../../2configs/tpm2.nix
     # ../../2configs/baseX.nix
     ../../2configs/desktops/sway/default.nix
     self.wrapperModules.workspace-manager
@@ -111,4 +112,5 @@
 
   services.udev.packages = [ pkgs.libmtp.out ];
 
+  systemd.services.nix-daemon.environment.SSH_AUTH_SOCK = "/run/user/1000/ssh-tpm-agent.sock";
 }

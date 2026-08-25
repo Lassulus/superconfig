@@ -109,7 +109,7 @@
             self.keys.ssh.yubi2.public
             self.keys.ssh.solo2.public
             self.keys.ssh.xerxes.public
-            self.keys.ssh.massulus.public
+            self.keys.ssh.ignavia.public
           ];
         };
         mainUser = {
@@ -136,7 +136,7 @@
             self.keys.ssh.yubi2.public
             self.keys.ssh.solo2.public
             self.keys.ssh.xerxes.public
-            self.keys.ssh.massulus.public
+            self.keys.ssh.ignavia.public
           ];
         };
       };
