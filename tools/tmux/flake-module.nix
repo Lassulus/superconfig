@@ -47,6 +47,12 @@
 
         # Session manager popup (prefix + s)
         bind s display-popup -E -w 80% -h 80% "${sessionManager}"
+        # tmux 3.7 stopped entering copy-mode on wheel/drag over alternate-screen
+        # panes and forwards the events to the app instead (issue 3705), which
+        # breaks scrolling around omp's fullscreen overlays. Pin the 3.6
+        # behavior: only hand the mouse to apps that track it themselves.
+        bind -n WheelUpPane { if -F '#{||:#{pane_in_mode},#{mouse_any_flag}}' { send -M } { copy-mode -e } }
+        bind -n MouseDrag1Pane { if -F '#{||:#{pane_in_mode},#{mouse_any_flag}}' { send -M } { copy-mode -M } }
       '';
       tmuxConfigFile = pkgs.writeText "tmux.conf" tmuxConfigText;
     in
