@@ -1,17 +1,22 @@
-# sigexec executor: signed remote command execution as root, for
-# administration. The signature is the authorization — commands are signed
-# with the CLI's local ed25519 key (or a passkey) and verified against the
-# key list below; no shell parses them, argv runs literally.
+# sigexec: signed remote command execution as root, for administration.
+# The signature is the authorization — commands are signed in the browser
+# (passkey) or by the CLI's local ed25519 key, verified against the key list
+# below; no shell parses them, argv runs literally.
 #
-# The executor itself has no TLS and listens on localhost; nginx terminates
-# TLS on the public vhost:  sigexec run -x https://sigexec.lassul.us -- uptime
+# nginx terminates TLS and serves the dashboard (page + reverse proxy, no key
+# material, no job data); the executor is localhost-only behind it.
+#   browser: https://sigexec.lassul.us          (register passkeys at /register)
+#   CLI:     sigexec run -x https://sigexec.lassul.us/x/neoprism -- uptime
+#     (statements sign the path relative to the base URL, so the executor
+#      verifies /jobs after the proxy strips /x/neoprism)
 let
   domain = "sigexec.lassul.us";
-  port = 7601;
+  executorPort = 7601;
+  dashboardPort = 7501;
 in
 { self, ... }:
 {
-  imports = [ self.inputs.sigexec.nixosModules.executor ];
+  imports = [ self.inputs.sigexec.nixosModules.default ];
 
   services.sigexec-executor = {
     enable = true;
@@ -21,17 +26,27 @@ in
     group = "root";
     # ssh-style: login shell env, bare command names work.
     login = true;
-    listen = "127.0.0.1:${toString port}";
+    listen = "127.0.0.1:${toString executorPort}";
+    # Browser passkeys sign against the dashboard's origin.
+    rpId = domain;
+    origins = [ "https://${domain}" ];
     authorizedKeys = [
       "ed25519 RhYj8TzT8w3q50Oi3-q7U1KLRLrm66FltogC15ootJg read,write lass@ignavia"
     ];
+  };
+
+  services.sigexec-dashboard = {
+    enable = true;
+    rpId = domain;
+    port = dashboardPort;
+    executors.neoprism = "http://127.0.0.1:${toString executorPort}";
   };
 
   services.nginx.virtualHosts.${domain} = {
     enableACME = true;
     forceSSL = true;
     locations."/" = {
-      proxyPass = "http://127.0.0.1:${toString port}";
+      proxyPass = "http://127.0.0.1:${toString dashboardPort}";
       extraConfig = ''
         # Job streams are long-lived chunked responses: unbuffered so output
         # arrives live, and a generous read timeout because `logs` on a
