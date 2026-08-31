@@ -1,2 +1,7 @@
 {
+  "machines": {
+    "starkstrom": {
+      "installedAt": 1788097133
+    }
+  }
 }
