@@ -5,6 +5,8 @@
     ../../2configs/retiolum.nix
     ../../2configs/ssh-redirect.nix
     ../../2configs/autoupdate.nix
+    ./ipfs.nix
+    ./ipfs-endpoint.nix
   ];
 
   # starkstrom is not (yet) in the shared kartei registry, so its retiolum

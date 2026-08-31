@@ -1,4 +1,4 @@
-@ 3600 IN SOA lassul.us. ns1.lassul.us. 2026080900 7200 3600 86400 3600
+@ 3600 IN SOA lassul.us. ns1.lassul.us. 2026083000 7200 3600 86400 3600
 
 ;;@ 3600 IN NS ns1
 @ 3600 IN NS ns1
@@ -24,6 +24,8 @@ neoprism IN A 95.217.192.59
 4.neoprism IN A 95.217.192.59
 neoprism IN AAAA 2a01:4f9:4a:4f1a::2
 6.neoprism IN AAAA 2a01:4f9:4a:4f1a::2
+ipfs IN CNAME neoprism
+starkstrom IN A 194.110.87.67
 
 ;; GLUE
 ns1 IN A 95.217.192.59
