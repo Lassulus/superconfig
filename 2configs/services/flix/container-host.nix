@@ -48,15 +48,6 @@
     }
   ];
 
-  services.nginx.virtualHosts."flix.lassul.us" = {
-    # forceSSL = true;
-    # enableACME = true;
-    locations."/" = {
-      proxyPass = "http://yellow.r:8096";
-      proxyWebsockets = true;
-      recommendedProxySettings = true;
-    };
-  };
   clan.core.vars.generators.yellow-container = {
     files."yellow.sync.key" = { };
     prompts.key.description = ''
