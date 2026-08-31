@@ -31,7 +31,8 @@ in
     rpId = domain;
     origins = [ "https://${domain}" ];
     authorizedKeys = [
-      "ed25519 RhYj8TzT8w3q50Oi3-q7U1KLRLrm66FltogC15ootJg read,write lass@ignavia"
+      "ed25519 RhYj8TzT8w3q50Oi3-q7U1KLRLrm66FltogC15ootJg read,request lass@ignavia"
+      "webauthn-es256 MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEZPkoTMJKVdsC-_m8wPrKrJiCKVcZLdJarMTzF8JQFJUKmYlqY_34oQr1u9wCMTQZFU541Jmje1ri9z20XmsXpQ 6KpUo9EZQrmOCQ0vVwgnbw read,write lass@ignavia"
     ];
   };
 
