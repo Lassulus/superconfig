@@ -87,6 +87,9 @@
     # One omp revision (and one build) for covibe's patched omp and llm.omp.
     covibe.inputs.llm-agents.follows = "llm-agents";
 
+    sigexec.url = "git+https://git.geninf.io/Lassulus/sigexec";
+    sigexec.inputs.nixpkgs.follows = "nixpkgs";
+
   };
 
   outputs =
