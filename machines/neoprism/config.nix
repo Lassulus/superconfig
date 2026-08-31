@@ -121,8 +121,10 @@
     # self-hosted iroh relay (relay.lassul.us)
     ../../2configs/iroh-relay
 
-    # signed remote command execution (root executor, sigexec.lassul.us)
-    ../../2configs/sigexec.nix
+    # signed remote command execution (root executor + fleet dashboard,
+    # sigexec.lassul.us)
+    ../../2configs/sigexec/executor.nix
+    ../../2configs/sigexec/dashboard.nix
   ];
 
   # lassul.us shouldn't be the default vhost here (nginx.nix already sets one)

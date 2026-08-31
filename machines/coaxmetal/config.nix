@@ -17,6 +17,7 @@
     ../../2configs/wine.nix
     ../../2configs/yellow-mounts/samba.nix
     ../../2configs/review.nix
+    ../../2configs/sigexec/executor.nix
     ./strom.nix
     ./hermes.nix
   ];

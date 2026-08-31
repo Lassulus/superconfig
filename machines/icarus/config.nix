@@ -12,6 +12,7 @@
     ../../2configs/snapclient.nix
     ../../2configs/consul.nix
     ../../2configs/autoupdate.nix
+    ../../2configs/sigexec/executor.nix
   ];
 
   krebs.build.host = config.krebs.hosts.icarus;

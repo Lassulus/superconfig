@@ -10,6 +10,7 @@
     ../../2configs/yellow-mounts/samba.nix
     ../../2configs/consul.nix
     ../../2configs/snapclient.nix
+    ../../2configs/sigexec/executor.nix
   ];
 
   krebs.build.host = config.krebs.hosts.shodan;
