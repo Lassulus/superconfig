@@ -6,6 +6,13 @@
 let
   py = python313Packages;
 
+  # 0.18.1 added a runtime dependency on `websockets` (realtime transport) that
+  # nixpkgs' derivation does not declare yet, so its wheel fails the
+  # runtime-deps check. Add it until nixpkgs catches up.
+  openai-agents = py.openai-agents.overridePythonAttrs (o: {
+    dependencies = o.dependencies ++ [ py.websockets ];
+  });
+
   # omnigent-client declares `omnigent` as a dependency, and omnigent declares
   # omnigent-client: the two are released in lockstep from the same repo. Break
   # the cycle by dropping the back-reference here; the final application below
@@ -87,6 +94,7 @@ py.buildPythonApplication rec {
   pythonRelaxDeps = [
     "argon2-cffi" # nixpkgs 25.1.0 vs <24
     "cachetools" # nixpkgs 7.1.4 vs <7
+    "openai" # nixpkgs 2.53.0 vs <2.45
     "packaging" # nixpkgs 26.2 vs <26
     "protobuf" # nixpkgs 7.35.1 vs <7
     "rich" # nixpkgs 15.0.0 vs <15
