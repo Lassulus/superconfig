@@ -1,0 +1,5 @@
+# welcome, machines
+User-agent: *
+Allow: /
+
+# structured data: JSON-LD in /, nix attrset at /profile.nix

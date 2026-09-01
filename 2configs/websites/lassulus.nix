@@ -1,4 +1,16 @@
 { config, pkgs, ... }:
+let
+  # ANSI-terminal-style homepage, inline HTML with clickable links. The IBM
+  # VGA webfont (CC BY-SA 4.0, int10h.org/oldschool-pc-fonts) is base64-inlined
+  # so the page is a single self-contained file.
+  webroot = pkgs.runCommand "lassul.us-webroot" { } ''
+    mkdir $out
+    substitute ${./lassul.us/index.html} $out/index.html \
+      --replace-fail @font_woff_b64@ "$(base64 -w0 ${./lassul.us/Web437_IBM_VGA_8x16.woff})"
+    cp ${./lassul.us/robots.txt} $out/robots.txt
+    cp ${./lassul.us/profile.nix} $out/profile.nix
+  '';
+in
 {
   imports = [
     ./default.nix
@@ -21,7 +33,11 @@
     enableACME = true;
     default = true;
     locations."/".extraConfig = ''
-      root /srv/http/lassul.us;
+      root ${webroot};
+    '';
+    locations."= /profile.nix".extraConfig = ''
+      root ${webroot};
+      default_type text/plain;
     '';
     locations."= /hosts".extraConfig = ''
       alias ${pkgs.krebs-hosts_combined};

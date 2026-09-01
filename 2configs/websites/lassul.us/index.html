@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>lassulus</title>
+    <meta
+      name="description"
+      content="lassulus - freelance NixOS & infrastructure consultant in Berlin. nixpkgs contributor, clan core developer, krebs & c-base member. Available for hire."
+    />
+    <link rel="canonical" href="https://lassul.us/" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "lassulus",
+        "url": "https://lassul.us",
+        "jobTitle": "NixOS & infrastructure consultant",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Berlin",
+          "addressCountry": "DE"
+        },
+        "memberOf": {
+          "@type": "OrganizationRole",
+          "roleName": "Treasurer",
+          "memberOf": {
+            "@type": "Organization",
+            "name": "NixOS Foundation",
+            "url": "https://nixos.org"
+          }
+        },
+        "sameAs": [
+          "https://github.com/lassulus",
+          "https://matrix.to/#/@lassulus:lassul.us"
+        ]
+      }
+    </script>
+    <!--
+      Font: "Web437 IBM VGA 8x16" from The Ultimate Oldschool PC Font Pack
+      (int10h.org/oldschool-pc-fonts), CC BY-SA 4.0. Inlined at build time.
+      Its metrics are exact: advance = 0.5em, line height = 1em, so the
+      80-column art is 40em wide and font-size: calc(100cqw / 40) makes it
+      fill the viewport width with no JS.
+    -->
+    <style>
+      @font-face {
+        font-family: "Web437 IBM VGA 8x16";
+        src: url("data:font/woff;base64,@font_woff_b64@") format("woff");
+      }
+      :root {
+        color-scheme: dark light;
+        --bg: #000;
+        --fg: #ccc;
+        --art: #ddd;
+        --str: #7c7;
+        --bool: #c96;
+        --cmt: #888;
+      }
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg: #f2efe6; /* paper terminal */
+          --fg: #333;
+          --art: #222;
+          --str: #171;
+          --bool: #941;
+          --cmt: #777;
+        }
+      }
+      html {
+        background: var(--bg);
+        overflow-x: hidden; /* guard against sub-pixel rounding */
+      }
+      body {
+        margin: 0;
+        color: var(--fg);
+        container-type: inline-size;
+        font-family: "Web437 IBM VGA 8x16", monospace;
+      }
+      pre {
+        margin: 0;
+        font-family:
+          "Web437 IBM VGA 8x16", monospace; /* UA pre{monospace} beats inheritance */
+        padding-bottom: 1em;
+        font-size: calc(100vw / 40); /* fallback: browsers without cq units */
+        font-size: calc(100cqw / 40); /* 80 cols x 0.5em, scrollbar excluded */
+        line-height: 1; /* VGA cell: 8x16 */
+      }
+      .art {
+        color: var(--art);
+      }
+      .s {
+        color: var(--str);
+      }
+      .b {
+        color: var(--bool);
+      }
+      .c {
+        color: var(--cmt);
+      }
+      a {
+        color: inherit;
+        text-decoration: underline dotted;
+      }
+      a:hover,
+      a:focus {
+        background: var(--str);
+        color: var(--bg);
+        text-decoration: none;
+      }
+      .cursor {
+        background: var(--fg);
+        animation: blink 1.2s steps(1) infinite;
+      }
+      @keyframes blink {
+        50% {
+          background: transparent;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <pre><span class="art">  ▀███▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀             ▄██
+  █▒▒█      ▄██████ ██████▄   ██████▄   ████ ████   █▒▒█    ████ ████ ██████▄
+  █▒▒█    ▄████▒▒▒█ █▒▒▒████▄ █▒▒▒████▄ █▒▒█ █▒▒█   █▒▒█    █▒▒█ █▒▒█ █▒▒▒████▄
+  █▒▒█         █▒▒█ █▒▒█▄▄▄▄▄ █▒▒█▄▄▄▄▄ █▒▒█ █▒▒█   █▒▒█    █▒▒█ █▒▒█ █▒▒█▄▄▄▄▄
+  █▒▒█    █████▒▒▒█ █▒▒▒▒▒▒▒█ █▒▒▒▒▒▒▒█ █▒▒█ █▒▒█   █▒▒█    █▒▒█ █▒▒█ █▒▒▒▒▒▒▒█
+  █░░█    █░░░█░░░█ ▀▀▀▀▀█░░█ ▀▀▀▀▀█░░█ █░░█ █░░█   █░░█    █░░█ █░░█ ▀▀▀▀▀█░░█
+  █░░░███ █░░█▄█░░█ ▀████░░░█ ▀████░░░█ █░░░█░░░█   █░░░███ █░░░█░░░█ ▀████░░░█
+  ███████ ███████▀    ▀██████   ▀██████ ███████▀    ███████ ███████▀    ▀████░█
+                                    ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄██
+                                                    ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀███████████
+
+┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼</span>
+
+{
+  name = <span class="s">"lassulus"</span>;
+  location = <span class="s">"berlin"</span>;
+  skills = [
+    <a class="s" href="https://nixos.org">"nixos"</a>
+    <a class="s" href="https://github.com/Lassulus/superconfig">"infrastructure"</a>
+    <a class="s" href="https://github.com/lassulus">"programming"</a>
+  ];
+  crews = [
+    <a class="s" href="https://nixos.org/blog/announcements/2025/foundation-board-2025/">"NixOS Foundation (treasurer)"</a>
+    <a class="s" href="https://krebsco.de">"krebs"</a>
+    <a class="s" href="https://c-base.org">"c-base"</a>
+  ];
+  services = [
+    <span class="s">"nix/nixos consulting"</span>
+    <span class="s">"fleet deployments"</span>
+    <span class="s">"self-hosted infra: mail, matrix, dns, vpn, ci"</span>
+  ];
+  projects = {
+    nixpkgs = <a class="s" href="https://github.com/NixOS/nixpkgs/commits?author=Lassulus">"contributor &amp; maintainer"</a>;
+    clan = <a class="s" href="https://clan.lol">"clan.lol"</a>;
+    disko = <a class="s" href="https://github.com/nix-community/disko">"declarative disk partitioning"</a>; <a class="c" href="https://www.youtube.com/watch?v=bKx7V917b2Q"># video</a>
+    nixos-anywhere = <a class="s" href="https://github.com/nix-community/nixos-anywhere">"install nixos over ssh"</a>; <a class="c" href="https://www.youtube.com/watch?v=4sypfTBuEbA"># video</a>
+    nix-writers = <a class="s" href="https://github.com/NixOS/nixpkgs/tree/master/pkgs/build-support/writers">"scripts in any language (pkgs.writers)"</a>; <a class="c" href="https://www.youtube.com/watch?v=qRE6kf30u4g"># video</a>
+    wrappers = <a class="s" href="https://github.com/Lassulus/wrappers">"wrapped executables via modules"</a>; <a class="c" href="https://www.youtube.com/watch?v=Zzvn9uYjQJY"># video</a>
+    thisWebsite = <a class="s" href="https://github.com/Lassulus/superconfig/tree/master/2configs/websites/lassul.us">"self-hosted with nix"</a>;
+  };
+  github = <a class="s" href="https://github.com/lassulus">"https://github.com/lassulus"</a>;
+  matrix = <a class="s" href="https://matrix.to/#/@lassulus:lassul.us">"@lassulus:lassul.us"</a>;
+  email = <a href="#" id="email">x: x.click_to_uncover</a>;
+  availableForHire = <span class="b">true</span>;
+}<span class="cursor"> </span></pre>
+    <script>
+      document.getElementById("email").addEventListener(
+        "click",
+        function (e) {
+          e.preventDefault();
+          var addr = ["consulting", "lassul.us"].join("@");
+          this.textContent = '"' + addr + '"';
+          this.classList.add("s");
+          this.href = "mailto:" + addr;
+        },
+        { once: true },
+      );
+    </script>
+  </body>
+</html>
