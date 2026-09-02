@@ -58,6 +58,13 @@ torify ssh $(pass show machines/<machine-name>/tor-hostname)  # via tor
 
 **CRITICAL**: New nix files must be staged (git add) before they are available in flake evaluation. When creating new packages, modules, or any nix files, always run `git add <files>` before testing with `nix build`, `nix run`, etc.
 
+## Git Push Policy
+
+**CRITICAL**: NEVER `git push` to any remote. Local commits are fine when asked.
+A push happens only when the user runs it themselves or explicitly says
+"push" for that specific change in the current conversation. This includes
+all remotes (origin, HTTPS via gh credentials, pair) and all branches.
+
 ## Machine Facts and Secrets via vars
 
 - SSH public keys
