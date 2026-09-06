@@ -57,7 +57,16 @@ in
     locations."/".extraConfig = ''
       proxy_pass http://127.0.0.1:8090;
       client_max_body_size 8g;
+      # Stream multi-GB bodies straight through instead of spooling to disk.
       proxy_request_buffering off;
+      # With unbuffered proxying over HTTP/2, nginx sizes the per-stream flow
+      # control window to max(client_body_buffer_size, http2_body_preread_size)
+      # (ngx_http_v2_read_request_body). The 64 KiB default capped uploads at
+      # 64 KiB / RTT (~1.2 MB/s at 55 ms) whenever the backend read slower than
+      # the client sent. 8 MiB in-flight per upload lifts the ceiling to
+      # ~150 MB/s at that RTT.
+      client_body_buffer_size 8m;
+      # The backend hashes/pins for minutes before answering.
       proxy_read_timeout 3600s;
       proxy_send_timeout 3600s;
     '';
