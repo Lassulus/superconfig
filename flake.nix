@@ -140,6 +140,10 @@
             tor = {
               roles.server.tags.all = { };
             };
+            retiolum = {
+              module.input = "self";
+              roles.default.tags.nixos = { };
+            };
             internet = {
               roles.default.machines = {
                 prism.settings.host = "prism.lassul.us";
