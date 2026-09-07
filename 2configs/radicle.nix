@@ -24,6 +24,11 @@
 
     httpd = {
       enable = true;
+      # The default 8080 is taken on neoprism by jitsi-videobridge's REST
+      # API (Jetty, 127.0.0.1:8080): radicle-httpd died with "Address
+      # already in use" on every restart and nginx proxied
+      # radicle.lassul.us to Jetty's 404 page instead.
+      listenPort = 8778;
       nginx = {
         serverName = "radicle.lassul.us";
         enableACME = true;
