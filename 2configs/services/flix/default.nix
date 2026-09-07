@@ -465,4 +465,10 @@
     group = "download";
     openFirewall = true;
   };
+  # sonarr/radarr copy on import and leave the originals in sabnzbd's
+  # complete_dir (/var/download/usenet) forever; purge anything untouched
+  # for a week. Active imports are always younger than that.
+  systemd.tmpfiles.rules = [
+    "e /var/download/usenet - - - 7d"
+  ];
 }
