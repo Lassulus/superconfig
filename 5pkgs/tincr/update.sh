@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Tracking the fork branch that carries fix/pmtu-blackhole-recovery.
-# Revert to owner=Mic92 / branch=main once it merges upstream.
-owner=Lassulus
+# Tracks upstream Mic92/main.
+owner=Mic92
 repo=tincr
-branch=fix/pmtu-blackhole-recovery
+branch=main
 attr=tincr
 
 pkg="$(dirname "$(realpath "$0")")/package.nix"

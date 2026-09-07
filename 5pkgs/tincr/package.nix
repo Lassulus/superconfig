@@ -3,26 +3,22 @@
   rustPlatform,
   fetchFromGitHub,
   installShellFiles,
+  pkg-config,
+  openssl,
 }:
 
 rustPlatform.buildRustPackage {
   pname = "tincr";
-  version = "0-unstable-2026-08-09";
+  version = "0-unstable-2026-09-07";
 
-  # Lassulus/tincr = upstream main + fix/pmtu-blackhole-recovery. Point
-  # back at Mic92/main (and revert update.sh) once that lands upstream.
-  # Without it a UDP path that dies after being confirmed is never
-  # abandoned: udp_confirmed stays pinned, maxmtu sticks at 0, and the
-  # peer logs "Fixing MTU ... to 0" every 3.4s forever. Bites any two
-  # nodes behind the same non-hairpinning NAT (ignavia <-> coaxmetal).
   src = fetchFromGitHub {
-    owner = "Lassulus";
+    owner = "Mic92";
     repo = "tincr";
-    rev = "32a10488622ad271942078712c3708cab66347ba";
-    hash = "sha256-zagrdeJIhS6G0fDjf2tM5oA3HS9kX42UuVm8zOqVvtE=";
+    rev = "da74995ab9257057dcfce1d8b12926c77d81bc43";
+    hash = "sha256-oslhal/av02Ov8WOhgwVu14Juibrs7G/qVN5cA9Dqvo=";
   };
 
-  cargoHash = "sha256-3zq9SoOiBRqwXWr7N0NRW+oM2OLu8/IY3B3WCCZ0Chw=";
+  cargoHash = "sha256-IaVZzNWxVIpzlLtE4xzt+gIBeIV6xX4/3C/eh1tlE04=";
 
   # Just the deployable bin crates; --workspace would pull tinc-ffi's cc.
   cargoBuildFlags = [
@@ -35,7 +31,12 @@ rustPlatform.buildRustPackage {
   # netns tests need bwrap+userns the build sandbox lacks.
   doCheck = false;
 
-  nativeBuildInputs = [ installShellFiles ];
+  # tinc-crypto's ChaPoly backend links openssl-sys against system openssl.
+  nativeBuildInputs = [
+    installShellFiles
+    pkg-config
+  ];
+  buildInputs = [ openssl ];
 
   postInstall = ''
     installManPage man/*.[0-9]
