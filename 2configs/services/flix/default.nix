@@ -158,9 +158,11 @@
   # pause downloads when /var/download runs low, so a full disk can no longer
   # hard-wedge sabnzbd with an unrecoverable "Disk full! Forcing Pause".
   # sabnzbd pauses itself once free disk drops below download_free/complete_free
-  # (auto-resuming above); this guard keeps those set to THRESH GiB. Transmission
-  # has no equivalent, so below the threshold the guard stops all its torrents
-  # (restarting them on recovery) and posts a Matrix alert on each transition.
+  # and only auto-resumes above if fulldisk_autoresume is set (default off);
+  # this guard keeps those at THRESH GiB / on, and additionally sends a resume
+  # on recovery. Transmission has no equivalent, so below the threshold the
+  # guard stops all its torrents (restarting them on recovery) and posts a
+  # Matrix alert on each transition.
   systemd.services.download-space-guard = {
     wantedBy = [ "multi-user.target" ];
     after = [ "sabnzbd.service" ];
@@ -200,12 +202,14 @@
           --data "$body" >/dev/null || :
       }
 
-      # sabnzbd pauses continuously once free disk drops below these (and
-      # auto-resumes above). Keep them at THRESH GiB; re-assert only if changed.
+      # sabnzbd pauses continuously once free disk drops below these; keep
+      # them at THRESH GiB and auto-resume on; re-assert only if changed.
       for k in download_free complete_free; do
         grep -qxF "$k = ''${THRESH}G" "$INI" \
           || sab "mode=set_config&section=misc&keyword=$k&value=''${THRESH}G"
       done
+      grep -qxF "fulldisk_autoresume = 1" "$INI" \
+        || sab "mode=set_config&section=misc&keyword=fulldisk_autoresume&value=1"
 
       prev=ok
       if [ -f "$STATE" ]; then prev=$(cat "$STATE"); fi
@@ -219,9 +223,10 @@
           notify "⚠️ yellow: /var/download down to ''${avail} GiB free (< ''${THRESH} GiB). Stopped all transmission torrents; sabnzbd auto-paused via download_free."
         fi
       elif [ "$prev" = low ]; then
-        echo "free ''${avail}G >= ''${THRESH}G: resumed transmission, alerting"
+        echo "free ''${avail}G >= ''${THRESH}G: resumed transmission and sabnzbd, alerting"
         tr_remote -t all --start
-        notify "✅ yellow: /var/download recovered to ''${avail} GiB free. Restarted transmission torrents."
+        sab "mode=resume"
+        notify "✅ yellow: /var/download recovered to ''${avail} GiB free. Resumed sabnzbd and transmission torrents."
       fi
       echo "$cur" > "$STATE"
     '';
