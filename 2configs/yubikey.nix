@@ -19,13 +19,16 @@
     enable = true;
     # Sets up the gpg-agent-ssh.socket unit so gpg-agent (running in
     # --supervised mode) actually receives an ssh listen fd. The module
-    # also exports SSH_AUTH_SOCK in environment.extraInit, which we
-    # don't want system-wide — unset it again below so users opt in via:
+    # also exports SSH_AUTH_SOCK in environment.extraInit (only if unset),
+    # which we don't want as the system-wide default — undo exactly that
+    # export below, leaving other agents (tpm2.nix) alone; users opt in via:
     #   SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)" ssh ...
     enableSSHSupport = true;
   };
 
   environment.extraInit = lib.mkAfter ''
-    unset SSH_AUTH_SOCK
+    case "''${SSH_AUTH_SOCK:-}" in
+      */gnupg/S.gpg-agent.ssh) unset SSH_AUTH_SOCK ;;
+    esac
   '';
 }

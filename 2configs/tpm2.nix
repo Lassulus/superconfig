@@ -25,6 +25,9 @@ in
     after = [ "graphical-session.target" ];
     serviceConfig = {
       ExecStart = "${ssh-tpm-agent}/bin/ssh-tpm-agent -l %t/ssh-tpm-agent.sock --no-cache";
+      # systemd-launched programs don't source /etc/set-environment; publish
+      # the socket to the user manager like gcr-ssh-agent does.
+      ExecStartPost = "${pkgs.systemd}/bin/systemctl --user set-environment SSH_AUTH_SOCK=%t/ssh-tpm-agent.sock";
       Environment = [
         "SSH_ASKPASS=${lib.getExe pinentry-rofi}"
         "SSH_ASKPASS_REQUIRE=force"
@@ -32,6 +35,10 @@ in
       Restart = "on-failure";
     };
   };
+
+  # gnome-keyring (desktops/lib/wayland.nix) pulls in gcr-ssh-agent, which
+  # also sets SSH_AUTH_SOCK in the user manager and would shadow the TPM agent.
+  services.gnome.gcr-ssh-agent.enable = false;
 
   environment.sessionVariables = {
     SSH_AUTH_SOCK = "\${XDG_RUNTIME_DIR}/ssh-tpm-agent.sock";
