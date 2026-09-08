@@ -18,11 +18,12 @@ detect_age_keys() {
     fi
 
     # Check for TPM on Linux (second priority - built-in, no USB needed)
-    # Requires: TPM device, hostname.age with age1tpm1 recipient, and identity in ~/.config/age/
+    # Requires: TPM device, hostname.age with age1tpm1/age1tag1 recipient, and identity in ~/.config/age/
+    # Newer age-plugin-tpm emits native p256tag (age1tag1) recipients by default.
     if [[ -c /dev/tpmrm0 ]] && [[ -f ~/.config/age/tpm-identity.txt ]]; then
         local hostname_key
         hostname_key="${AGE_DETECT_KEYS_DIR:-}/age/$(hostname).age"
-        if [[ -f "$hostname_key" ]] && grep -q "^age1tpm1" "$hostname_key" 2>/dev/null; then
+        if [[ -f "$hostname_key" ]] && grep -qE "^age1(tpm|tag)1" "$hostname_key" 2>/dev/null; then
             rm -f "$temp_identities"
             echo "DETECTED_KEY=tpm"
             echo "KEY_TYPE=tpm"
