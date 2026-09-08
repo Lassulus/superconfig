@@ -40,7 +40,7 @@
       publicExplorer = "https://app.radicle.xyz/nodes/$host/$rid$path";
       preferredSeeds = [
         "z6MkrLMMsiPWUcNPHcRajuMi9mDfYckSoJyPwwnknocNYPm7@seed.radicle.xyz:8776"
-        "z6Mkmqogy2qEM2ummccUthFEaaHvyYmYBYh3dbe9W4ebScxo@seed.radicle.garden:8776"
+        "z6Mkmqogy2qEM2ummccUthFEaaHvyYmYBYh3dbe9W4ebScxo@iris.radicle.network:8776"
       ];
       web.pinned.repositories = [ ];
       cli.hints = true;

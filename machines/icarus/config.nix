@@ -13,6 +13,7 @@
     ../../2configs/consul.nix
     ../../2configs/autoupdate.nix
     ../../2configs/sigexec/executor.nix
+    ../../2configs/rad.nix
   ];
 
   krebs.build.host = config.krebs.hosts.icarus;

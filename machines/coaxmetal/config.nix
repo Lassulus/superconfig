@@ -18,6 +18,7 @@
     ../../2configs/yellow-mounts/samba.nix
     ../../2configs/review.nix
     ../../2configs/sigexec/executor.nix
+    ../../2configs/rad.nix
     ./strom.nix
     ./hermes.nix
   ];

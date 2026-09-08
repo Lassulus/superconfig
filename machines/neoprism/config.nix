@@ -116,7 +116,9 @@
     ../../2configs/omnigent.nix
 
     # radicle public seed (radicle.lassul.us)
-    ../../2configs/radicle.nix
+    ../../2configs/radicle.lassul.us.nix
+    # radicle identity + node for this machine (/var/lib/rad)
+    ../../2configs/rad.nix
 
     # self-hosted iroh relay (relay.lassul.us)
     ../../2configs/iroh-relay
