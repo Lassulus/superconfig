@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>where is lassulus?</title>
+    <link rel="stylesheet" href="/leaflet/leaflet.css" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #111;
+      }
+      #map {
+        position: absolute;
+        inset: 0;
+      }
+      #info {
+        position: absolute;
+        z-index: 1000;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 0.5em 1em;
+        font: 14px/1.4 monospace;
+        color: #eee;
+        background: rgba(0, 0, 0, 0.7);
+      }
+      #info a {
+        color: #9cf;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="info">loading…</div>
+    <script src="/leaflet/leaflet.js"></script>
+    <script>
+      (function () {
+        var map = L.map("map", { zoomControl: true });
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        }).addTo(map);
+
+        var layer = L.layerGroup().addTo(map);
+        var info = document.getElementById("info");
+
+        function ago(iso) {
+          var s = Math.round((Date.now() - Date.parse(iso)) / 1000);
+          if (s < 60) return s + "s";
+          if (s < 3600) return Math.round(s / 60) + "min";
+          if (s < 86400) return (s / 3600).toFixed(1) + "h";
+          return (s / 86400).toFixed(1) + "d";
+        }
+
+        // trail fades from transparent (24h ago) to solid (now); one segment per point pair
+        function render(data) {
+          layer.clearLayers();
+          var pts = data.points;
+          if (!pts.length) {
+            info.textContent = "no location in the last 24h";
+            return;
+          }
+          var t0 = Date.parse(pts[0].t),
+            t1 = Date.parse(pts[pts.length - 1].t) || t0 + 1;
+          for (var i = 1; i < pts.length; i++) {
+            var a = pts[i - 1],
+              b = pts[i];
+            var age = (Date.parse(b.t) - t0) / (t1 - t0);
+            L.polyline(
+              [
+                [a.lat, a.lon],
+                [b.lat, b.lon],
+              ],
+              {
+                color: "#e33",
+                weight: 4,
+                opacity: 0.15 + 0.85 * age,
+              },
+            ).addTo(layer);
+          }
+          var last = pts[pts.length - 1];
+          if (last.acc) {
+            L.circle([last.lat, last.lon], {
+              radius: last.acc,
+              color: "#39f",
+              weight: 1,
+              fillOpacity: 0.1,
+            }).addTo(layer);
+          }
+          L.marker([last.lat, last.lon])
+            .addTo(layer)
+            .bindPopup(
+              "last seen " +
+                ago(last.t) +
+                " ago<br>" +
+                new Date(last.t).toLocaleString(),
+            );
+          info.innerHTML =
+            "<b>lassulus</b> is <b>" +
+            last.state +
+            "</b> · last seen " +
+            ago(last.t) +
+            " ago" +
+            " · " +
+            pts.length +
+            " points in the last 24h" +
+            ' · <a href="https://www.openstreetmap.org/?mlat=' +
+            last.lat +
+            "&mlon=" +
+            last.lon +
+            "#map=16/" +
+            last.lat +
+            "/" +
+            last.lon +
+            '">osm</a>';
+          return L.latLngBounds(
+            pts.map(function (p) {
+              return [p.lat, p.lon];
+            }),
+          );
+        }
+
+        var first = true;
+        function refresh() {
+          fetch("/location.json", { cache: "no-cache" })
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (data) {
+              var bounds = render(data);
+              if (first && bounds) {
+                map.fitBounds(bounds.pad(0.1), { maxZoom: 16 });
+                first = false;
+              }
+            })
+            .catch(function (e) {
+              info.textContent = "failed to load location: " + e;
+            });
+        }
+        refresh();
+        setInterval(refresh, 60 * 1000);
+      })();
+    </script>
+  </body>
+</html>

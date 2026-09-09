@@ -79,6 +79,9 @@
     # lassul.us website
     ../../2configs/websites/lassulus.nix
 
+    # where.is.lassul.us (location from home-assistant on a map)
+    ../../2configs/websites/where.is.lassul.us
+
     # realwallpaper generator
     ../../2configs/realwallpaper.nix
 
