@@ -274,11 +274,11 @@
     '';
   };
 
-  services.journald.extraConfig = ''
-    SystemMaxUse=1G
-    RuntimeMaxUse=128M
-    Storage=persistent
-  '';
+  services.journald.settings.Journal = {
+    SystemMaxUse = "1G";
+    RuntimeMaxUse = "128M";
+    Storage = "persistent";
+  };
 
   krebs.iptables = {
     enable = true;
