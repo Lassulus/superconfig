@@ -14,6 +14,31 @@ let
     chmod -R u+w $out
     ln -s bin $out/sbin
   '';
+
+  # Peer keys and addresses come straight from kartei, not through
+  # stockholm's krebs.hosts: stockholm pins an older kartei and its host type
+  # still requires the legacy RSA pubkey. This is only the host database --
+  # the daemon stays on nixpkgs' services.tinc (kartei's own retiolum module
+  # is nix-darwin only here, see machines/barnacle/retiolum.nix).
+  #
+  # tincHosts is already filtered to SPTPS-capable nodes, so the RSA-only
+  # leftovers tincr refuses per connection attempt are gone.
+  kartei = import (self.inputs.kartei + "/modules/retiolum/hosts.nix") { inherit lib; };
+
+  name = config.networking.hostName;
+  inKartei = kartei.tincHosts ? ${name};
+
+  # Hosts that have no kartei card yet (starkstrom) keep the card they declare
+  # locally in krebs.hosts. Drops out once they are in kartei.
+  localNet = config.krebs.build.host.nets.retiolum;
+  own =
+    if inKartei then
+      kartei.own.${name}
+    else
+      {
+        ip4 = localNet.ip4.addr;
+        ip6 = localNet.ip6.addr;
+      };
 in
 
 {
@@ -27,16 +52,14 @@ in
     # (tens of thousands of suppressed messages per minute) and rotates
     # all other units' logs out of the journal within hours
     debugLevel = 0;
-    hosts = lib.mapAttrs' (name: host: lib.nameValuePair name host.nets.retiolum.tinc.config) (
-      lib.filterAttrs (_: host: host.nets.retiolum.tinc.config or null != null) config.krebs.hosts
-    );
+    hosts = kartei.tincHosts // lib.optionalAttrs (!inKartei) { ${name} = localNet.tinc.config; };
     extraConfig = ''
       AutoConnect = yes
       LocalDiscovery = yes
     '';
     settings = {
       Interface = "retiolum";
-      Name = config.krebs.build.host.name;
+      Name = name;
       ConnectTo = [
         "neoprism"
         "prism"
@@ -80,10 +103,7 @@ in
 
   systemd.network.networks.retiolum = {
     matchConfig.Name = "retiolum";
-    address = [
-      "${config.krebs.build.host.nets.retiolum.ip4.addr}/16"
-      "${config.krebs.build.host.nets.retiolum.ip6.addr}/16"
-    ];
+    address = lib.optional (own.ip4 != null) "${own.ip4}/16" ++ [ "${own.ip6}/16" ];
     linkConfig = {
       MTUBytes = "1377";
       RequiredForOnline = "no";
