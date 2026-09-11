@@ -50,7 +50,6 @@
     {
       environment.systemPackages = [
         self.packages.${pkgs.system}.bank
-        pkgs.adb-sync
         pkgs.transgui
       ];
     }
