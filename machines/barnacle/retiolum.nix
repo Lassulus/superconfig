@@ -16,15 +16,8 @@ in
 {
   imports = [ self.inputs.kartei.darwinModules.retiolum ];
 
-  # nodename defaults to networking.hostName ("barnacle"); the addresses are
-  # looked up in kartei by that name.
-  #
-  # Pinned explicitly until krebs/kartei#lass-add-barnacle lands: without the
-  # card the module falls back to a hostname-derived IPv6 and no IPv4, which
-  # would re-address the running node. Drop both lines once the input carries
-  # the card -- the values are identical to lass/hosts/barnacle/retiolum/ip{4,6}.
-  networking.retiolum.ipv4 = "10.243.133.117";
-  networking.retiolum.ipv6 = "42:0:ce16::ba2c";
+  # nodename defaults to networking.hostName ("barnacle"); the addresses and
+  # aliases come from lass/hosts/barnacle in kartei.
 
   networking.retiolum.ed25519PrivateKeyFile = vars.files."${net}.ed25519_key.priv".path;
 

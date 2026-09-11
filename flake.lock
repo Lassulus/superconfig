@@ -485,11 +485,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1788812154,
-        "narHash": "sha256-Z1CjMkP4x3dhnTdxpVB8h9UR4TMICtEB7tElLONVvXM=",
+        "lastModified": 1789120890,
+        "narHash": "sha256-OMslqJ6Lqg0e++3cMgtuXKw36zoNy7a2ShDkIc6Owyw=",
         "owner": "krebs",
         "repo": "kartei",
-        "rev": "bc93da3e2815802f11925a13b983e977737c2b5d",
+        "rev": "ae7dc39ff2dbf7d1663f0624ab9d4c6a96cfcc3f",
         "type": "github"
       },
       "original": {
