@@ -29,6 +29,12 @@
     stockholm.inputs.nixpkgs.follows = "nixpkgs";
     stockholm.inputs.buildbot-nix.follows = "";
 
+    # Host database + retiolum modules. barnacle (darwin) consumes these
+    # directly; the NixOS machines still get their host data through
+    # stockholm's older kartei pin.
+    kartei.url = "github:krebs/kartei";
+    kartei.inputs.nixpkgs.follows = "nixpkgs";
+
     disko.url = "github:nix-community/disko";
     # disko.url = "path:/home/lass/src/disko/";
     disko.inputs.nixpkgs.follows = "nixpkgs";

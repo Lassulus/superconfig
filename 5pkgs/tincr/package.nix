@@ -49,6 +49,6 @@ rustPlatform.buildRustPackage {
     homepage = "https://github.com/Mic92/tincr";
     license = lib.licenses.gpl2Plus;
     mainProgram = "tincd";
-    platforms = lib.platforms.linux;
+    platforms = lib.platforms.linux ++ lib.platforms.darwin;
   };
 }
