@@ -21,9 +21,21 @@ in
 
   networking.retiolum.ed25519PrivateKeyFile = vars.files."${net}.ed25519_key.priv".path;
 
-  # Peers that only exist inside superconfig; merged on top of the cards
-  # kartei's module installs (hosts is attrsOf lines, so this adds to them).
-  services.tincr.networks.${net}.hosts = self.retiolum.tincHosts;
+  # Both merge with what kartei's module sets: hosts is attrsOf lines,
+  # connectTo is listOf str.
+  services.tincr.networks.${net} = {
+    # Peers that only exist inside superconfig, on top of the kartei cards.
+    hosts = self.retiolum.tincHosts;
+
+    # kartei's module dials eve/eva/ni/prism -- krebs hubs that only learn
+    # about barnacle when their own registry pins move. A laptop behind NAT
+    # needs relays we control, so also dial our own public servers; same list
+    # the NixOS nodes use in 2configs/retiolum.nix, plus starkstrom.
+    connectTo = [
+      "neoprism"
+      "starkstrom"
+    ];
+  };
 
   # Same generator as 2configs/retiolum.nix, minus the RSA half: tincr is
   # SPTPS/Ed25519-only and kartei no longer wants an rsa.key.
