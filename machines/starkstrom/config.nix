@@ -1,4 +1,15 @@
-{ config, lib, ... }:
+{
+  self,
+  config,
+  ...
+}:
+let
+  # starkstrom is deliberately not in the shared kartei registry; its retiolum
+  # identity lives in retiolum/ (self.retiolum), which every superconfig
+  # machine injects into its tinc host set. Move that entry into kartei/lass if
+  # the rest of krebs should be able to reach it too.
+  net = self.retiolum.hosts.starkstrom.nets.retiolum;
+in
 {
   imports = [
     ../../2configs
@@ -10,27 +21,20 @@
     ./ipfs-endpoint.nix
   ];
 
-  # starkstrom is not (yet) in the shared kartei registry, so its retiolum
-  # identity is declared here. Migrate this block into kartei/lass to give the
-  # rest of the fleet starkstrom's keys (full mesh); until then only starkstrom
-  # knows the peers it ConnectTo's.
-  # Pubkeys are read from this machine's clan vars, so they always match the
-  # private keys deployed to the host.
+  # krebs.build.host and the monitoring/dns bits still read this card, so build
+  # it from the same data rather than repeating the addresses and keys.
+  # stockholm's host type additionally insists on the legacy RSA pubkey, which
+  # tincr ignores; via is left out because stockholm resolves it to a net
+  # submodule, not a name.
   krebs.hosts.starkstrom = {
     owner = config.krebs.users.lass;
     monitoring = true;
     nets.retiolum = {
-      ip4.addr = "10.243.0.100";
-      ip6.addr = "42:0:ce16::100";
-      aliases = [ "starkstrom.r" ];
-      tinc.pubkey = config.clan.core.vars.generators.retiolum.files."retiolum.rsa_key.pub".value;
-      # tincr writes the pub as `Ed25519PublicKey = <key>`; keep only the key.
-      tinc.pubkey_ed25519 = lib.last (
-        lib.splitString " " (
-          lib.removeSuffix "\n"
-            config.clan.core.vars.generators.retiolum.files."retiolum.ed25519_key.pub".value
-        )
-      );
+      inherit (net) ip4 ip6 aliases;
+      tinc = {
+        pubkey = config.clan.core.vars.generators.retiolum.files."retiolum.rsa_key.pub".value;
+        inherit (net.tinc) pubkey_ed25519;
+      };
     };
   };
 

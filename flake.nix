@@ -219,6 +219,7 @@
         ./formatter.nix
         ./5pkgs/flake-module.nix
         ./keys/flake-module.nix
+        ./retiolum/flake-module.nix
         ./skills/flake-module.nix
         ./games/flake-module.nix
 

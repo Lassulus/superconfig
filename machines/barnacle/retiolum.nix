@@ -6,9 +6,9 @@
 }:
 
 # Retiolum node, driven by kartei's nix-darwin module (tincr + host data
-# straight out of the kartei host database). The NixOS machines still go
-# through 2configs/retiolum.nix and stockholm's older kartei pin; barnacle is
-# the first node on the upstream modules.
+# straight out of the kartei host database). The NixOS machines run the same
+# host database through nixpkgs' services.tinc instead, see
+# 2configs/retiolum.nix.
 let
   net = "retiolum";
   vars = config.clan.core.vars.generators.${net};
@@ -20,6 +20,10 @@ in
   # aliases come from lass/hosts/barnacle in kartei.
 
   networking.retiolum.ed25519PrivateKeyFile = vars.files."${net}.ed25519_key.priv".path;
+
+  # Peers that only exist inside superconfig; merged on top of the cards
+  # kartei's module installs (hosts is attrsOf lines, so this adds to them).
+  services.tincr.networks.${net}.hosts = self.retiolum.tincHosts;
 
   # Same generator as 2configs/retiolum.nix, minus the RSA half: tincr is
   # SPTPS/Ed25519-only and kartei no longer wants an rsa.key.

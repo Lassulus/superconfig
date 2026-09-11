@@ -26,19 +26,12 @@ let
   kartei = import (self.inputs.kartei + "/modules/retiolum/hosts.nix") { inherit lib; };
 
   name = config.networking.hostName;
-  inKartei = kartei.tincHosts ? ${name};
 
-  # Hosts that have no kartei card yet (starkstrom) keep the card they declare
-  # locally in krebs.hosts. Drops out once they are in kartei.
-  localNet = config.krebs.build.host.nets.retiolum;
-  own =
-    if inKartei then
-      kartei.own.${name}
-    else
-      {
-        ip4 = localNet.ip4.addr;
-        ip6 = localNet.ip6.addr;
-      };
+  # Nodes with no kartei card, known only inside superconfig. Exposes the same
+  # interface as kartei's hosts.nix, so both sources merge the same way.
+  local = self.retiolum;
+
+  own = kartei.own.${name} or local.own.${name};
 in
 
 {
@@ -52,7 +45,7 @@ in
     # (tens of thousands of suppressed messages per minute) and rotates
     # all other units' logs out of the journal within hours
     debugLevel = 0;
-    hosts = kartei.tincHosts // lib.optionalAttrs (!inKartei) { ${name} = localNet.tinc.config; };
+    hosts = kartei.tincHosts // local.tincHosts;
     extraConfig = ''
       AutoConnect = yes
       LocalDiscovery = yes
