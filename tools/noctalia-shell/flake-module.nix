@@ -23,6 +23,12 @@
           # machines without DDC/CI-capable displays (detection finds
           # nothing, internal backlight path is used as before).
           brightness.enableDdcSupport = true;
+          # Don't pop the changelog panel on every startup; it is an
+          # interruption nobody asked for. Note this is *only* the changelog
+          # (UpdateService.showLatestChangelog): the separate telemetry wizard
+          # is gated on noctalia's cache, not on this setting. Telemetry itself
+          # is already off by default (general.telemetryEnabled = false).
+          general.showChangelogOnStartup = false;
         };
 
         settingsPatches = [
