@@ -68,8 +68,18 @@
   # present. hardware.amdgpu.initrd.enable is the same trap — it only adds the
   # module and handles no firmware.
   hardware.graphics.enable = true;
-  hardware.graphics.enable32Bit = true;
   hardware.enableRedistributableFirmware = true;
+
+  # No 32-bit graphics stack: it drags in a second mesa plus a second LLVM
+  # (~840 MB uncompressed) and is only needed for Steam/Wine, which this
+  # stateless box doesn't run. Both image variants pay for it otherwise, and
+  # the netboot initrd has to fit under iPXE's sub-4GB allocation limit.
+  hardware.graphics.enable32Bit = false;
+
+  # nixpkgs' graphical-desktop.nix turns on speech-dispatcher for any
+  # graphical session, which pulls espeak and 676 MB of mbrola TTS voices.
+  # Nothing here speaks.
+  services.speechd.enable = lib.mkForce false;
   services.xserver.videoDrivers = [ "amdgpu" ];
   boot.kernelModules = [ "kvm-intel" ];
 
