@@ -1,0 +1,5 @@
+bin "herd"
+about "Start an omp agent in a new herdr tab (current workspace, current directory) and print its pane id"
+
+arg "[prompt]" help="First message for omp"
+arg "[omp-args...]" help="Arguments passed through to omp, e.g. --model opus"
