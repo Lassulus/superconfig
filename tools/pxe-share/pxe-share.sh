@@ -280,4 +280,15 @@ if [[ -n $HTTP_ROOT ]]; then
 fi
 
 echo "$PROG: press Ctrl+C to stop"
-dnsmasq "${DNSMASQ_OPTS[@]}"
+
+# dnsmasq must not be a foreground child: a trap set while bash blocks on an
+# external command is deferred until that command returns, and sudo runs us in
+# its own pty/process group so the terminal's SIGINT never reaches dnsmasq
+# either. The result was a Ctrl+C that did nothing at all. Backgrounding it and
+# blocking in `wait` (a builtin, so handlers run immediately) means the signal
+# is forwarded on, dnsmasq exits, and the EXIT trap tears down the firewall
+# rules and darkhttpd.
+dnsmasq "${DNSMASQ_OPTS[@]}" &
+DNSMASQ_PID=$!
+trap 'kill -TERM "$DNSMASQ_PID" 2>/dev/null' INT TERM
+wait "$DNSMASQ_PID"
