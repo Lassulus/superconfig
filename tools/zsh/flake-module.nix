@@ -329,9 +329,13 @@
           tmux set -g mouse on 2>/dev/null || true
         fi
 
-        # Workspace manager integration: cd to workspace directory on new terminal
-        _ws_dir=$(${self.packages.${pkgs.system}.workspace-manager}/bin/workspace-manager dir 2>/dev/null)
-        [[ -n "$_ws_dir" && -d "$_ws_dir" ]] && cd "$_ws_dir"
+        # Workspace manager integration: cd to workspace directory on new terminal.
+        # Only for shells that start in $HOME: a pane spawned with an explicit
+        # directory (herdr, tmux split in cwd) must keep it.
+        if [[ "$PWD" == "$HOME" ]]; then
+          _ws_dir=$(${self.packages.${pkgs.system}.workspace-manager}/bin/workspace-manager dir 2>/dev/null)
+          [[ -n "$_ws_dir" && -d "$_ws_dir" ]] && cd "$_ws_dir"
+        fi
 
         # Disable some features to support TRAMP.
         if [ "$TERM" = dumb ]; then
