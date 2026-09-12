@@ -19,6 +19,7 @@
     ../../2configs/review.nix
     ../../2configs/sigexec/executor.nix
     ../../2configs/rad.nix
+    ../../2configs/herdr.nix
     ./strom.nix
     ./hermes.nix
   ];

@@ -123,6 +123,9 @@
     # radicle identity + node for this machine (/var/lib/rad)
     ../../2configs/rad.nix
 
+    # herdr agent multiplexer
+    ../../2configs/herdr.nix
+
     # self-hosted iroh relay (relay.lassul.us)
     ../../2configs/iroh-relay
 
