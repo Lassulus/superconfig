@@ -1,0 +1,12 @@
+bin "pxe-share"
+about "Serve PXE network boot, by default as a proxy DHCP server that coexists with somebody else's DHCP"
+
+flag "--no-dhcp" help="Don't answer DHCP; only serve the files (use alongside nat-share --pxe)"
+flag "--http" help="Also serve <dir> over HTTP (kernel/initrd are too big for TFTP)"
+flag "--http-port <port>" help="Port for --http (default: 8079)"
+flag "--script <name>" help="iPXE script handed to iPXE (default: netboot.ipxe)"
+flag "-b --backend <name>" help="Firewall backend: auto | iptables | nft (default: auto-detect)"
+flag "-h --help" help="Show help message"
+
+arg "<dir>" help="Directory holding ipxe.efi / undionly.kpxe and the iPXE script"
+arg "<interface>" help="Interface to serve PXE on"
