@@ -1,0 +1,15 @@
+bin "nat-share"
+about "Start a DHCP + dnsmasq NAT server on an interface, sharing the upstream connection"
+
+flag "-u --upstream" help="Upstream/WAN interface to NAT through (default: default route)"
+flag "-s --subnet" help="/24 subnet prefix for the served link (default: 10.42.0)"
+flag "--range" help="DHCP host range within the /24 (default: 10-254)"
+flag "--lease" help="DHCP lease time (default: 12h)"
+flag "--dns" help="Upstream DNS server to forward to (default: system resolv.conf)"
+flag "-h --help" help="Show help message"
+flag "-b --backend" help="Firewall backend: auto | iptables | nft (default: auto-detect)"
+flag "--pxe <dir>" help="Also boot PXE clients from <dir> (runs pxe-share --no-dhcp to serve it)"
+flag "--http" help="Serve the --pxe dir over HTTP too; requires --pxe (netboot kernel/initrd are too big for TFTP)"
+flag "--http-port <port>" help="Port for --http (default: 8079)"
+
+arg "<interface>" help="Interface to serve DHCP/DNS/NAT on"
