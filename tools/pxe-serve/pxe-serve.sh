@@ -160,10 +160,16 @@ rm -f "$IPXE_EXPR"
 # after running, so it deleted the served directory out from under a still
 # running dnsmasq and then went back to waiting. Only symlinks live here, so
 # leaving them behind between runs costs nothing.
-ROOT="${XDG_RUNTIME_DIR:-/tmp}/${PROG}/${MACHINE}"
+#
+# Not under XDG_RUNTIME_DIR: dnsmasq drops privileges after startup, and
+# /run/user/$UID is mode 0700, so the unprivileged dnsmasq cannot traverse it
+# ("TFTP directory ... inaccessible: Permission denied", then it refuses to
+# start). Everything served is a symlink into the world-readable nix store,
+# so a world-traversable directory costs nothing.
+ROOT="/var/tmp/${PROG}/${MACHINE}"
 rm -rf "$ROOT"
 mkdir -p "$ROOT"
-chmod 755 "$ROOT"
+chmod 755 "/var/tmp/${PROG}" "$ROOT"
 
 ln -s "${KERNEL}/${KERNEL_FILE}" "$ROOT/bzImage"
 ln -s "${INITRD}/initrd" "$ROOT/initrd"
