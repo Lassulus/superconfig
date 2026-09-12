@@ -47,13 +47,84 @@
     image.fileName = lib.mkForce "atlas.iso";
   };
 
-  # PXE/netboot: iPXE pulls bzImage + initrd, so nothing has to be flashed to
-  # iterate. The whole store rides inside the initrd (~3.8 GB), which is why
-  # it has to be served over HTTP rather than TFTP — see nat-share --pxe/--http.
-  image.modules.netboot = {
-    imports = [ (modulesPath + "/installer/netboot/netboot.nix") ];
-    netboot.squashfsCompression = "zstd -Xcompression-level 6";
-  };
+  # PXE/netboot: iPXE pulls only bzImage + a ~11 MB initrd, so nothing has to
+  # be flashed to iterate.
+  #
+  # The store is NOT embedded in the initrd the way upstream netboot.nix does
+  # it. iPXE has to hold whatever it downloads in EfiBootServicesData, and
+  # firmware caps that well below installed RAM — a 2.8 GB initrd died with
+  # "No space left on device" (ipxe.org/34182006) on a 16 GB machine. So stage
+  # 1 brings up the network itself and fetches the squashfs, which lands in
+  # kernel-managed memory where the whole 16 GB is actually usable.
+  #
+  # The file is fetched to exactly the path netboot.nix already mounts from
+  # ("../nix-store.squashfs", i.e. /nix-store.squashfs in the initrd root), so
+  # the mount itself is upstream's, unmodified. It survives switch_root
+  # because the loop device keeps the inode open after the old root is wiped.
+  image.modules.netboot =
+    { config, lib, ... }:
+    {
+      imports = [ (modulesPath + "/installer/netboot/netboot.nix") ];
+      netboot.squashfsCompression = "zstd -Xcompression-level 6";
+
+      # Ship the initrd without the store; pxe-serve serves squashfsStore
+      # separately over HTTP.
+      system.build.netbootRamdisk = lib.mkForce config.system.build.initialRamdisk;
+
+      # DHCP in stage 1 (runs in preLVMCommands, before postDeviceCommands).
+      boot.initrd.network.enable = true;
+      boot.initrd.network.udhcpc.enable = true;
+
+      # hardware.enableAllHardware is storage-only — virtio_net is the single
+      # network driver in its 89 modules — so wired NICs have to be listed by
+      # hand. availableKernelModules only makes them available; udev loads just
+      # the ones matching present PCI/USB IDs, so unused entries cost bytes.
+      boot.initrd.availableKernelModules = [
+        "e1000e"
+        "e1000"
+        "igb"
+        "igc"
+        "ixgbe"
+        "r8169"
+        "alx"
+        "atl1c"
+        "tg3"
+        "bnx2"
+        "bnx2x"
+        "sky2"
+        "forcedeth"
+        "atlantic"
+        # USB NICs (docks, adapters)
+        "r8152"
+        "cdc_ether"
+        "cdc_ncm"
+        "asix"
+        "ax88179_178a"
+        "virtio_net"
+      ];
+
+      # wget is busybox's, already present in the scripted initrd's
+      # extra-utils. The URL comes from the kernel command line rather than
+      # being baked in, so the image doesn't go stale when the serving address
+      # changes (pxe-serve passes store.url=).
+      boot.initrd.postDeviceCommands = ''
+        store_url=
+        for o in $(cat /proc/cmdline); do
+          case $o in
+            store.url=*) store_url=''${o#store.url=} ;;
+          esac
+        done
+        if [ -z "$store_url" ]; then
+          echo "netboot: no store.url= on the kernel command line"
+          fail
+        fi
+        echo "netboot: fetching nix store from $store_url"
+        if ! wget -O /nix-store.squashfs "$store_url"; then
+          echo "netboot: failed to fetch $store_url"
+          fail
+        fi
+      '';
+    };
 
   nixpkgs.hostPlatform = "x86_64-linux";
 

@@ -129,6 +129,9 @@ KERNEL_FILE=$(nix eval --raw "${CFG}.system.boot.loader.kernelFile")
 INITRD=$(nix build --no-link --print-out-paths "${CFG}.system.build.netbootRamdisk")
 TOPLEVEL=$(nix eval --raw "${CFG}.system.build.toplevel")
 PARAMS=$(nix eval --raw --apply 'ps: builtins.concatStringsSep " " ps' "${CFG}.boot.kernelParams")
+# Served separately from the initrd: iPXE can only hold so much in
+# EfiBootServicesData, so stage 1 fetches this itself over HTTP.
+SQUASHFS=$(nix build --no-link --print-out-paths "${CFG}.system.build.squashfsStore")
 
 # iPXE gets the chain script baked in rather than asking DHCP for a filename.
 # In proxy-DHCP mode dnsmasq answers through pxe-service, so a --dhcp-boot
@@ -173,18 +176,22 @@ chmod 755 "/var/tmp/${PROG}" "$ROOT"
 
 ln -s "${KERNEL}/${KERNEL_FILE}" "$ROOT/bzImage"
 ln -s "${INITRD}/initrd" "$ROOT/initrd"
+ln -s "${SQUASHFS}" "$ROOT/nix-store.squashfs"
 ln -s "${IPXE}/ipxe.efi" "$ROOT/ipxe.efi"
 ln -s "${IPXE}/undionly.kpxe" "$ROOT/undionly.kpxe"
 
+# store.url= is what stage 1 fetches the squashfs from; passing it on the
+# command line instead of baking it into the image keeps the image valid when
+# the serving address changes.
 cat >"$ROOT/netboot.ipxe" <<EOF
 #!ipxe
-kernel http://${ADDR}:${HTTP_PORT}/bzImage init=${TOPLEVEL}/init initrd=initrd ${PARAMS}
+kernel http://${ADDR}:${HTTP_PORT}/bzImage init=${TOPLEVEL}/init initrd=initrd ${PARAMS} store.url=http://${ADDR}:${HTTP_PORT}/nix-store.squashfs
 initrd http://${ADDR}:${HTTP_PORT}/initrd
 boot
 EOF
 
-echo "$PROG: serving ${MACHINE} on ${IFACE} (${ADDR}), kernel+initrd over http://${ADDR}:${HTTP_PORT}"
-echo "$PROG: initrd is $(stat -Lc %s "$ROOT/initrd" | awk '{printf "%.1f GB", $1/1073741824}') — expect that much to cross the wire on every boot"
+echo "$PROG: serving ${MACHINE} on ${IFACE} (${ADDR}) over http://${ADDR}:${HTTP_PORT}"
+echo "$PROG: iPXE fetches $(stat -Lc %s "$ROOT/bzImage" | awk '{printf "%.0f MB", $1/1048576}') kernel + $(stat -Lc %s "$ROOT/initrd" | awk '{printf "%.0f MB", $1/1048576}') initrd; stage 1 then fetches $(stat -Lc %s "$ROOT/nix-store.squashfs" | awk '{printf "%.2f GB", $1/1073741824}') of store itself"
 
 # exec, so there is no wrapper process between the terminal and dnsmasq: Ctrl+C
 # reaches it directly and pxe-share's own trap does the privileged teardown
