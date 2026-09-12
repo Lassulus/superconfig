@@ -1,0 +1,10 @@
+bin "pxe-serve"
+about "Netboot a machine from its flake: builds its netboot image variant and serves it over PXE"
+
+flag "--no-dhcp" help="Don't answer DHCP; only serve the files (another DHCP server points clients at us)"
+flag "--http-port <port>" help="Port to serve kernel/initrd on (default: 8079)"
+flag "-i --interface <iface>" help="Interface to serve on (default: the one carrying the default route)"
+flag "-h --help" help="Show help message"
+
+arg "<flake#machine>" help="Machine to netboot, e.g. .#atlas"
+arg "[interface]" help="Interface to serve on"
