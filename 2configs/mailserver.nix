@@ -24,7 +24,12 @@ in
   mailserver = {
     enable = true;
     fqdn = "mail.lassul.us";
-    domains = [ "lassul.us" ];
+    # neoprism.r: retiolum-internal mail (cron, root@neoprism.r from other
+    # krebs hosts) lands in lass's mailbox via catchAll.
+    domains = [
+      "lassul.us"
+      "neoprism.r"
+    ];
 
     loginAccounts = {
       "lass@lassul.us" = {
@@ -42,7 +47,10 @@ in
           "nobody@lassul.us"
           "lassulus@lassul.us"
         ];
-        catchAll = [ "lassul.us" ];
+        catchAll = [
+          "lassul.us"
+          "neoprism.r"
+        ];
       };
       "bot@lassul.us" = {
         hashedPasswordFile =
