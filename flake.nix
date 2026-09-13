@@ -327,6 +327,22 @@
                           default = true;
                           description = "Dummy option for extra-container compatibility";
                         };
+                        # nixos-containers.nix reads config.nix.enable and
+                        # config.nix.daemon.enable for the /nix/var/nix bind
+                        # mounts, but the minimal module set omits
+                        # config/nix.nix which declares them.
+                        options.nix = {
+                          enable = lib.mkOption {
+                            type = lib.types.bool;
+                            default = true;
+                            description = "Dummy option for extra-container compatibility";
+                          };
+                          daemon.enable = lib.mkOption {
+                            type = lib.types.bool;
+                            default = true;
+                            description = "Dummy option for extra-container compatibility";
+                          };
+                        };
                       }
                     )
                   ];
