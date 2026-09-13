@@ -121,8 +121,7 @@ export default function websearch(pi: ExtensionAPI) {
 
     renderResult(result, _options, theme) {
       const details = result.details as
-        | (KagiOutput & { query: string })
-        | undefined;
+        (KagiOutput & { query: string }) | undefined;
       if (!details) {
         const text = result.content[0];
         return new Text(text?.type === "text" ? text.text : "", 0, 0);
@@ -203,8 +202,7 @@ export default function websearch(pi: ExtensionAPI) {
 
     renderResult(result, _options, theme) {
       const details = result.details as
-        | { url: string; length: number }
-        | undefined;
+        { url: string; length: number } | undefined;
       if (!details) {
         const text = result.content[0];
         return new Text(text?.type === "text" ? text.text : "", 0, 0);
