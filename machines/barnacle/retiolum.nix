@@ -5,8 +5,9 @@
   ...
 }:
 
-# Retiolum node, driven by kartei's nix-darwin module (tincr + host data
-# straight out of the kartei host database). The NixOS machines run the same
+# Retiolum node, driven by kartei's nix-darwin retiolum module (host data
+# straight out of the kartei host database on top of tincr's own launchd
+# module, which also supplies the tincd package). The NixOS machines run the same
 # host database through nixpkgs' services.tinc instead, see
 # 2configs/retiolum.nix.
 let
