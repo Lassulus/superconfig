@@ -55,7 +55,6 @@ in
       Name = name;
       ConnectTo = [
         "neoprism"
-        "prism"
         "ni"
         "eve"
       ];

@@ -81,7 +81,7 @@
             defaults
               logfile ~/.msmtp.log
               timeout 10
-            account prism
+            account neoprism
               host neoprism.r
             account c-base
               from lassulus@c-base.org
@@ -110,7 +110,7 @@
               auth on
               user mail@dedede.org
               passwordeval rbw get --folder dedede mail@dedede.org
-            account default: prism
+            account default: neoprism
           '';
 
           msmtp = pkgs.writeShellScriptBin "msmtp" ''

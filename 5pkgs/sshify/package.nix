@@ -1,5 +1,5 @@
 { pkgs }:
-# usage: sshify prism.r -- curl ifconfig.me
+# usage: sshify neoprism.r -- curl ifconfig.me
 pkgs.writers.writeBashBin "sshify" ''
   set -efu
 

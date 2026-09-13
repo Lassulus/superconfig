@@ -9,7 +9,6 @@
     ../../2configs
     ../../2configs/retiolum.nix
     ../../2configs/pipewire.nix
-    ../../2configs/nfs-dl.nix
     ../../2configs/yellow-mounts/samba.nix
     ../../2configs/gg23.nix
     ../../2configs/hass
@@ -88,10 +87,10 @@
       title = ni.r
       host = ni.r
 
-      ++ prism
-      menu = prism.r
-      title = prism.r
-      host = prism.r
+      ++ neoprism
+      menu = neoprism.r
+      title = neoprism.r
+      host = neoprism.r
     '';
   };
 

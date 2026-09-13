@@ -46,7 +46,7 @@ in
       alias ${pkgs.krebs-hosts-retiolum};
     '';
     locations."= /wireguard-key".extraConfig = ''
-      alias ${pkgs.writeText "prism.wg" config.krebs.hosts.prism.nets.wiregrill.wireguard.pubkey};
+      alias ${pkgs.writeText "neoprism.wg" config.krebs.hosts.neoprism.nets.wiregrill.wireguard.pubkey};
     '';
     locations."= /ssh.pub".extraConfig = ''
       alias ${pkgs.writeText "pub" config.krebs.users.lass.pubkey};

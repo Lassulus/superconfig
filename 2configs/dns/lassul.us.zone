@@ -16,14 +16,11 @@ he IN NS robotns3.second-ns.com.
 
 @ IN A 95.217.192.59
 @ IN AAAA 2a01:4f9:4a:4f1a::2
-prism IN A 95.216.1.150
-4.prism IN A 95.216.1.150
-prism IN AAAA 2a01:4f9:2a:1e9::1
-6.prism IN AAAA 2a01:4f9:2a:1e9::1
 neoprism IN A 95.217.192.59
 4.neoprism IN A 95.217.192.59
 neoprism IN AAAA 2a01:4f9:4a:4f1a::2
 6.neoprism IN AAAA 2a01:4f9:4a:4f1a::2
+prism IN CNAME neoprism
 ipfs IN CNAME neoprism
 starkstrom IN A 194.110.87.67
 
@@ -34,7 +31,7 @@ ns1 IN AAAA 2a01:4f9:4a:4f1a::2
 * IN CNAME www
 
 www IN CNAME neoprism
-cgit IN CNAME prism
+cgit IN CNAME neoprism
 pad IN CNAME neoprism
 go IN CNAME neoprism
 cast IN CNAME neoprism
@@ -43,7 +40,7 @@ paste IN CNAME neoprism
 radio IN CNAME neoprism
 jitsi IN CNAME neoprism
 meet IN CNAME neoprism
-streaming IN CNAME prism
+streaming IN CNAME neoprism
 flix IN CNAME neoprism
 flex IN CNAME neoprism
 flux IN CNAME neoprism

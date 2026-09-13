@@ -305,7 +305,6 @@ in
     path = lib.mkForce "/var/music/the_playlist";
     devices = [
       "mors"
-      "prism"
       "radio"
     ];
   };

@@ -15,7 +15,6 @@ let
     ]; # TODO add aergia
     "/home/lass/tmp/the_playlist" = [
       "mors"
-      "prism"
       "radio"
     ];
     # "/home/lass/.weechat" = [ "green" "mors" ];

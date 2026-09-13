@@ -135,7 +135,6 @@
               ];
             };
             icarus.tags = [ "laptop" ];
-            prism.tags = [ "server" ];
             neoprism.tags = [ "server" ];
             starkstrom = {
               tags = [ "server" ];
@@ -152,8 +151,6 @@
             };
             internet = {
               roles.default.machines = {
-                prism.settings.host = "prism.lassul.us";
-                prism.settings.port = 45621;
                 neoprism.settings.host = "neoprism.lassul.us";
                 neoprism.settings.port = 45621;
                 starkstrom.settings.host = "194.110.87.67";

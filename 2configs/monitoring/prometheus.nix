@@ -60,7 +60,7 @@
         static_configs = [
           {
             targets = [
-              "prism.r:9273"
+              "neoprism.r:9273"
               "yellow.r:9273"
             ];
           }

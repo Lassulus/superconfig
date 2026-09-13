@@ -28,7 +28,7 @@ in
     # Peers that only exist inside superconfig, on top of the kartei cards.
     hosts = self.retiolum.tincHosts;
 
-    # kartei's module dials eve/eva/ni/prism -- krebs hubs that only learn
+    # kartei's module dials eve/eva/ni -- krebs hubs that only learn
     # about barnacle when their own registry pins move. A laptop behind NAT
     # needs relays we control, so also dial our own public servers; same list
     # the NixOS nodes use in 2configs/retiolum.nix, plus starkstrom.
