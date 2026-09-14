@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Tracks our fork's fix branch (Mic92/tincr#101); switch back to
+# Tracks our fork's integration branch (Mic92/tincr#101 + #109); switch back to
 # Mic92/main once merged.
 owner=Lassulus
 repo=tincr
-branch=fix/edge-walk-address
+branch=lassulus/fixes
 attr=tincr
 
 pkg="$(dirname "$(realpath "$0")")/package.nix"
@@ -25,9 +25,13 @@ new_date=$(curl -fsSL "https://api.github.com/repos/$owner/$repo/commits/$new_re
 new_version="0-unstable-$new_date"
 
 # Bump rev + version, leave hashes for nix to complain about.
+# Blank both hashes too: with the old ones in place nix reuses the cached
+# FODs (old src + old vendor dir) and the build "succeeds" on stale code.
 sed -i \
   -e "s|^\(\s*\)rev = \".*\"|\1rev = \"$new_rev\"|" \
   -e "s|^\(\s*\)version = \".*\"|\1version = \"$new_version\"|" \
+  -e "s|^\(\s*\)hash = \".*\"|\1hash = \"\"|" \
+  -e "s|^\(\s*\)cargoHash = \".*\"|\1cargoHash = \"\"|" \
   "$pkg"
 
 # Each FOD reports its own hash on first miss; build twice (src, then vendor).

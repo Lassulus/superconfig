@@ -11,16 +11,16 @@ rustPlatform.buildRustPackage {
   pname = "tincr";
   version = "0-unstable-2026-09-14";
 
-  # Our fork's fix branch until Mic92/tincr#101 lands: NAT-leaf dial
-  # (#100), stale-loop-clock auth timeouts, tunnel-address gate.
+  # Our fork's integration branch until Mic92/tincr#101 + #109 land: NAT-leaf dial
+  # (#100), stale-loop-clock auth timeouts, tunnel-address gate, PMTU-decrease recovery.
   src = fetchFromGitHub {
     owner = "Lassulus";
     repo = "tincr";
-    rev = "44220d98a08c73eaf61f5e75f6743843bfd58746";
-    hash = "sha256-K4iHJX3qHwgVXB6X05of1sjB57qMzY5mGCYuPODiHwY=";
+    rev = "b39022c8ee1cecc91036f6f53d7a5f48102bae41";
+    hash = "sha256-O7skZmTmaqGAAC49TGuRjs6wLWsulzCWOUlI38K191s=";
   };
 
-  cargoHash = "sha256-IaVZzNWxVIpzlLtE4xzt+gIBeIV6xX4/3C/eh1tlE04=";
+  cargoHash = "sha256-RcyJ7NV3EH6GeIbapsQGJLBx8BkWbiFeeR4CB8k12ak=";
 
   # Just the deployable bin crates; --workspace would pull tinc-ffi's cc.
   cargoBuildFlags = [

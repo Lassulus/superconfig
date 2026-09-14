@@ -40,7 +40,7 @@
 
     # Only for darwinModules.tincr (launchd plumbing); the package comes
     # from 5pkgs/tincr, which pins the same fork branch.
-    tincr.url = "github:Lassulus/tincr/fix/edge-walk-address";
+    tincr.url = "github:Lassulus/tincr/lassulus/fixes";
     tincr.inputs.nixpkgs.follows = "nixpkgs";
     tincr.inputs.treefmt-nix.follows = "treefmt-nix";
 
