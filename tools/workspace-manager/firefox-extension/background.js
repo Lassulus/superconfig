@@ -99,16 +99,35 @@ async function listWorkspaces() {
 // Throws on query failure so callers can distinguish "no Firefox windows"
 // from "we don't know" — a silent empty result here under load caused
 // duplicate window restoration.
+//
+// A workspace holding more than one Firefox window is ambiguous and is left
+// out of the map. This happens after every Firefox restart: session restore
+// reopens all windows on the focused workspace, and mapping any one of them to
+// that workspace would overwrite its file with another workspace's tabs.
 async function getFirefoxWindowMappings() {
   const resp = await sendNative("map_windows");
   if (resp.error) throw new Error(resp.error);
   if (!resp.windows) throw new Error("map_windows: no windows field");
+
+  const perWorkspace = new Map();
+  for (const mapping of resp.windows) {
+    perWorkspace.set(
+      mapping.workspace,
+      (perWorkspace.get(mapping.workspace) || 0) + 1,
+    );
+  }
 
   const allWindows = await browser.windows.getAll({ populate: true });
   const result = new Map();
   const matched = new Set();
 
   for (const mapping of resp.windows) {
+    if (perWorkspace.get(mapping.workspace) > 1) {
+      console.warn(
+        `Workspace ${mapping.workspace} has several Firefox windows — not mapping it`,
+      );
+      continue;
+    }
     const swayTitle = mapping.windowTitle || "";
     for (const win of allWindows) {
       if (matched.has(win.id) || win.id === anchorWindowId) continue;
