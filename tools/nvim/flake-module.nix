@@ -11,6 +11,20 @@
         # nixvim an older one — just drop the manpage (irrelevant to the editor).
         enableMan = false;
         vimAlias = true;
+        # Closure budget: ~100 MB. Everything below that isn't the editor or a
+        # plugin comes from PATH (project devshell / system) instead of being
+        # baked in: no python/ruby/node providers (no remote plugins are used),
+        # no git/bat/wl-clipboard on the wrapper PATH (desktops install
+        # wl-clipboard themselves; xdg-utils behind it costs 120 MB of perl),
+        # language servers unset (taken from the project devshell), and only
+        # the grammars we edit.
+        withPython3 = false;
+        withRuby = false;
+        withNodeJs = false;
+        waylandSupport = false;
+        enablePrintInit = false;
+        dependencies.git.enable = false;
+        dependencies.bat.enable = false;
         colorschemes = {
           ayu = {
             enable = true;
@@ -299,21 +313,48 @@
           };
         };
         plugins.lsp-format.enable = true;
-        plugins.lsp-lines.enable = true;
         plugins.lsp = {
           enable = true;
           servers = {
-            bashls.enable = true; # bash
+            bashls = {
+              enable = true; # bash
+              package = null;
+            };
             nixd = {
               enable = true; # nix
+              package = null;
               extraOptions.offset_encoding = "utf-8"; # workaround https://github.com/nix-community/nixvim/issues/2390#issuecomment-2408101568
             };
-            ruff.enable = true; # python
-            pyright.enable = true; # python
-            jsonls.enable = true; # json
+            ruff = {
+              enable = true; # python
+              package = null;
+            };
+            pyright = {
+              enable = true; # python
+              package = null;
+            };
+            jsonls = {
+              enable = true; # json
+              package = null;
+            };
           };
         };
-        plugins.treesitter.enable = true;
+        plugins.treesitter = {
+          enable = true;
+          grammarPackages = with pkgs.vimPlugins.nvim-treesitter.builtGrammars; [
+            bash
+            json
+            lua
+            markdown
+            markdown_inline
+            nix
+            python
+            toml
+            vim
+            vimdoc
+            yaml
+          ];
+        };
         plugins.cmp_yanky.enable = true;
         plugins.cmp = {
           enable = true;
