@@ -1135,11 +1135,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789400084,
-        "narHash": "sha256-HE+MuL2nE4MHp8pfcu2p4jgyqVowlXQfNTL3/T+2C+8=",
+        "lastModified": 1789400864,
+        "narHash": "sha256-sJ5sH0cP0+bEjFSspkP339jzwrSolZoYUVKopg8NDqc=",
         "owner": "Lassulus",
         "repo": "tincr",
-        "rev": "a101c6292323709769b970ba21b3a4610ea600d6",
+        "rev": "97b055f71ef80ea4b2d3e1e87b8819968ec00697",
         "type": "github"
       },
       "original": {

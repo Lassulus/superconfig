@@ -45,14 +45,22 @@ update_hash() {
 
 build_attr=".#packages.$system.$attr"
 
-if got=$(nix build --no-link "$build_attr" 2>&1 | tee /dev/stderr | extract_got) \
-    && [ -n "$got" ]; then
+# The probe build is *expected* to fail (hash mismatch); `|| true` keeps
+# pipefail/errexit from turning that into an empty `got`. awk must not
+# `exit` early or tee dies of SIGPIPE and takes the pipeline with it.
+probe_hash() {
+  { nix build --no-link "$build_attr" 2>&1 || true; } | tee /dev/stderr \
+    | awk '/got:/ && !seen { print $2; seen = 1 }' || true
+}
+
+got=$(probe_hash)
+if [ -n "$got" ]; then
   update_hash hash "$got"
   echo "$attr: src hash → $got"
 fi
 
-if got=$(nix build --no-link "$build_attr" 2>&1 | tee /dev/stderr | extract_got) \
-    && [ -n "$got" ]; then
+got=$(probe_hash)
+if [ -n "$got" ]; then
   update_hash cargoHash "$got"
   echo "$attr: cargoHash → $got"
 fi

@@ -16,8 +16,8 @@ rustPlatform.buildRustPackage {
   src = fetchFromGitHub {
     owner = "Lassulus";
     repo = "tincr";
-    rev = "b39022c8ee1cecc91036f6f53d7a5f48102bae41";
-    hash = "sha256-O7skZmTmaqGAAC49TGuRjs6wLWsulzCWOUlI38K191s=";
+    rev = "97b055f71ef80ea4b2d3e1e87b8819968ec00697";
+    hash = "sha256-sJ5sH0cP0+bEjFSspkP339jzwrSolZoYUVKopg8NDqc=";
   };
 
   cargoHash = "sha256-RcyJ7NV3EH6GeIbapsQGJLBx8BkWbiFeeR4CB8k12ak=";
