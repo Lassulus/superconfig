@@ -35,7 +35,9 @@
       incomplete-dir-enabled = false;
       rpc-bind-address = "::";
       message-level = 1;
-      umask = 18;
+      # 0o002: files 664 so sonarr/radarr (group download) can hardlink
+      # instead of copying (fs.protected_hardlinks needs owner or write)
+      umask = 2;
       rpc-whitelist-enabled = false;
       rpc-host-whitelist-enabled = false;
       # stop seeding after reaching 5.0 ratio
