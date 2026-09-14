@@ -10,6 +10,7 @@
     ../../2configs
     ../../2configs/retiolum.nix
     ../../2configs/tpm2.nix
+    ../../2configs/phonetpm.nix
     # ../../2configs/baseX.nix
     ../../2configs/desktops/sway/default.nix
     self.wrapperModules.workspace-manager
