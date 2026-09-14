@@ -9,13 +9,15 @@
 
 rustPlatform.buildRustPackage {
   pname = "tincr";
-  version = "0-unstable-2026-09-07";
+  version = "0-unstable-2026-09-14";
 
+  # Our fork's fix branch until Mic92/tincr#101 lands: NAT-leaf dial
+  # (#100), stale-loop-clock auth timeouts, tunnel-address gate.
   src = fetchFromGitHub {
-    owner = "Mic92";
+    owner = "Lassulus";
     repo = "tincr";
-    rev = "da74995ab9257057dcfce1d8b12926c77d81bc43";
-    hash = "sha256-oslhal/av02Ov8WOhgwVu14Juibrs7G/qVN5cA9Dqvo=";
+    rev = "44220d98a08c73eaf61f5e75f6743843bfd58746";
+    hash = "sha256-K4iHJX3qHwgVXB6X05of1sjB57qMzY5mGCYuPODiHwY=";
   };
 
   cargoHash = "sha256-IaVZzNWxVIpzlLtE4xzt+gIBeIV6xX4/3C/eh1tlE04=";

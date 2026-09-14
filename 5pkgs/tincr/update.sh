@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Tracks upstream Mic92/main.
-owner=Mic92
+# Tracks our fork's fix branch (Mic92/tincr#101); switch back to
+# Mic92/main once merged.
+owner=Lassulus
 repo=tincr
-branch=main
+branch=fix/edge-walk-address
 attr=tincr
 
 pkg="$(dirname "$(realpath "$0")")/package.nix"
