@@ -29,11 +29,20 @@
     stockholm.inputs.nixpkgs.follows = "nixpkgs";
     stockholm.inputs.buildbot-nix.follows = "";
 
-    # Host database + retiolum modules. barnacle (darwin) consumes these
-    # directly; the NixOS machines still get their host data through
-    # stockholm's older kartei pin.
+    # Host database only (modules/retiolum/hosts.nix), on every platform.
+    # The daemon is 5pkgs/tincr everywhere; barnacle imports tincr's own
+    # darwin module below, not kartei's retiolum shim.
     kartei.url = "github:krebs/kartei";
     kartei.inputs.nixpkgs.follows = "nixpkgs";
+    kartei.inputs.tincr.follows = "tincr";
+    kartei.inputs.crane.follows = "tincr/crane";
+    kartei.inputs.fenix.follows = "tincr/fenix";
+
+    # Only for darwinModules.tincr (launchd plumbing); the package comes
+    # from 5pkgs/tincr, which pins the same fork branch.
+    tincr.url = "github:Lassulus/tincr/fix/edge-walk-address";
+    tincr.inputs.nixpkgs.follows = "nixpkgs";
+    tincr.inputs.treefmt-nix.follows = "treefmt-nix";
 
     disko.url = "github:nix-community/disko";
     # disko.url = "path:/home/lass/src/disko/";

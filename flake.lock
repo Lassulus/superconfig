@@ -190,7 +190,7 @@
     "fenix": {
       "inputs": {
         "nixpkgs": [
-          "kartei",
+          "tincr",
           "nixpkgs"
         ],
         "rust-analyzer-src": "rust-analyzer-src"
@@ -476,12 +476,20 @@
     },
     "kartei": {
       "inputs": {
-        "crane": "crane",
-        "fenix": "fenix",
+        "crane": [
+          "tincr",
+          "crane"
+        ],
+        "fenix": [
+          "tincr",
+          "fenix"
+        ],
         "nixpkgs": [
           "nixpkgs"
         ],
-        "tincr": "tincr",
+        "tincr": [
+          "tincr"
+        ],
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
@@ -930,6 +938,7 @@
         "sigexec": "sigexec",
         "spora": "spora",
         "stockholm": "stockholm",
+        "tincr": "tincr",
         "treefmt-nix": "treefmt-nix_8",
         "wrappers": "wrappers"
       }
@@ -1116,33 +1125,26 @@
     },
     "tincr": {
       "inputs": {
-        "crane": [
-          "kartei",
-          "crane"
-        ],
-        "fenix": [
-          "kartei",
-          "fenix"
-        ],
+        "crane": "crane",
+        "fenix": "fenix",
         "nixpkgs": [
-          "kartei",
           "nixpkgs"
         ],
         "treefmt-nix": [
-          "kartei",
           "treefmt-nix"
         ]
       },
       "locked": {
-        "lastModified": 1789301661,
-        "narHash": "sha256-NdOx7bwXMMpmFsXFMO/6iLx+k/lyI6ck46tWHQgHWY8=",
-        "owner": "Mic92",
+        "lastModified": 1789372505,
+        "narHash": "sha256-K4iHJX3qHwgVXB6X05of1sjB57qMzY5mGCYuPODiHwY=",
+        "owner": "Lassulus",
         "repo": "tincr",
-        "rev": "779d35c89e5f1b8e13909c1f110d7fdd354a7d18",
+        "rev": "44220d98a08c73eaf61f5e75f6743843bfd58746",
         "type": "github"
       },
       "original": {
-        "owner": "Mic92",
+        "owner": "Lassulus",
+        "ref": "fix/edge-walk-address",
         "repo": "tincr",
         "type": "github"
       }

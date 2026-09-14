@@ -2,41 +2,75 @@
   self,
   config,
   pkgs,
+  lib,
   ...
 }:
 
-# Retiolum node, driven by kartei's nix-darwin retiolum module (host data
-# straight out of the kartei host database on top of tincr's own launchd
-# module, which also supplies the tincd package). The NixOS machines run the same
-# host database through nixpkgs' services.tinc instead, see
-# 2configs/retiolum.nix.
+# Retiolum node on nix-darwin. tincr's own darwin module does the launchd
+# plumbing; the daemon is the same 5pkgs/tincr the NixOS machines run (they
+# use nixpkgs' services.tinc, see 2configs/retiolum.nix). kartei is only the
+# host database here, same as on NixOS — its darwin retiolum shim would
+# pull tincd from kartei's own tincr pin instead.
 let
   net = "retiolum";
+  name = config.networking.hostName;
   vars = config.clan.core.vars.generators.${net};
+
+  kartei = import (self.inputs.kartei + "/modules/retiolum/hosts.nix") { inherit lib; };
+  # Nodes with no kartei card, known only inside superconfig.
+  local = self.retiolum;
+  own = kartei.own.${name} or local.own.${name};
 in
 {
-  imports = [ self.inputs.kartei.darwinModules.retiolum ];
+  imports = [ self.inputs.tincr.darwinModules.tincr ];
 
-  # nodename defaults to networking.hostName ("barnacle"); the addresses and
-  # aliases come from lass/hosts/barnacle in kartei.
+  services.tincr.package = self.packages.${pkgs.system}.tincr;
 
-  networking.retiolum.ed25519PrivateKeyFile = vars.files."${net}.ed25519_key.priv".path;
-
-  # Both merge with what kartei's module sets: hosts is attrsOf lines,
-  # connectTo is listOf str.
   services.tincr.networks.${net} = {
-    # Peers that only exist inside superconfig, on top of the kartei cards.
-    hosts = self.retiolum.tincHosts;
-
-    # kartei's module dials eve/eva/ni -- krebs hubs that only learn
-    # about barnacle when their own registry pins move. A laptop behind NAT
-    # needs relays we control, so also dial our own public servers; same list
-    # the NixOS nodes use in 2configs/retiolum.nix, plus starkstrom.
+    nodeName = name;
+    listenPort = 655;
+    ed25519PrivateKeyFile = vars.files."${net}.ed25519_key.priv".path;
+    hosts = kartei.tincHosts // local.tincHosts;
+    # eve/eva/ni/prism: the krebs hubs kartei's shim dialled. A laptop
+    # behind NAT also needs relays we control; same list as the NixOS
+    # nodes in 2configs/retiolum.nix, plus starkstrom.
     connectTo = [
+      "eve"
+      "eva"
+      "ni"
+      "prism"
       "neoprism"
       "starkstrom"
     ];
+    addresses = lib.optional (own.ip4 != null) "${own.ip4}/12" ++ [ "${own.ip6}/16" ];
+    extraConfig = ''
+      LocalDiscovery = yes
+      Broadcast = no
+    '';
   };
+
+  # No resolved on Darwin, so the tincr DNS stub cannot be routed
+  # per-suffix; keep a static hosts block, replaced in place on every
+  # darwin-rebuild via BEGIN/END markers.
+  system.activationScripts.postActivation.text =
+    let
+      hostsFile = if own.ip4 == null then kartei.extraHosts.v6only else kartei.extraHosts.v4v6;
+    in
+    lib.mkAfter ''
+      tmp=$(mktemp /private/etc/hosts.XXXXXX)
+      chmod 644 "$tmp"
+      awk '
+        /^# BEGIN RETIOLUM HOSTS$/ { skip=1; next }
+        /^# END RETIOLUM HOSTS$/   { skip=0; next }
+        !skip { print }
+      ' /private/etc/hosts > "$tmp"
+      {
+        echo "# BEGIN RETIOLUM HOSTS"
+        cat ${builtins.toFile "retiolum-hosts" hostsFile}
+        echo "# END RETIOLUM HOSTS"
+      } >> "$tmp"
+      mv "$tmp" /private/etc/hosts
+    '';
 
   # Same generator as 2configs/retiolum.nix, minus the RSA half: tincr is
   # SPTPS/Ed25519-only and kartei no longer wants an rsa.key.
@@ -59,10 +93,10 @@ in
     # a ready-made `Ed25519PublicKey = ...` line into hosts/$Name.
     script = ''
       mkdir -p "$out/hosts"
-      echo 'Name = ${config.networking.hostName}' >"$out/tinc.conf"
+      echo 'Name = ${name}' >"$out/tinc.conf"
       tinc --config "$out" generate-ed25519-keys
       mv "$out/ed25519_key.priv" "$out/${net}.ed25519_key.priv"
-      mv "$out/hosts/${config.networking.hostName}" "$out/${net}.ed25519_key.pub"
+      mv "$out/hosts/${name}" "$out/${net}.ed25519_key.pub"
       rm -r "$out/tinc.conf" "$out/hosts"
     '';
   };
