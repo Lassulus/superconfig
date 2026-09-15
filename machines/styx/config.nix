@@ -10,7 +10,6 @@
     ../../2configs/retiolum.nix
     ../../2configs/pipewire.nix
     ../../2configs/yellow-mounts/samba.nix
-    ../../2configs/gg23.nix
     ../../2configs/hass
     ../../2configs/n8n.nix
     ../../2configs/green-host.nix

@@ -6,7 +6,7 @@
 
   krebs.iptables.tables.filter.INPUT.rules = [
     {
-      predicate = "-i int0 -p tcp --dport 1883";
+      predicate = "-i et0 -p tcp --dport 1883";
       target = "ACCEPT";
     } # mosquitto
     {
@@ -14,11 +14,11 @@
       target = "ACCEPT";
     } # mosquitto
     {
-      predicate = "-i int0 -p tcp --dport 8123";
+      predicate = "-i et0 -p tcp --dport 8123";
       target = "ACCEPT";
     } # hass
     {
-      predicate = "-i int0 -p tcp --dport 1337";
+      predicate = "-i et0 -p tcp --dport 1337";
       target = "ACCEPT";
     } # zigbee2mqtt frontend
     {

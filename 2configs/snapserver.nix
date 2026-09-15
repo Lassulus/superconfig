@@ -22,7 +22,7 @@
     tcp.enable = true;
   };
 
-  networking.firewall.interfaces.int0.allowedTCPPorts = [
+  networking.firewall.interfaces.et0.allowedTCPPorts = [
     1704
     1705
     1780

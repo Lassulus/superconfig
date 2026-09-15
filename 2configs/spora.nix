@@ -15,8 +15,8 @@
       "--silent"
     ];
     peers = [
-      "quic://10.42.0.1:9651"
-      "tcp://10.42.0.1:9651"
+      "quic://10.42.0.3:9651"
+      "tcp://10.42.0.3:9651"
     ];
   };
   clan.core.vars.generators.mycelium = {

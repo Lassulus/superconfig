@@ -68,6 +68,13 @@
           MACAddress = "84:28:59:f0:d2:a8";
         };
       }
+      {
+        # styx (et0), ex-router: snapserver, mosquitto, mycelium peer
+        dhcpServerStaticLeaseConfig = {
+          Address = "10.42.0.3";
+          MACAddress = "3c:7c:3f:7e:e2:39";
+        };
+      }
       # {
       #   dhcpServerStaticLeaseConfig = {
       #     Address = "10.42.0.10";

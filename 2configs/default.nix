@@ -317,7 +317,8 @@
     }
   ]; # mosh
   networking.extraHosts = ''
-    10.42.0.1 styx.gg23
+    10.42.0.1 acheron.gg23
+    10.42.0.3 styx.gg23
   '';
 
   # use 24:00 time format, the default got sneakily changed around 20.03

@@ -18,7 +18,7 @@
       mqtt = {
         discovery = true;
         base_topic = "zigbee";
-        server = "mqtt://10.42.0.1";
+        server = "mqtt://127.0.0.1";
         user = "gg23";
         password = "gg23-mqtt";
       };
