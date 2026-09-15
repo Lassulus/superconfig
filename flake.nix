@@ -149,6 +149,7 @@
               tags = [ "server" ];
               deploy.forwardAgent = true;
             };
+            acheron.tags = [ "server" ];
           };
           instances = {
             tor = {

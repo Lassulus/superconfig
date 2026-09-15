@@ -74,6 +74,16 @@ rec {
         };
       };
     };
+    acheron = {
+      # gg23 router replacing styx; sits behind the vodafone NAT, so it dials
+      # out and is relayed like any other node (no via net).
+      nets.retiolum = {
+        ip4.addr = "10.243.11.2";
+        ip6.addr = "42:0:ce16::112";
+        aliases = [ "acheron.r" ];
+        tinc.pubkey_ed25519 = ed25519 "acheron";
+      };
+    };
   };
 
   # Same interface kartei's modules/retiolum/hosts.nix exposes, so consumers
