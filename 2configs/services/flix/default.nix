@@ -63,6 +63,8 @@
     ];
     script = ''
       set -efu
+      # transmission lives in its own netns (t1 = 128.0.0.1/30), this unit runs
+      # outside it (t2 = 128.0.0.2), so localhost is *not* the daemon here.
       TRANSMISSION_HOST="128.0.0.1:9091"
       MAX_AGE_DAYS=30
       MIN_RATIO=5.0

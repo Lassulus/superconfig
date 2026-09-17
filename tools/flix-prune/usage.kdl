@@ -1,0 +1,27 @@
+bin "flix-prune"
+about "Report disk usage per Sonarr series (joined with Jellyfin watch data) and delete/unmonitor them without leaving Sonarr re-downloading"
+
+cmd "list" help="Show series by size on disk, with Jellyfin watch info" {
+  flag "--untouched" help="Only series nobody ever started watching"
+  flag "--min-size" help="Skip series smaller than N GiB" {
+    arg "<gib>"
+  }
+  flag "--json" help="Emit raw JSON instead of a table"
+}
+
+cmd "delete" help="Delete files, remove the series from Sonarr and exclude it from import lists" {
+  arg "<series>..." help="Series title (exact, case-insensitive) or Sonarr id"
+  flag "--yes" help="Actually delete; without it only a dry-run report is printed"
+  flag "--keep-exclusion" help="Do not add an import list exclusion"
+}
+
+cmd "unmonitor" help="Stop Sonarr from grabbing more episodes but keep existing files" {
+  arg "<series>..." help="Series title (exact, case-insensitive) or Sonarr id"
+}
+
+flag "--sonarr-url" help="Sonarr base URL (default http://127.0.0.1:8989, env SONARR_URL)" {
+  arg "<url>"
+}
+flag "--jellyfin-db" help="Jellyfin library db (default /var/lib/jellyfin/data/jellyfin.db, env JELLYFIN_DB)" {
+  arg "<path>"
+}
