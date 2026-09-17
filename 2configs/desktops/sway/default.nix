@@ -217,7 +217,6 @@ in
   imports = [
     ../lib/wayland.nix
     ./noctalia.nix
-    ./wallpaper.nix
   ];
   programs.sway = {
     enable = true;

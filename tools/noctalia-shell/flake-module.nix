@@ -15,10 +15,14 @@
             # Mirror noctalia's dark mode toggle to the system theme.
             darkModeChange = ''if [ "$1" = "true" ]; then switch-theme dark; else switch-theme light; fi'';
           };
-          # The live desktop wallpaper is rendered by mpvpaper on the
-          # background layer (see 2configs/desktops/sway/wallpaper.nix), so
-          # noctalia's own wallpaper is turned off to let it show through.
-          wallpaper.enabled = false;
+          # noctalia owns the desktop background. It draws a static image (or
+          # a solid colour), unlike the mpvpaper live video wallpaper it
+          # replaced: a looping video on every output means every frame is
+          # full-screen motion, which is unusable for the sunshine-streamed
+          # tablet screen (2configs/tablet-screen.nix) and pointless power
+          # draw on the real ones. Pick the image in noctalia's wallpaper
+          # panel; only `enabled` is pinned here.
+          wallpaper.enabled = true;
           # DDC/CI control for external monitors via ddcutil. Inert on
           # machines without DDC/CI-capable displays (detection finds
           # nothing, internal backlight path is used as before).
