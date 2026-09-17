@@ -31,6 +31,7 @@
     ../../2configs/services/pad
 
     ../../2configs/hass/proxy.nix
+    ../../2configs/hermes-proxy.nix
 
     # sync-containers
     ../../2configs/consul.nix

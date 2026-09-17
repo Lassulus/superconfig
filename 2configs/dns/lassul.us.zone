@@ -50,6 +50,7 @@ mergebot IN CNAME neoprism
 cdio IN CNAME neoprism
 c IN CNAME neoprism
 hass IN CNAME neoprism
+hermes IN CNAME neoprism
 vault IN CNAME neoprism
 cal IN CNAME neoprism
 kanban IN CNAME neoprism
