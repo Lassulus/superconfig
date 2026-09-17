@@ -247,7 +247,6 @@
   security.acme.defaults.email = "spam@krebsco.de";
   security.acme.acceptTerms = true;
   security.acme.certs."yellow.r".server = config.krebs.ssl.acmeURL;
-  security.acme.certs."jelly.r".server = config.krebs.ssl.acmeURL;
   security.acme.certs."radar.r".server = config.krebs.ssl.acmeURL;
   security.acme.certs."sonar.r".server = config.krebs.ssl.acmeURL;
   security.acme.certs."transmission.r".server = config.krebs.ssl.acmeURL;
@@ -279,8 +278,6 @@
 
     };
     virtualHosts."jelly.r" = {
-      enableACME = true;
-      addSSL = true;
       locations."/".extraConfig = ''
         proxy_pass http://localhost:8096/;
         proxy_set_header Accept-Encoding "";
