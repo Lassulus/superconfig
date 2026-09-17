@@ -13,6 +13,14 @@ set -efu
 CACHE_KEY="pinentry-rofi-pin"
 CACHE_TIMEOUT=300  # 5 minutes
 
+# Hard limit on how long a dialog may sit unanswered. Without it, a prompt
+# nobody answers (lost workspace, requester already dead) hangs forever, and
+# ssh-tpm-agent serializes TPM access behind it: every later signature blocks,
+# so all ssh auth on the machine wedges until the stray rofi is killed by hand.
+# On expiry `timeout` exits 124, which the callers treat like a cancel, so the
+# requester gets a failed auth it can retry instead of a deadlock.
+PROMPT_TIMEOUT="${PINENTRY_ROFI_TIMEOUT:-120}"
+
 # ---------- cache helpers ----------
 
 get_cached_pin() {
@@ -106,7 +114,7 @@ rofi_prompt() {
     local cached_pin=""
     if cached_pin=$(get_cached_pin 2>/dev/null) && [[ -n "$cached_pin" ]]; then
       local choice
-      choice=$(printf "OK\nCancel\nClear cache" | rofi -dmenu \
+      choice=$(printf "OK\nCancel\nClear cache" | timeout -k 5 "$PROMPT_TIMEOUT" rofi -dmenu \
         -i \
         -no-custom \
         -no-fixed-num-lines \
@@ -131,7 +139,7 @@ rofi_prompt() {
   fi
 
   local result
-  result=$(rofi -dmenu \
+  result=$(timeout -k 5 "$PROMPT_TIMEOUT" rofi -dmenu \
     -password \
     -p "$prompt_label" \
     -lines 0 \
