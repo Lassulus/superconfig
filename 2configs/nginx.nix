@@ -14,6 +14,19 @@
 
     enableReload = true;
 
+    # nginx defaults to one worker with 512 connections, and a proxied
+    # websocket costs two of them (client + upstream). maze.lassul.us hit
+    # "512 worker_connections are not enough" at ~250 players, which takes
+    # down every other vhost on the box with it.
+    eventsConfig = ''
+      worker_connections 8192;
+      multi_accept on;
+    '';
+    appendConfig = ''
+      worker_processes auto;
+      worker_rlimit_nofile 65536;
+    '';
+
     # avoid nixpkgs nginx's /tmp/nginx_* compile-time defaults: under
     # systemd PrivateTmp they don't survive a host `rm -rf /tmp/*`.
     appendHttpConfig = ''
@@ -36,4 +49,7 @@
       locations."~ ^/.well-known/acme-challenge/".root = "/var/lib/acme/acme-challenge";
     };
   };
+
+  # worker_rlimit_nofile above only matters if systemd lets nginx have them.
+  systemd.services.nginx.serviceConfig.LimitNOFILE = 65536;
 }
