@@ -18,23 +18,27 @@ in
   services.nginx.virtualHosts.${domain} = {
     enableACME = true;
     forceSSL = true;
-    # nginx hands out the client straight from the store. The game server is a
-    # single event loop: every .js it serves during a join burst is time it is
-    # not spending on the world tick, and a crowd arriving costs six files
-    # each.
-    # …the very package the service runs, so the client never lags the server.
+    # nginx hands out the client straight from the store — the very package
+    # the service runs, so the page never lags the server. The game is a
+    # single event loop: every .js it serves during a join burst is a tick it
+    # is not spending on the world, and a crowd arriving costs six files each.
     root = config.services.mazegame.package.static;
     locations."/" = {
       index = "index.html";
       tryFiles = "$uri $uri/ =404";
-      extraConfig = ''
-        # Versions ride in the store path, but the URLs never change, so let
-        # the browser revalidate rather than cache a stale client.
-        add_header Cache-Control "no-cache";
-      '';
+      # Versions ride in the store path but the URLs never change, so let the
+      # browser revalidate against the ETag rather than cache a stale client.
+      # add_header does not inherit into the exact-match locations below.
+      extraConfig = ''add_header Cache-Control "no-cache";'';
     };
-    locations."= /play".tryFiles = "/index.html =404";
-    locations."= /watch".tryFiles = "/watch.html =404";
+    locations."= /play" = {
+      tryFiles = "/index.html =404";
+      extraConfig = ''add_header Cache-Control "no-cache";'';
+    };
+    locations."= /watch" = {
+      tryFiles = "/watch.html =404";
+      extraConfig = ''add_header Cache-Control "no-cache";'';
+    };
 
     # Player and watcher sockets stay open for as long as someone is in the
     # maze; players heartbeat every 3s, watchers every 3s, so the default
