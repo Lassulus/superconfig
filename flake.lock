@@ -552,6 +552,26 @@
         "type": "github"
       }
     },
+    "mazegame": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789920601,
+        "narHash": "sha256-4TNAueQrBZVXdd5Xng2762caj03rY4knT++CRdLCSdk=",
+        "owner": "lassulus",
+        "repo": "mazegame",
+        "rev": "144886275b4fcde442e71aaf5a7827b2e70e81f2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lassulus",
+        "repo": "mazegame",
+        "type": "github"
+      }
+    },
     "nether": {
       "inputs": {
         "clan-core": [
@@ -924,6 +944,7 @@
         "kartei": "kartei",
         "le_menu": "le_menu",
         "llm-agents": "llm-agents",
+        "mazegame": "mazegame",
         "nether": "nether",
         "nix-darwin": "nix-darwin_2",
         "nix-index-database": "nix-index-database",
