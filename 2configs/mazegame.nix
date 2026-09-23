@@ -15,6 +15,15 @@ in
     port = port;
   };
 
+  # One address may hold a household's worth of tabs and join at a human
+  # pace. Without this a single host opened ~2500 sockets at once and churned
+  # thousands more, and the thread-per-socket server ran out of tasks for
+  # everyone else.
+  services.nginx.appendHttpConfig = ''
+    limit_conn_zone $binary_remote_addr zone=mazegame_conns:10m;
+    limit_req_zone $binary_remote_addr zone=mazegame_joins:10m rate=2r/s;
+  '';
+
   services.nginx.virtualHosts.${domain} = {
     enableACME = true;
     forceSSL = true;
@@ -50,6 +59,10 @@ in
       extraConfig = ''
         proxy_read_timeout 1h;
         proxy_send_timeout 1h;
+        limit_conn mazegame_conns 32;
+        limit_req zone=mazegame_joins burst=30 nodelay;
+        limit_conn_status 429;
+        limit_req_status 429;
       '';
     };
     locations."/api/" = {
