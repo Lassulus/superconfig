@@ -87,7 +87,6 @@
     self.packages.${pkgs.system}.bank
     pkgs.ddcutil
     pkgs.mycelium
-    pkgs.tmate
     pkgs.rbw
   ];
 
