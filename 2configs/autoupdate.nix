@@ -2,20 +2,19 @@
   config,
   lib,
   pkgs,
-  self,
   ...
 }:
 let
   flake = "github:lassulus/superconfig";
 
-  # Timestamp of the flake revision this system was built from, baked into the
-  # closure so the running system knows how old its own source is.
-  stampFile = "/run/current-system/source-lastModified";
-
   # system.autoUpgrade switches to whatever the flake currently evaluates to,
   # forwards or backwards. A machine deployed from an unpushed local checkout
   # therefore gets reverted to the older remote HEAD on the next timer run.
-  # Refuse to move backwards in time.
+  # Refuse to move backwards in time: only upgrade to a revision committed
+  # after the running system was deployed. The deploy time is when its profile
+  # generation was created (/run/current-system's mtime if no generation points
+  # at it); the source's own lastModified is no use, since `clan machines
+  # update` builds from a path: flake, which has none.
   guard = pkgs.writeShellApplication {
     name = "autoupgrade-forward-only";
     runtimeInputs = [
@@ -24,17 +23,24 @@ let
       pkgs.jq
     ];
     text = ''
-      stamp=''${1:-${stampFile}}
-      current=$(cat "$stamp" 2>/dev/null || echo 0)
+      system=$(readlink -f /run/current-system)
+      deployed=0
+      for link in /nix/var/nix/profiles/system-*-link; do
+        if [ "$(readlink -f "$link")" = "$system" ]; then
+          created=$(stat -c %Y "$link")
+          if [ "$created" -gt "$deployed" ]; then deployed=$created; fi
+        fi
+      done
+      if [ "$deployed" -eq 0 ]; then deployed=$(stat -c %Y /run/current-system); fi
       if ! meta=$(nix flake metadata --refresh --json ${lib.escapeShellArg flake}); then
         echo "autoupgrade: cannot reach ${flake}; letting nixos-upgrade report the error"
         exit 0
       fi
       remote=$(jq -r '.lastModified // 0' <<<"$meta")
-      if [ "$remote" -gt "$current" ]; then
+      if [ "$remote" -gt "$deployed" ]; then
         exit 0
       fi
-      echo "autoupgrade: ${flake} is at $remote, running system is at $current; skipping"
+      echo "autoupgrade: ${flake} is at $remote, running system was deployed at $deployed; skipping"
       exit 1
     '';
   };
@@ -45,10 +51,6 @@ in
     inherit flake;
     randomizedDelaySec = "6h";
   };
-
-  system.extraSystemBuilderCmds = ''
-    echo -n ${toString (self.lastModified or 0)} > $out/source-lastModified
-  '';
 
   systemd.services.nixos-upgrade.serviceConfig.ExecCondition = lib.getExe guard;
 }
