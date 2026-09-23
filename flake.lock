@@ -91,17 +91,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1788872673,
-        "narHash": "sha256-uqHIyjYh1+4OooxCmVQBrdIW9+Hc561Wgewqou5vGME=",
-        "owner": "lassulus",
-        "repo": "covibe",
-        "rev": "c8cb31412c6a53c2bfc82ede234d4f62cb296f69",
-        "type": "github"
+        "lastModified": 1790136920,
+        "narHash": "sha256-0MLRgNWZW0QtwEG4YTCSblU55OPo/hzBqdu94JOaBOg=",
+        "ref": "refs/heads/main",
+        "rev": "10667f51554ed03c7a9c99f3353143b4395880cc",
+        "revCount": 89,
+        "type": "git",
+        "url": "https://git.geninf.io/Lassulus/covibe"
       },
       "original": {
-        "owner": "lassulus",
-        "repo": "covibe",
-        "type": "github"
+        "type": "git",
+        "url": "https://git.geninf.io/Lassulus/covibe"
       }
     },
     "crane": {

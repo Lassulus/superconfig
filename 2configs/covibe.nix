@@ -9,7 +9,7 @@ in
   ...
 }:
 {
-  # covibe: co-vibing dashboard. Launches omp sessions in zellij as the
+  # covibe: co-vibing dashboard. Launches omp sessions in herdr as the
   # pairprogramming user, shows live sessions + collab QR codes, and exposes a
   # REST API. Browser auth via the local pocket-id IdP (id.lassul.us); the REST
   # surface additionally accepts a generated API key. Collab uses omp's native
