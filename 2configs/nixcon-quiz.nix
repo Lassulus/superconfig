@@ -13,6 +13,9 @@ in
   # after deploying; until then the service is skipped:
   #   rsync -r --delete ~/src/nixcon-quiz/questions/ root@neoprism.r:/var/lib/nixcon-quiz/questions/
   #   ssh root@neoprism.r systemctl restart nixcon-quiz
+  # Break slides for /spectate (PDF/PNG/JPEG/WebP, not in any repository
+  # either) are picked up without a restart:
+  #   rsync -r --delete ~/src/nixcon-quiz/slides/ root@neoprism.r:/var/lib/nixcon-quiz/slides/
   imports = [ self.inputs.nixcon-quiz.nixosModules.default ];
 
   services.nixcon-quiz = {
