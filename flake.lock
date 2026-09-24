@@ -67,11 +67,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1790090350,
-        "narHash": "sha256-WaVFbTbu8cMNf0c3xcmmg5JTjS5WNVFTCPXfUdM6naI=",
+        "lastModified": 1790174689,
+        "narHash": "sha256-GsCo4oro8j22AGYKcfeJGEBQj5HqZ1oGX0LqK0ISgag=",
         "ref": "refs/heads/main",
-        "rev": "483bd1b39cbb430412cca98ecae7279a0f1c379e",
-        "revCount": 15313,
+        "rev": "c612dac4b2bfb5278b7c366f250044ddb5401bcb",
+        "revCount": 15315,
         "type": "git",
         "url": "https://git.clan.lol/clan/clan-core"
       },
@@ -440,11 +440,11 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1790169092,
-        "narHash": "sha256-IfnnePX0rP+kFTeAX1SmcXGI4RGtGlQvph/ahUPf67o=",
+        "lastModified": 1790255973,
+        "narHash": "sha256-x0u5jamTxwQn4XGmmgTAW583UgKTEBmmjz2/3GNDDYQ=",
         "owner": "nousresearch",
         "repo": "hermes-agent",
-        "rev": "1769024ca3bae711d039f12b72cfaee581cd18c6",
+        "rev": "30565b2db235d48d3f1ab42bcc63645a45dd94fa",
         "type": "github"
       },
       "original": {
@@ -493,11 +493,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1789908092,
-        "narHash": "sha256-jBTXL8I6wVrHHH6CCpgOYvGRokjO8qzP1PgmgDQ2IjI=",
+        "lastModified": 1790199138,
+        "narHash": "sha256-KqiBnE998ddiNFMbUEQ2Rg4TLvYz8FK4WnUPqDN3Sis=",
         "owner": "krebs",
         "repo": "kartei",
-        "rev": "4652ce6babd8590f010c17bbeae0c8c52cd28489",
+        "rev": "f8f5d0fec3f2b8e38f7ae5996d94bbfc409a2d63",
         "type": "github"
       },
       "original": {
@@ -539,11 +539,11 @@
         "treefmt-nix": "treefmt-nix_4"
       },
       "locked": {
-        "lastModified": 1790156955,
-        "narHash": "sha256-fX01id/iJpSbHzVDYgrQHy1vr7OsqCZrNAwfYsestLQ=",
+        "lastModified": 1790255433,
+        "narHash": "sha256-a/tZWRpZsIIh6mY16bR57/8hbkCFDASasOxrQjMTekY=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "06830d044f23ec9bc55cec62771122d2941c634d",
+        "rev": "c2d669b6ed4001f1f7c2a45cf14724467387cbe0",
         "type": "github"
       },
       "original": {
@@ -777,11 +777,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787963050,
-        "narHash": "sha256-yt4H/X9CU2iaLl2NJ/MBycQs7Jl0tbJP5uuDdGWiPGg=",
+        "lastModified": 1790256478,
+        "narHash": "sha256-jnU8wDRoMIUxuT0AgGYxqPucIf3cOAwWrmB23xarCXI=",
         "owner": "simple-nixos-mailserver",
         "repo": "nixos-mailserver",
-        "rev": "27b3c74d96351b770ec8216430d5d947290917e9",
+        "rev": "2c3a8c4e36ab8190010f9f104e48d042cc65b05f",
         "type": "gitlab"
       },
       "original": {
@@ -805,11 +805,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1790046670,
-        "narHash": "sha256-MYiI+CzL0tuWgRPjGsKCDHqYs2T3OzMlMQWOYWG0qso=",
+        "lastModified": 1790185690,
+        "narHash": "sha256-xJ+X4hBtOcAFGBOe5nAMyMUeF9foJBmIOu3NjBqBycU=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "6774f7bc253789b113a4f39285dc0fa100abeacc",
+        "rev": "4975466d324710c576dc11ad614684e6bd8cad8e",
         "type": "github"
       },
       "original": {
