@@ -721,11 +721,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790251394,
-        "narHash": "sha256-spheu/tgAXb7m29//Y24hblCZa7cJ9UcIo9VEl9FoFs=",
+        "lastModified": 1790260532,
+        "narHash": "sha256-5peue44WCA9ddvbRjUxa7/LmzqdF1CtKDdGWgRh40PU=",
         "owner": "lassulus",
         "repo": "nixcon-quiz",
-        "rev": "b0db3f747cc830c7c823aa73f423d386b8adc3fe",
+        "rev": "0cfb384a33188a60278e85a9b010c754f7880092",
         "type": "github"
       },
       "original": {

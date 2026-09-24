@@ -1,5 +1,5 @@
 let
-  domain = "quiz.lassul.us";
+  domain = "quiz.nixcon.org";
   port = 8773;
 in
 { self, ... }:
@@ -38,4 +38,11 @@ in
     limit_conn_status 429;
     limit_req_status 429;
   '';
+
+  # The quiz's first home; old links and QR codes land on the new name.
+  services.nginx.virtualHosts."quiz.lassul.us" = {
+    enableACME = true;
+    forceSSL = true;
+    globalRedirect = domain;
+  };
 }
