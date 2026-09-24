@@ -22,7 +22,7 @@ in
     enable = true;
     host = "127.0.0.1";
     inherit port domain;
-    questionSeconds = 20;
+    questionSeconds = 30;
   };
 
   # One address may hold a few tabs (players and a spectator screen) and
