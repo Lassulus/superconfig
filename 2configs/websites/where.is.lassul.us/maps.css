@@ -1,0 +1,23 @@
+/* button grid for "open in" links; shared by index.html and at.html */
+.open {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5em;
+}
+.open a,
+.open button {
+  display: block;
+  padding: 0.8em;
+  border: 0;
+  border-radius: 0.4em;
+  text-align: center;
+  text-decoration: none;
+  font: inherit;
+  color: #fff;
+  background: #333;
+  cursor: pointer;
+}
+.open a:active,
+.open button:active {
+  background: #39f;
+}

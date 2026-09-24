@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>lassulus was here</title>
+    <link rel="stylesheet" href="/leaflet/leaflet.css" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #111;
+        color: #eee;
+        font: 16px/1.4 monospace;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+      #map {
+        flex: 1;
+        min-height: 40vh;
+      }
+      #panel {
+        padding: 1em;
+      }
+      #when,
+      #coords {
+        margin: 0 0 0.75em;
+      }
+      #coords {
+        user-select: all;
+        color: #aaa;
+      }
+      #open {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5em;
+      }
+      #open a {
+        display: block;
+        padding: 0.8em;
+        border-radius: 0.4em;
+        text-align: center;
+        text-decoration: none;
+        color: #fff;
+        background: #333;
+      }
+      #open a:active {
+        background: #39f;
+      }
+      #live {
+        display: block;
+        margin-top: 1em;
+        color: #9cf;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="panel">
+      <p id="when"></p>
+      <p id="coords"></p>
+      <div id="open"></div>
+      <a id="live" href="/">live location →</a>
+    </div>
+    <script src="/leaflet/leaflet.js"></script>
+    <script>
+      (function () {
+        // /at#LAT,LON[@UNIXTIME]; the fragment never reaches the server
+        var m = /^#(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)(?:@(\d+))?$/.exec(
+          location.hash,
+        );
+        var lat = m && parseFloat(m[1]),
+          lon = m && parseFloat(m[2]);
+        var when = document.getElementById("when");
+        if (!m || Math.abs(lat) > 90 || Math.abs(lon) > 180) {
+          document.getElementById("map").remove();
+          when.textContent = "no location in this link";
+          return;
+        }
+
+        var map = L.map("map").setView([lat, lon], 16);
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        }).addTo(map);
+        L.marker([lat, lon]).addTo(map);
+
+        if (m[3]) {
+          var t = new Date(parseInt(m[3], 10) * 1000);
+          when.textContent = "lassulus was here at " + t.toLocaleString();
+        } else {
+          when.textContent = "lassulus was here";
+        }
+        document.getElementById("coords").textContent = lat + ", " + lon;
+
+        // iOS has no handler for geo: (iPadOS reports itself as a Mac)
+        var ios =
+          /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+          (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+        var ll = lat + "," + lon;
+        var links = [
+          [
+            "Google Maps",
+            "https://www.google.com/maps/search/?api=1&query=" +
+              encodeURIComponent(ll),
+          ],
+          [
+            "Apple Maps",
+            "https://maps.apple.com/?ll=" + ll + "&q=lassulus",
+          ],
+          // android: app chooser incl. OsmAnd, Organic Maps, ...
+          ios ? null : ["other app", "geo:" + ll + "?q=" + ll + "(lassulus)"],
+          [
+            "OpenStreetMap",
+            "https://www.openstreetmap.org/?mlat=" +
+              lat +
+              "&mlon=" +
+              lon +
+              "#map=16/" +
+              lat +
+              "/" +
+              lon,
+          ],
+        ];
+        var open = document.getElementById("open");
+        links.forEach(function (l) {
+          if (!l) return;
+          var a = document.createElement("a");
+          a.textContent = l[0];
+          a.href = l[1];
+          open.appendChild(a);
+        });
+      })();
+    </script>
+  </body>
+</html>
