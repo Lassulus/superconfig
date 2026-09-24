@@ -108,6 +108,9 @@
     mazegame.url = "github:lassulus/mazegame";
     mazegame.inputs.nixpkgs.follows = "nixpkgs";
 
+    nixcon-quiz.url = "github:lassulus/nixcon-quiz";
+    nixcon-quiz.inputs.nixpkgs.follows = "nixpkgs";
+
   };
 
   outputs =

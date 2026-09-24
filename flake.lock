@@ -714,6 +714,26 @@
         "url": "https://cgit.krebsco.de/nix-writers"
       }
     },
+    "nixcon-quiz": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790236473,
+        "narHash": "sha256-JD+IOEI2pLelc99dKpOAkpw+FubcRLZDtU2K8Jotnkg=",
+        "owner": "lassulus",
+        "repo": "nixcon-quiz",
+        "rev": "89d1ca98b25909f326b354b86337b500c162e2af",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lassulus",
+        "repo": "nixcon-quiz",
+        "type": "github"
+      }
+    },
     "nixos-facter": {
       "locked": {
         "lastModified": 1773858690,
@@ -949,6 +969,7 @@
         "nix-darwin": "nix-darwin_2",
         "nix-index-database": "nix-index-database",
         "nix-rosetta-builder": "nix-rosetta-builder",
+        "nixcon-quiz": "nixcon-quiz",
         "nixos-facter": "nixos-facter",
         "nixos-hardware": "nixos-hardware",
         "nixos-mailserver": "nixos-mailserver",
