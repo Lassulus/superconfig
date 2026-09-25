@@ -559,11 +559,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790337242,
-        "narHash": "sha256-BFPpYnEHPQEQR8PB7N/UQBMY/3z81w8MW5dE8lFcgU0=",
+        "lastModified": 1790347880,
+        "narHash": "sha256-DNCcaFut2sLarTKKnsPopxu2VujJvZdWxpjXOTZ8m2A=",
         "owner": "lassulus",
         "repo": "mazegame",
-        "rev": "c6bd55421b9db44393ad01a9351414dcf82b04f2",
+        "rev": "8ffc6c83edc2042addc6f8767f54640761a6bcda",
         "type": "github"
       },
       "original": {
