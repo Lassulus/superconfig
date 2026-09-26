@@ -25,19 +25,9 @@ in
     questionSeconds = 30;
   };
 
-  # One address may hold a few tabs (players and a spectator screen) and
-  # reload at a human pace; each tab keeps one event stream open.
-  services.nginx.appendHttpConfig = ''
-    limit_conn_zone $binary_remote_addr zone=nixcon_quiz_conns:10m;
-    limit_req_zone $binary_remote_addr zone=nixcon_quiz_joins:10m rate=5r/s;
-  '';
-
-  services.nginx.virtualHosts.${domain}.locations."/api/events".extraConfig = ''
-    limit_conn nixcon_quiz_conns 16;
-    limit_req zone=nixcon_quiz_joins burst=30 nodelay;
-    limit_conn_status 429;
-    limit_req_status 429;
-  '';
+  # No per-address limits on the event streams: the venue Wi-Fi puts every
+  # phone at NixCon behind one public address, so a per-IP cap cuts off
+  # everyone past the first few players. The quiz caps players itself.
 
   # The quiz's first home; old links and QR codes land on the new name.
   services.nginx.virtualHosts."quiz.lassul.us" = {
