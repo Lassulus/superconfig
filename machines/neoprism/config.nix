@@ -119,12 +119,6 @@
     # omnigent agent meta-harness (omni.lassul.us)
     ../../2configs/omnigent.nix
 
-    # browser maze game with spectator camera (maze.lassul.us)
-    ../../2configs/mazegame.nix
-
-    # live NixCon quiz with a livestream screen (quiz.nixcon.org)
-    ../../2configs/nixcon-quiz.nix
-
     # radicle public seed (radicle.lassul.us)
     ../../2configs/radicle.lassul.us.nix
     # radicle identity + node for this machine (/var/lib/rad)

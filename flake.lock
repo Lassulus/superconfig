@@ -552,26 +552,6 @@
         "type": "github"
       }
     },
-    "mazegame": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1790402647,
-        "narHash": "sha256-2zOf4YQwkY8KnXCWfrAxS/wRtK8uHuarYV0n1M346H0=",
-        "owner": "lassulus",
-        "repo": "mazegame",
-        "rev": "b4f5491b7abe92a35380796ada4c90b8c7f0fd8e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "lassulus",
-        "repo": "mazegame",
-        "type": "github"
-      }
-    },
     "nether": {
       "inputs": {
         "clan-core": [
@@ -712,26 +692,6 @@
       "original": {
         "type": "git",
         "url": "https://cgit.krebsco.de/nix-writers"
-      }
-    },
-    "nixcon-quiz": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1790428779,
-        "narHash": "sha256-FJaGc+Ez48FVKz827SjmI++Wphabu3Bi1lFAzWVhriM=",
-        "owner": "lassulus",
-        "repo": "nixcon-quiz",
-        "rev": "e38f7ca4fb55031d2ebcf12f391b31394045522f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "lassulus",
-        "repo": "nixcon-quiz",
-        "type": "github"
       }
     },
     "nixos-facter": {
@@ -964,12 +924,10 @@
         "kartei": "kartei",
         "le_menu": "le_menu",
         "llm-agents": "llm-agents",
-        "mazegame": "mazegame",
         "nether": "nether",
         "nix-darwin": "nix-darwin_2",
         "nix-index-database": "nix-index-database",
         "nix-rosetta-builder": "nix-rosetta-builder",
-        "nixcon-quiz": "nixcon-quiz",
         "nixos-facter": "nixos-facter",
         "nixos-hardware": "nixos-hardware",
         "nixos-mailserver": "nixos-mailserver",
