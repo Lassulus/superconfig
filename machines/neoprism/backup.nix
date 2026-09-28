@@ -20,6 +20,7 @@
   systemd.tmpfiles.rules = [
     "d /var/backup 0700 root root -"
     "d /var/backup/postgresql 0700 root root -"
+    "d /var/backup/parley 0700 root root -"
   ];
 
   services.borgbackup.jobs.hetzner = {
@@ -36,6 +37,9 @@
       "/var/dkim"
       "/var/sieve"
       "/var/lib/heisenbridge"
+      # identity.key also lives in clan vars; the SQLite databases are
+      # dumped consistently to /var/backup/parley by the preHook.
+      "/var/lib/parley"
     ];
     exclude = [
       "*.pyc"
@@ -43,6 +47,7 @@
       "/home/bot/.nix-defexpr"
       "/home/bot/.nix-profile"
       "/var/lib/kannix/.cache"
+      "/var/lib/parley/*.db*"
     ];
     repo = "u550643@u550643.your-storagebox.de:/./neoprism";
     encryption.mode = "none";
@@ -61,6 +66,8 @@
     readWritePaths = [
       "/var/backup"
       "/var/lib/hedgedoc"
+      # WAL-mode SQLite readers need to write the -shm file
+      "/var/lib/parley"
     ];
 
     preHook = ''
@@ -78,6 +85,11 @@
 
       # Dump hedgedoc SQLite database (172MB) safely
       ${pkgs.sqlite}/bin/sqlite3 /var/lib/hedgedoc/db.sqlite ".backup /var/backup/hedgedoc.sqlite"
+
+      # Dump parley accounts + history SQLite databases safely
+      for db in parley history; do
+        ${pkgs.sqlite}/bin/sqlite3 "/var/lib/parley/$db.db" ".backup /var/backup/parley/$db.db"
+      done
     '';
 
     postHook = ''

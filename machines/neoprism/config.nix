@@ -140,6 +140,9 @@
     # sigexec.lassul.us)
     ../../2configs/sigexec/executor.nix
     ../../2configs/sigexec/dashboard.nix
+
+    # parley federated IRC-speaking chat (parley.lassul.us)
+    ../../2configs/parley.nix
   ];
 
   # lassul.us shouldn't be the default vhost here (nginx.nix already sets one)
