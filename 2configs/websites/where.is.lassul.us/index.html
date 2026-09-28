@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>where is lassulus?</title>
     <link rel="stylesheet" href="/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="/maps.css" />
     <style>
       html,
       body {
@@ -30,12 +31,100 @@
       #info a {
         color: #9cf;
       }
+      .ctl a {
+        font-size: 18px;
+        text-decoration: none;
+      }
+      .ctl a.on {
+        background: #39f;
+      }
+      #compass {
+        display: none;
+        position: absolute;
+        z-index: 1000;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 14em;
+        padding: 1em;
+        border-radius: 1em;
+        text-align: center;
+        font: 14px/1.4 monospace;
+        color: #eee;
+        background: rgba(0, 0, 0, 0.75);
+        pointer-events: none;
+      }
+      body.nav #compass {
+        display: block;
+      }
+      #arrow {
+        width: 10em;
+        height: 10em;
+        transition: transform 0.2s linear;
+      }
+      #dist {
+        font-size: 2em;
+        font-weight: bold;
+      }
+      #sheet {
+        display: none;
+        position: absolute;
+        z-index: 1001;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 1em;
+        border-radius: 1em 1em 0 0;
+        font: 14px/1.4 monospace;
+        color: #eee;
+        background: #111;
+      }
+      body.sheet #sheet {
+        display: block;
+      }
+      #sheet-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75em;
+      }
+      #sheet-close {
+        border: 0;
+        font: inherit;
+        font-size: 1.4em;
+        color: #eee;
+        background: none;
+        cursor: pointer;
+      }
+      #sheet-share {
+        margin-top: 0.5em;
+      }
     </style>
   </head>
   <body>
     <div id="map"></div>
+    <div id="compass">
+      <svg id="arrow" viewBox="-50 -50 100 100">
+        <circle r="46" fill="none" stroke="#666" stroke-width="2" />
+        <path d="M0,-42 L18,20 L0,10 L-18,20 Z" fill="#e33" />
+      </svg>
+      <div id="dist">…</div>
+      <div id="dir"></div>
+    </div>
     <div id="info">loading…</div>
+    <div id="sheet">
+      <div id="sheet-head">
+        <span>open lassulus' location in…</span>
+        <button id="sheet-close" aria-label="close">✕</button>
+      </div>
+      <div id="sheet-open" class="open"></div>
+      <div id="sheet-share" class="open">
+        <button id="share-link">share link…</button>
+        <button id="copy-link">copy link</button>
+      </div>
+    </div>
     <script src="/leaflet/leaflet.js"></script>
+    <script src="/maps.js"></script>
     <script>
       (function () {
         var map = L.map("map", { zoomControl: true });
@@ -46,7 +135,34 @@
         }).addTo(map);
 
         var layer = L.layerGroup().addTo(map);
+        var meLayer = L.layerGroup().addTo(map);
         var info = document.getElementById("info");
+        var arrow = document.getElementById("arrow");
+        var distEl = document.getElementById("dist");
+        var dirEl = document.getElementById("dir");
+
+        var target = null; // L.LatLng of lassulus' last point
+        var targetTime = null; // ISO timestamp of that point
+        var me = null; // L.LatLng of the viewer
+        var meError = null;
+        var heading = null; // device compass heading, degrees clockwise from north
+        var compassNote = "no compass"; // why heading is null
+        var navMode = false;
+        var trailBounds = null; // bounds of the first trail we loaded
+        var loaded = false; // first location.json fetched (even if empty)
+        var meFitted = false; // initial view already includes the viewer
+
+        // initial view: trail plus viewer, once each is first known
+        function initialView() {
+          if (!loaded) return;
+          var b = trailBounds ? L.latLngBounds([]).extend(trailBounds) : null;
+          if (me) {
+            b = b ? b.extend(me) : L.latLngBounds([me]);
+            meFitted = true;
+          }
+          if (b) map.fitBounds(b.pad(0.1), { maxZoom: 16 });
+          else map.setView([0, 0], 2);
+        }
 
         function ago(iso) {
           var s = Math.round((Date.now() - Date.parse(iso)) / 1000);
@@ -56,11 +172,90 @@
           return (s / 86400).toFixed(1) + "d";
         }
 
+        function fmtDist(m) {
+          if (m < 1000) return Math.round(m) + " m";
+          if (m < 10000) return (m / 1000).toFixed(1) + " km";
+          return Math.round(m / 1000) + " km";
+        }
+
+        // initial great-circle bearing from a to b, degrees clockwise from north
+        function bearing(a, b) {
+          var r = Math.PI / 180;
+          var p1 = a.lat * r,
+            p2 = b.lat * r,
+            dl = (b.lng - a.lng) * r;
+          var y = Math.sin(dl) * Math.cos(p2);
+          var x =
+            Math.cos(p1) * Math.sin(p2) -
+            Math.sin(p1) * Math.cos(p2) * Math.cos(dl);
+          return (Math.atan2(y, x) / r + 360) % 360;
+        }
+
+        var points = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+        function cardinal(deg) {
+          return points[Math.round(deg / 45) % 8];
+        }
+
+        // rotate along the shortest path so the css transition never spins 350°
+        var shown = 0;
+        function rotateArrow(deg) {
+          var d = ((((deg - shown) % 360) + 540) % 360) - 180;
+          shown += d;
+          arrow.style.transform = "rotate(" + shown + "deg)";
+        }
+
+        // distance/direction between viewer and lassulus: info bar + compass
+        function updateRel() {
+          var rel = document.getElementById("rel");
+          if (!target) return;
+          if (!me) {
+            if (rel)
+              rel.textContent = meError ? " · your location: " + meError : "";
+            distEl.textContent = "…";
+            dirEl.textContent = meError || "waiting for your location";
+            return;
+          }
+          var d = me.distanceTo(target);
+          var b = bearing(me, target);
+          if (rel) {
+            rel.innerHTML =
+              " · " +
+              fmtDist(d) +
+              " " +
+              cardinal(b) +
+              ' of you · <a href="https://www.openstreetmap.org/directions?route=' +
+              me.lat +
+              "%2C" +
+              me.lng +
+              "%3B" +
+              target.lat +
+              "%2C" +
+              target.lng +
+              '">route</a>';
+          }
+          distEl.textContent = fmtDist(d);
+          if (heading === null) {
+            // no compass: arrow is relative to north (map up)
+            rotateArrow(b);
+            dirEl.textContent =
+              Math.round(b) +
+              "° " +
+              cardinal(b) +
+              " (" +
+              compassNote +
+              ", north up)";
+          } else {
+            rotateArrow(b - heading);
+            dirEl.textContent = Math.round(b) + "° " + cardinal(b);
+          }
+        }
+
         // trail fades from transparent (24h ago) to solid (now); one segment per point pair
         function render(data) {
           layer.clearLayers();
           var pts = data.points;
           if (!pts.length) {
+            target = null;
             info.textContent = "no location in the last 24h";
             return;
           }
@@ -83,15 +278,18 @@
             ).addTo(layer);
           }
           var last = pts[pts.length - 1];
+          target = L.latLng(last.lat, last.lon);
+          targetTime = last.t;
+          updateSheet();
           if (last.acc) {
-            L.circle([last.lat, last.lon], {
+            L.circle(target, {
               radius: last.acc,
               color: "#39f",
               weight: 1,
               fillOpacity: 0.1,
             }).addTo(layer);
           }
-          L.marker([last.lat, last.lon])
+          L.marker(target)
             .addTo(layer)
             .bindPopup(
               "last seen " +
@@ -116,7 +314,8 @@
             last.lat +
             "/" +
             last.lon +
-            '">osm</a>';
+            '">osm</a><span id="rel"></span>';
+          updateRel();
           return L.latLngBounds(
             pts.map(function (p) {
               return [p.lat, p.lon];
@@ -124,7 +323,229 @@
           );
         }
 
-        var first = true;
+        function fitBoth() {
+          if (!me || !target) return;
+          map.fitBounds(L.latLngBounds([me, target]).pad(0.2), {
+            maxZoom: 17,
+          });
+        }
+
+        // viewer position: blue dot + accuracy circle
+        var meDot = null,
+          meAcc = null;
+        function onPosition(pos) {
+          me = L.latLng(pos.coords.latitude, pos.coords.longitude);
+          meError = null;
+          if (!meDot) {
+            meAcc = L.circle(me, {
+              radius: pos.coords.accuracy,
+              color: "#3c3",
+              weight: 1,
+              fillOpacity: 0.1,
+            }).addTo(meLayer);
+            meDot = L.circleMarker(me, {
+              radius: 7,
+              color: "#fff",
+              weight: 2,
+              fillColor: "#3c3",
+              fillOpacity: 1,
+            })
+              .addTo(meLayer)
+              .bindPopup("you");
+          } else {
+            meDot.setLatLng(me);
+            meAcc.setLatLng(me).setRadius(pos.coords.accuracy);
+          }
+          if (!meFitted) initialView();
+          updateRel();
+        }
+        function onPositionError(e) {
+          meError = e.code === 1 ? "permission denied" : "unavailable";
+          updateRel();
+        }
+        var watchId = null;
+        function watchMe() {
+          if (!navigator.geolocation) {
+            meError = "not supported";
+            return;
+          }
+          if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+          watchId = navigator.geolocation.watchPosition(
+            onPosition,
+            onPositionError,
+            { enableHighAccuracy: true, maximumAge: 10000 },
+          );
+        }
+
+        // device compass. iOS exposes webkitCompassHeading; others give an
+        // absolute alpha (counter-clockwise from north) via deviceorientationabsolute.
+        function onOrientation(e) {
+          var h;
+          if (typeof e.webkitCompassHeading === "number") {
+            h = e.webkitCompassHeading;
+          } else if (e.absolute && e.alpha !== null) {
+            h = 360 - e.alpha;
+          } else {
+            return;
+          }
+          var screenAngle =
+            (screen.orientation && screen.orientation.angle) ||
+            window.orientation ||
+            0;
+          heading = (h + screenAngle + 360) % 360;
+          updateRel();
+        }
+        var orientationEvent =
+          "ondeviceorientationabsolute" in window
+            ? "deviceorientationabsolute"
+            : "deviceorientation";
+
+        function setNav(on) {
+          navMode = on;
+          document.body.classList.toggle("nav", on);
+          navBtn.classList.toggle("on", on);
+          if (!on) {
+            window.removeEventListener(orientationEvent, onOrientation);
+            heading = null;
+            compassNote = "no compass";
+            return;
+          }
+          var listen = function () {
+            window.addEventListener(orientationEvent, onOrientation);
+          };
+          // iOS 13+ (and newer Chromium): permission must be requested from
+          // the click handler
+          if (
+            window.DeviceOrientationEvent &&
+            typeof DeviceOrientationEvent.requestPermission === "function"
+          ) {
+            DeviceOrientationEvent.requestPermission()
+              .then(function (state) {
+                if (state === "granted") listen();
+                else compassNote = "compass " + state;
+                updateRel();
+              })
+              .catch(function () {
+                compassNote = "compass unavailable";
+                updateRel();
+              });
+          } else {
+            listen();
+          }
+          if (!me) watchMe();
+          fitBoth();
+          updateRel();
+        }
+
+        function button(container, text, title, onClick) {
+          var a = L.DomUtil.create("a", "", container);
+          a.href = "#";
+          a.setAttribute("role", "button");
+          a.title = title;
+          a.textContent = text;
+          L.DomEvent.on(a, "click", function (e) {
+            L.DomEvent.preventDefault(e);
+            onClick();
+          });
+          return a;
+        }
+
+        // snapshot link to the /at page, which offers the same "open in"
+        // choices to whoever receives it
+        function shareUrl() {
+          return (
+            location.origin +
+            "/at#" +
+            target.lat +
+            "," +
+            target.lng +
+            "@" +
+            Math.floor(Date.parse(targetTime) / 1000)
+          );
+        }
+        var sheetOpen = document.getElementById("sheet-open");
+        var shareLinkBtn = document.getElementById("share-link");
+        var copyLinkBtn = document.getElementById("copy-link");
+        // the share sheet only lists apps that accept shared text/urls, which
+        // is why the "open in" links above exist at all
+        if (!navigator.share) shareLinkBtn.remove();
+        function copyLink() {
+          var url = shareUrl();
+          var ask = function () {
+            window.prompt("copy this link", url);
+          };
+          if (!navigator.clipboard) return ask();
+          navigator.clipboard.writeText(url).then(function () {
+            copyLinkBtn.textContent = "copied ✓";
+            setTimeout(function () {
+              copyLinkBtn.textContent = "copy link";
+            }, 1500);
+          }, ask);
+        }
+        function shareLink() {
+          navigator
+            .share({
+              title: "where is lassulus?",
+              text:
+                "lassulus, last seen " + new Date(targetTime).toLocaleString(),
+              url: shareUrl(),
+            })
+            .catch(function (e) {
+              // AbortError: user closed the share sheet
+              if (e.name !== "AbortError") copyLink();
+            });
+        }
+        function updateSheet() {
+          if (target) renderMapLinks(sheetOpen, target.lat, target.lng);
+        }
+        function setSheet(on) {
+          if (on && !target) return;
+          document.body.classList.toggle("sheet", on);
+          shareBtn.classList.toggle("on", on);
+          if (on) updateSheet();
+        }
+        shareLinkBtn.addEventListener("click", shareLink);
+        copyLinkBtn.addEventListener("click", copyLink);
+        document
+          .getElementById("sheet-close")
+          .addEventListener("click", function () {
+            setSheet(false);
+          });
+        map.on("click", function () {
+          setSheet(false);
+        });
+
+        var navBtn, shareBtn;
+        var Controls = L.Control.extend({
+          options: { position: "topleft" },
+          onAdd: function () {
+            var div = L.DomUtil.create("div", "leaflet-bar ctl");
+            button(div, "◎", "show me and lassulus", function () {
+              if (!me) watchMe();
+              fitBoth();
+            });
+            navBtn = button(
+              div,
+              "➤",
+              "compass: point to lassulus",
+              function () {
+                setNav(!navMode);
+              },
+            );
+            shareBtn = button(
+              div,
+              "⤴",
+              "open in maps app / share lassulus' location",
+              function () {
+                setSheet(!document.body.classList.contains("sheet"));
+              },
+            );
+            L.DomEvent.disableClickPropagation(div);
+            return div;
+          },
+        });
+        new Controls().addTo(map);
+
         function refresh() {
           fetch("/location.json", { cache: "no-cache" })
             .then(function (r) {
@@ -132,9 +553,10 @@
             })
             .then(function (data) {
               var bounds = render(data);
-              if (first && bounds) {
-                map.fitBounds(bounds.pad(0.1), { maxZoom: 16 });
-                first = false;
+              if (!loaded) {
+                loaded = true;
+                trailBounds = bounds || null;
+                initialView();
               }
             })
             .catch(function (e) {
@@ -143,6 +565,7 @@
         }
         refresh();
         setInterval(refresh, 60 * 1000);
+        watchMe();
       })();
     </script>
   </body>

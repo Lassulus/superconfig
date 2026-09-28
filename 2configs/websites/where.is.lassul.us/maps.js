@@ -15,7 +15,8 @@ function mapLinks(lat, lon) {
     ["Apple Maps", "https://maps.apple.com/?ll=" + ll + "&q=lassulus"],
   ];
   // android: app chooser incl. Google Maps, OsmAnd, Organic Maps, ...
-  if (!ios) links.push(["choose app…", "geo:" + ll + "?q=" + ll + "(lassulus)"]);
+  if (!ios)
+    links.push(["choose app…", "geo:" + ll + "?q=" + ll + "(lassulus)"]);
   links.push([
     "OpenStreetMap",
     "https://www.openstreetmap.org/?mlat=" +

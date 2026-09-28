@@ -14,6 +14,9 @@ let
   webroot = pkgs.runCommand "${domain}-webroot" { } ''
     mkdir -p $out/leaflet
     cp ${./index.html} $out/index.html
+    cp ${./at.html} $out/at.html
+    cp ${./maps.js} $out/maps.js
+    cp ${./maps.css} $out/maps.css
     cp ${leaflet}/dist/leaflet.js ${leaflet}/dist/leaflet.css $out/leaflet/
     cp -r ${leaflet}/dist/images $out/leaflet/images
   '';
@@ -101,6 +104,8 @@ in
     enableACME = true;
     forceSSL = true;
     root = webroot;
+    # share landing page: /at#LAT,LON[@UNIXTIME]
+    locations."= /at".tryFiles = "/at.html =404";
     locations."= /location.json".extraConfig = ''
       alias ${stateDir}/location.json;
       default_type application/json;

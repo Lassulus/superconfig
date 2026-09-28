@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>lassulus was here</title>
     <link rel="stylesheet" href="/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="/maps.css" />
     <style>
       html,
       body {
@@ -33,23 +34,6 @@
         user-select: all;
         color: #aaa;
       }
-      #open {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.5em;
-      }
-      #open a {
-        display: block;
-        padding: 0.8em;
-        border-radius: 0.4em;
-        text-align: center;
-        text-decoration: none;
-        color: #fff;
-        background: #333;
-      }
-      #open a:active {
-        background: #39f;
-      }
       #live {
         display: block;
         margin-top: 1em;
@@ -62,13 +46,17 @@
     <div id="panel">
       <p id="when"></p>
       <p id="coords"></p>
-      <div id="open"></div>
+      <div id="open" class="open"></div>
       <a id="live" href="/">live location →</a>
     </div>
     <script src="/leaflet/leaflet.js"></script>
+    <script src="/maps.js"></script>
     <script>
       (function () {
         // /at#LAT,LON[@UNIXTIME]; the fragment never reaches the server
+        window.addEventListener("hashchange", function () {
+          location.reload();
+        });
         var m = /^#(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)(?:@(\d+))?$/.exec(
           location.hash,
         );
@@ -97,43 +85,7 @@
         }
         document.getElementById("coords").textContent = lat + ", " + lon;
 
-        // iOS has no handler for geo: (iPadOS reports itself as a Mac)
-        var ios =
-          /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-          (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-        var ll = lat + "," + lon;
-        var links = [
-          [
-            "Google Maps",
-            "https://www.google.com/maps/search/?api=1&query=" +
-              encodeURIComponent(ll),
-          ],
-          [
-            "Apple Maps",
-            "https://maps.apple.com/?ll=" + ll + "&q=lassulus",
-          ],
-          // android: app chooser incl. OsmAnd, Organic Maps, ...
-          ios ? null : ["other app", "geo:" + ll + "?q=" + ll + "(lassulus)"],
-          [
-            "OpenStreetMap",
-            "https://www.openstreetmap.org/?mlat=" +
-              lat +
-              "&mlon=" +
-              lon +
-              "#map=16/" +
-              lat +
-              "/" +
-              lon,
-          ],
-        ];
-        var open = document.getElementById("open");
-        links.forEach(function (l) {
-          if (!l) return;
-          var a = document.createElement("a");
-          a.textContent = l[0];
-          a.href = l[1];
-          open.appendChild(a);
-        });
+        renderMapLinks(document.getElementById("open"), lat, lon);
       })();
     </script>
   </body>
