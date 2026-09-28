@@ -1,4 +1,5 @@
 {
+  self,
   config,
   pkgs,
   ...
@@ -25,6 +26,10 @@
 # The node only dials out (no listen address): the laptops sit behind NAT and
 # the public seed neoprism relays for them, so nothing needs a port opened.
 let
+  # nixpkgs marks radicle-node insecure: private repos are not encrypted
+  # between nodes. Clear the flag on the package we use instead of allowing
+  # it globally.
+  radicle-node = self.lib.secureify pkgs.radicle-node;
   generator = config.clan.core.vars.generators.rad;
   radHome = "/var/lib/rad";
 
@@ -53,7 +58,7 @@ let
   configFile =
     pkgs.runCommand "rad-config.json"
       {
-        nativeBuildInputs = [ pkgs.buildPackages.radicle-node ];
+        nativeBuildInputs = [ (self.lib.secureify pkgs.buildPackages.radicle-node) ];
         json = builtins.toJSON settings;
         passAsFile = [ "json" ];
         preferLocalBuild = true;
@@ -72,14 +77,14 @@ let
     pkgs.writeShellScriptBin bin ''
       # ${radHome} is shared with the rad-node service via group rad.
       umask 002
-      exec ${pkgs.radicle-node}/bin/${bin} "$@"
+      exec ${radicle-node}/bin/${bin} "$@"
     '';
   radicle-shared = pkgs.symlinkJoin {
     name = "radicle-shared";
     paths = [
       (wrap "rad")
       (wrap "git-remote-rad")
-      pkgs.radicle-node
+      radicle-node
     ];
   };
 in
@@ -145,7 +150,7 @@ in
       Group = "rad";
       UMask = "0002";
       # --force: reclaim a control socket left behind by an unclean shutdown.
-      ExecStart = "${pkgs.radicle-node}/bin/radicle-node --force";
+      ExecStart = "${radicle-node}/bin/radicle-node --force";
       Restart = "on-failure";
       RestartSec = 5;
     };

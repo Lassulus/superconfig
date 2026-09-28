@@ -47,7 +47,8 @@
     pkgs.ripgrep
     self.packages.${pkgs.system}.mpv
     pkgs.gh
-    pkgs.radicle-node
+    # marked insecure in nixpkgs (private repos unencrypted)
+    (self.lib.secureify pkgs.radicle-node)
   ];
 
   documentation.nixos.enable = true;

@@ -1,8 +1,16 @@
 {
+  self,
   config,
+  lib,
   pkgs,
   ...
 }:
+let
+  # nixpkgs marks radicle-node insecure: private repos are not encrypted
+  # between nodes. Clear the flag on the package we use instead of allowing
+  # it globally.
+  radicle-node = self.lib.secureify pkgs.radicle-node;
+in
 {
   # Generate Radicle identity keys using clan vars
   clan.core.vars.generators.radicle = {
@@ -17,6 +25,25 @@
 
   services.radicle = {
     enable = true;
+    package = radicle-node;
+    # The module's checkConfig runs `rad config` from
+    # pkgs.buildPackages.radicle-node, not cfg.package, which trips the
+    # insecure check. Same validation, against our package.
+    configFile = lib.mkForce (
+      pkgs.runCommand "config.json"
+        {
+          nativeBuildInputs = [ (self.lib.secureify pkgs.buildPackages.radicle-node) ];
+          json = builtins.toJSON config.services.radicle.settings;
+          passAsFile = [ "json" ];
+          preferLocalBuild = true;
+        }
+        ''
+          install -D -m 644 "$jsonPath" $out
+          ln -s $out config.json
+          install -D -m 644 /dev/stdin keys/radicle.pub <<<"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBgFMhajUng+Rjj/sCFXI9PzG8BQjru2n7JgUVF1Kbv5 snakeoil"
+          RAD_HOME=$PWD rad config >/dev/null
+        ''
+    );
     privateKey = config.clan.core.vars.generators.radicle.files."radicle.key".path;
     publicKey = config.clan.core.vars.generators.radicle.files."radicle.pub".path;
 

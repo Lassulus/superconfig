@@ -46,7 +46,8 @@
     pkgs.gh
     pkgs.tea
     pkgs.rbw
-    pkgs.radicle-node
+    # marked insecure in nixpkgs (private repos unencrypted)
+    (self.lib.secureify pkgs.radicle-node)
   ];
 
   environment.variables = {
