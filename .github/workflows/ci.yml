@@ -18,14 +18,7 @@ jobs:
           # Fetch all history for git-based operations
           fetch-depth: 0
 
-      - uses: DeterminateSystems/nix-installer-action@main
-        with:
-          extra-conf: |
-            experimental-features = nix-command flakes
-
-      - uses: DeterminateSystems/magic-nix-cache-action@main
-        with:
-          use-flakehub: false
+      - uses: cachix/install-nix-action@v31
 
       - id: list
         run: |
@@ -46,14 +39,7 @@ jobs:
           # Fetch all history for git-based operations
           fetch-depth: 0
 
-      - uses: DeterminateSystems/nix-installer-action@main
-        with:
-          extra-conf: |
-            experimental-features = nix-command flakes
-
-      - uses: DeterminateSystems/magic-nix-cache-action@main
-        with:
-          use-flakehub: false
+      - uses: cachix/install-nix-action@v31
 
       - run: nix build -L --no-link '.#checks.x86_64-linux.${{ matrix.check }}'
 
@@ -66,14 +52,7 @@ jobs:
           # Fetch all history for git-based operations
           fetch-depth: 0
 
-      - uses: DeterminateSystems/nix-installer-action@main
-        with:
-          extra-conf: |
-            experimental-features = nix-command flakes
-
-      - uses: DeterminateSystems/magic-nix-cache-action@main
-        with:
-          use-flakehub: false
+      - uses: cachix/install-nix-action@v31
 
       - run: |
           for output in packages devShells; do
