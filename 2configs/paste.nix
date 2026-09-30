@@ -6,6 +6,21 @@
   ...
 }:
 
+let
+  uploadPage = pkgs.writeText "paste-upload.html" ''
+    <!doctype html>
+    <title>p.krebsco.de</title>
+    <form action="/form" method="post" enctype="multipart/form-data">
+      <input type="file" name="file" required>
+      <button>upload</button>
+    </form>
+    <p>or with curl:</p>
+    <pre>
+    curl --data-binary @file https://p.krebsco.de
+    some-command | curl --data-binary @- https://p.krebsco.de
+    </pre>
+  '';
+in
 {
   imports = [
     {
@@ -77,10 +92,18 @@
       if ($request_method = 'OPTIONS') {
         return 204;
       }
+      if ($request_method ~ ^(GET|HEAD)$) {
+        rewrite ^/$ /_upload last;
+      }
       client_max_body_size 4G;
       proxy_set_header Host $host;
       proxy_set_header X-Forwarded-Proto $scheme;
       proxy_pass http://127.0.0.1:${toString config.krebs.htgen.paste.port};
+    '';
+    locations."= /_upload".extraConfig = ''
+      internal;
+      default_type text/html;
+      alias ${uploadPage};
     '';
     locations."/form".extraConfig = ''
       client_max_body_size 4G;
@@ -133,7 +156,14 @@
         (. ${pkgs.writeScript "paste-form" ''
           case "$Method" in
             'POST')
-              ref=$(head -c $req_content_length | sed '0,/^\r$/d;$d' | curl -fSs --data-binary @- https://p.krebsco.de | sed '1d;s/^http:/https:/')
+              # multipart body: part headers up to the first empty line, then the
+              # file, then "\r\n--$boundary--\r\n" (length of boundary + 8 bytes)
+              boundary=''${req_content_type-}
+              boundary=''${boundary#*boundary=}
+              boundary=''${boundary%%;*}
+              boundary=''${boundary#\"}
+              boundary=''${boundary%\"}
+              ref=$(head -c $req_content_length | sed '0,/^\r$/d' | head -c -$(expr ''${#boundary} + 8) | curl -fSs --data-binary @- https://p.krebsco.de | sed '1d;s/^http:/https:/')
 
               printf 'HTTP/1.1 200 OK\r\n'
               printf 'Content-Type: text/plain; charset=UTF-8\r\n'
