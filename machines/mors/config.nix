@@ -7,27 +7,27 @@
 
 {
   imports = [
-    ../../2configs
-    ../../2configs/mouse.nix
-    ../../2configs/retiolum.nix
-    ../../2configs/desktops/qtile/nixos.nix
-    ../../2configs/pipewire.nix
-    ../../2configs/browsers.nix
-    ../../2configs/pass.nix
-    ../../2configs/steam.nix
-    ../../2configs/fetchWallpaper.nix
-    ../../2configs/mail.nix
-    ../../2configs/syncthing.nix
-    ../../2configs/ableton.nix
-    ../../2configs/dunst.nix
-    ../../2configs/rtl-sdr.nix
-    ../../2configs/printing
-    ../../2configs/network-manager.nix
-    ../../2configs/yellow-mounts/samba.nix
-    ../../2configs/consul.nix
-    ../../2configs/networkd.nix
-    ../../2configs/autotether.nix
-    ../../2configs/autoupdate.nix
+    ../../configs
+    ../../configs/mouse.nix
+    ../../configs/retiolum.nix
+    ../../configs/desktops/qtile/nixos.nix
+    ../../configs/pipewire.nix
+    ../../configs/browsers.nix
+    ../../configs/pass.nix
+    ../../configs/steam.nix
+    ../../configs/fetchWallpaper.nix
+    ../../configs/mail.nix
+    ../../configs/syncthing.nix
+    ../../configs/ableton.nix
+    ../../configs/dunst.nix
+    ../../configs/rtl-sdr.nix
+    ../../configs/printing
+    ../../configs/network-manager.nix
+    ../../configs/yellow-mounts/samba.nix
+    ../../configs/consul.nix
+    ../../configs/networkd.nix
+    ../../configs/autotether.nix
+    ../../configs/autoupdate.nix
     {
       services.nginx = {
         enable = true;

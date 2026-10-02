@@ -36,7 +36,7 @@ let
   settings = {
     publicExplorer = "https://app.radicle.xyz/nodes/$host/$rid$path";
     preferredSeeds = [
-      # our own seed (2configs/radicle.lassul.us.nix on neoprism)
+      # our own seed (configs/radicle.lassul.us.nix on neoprism)
       "z6MkhTe9WWbqNdRAnWLHxL23gedRQWdhjajRbNAt5fCpae6o@radicle.lassul.us:8776"
       "z6MkrLMMsiPWUcNPHcRajuMi9mDfYckSoJyPwwnknocNYPm7@seed.radicle.xyz:8776"
       "z6Mkmqogy2qEM2ummccUthFEaaHvyYmYBYh3dbe9W4ebScxo@iris.radicle.network:8776"

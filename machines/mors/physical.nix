@@ -1,8 +1,8 @@
 {
   imports = [
     ./config.nix
-    ../../2configs/hw/x220.nix
-    ../../2configs/boot/universal.nix
+    ../../configs/hw/x220.nix
+    ../../configs/boot/universal.nix
   ];
 
   boot.kernelParams = [ "acpi_backlight=native" ];

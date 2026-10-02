@@ -7,10 +7,10 @@
 }:
 {
   imports = [
-    ../../2configs
-    ../../2configs/desktops/sway/default.nix
-    ../../2configs/pipewire.nix
-    ../../2configs/network-manager.nix
+    ../../configs
+    ../../configs/desktops/sway/default.nix
+    ../../configs/pipewire.nix
+    ../../configs/network-manager.nix
     self.wrapperModules.workspace-manager
   ];
 

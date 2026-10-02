@@ -40,7 +40,7 @@
       # program called `+kitten`. KITTY_CONFIG_DIRECTORY leaves argv alone.
       configDir = pkgs.writeTextDir "kitty.conf" kittyConfig;
 
-      # Color files consumed by switch-theme (2configs/themes.nix) via
+      # Color files consumed by switch-theme (configs/themes.nix) via
       # /etc/themes/<name>/kitty-colors.conf.
       themes = {
         # Gruvbox Light

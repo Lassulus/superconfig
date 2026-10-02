@@ -3,10 +3,10 @@
   clan.core.vars.password-store.secretLocation = "/var/state/secret-vars";
 
   imports = [
-    ../../2configs
-    ../../2configs/retiolum.nix
-    ../../2configs/mumble-reminder.nix
-    ../../2configs/nginx.nix
+    ../../configs
+    ../../configs/retiolum.nix
+    ../../configs/mumble-reminder.nix
+    ../../configs/nginx.nix
   ];
 
   krebs.build.host = config.krebs.hosts.orange;

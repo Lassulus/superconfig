@@ -8,7 +8,7 @@
 let
   domain = "sigexec.lassul.us";
   dashboardPort = 7501;
-  # Must match 2configs/sigexec/executor.nix.
+  # Must match configs/sigexec/executor.nix.
   executorPort = 7601;
 in
 { self, ... }:

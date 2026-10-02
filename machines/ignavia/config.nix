@@ -7,39 +7,39 @@
 
 {
   imports = [
-    ../../2configs
-    ../../2configs/retiolum.nix
-    ../../2configs/tpm2.nix
-    ../../2configs/phonetpm.nix
-    # ../../2configs/baseX.nix
-    ../../2configs/desktops/sway/default.nix
+    ../../configs
+    ../../configs/retiolum.nix
+    ../../configs/tpm2.nix
+    ../../configs/phonetpm.nix
+    # ../../configs/baseX.nix
+    ../../configs/desktops/sway/default.nix
     self.wrapperModules.workspace-manager
-    # ../../2configs/desktops/xmonad
-    ../../2configs/power-action.nix
-    ../../2configs/yubikey.nix
-    ../../2configs/pipewire.nix
-    ../../2configs/udisks.nix
-    ../../2configs/browsers.nix
-    ../../2configs/network-manager.nix
-    ../../2configs/syncthing.nix
-    # ../../2configs/games.nix
-    ../../2configs/steam.nix
-    # ../../2configs/wine.nix
-    ../../2configs/yellow-mounts/samba.nix
-    ../../2configs/pass.nix
-    ../../2configs/mail.nix
-    ../../2configs/printing
-    ../../2configs/auto-timezone.nix
-    # ../../2configs/bitcoin.nix
-    ../../2configs/review.nix
-    ../../2configs/dunst.nix
-    ../../2configs/yggdrasil.nix
-    ../../2configs/container-tests.nix
-    ../../2configs/rad.nix
-    ../../2configs/herdr.nix
-    ../../2configs/tablet-screen.nix
-    # ../../2configs/br.nix
-    # ../../2configs/c-base.nix
+    # ../../configs/desktops/xmonad
+    ../../configs/power-action.nix
+    ../../configs/yubikey.nix
+    ../../configs/pipewire.nix
+    ../../configs/udisks.nix
+    ../../configs/browsers.nix
+    ../../configs/network-manager.nix
+    ../../configs/syncthing.nix
+    # ../../configs/games.nix
+    ../../configs/steam.nix
+    # ../../configs/wine.nix
+    ../../configs/yellow-mounts/samba.nix
+    ../../configs/pass.nix
+    ../../configs/mail.nix
+    ../../configs/printing
+    ../../configs/auto-timezone.nix
+    # ../../configs/bitcoin.nix
+    ../../configs/review.nix
+    ../../configs/dunst.nix
+    ../../configs/yggdrasil.nix
+    ../../configs/container-tests.nix
+    ../../configs/rad.nix
+    ../../configs/herdr.nix
+    ../../configs/tablet-screen.nix
+    # ../../configs/br.nix
+    # ../../configs/c-base.nix
   ];
 
   system.stateVersion = "23.11";

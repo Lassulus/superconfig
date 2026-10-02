@@ -13,9 +13,9 @@ let
 in
 {
   imports = [
-    ../../2configs
-    ../../2configs/retiolum.nix
-    ../../2configs/gg23.nix
+    ../../configs
+    ../../configs/retiolum.nix
+    ../../configs/gg23.nix
   ];
 
   # krebs.build.host and the monitoring/dns bits still read this card, so build

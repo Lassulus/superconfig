@@ -2,19 +2,19 @@
 
 {
   imports = [
-    ../../2configs
-    ../../2configs/retiolum.nix
-    ../../2configs/browsers.nix
-    ../../2configs/network-manager.nix
-    ../../2configs/syncthing.nix
-    ../../2configs/yellow-mounts/samba.nix
-    ../../2configs/pass.nix
-    ../../2configs/mail.nix
-    # ../../2configs/bitcoin.nix
-    # ../../2configs/review.nix
-    # ../../2configs/dunst.nix
-    ../../2configs/br.nix
-    # ../../2configs/c-base.nix
+    ../../configs
+    ../../configs/retiolum.nix
+    ../../configs/browsers.nix
+    ../../configs/network-manager.nix
+    ../../configs/syncthing.nix
+    ../../configs/yellow-mounts/samba.nix
+    ../../configs/pass.nix
+    ../../configs/mail.nix
+    # ../../configs/bitcoin.nix
+    # ../../configs/review.nix
+    # ../../configs/dunst.nix
+    ../../configs/br.nix
+    # ../../configs/c-base.nix
   ];
 
   system.stateVersion = "22.11";

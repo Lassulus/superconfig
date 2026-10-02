@@ -36,7 +36,7 @@
   #
   # The built-in `iso` variant is iso-image.nix (not installation-cd-base):
   # no nixos channel, no installer profile, no `nixos` autologin to fight
-  # greetd or clash with 2configs/pinned-registry.nix. Settings here merge
+  # greetd or clash with configs/pinned-registry.nix. Settings here merge
   # into it, since image.modules is an attrsOf deferredModule.
   image.modules.iso = {
     # zstd keeps the squashfs small without a slow xz build.

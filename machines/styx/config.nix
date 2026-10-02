@@ -6,18 +6,18 @@
 
 {
   imports = [
-    ../../2configs
-    ../../2configs/retiolum.nix
-    ../../2configs/pipewire.nix
-    ../../2configs/yellow-mounts/samba.nix
-    ../../2configs/hass
-    ../../2configs/n8n.nix
-    ../../2configs/green-host.nix
-    ../../2configs/syncthing.nix
-    ../../2configs/ppp/umts-stick.nix
-    ../../2configs/snapserver.nix
-    ../../2configs/snapclient.nix
-    ../../2configs/consul.nix
+    ../../configs
+    ../../configs/retiolum.nix
+    ../../configs/pipewire.nix
+    ../../configs/yellow-mounts/samba.nix
+    ../../configs/hass
+    ../../configs/n8n.nix
+    ../../configs/green-host.nix
+    ../../configs/syncthing.nix
+    ../../configs/ppp/umts-stick.nix
+    ../../configs/snapserver.nix
+    ../../configs/snapclient.nix
+    ../../configs/consul.nix
   ];
 
   krebs.build.host = config.krebs.hosts.styx;

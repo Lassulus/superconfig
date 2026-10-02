@@ -95,7 +95,7 @@
 
   # MT7925 wifi stability. The dominant cause of the "drops every few
   # minutes" was a dual-manager conflict (systemd-networkd AND NM both
-  # running DHCP on the wifi) - fixed in 2configs/network-manager.nix by
+  # running DHCP on the wifi) - fixed in configs/network-manager.nix by
   # handing wifi solely to NM. The remainder below addresses a *separate*,
   # secondary mt7925 firmware bug: the card intermittently tears the link
   # down during scans (wpa_supplicant "reason=3 locally_generated=1" next

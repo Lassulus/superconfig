@@ -36,7 +36,7 @@
   ];
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
-  # Both ports are Intel I226-V (igc). Same naming as styx so 2configs/gg23.nix
+  # Both ports are Intel I226-V (igc). Same naming as styx so configs/gg23.nix
   # applies unchanged: et0 = WAN (uplink, DHCP client), int0 = LAN (10.42.0.1).
   # Port 1 (enp2s0) is the uplink, port 2 (enp3s0) faces the gg23 LAN.
   services.udev.extraRules = ''

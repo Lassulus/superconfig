@@ -2,8 +2,8 @@
 {
   system.stateVersion = lib.mkForce "25.05";
   imports = [
-    ../../2configs
-    ../../2configs/spora.nix
+    ../../configs
+    ../../configs/spora.nix
     (modulesPath + "/image/images.nix")
   ];
 

@@ -2,16 +2,16 @@
 
 {
   imports = [
-    ../../2configs
-    ../../2configs/retiolum.nix
-    ../../2configs/desktops/qtile/nixos.nix
-    ../../2configs/pipewire.nix
-    ../../2configs/network-manager.nix
-    ../../2configs/yellow-mounts/samba.nix
-    ../../2configs/consul.nix
-    ../../2configs/snapclient.nix
-    ../../2configs/sigexec/executor.nix
-    ../../2configs/rad.nix
+    ../../configs
+    ../../configs/retiolum.nix
+    ../../configs/desktops/qtile/nixos.nix
+    ../../configs/pipewire.nix
+    ../../configs/network-manager.nix
+    ../../configs/yellow-mounts/samba.nix
+    ../../configs/consul.nix
+    ../../configs/snapclient.nix
+    ../../configs/sigexec/executor.nix
+    ../../configs/rad.nix
   ];
 
   krebs.build.host = config.krebs.hosts.shodan;

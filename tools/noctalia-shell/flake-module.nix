@@ -19,7 +19,7 @@
           # a solid colour), unlike the mpvpaper live video wallpaper it
           # replaced: a looping video on every output means every frame is
           # full-screen motion, which is unusable for the sunshine-streamed
-          # tablet screen (2configs/tablet-screen.nix) and pointless power
+          # tablet screen (configs/tablet-screen.nix) and pointless power
           # draw on the real ones. Pick the image in noctalia's wallpaper
           # panel; only `enabled` is pinned here.
           wallpaper.enabled = true;

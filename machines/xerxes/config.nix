@@ -1,21 +1,21 @@
 { self, pkgs, ... }:
 {
   imports = [
-    ../../2configs
-    ../../2configs/network-manager.nix
-    ../../2configs/pipewire.nix
-    ../../2configs/yubikey.nix
-    ../../2configs/tpm2.nix
-    ../../2configs/desktops/sway/default.nix
-    ../../2configs/power-action.nix
-    ../../2configs/rtl-sdr.nix
-    ../../2configs/browsers.nix
-    ../../2configs/container-bridge.nix
-    ../../2configs/android-webcam.nix
-    ../../2configs/ipfs.nix
-    ../../2configs/steam.nix
-    ../../2configs/games.nix
-    ../../2configs/auto-timezone.nix
+    ../../configs
+    ../../configs/network-manager.nix
+    ../../configs/pipewire.nix
+    ../../configs/yubikey.nix
+    ../../configs/tpm2.nix
+    ../../configs/desktops/sway/default.nix
+    ../../configs/power-action.nix
+    ../../configs/rtl-sdr.nix
+    ../../configs/browsers.nix
+    ../../configs/container-bridge.nix
+    ../../configs/android-webcam.nix
+    ../../configs/ipfs.nix
+    ../../configs/steam.nix
+    ../../configs/games.nix
+    ../../configs/auto-timezone.nix
     self.wrapperModules.workspace-manager
   ];
   system.stateVersion = "25.05";

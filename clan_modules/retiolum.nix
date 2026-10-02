@@ -26,7 +26,7 @@
   }) config.instances;
 
   roles.default = {
-    description = "machine reachable as <name>.r; retiolum itself is configured in 2configs/retiolum.nix";
+    description = "machine reachable as <name>.r; retiolum itself is configured in configs/retiolum.nix";
     perInstance =
       { mkExports, machine, ... }:
       {

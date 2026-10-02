@@ -12,11 +12,11 @@ let
 in
 {
   imports = [
-    ../../2configs
-    ../../2configs/retiolum.nix
-    ../../2configs/ssh-redirect.nix
-    ../../2configs/autoupdate.nix
-    ../../2configs/sigexec/executor.nix
+    ../../configs
+    ../../configs/retiolum.nix
+    ../../configs/ssh-redirect.nix
+    ../../configs/autoupdate.nix
+    ../../configs/sigexec/executor.nix
     ./ipfs.nix
     ./ipfs-endpoint.nix
   ];

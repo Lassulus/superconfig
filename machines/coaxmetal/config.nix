@@ -6,20 +6,20 @@
 
 {
   imports = [
-    ../../2configs
-    ../../2configs/retiolum.nix
-    ../../2configs/pipewire.nix
-    ../../2configs/browsers.nix
-    ../../2configs/network-manager.nix
-    ../../2configs/syncthing.nix
-    ../../2configs/games.nix
-    ../../2configs/steam.nix
-    ../../2configs/wine.nix
-    ../../2configs/yellow-mounts/samba.nix
-    ../../2configs/review.nix
-    ../../2configs/sigexec/executor.nix
-    ../../2configs/rad.nix
-    ../../2configs/herdr.nix
+    ../../configs
+    ../../configs/retiolum.nix
+    ../../configs/pipewire.nix
+    ../../configs/browsers.nix
+    ../../configs/network-manager.nix
+    ../../configs/syncthing.nix
+    ../../configs/games.nix
+    ../../configs/steam.nix
+    ../../configs/wine.nix
+    ../../configs/yellow-mounts/samba.nix
+    ../../configs/review.nix
+    ../../configs/sigexec/executor.nix
+    ../../configs/rad.nix
+    ../../configs/herdr.nix
     ./strom.nix
     ./hermes.nix
   ];

@@ -7,142 +7,142 @@
 
 {
   imports = [
-    ../../2configs
-    ../../2configs/ssh-redirect.nix
-    ../../2configs/retiolum.nix
-    ../../2configs/mailserver.nix
-    ../../2configs/snappymail.nix
-    ../../2configs/gsm-wiki.nix
-    ../../2configs/monitoring/telegraf.nix
-    ../../2configs/pair-programming.nix
-    ../../2configs/nginx.nix
-    ../../2configs/rogue-talk.nix
+    ../../configs
+    ../../configs/ssh-redirect.nix
+    ../../configs/retiolum.nix
+    ../../configs/mailserver.nix
+    ../../configs/snappymail.nix
+    ../../configs/gsm-wiki.nix
+    ../../configs/monitoring/telegraf.nix
+    ../../configs/pair-programming.nix
+    ../../configs/nginx.nix
+    ../../configs/rogue-talk.nix
 
-    ../../2configs/services/matrix
-    ../../2configs/services/matrix/proxy.nix
-    ../../2configs/services/matrix/cinny.nix
-    ../../2configs/services/matrix/bridges/mautrix-whatsapp.nix
-    ../../2configs/services/matrix/bridges/mautrix-signal.nix
-    ../../2configs/services/matrix/bridges/heisenbridge.nix
-    ../../2configs/services/matrix/bridges/mautrix-telegram.nix
-    ../../2configs/services/matrix/bridges/mautrix-discord.nix
-    ../../2configs/services/matrix/bridges/matrix-zulip-bridge.nix
+    ../../configs/services/matrix
+    ../../configs/services/matrix/proxy.nix
+    ../../configs/services/matrix/cinny.nix
+    ../../configs/services/matrix/bridges/mautrix-whatsapp.nix
+    ../../configs/services/matrix/bridges/mautrix-signal.nix
+    ../../configs/services/matrix/bridges/heisenbridge.nix
+    ../../configs/services/matrix/bridges/mautrix-telegram.nix
+    ../../configs/services/matrix/bridges/mautrix-discord.nix
+    ../../configs/services/matrix/bridges/matrix-zulip-bridge.nix
 
-    ../../2configs/services/pad
+    ../../configs/services/pad
 
-    ../../2configs/hass/proxy.nix
-    ../../2configs/hermes-proxy.nix
+    ../../configs/hass/proxy.nix
+    ../../configs/hermes-proxy.nix
 
     # sync-containers
-    ../../2configs/consul.nix
-    ../../2configs/services/flix/container-host.nix
-    ../../2configs/services/radio/container-host.nix
-    ../../2configs/orange-host.nix
-    ../../2configs/hotdog-host.nix
+    ../../configs/consul.nix
+    ../../configs/services/flix/container-host.nix
+    ../../configs/services/radio/container-host.nix
+    ../../configs/orange-host.nix
+    ../../configs/hotdog-host.nix
 
     # other containers
-    ../../2configs/riot.nix
+    ../../configs/riot.nix
 
     # proxying of services
-    ../../2configs/services/radio/proxy.nix
-    ../../2configs/services/flix/proxy.nix
-    ../../2configs/services/coms/jitsi.nix
+    ../../configs/services/radio/proxy.nix
+    ../../configs/services/flix/proxy.nix
+    ../../configs/services/coms/jitsi.nix
     # mastodon (social.krebsco.de) -> hotdog container, migrated from prism
     (self.inputs.stockholm + "/krebs/2configs/mastodon-proxy.nix")
 
     # dns
-    ../../2configs/dns/knot.nix
+    ../../configs/dns/knot.nix
 
     # url shortener
-    ../../2configs/go.nix
+    ../../configs/go.nix
 
     # video strreaming
-    ../../2configs/cast.nix
+    ../../configs/cast.nix
 
     # c-base ollama tunnel
-    ../../2configs/c-base-ai-tunnel.nix
+    ../../configs/c-base-ai-tunnel.nix
 
     # debug stuff
-    ../../2configs/websites/mergebot.lassul.us.nix
+    ../../configs/websites/mergebot.lassul.us.nix
 
     # autoupdates
-    ../../2configs/autoupdate.nix
+    ../../configs/autoupdate.nix
 
     # vaultwarden
-    ../../2configs/vaultwarden.nix
+    ../../configs/vaultwarden.nix
 
     # download user
-    ../../2configs/download-user.nix
+    ../../configs/download-user.nix
 
     # caldav calendar
-    ../../2configs/radicale.nix
+    ../../configs/radicale.nix
 
     # lassul.us website
-    ../../2configs/websites/lassulus.nix
+    ../../configs/websites/lassulus.nix
 
     # where.is.lassul.us (location from home-assistant on a map)
-    ../../2configs/websites/where.is.lassul.us
+    ../../configs/websites/where.is.lassul.us
 
     # realwallpaper generator
-    ../../2configs/realwallpaper.nix
+    ../../configs/realwallpaper.nix
 
     # binaergewitter announce bot
-    # ../../2configs/bgt-bot
+    # ../../configs/bgt-bot
 
     # paste + cyberlocker
-    ../../2configs/paste.nix
+    ../../configs/paste.nix
 
     # opencrow matrix bot
-    ../../2configs/opencrow.nix
+    ../../configs/opencrow.nix
 
     # document signing
-    ../../2configs/docuseal.nix
+    ../../configs/docuseal.nix
 
     # kannix (kanban board)
-    ../../2configs/kannix.nix
+    ../../configs/kannix.nix
 
     # timeful availability polls (when.lassul.us)
-    ../../2configs/timeful.nix
+    ../../configs/timeful.nix
 
     # backups
     ./backup.nix
 
     # IPFS
-    ../../2configs/services/flix/ipfs.nix
+    ../../configs/services/flix/ipfs.nix
 
     # n2n supernode (n2n.lassul.us)
-    ../../2configs/n2n-supernode.nix
+    ../../configs/n2n-supernode.nix
 
     # pocket-id SSO IdP (id.lassul.us)
-    ../../2configs/pocket-id.nix
+    ../../configs/pocket-id.nix
 
     # covibe co-vibing dashboard (covibe.lassul.us)
-    ../../2configs/covibe.nix
+    ../../configs/covibe.nix
 
     # omnigent agent meta-harness (omni.lassul.us)
-    ../../2configs/omnigent.nix
+    ../../configs/omnigent.nix
 
     # radicle public seed (radicle.lassul.us)
-    ../../2configs/radicle.lassul.us.nix
+    ../../configs/radicle.lassul.us.nix
     # radicle identity + node for this machine (/var/lib/rad)
-    ../../2configs/rad.nix
+    ../../configs/rad.nix
 
     # herdr agent multiplexer
-    ../../2configs/herdr.nix
+    ../../configs/herdr.nix
 
     # self-hosted iroh relay (relay.lassul.us)
-    ../../2configs/iroh-relay
+    ../../configs/iroh-relay
 
     # signed remote command execution (root executor + fleet dashboard,
     # sigexec.lassul.us)
-    ../../2configs/sigexec/executor.nix
-    ../../2configs/sigexec/dashboard.nix
+    ../../configs/sigexec/executor.nix
+    ../../configs/sigexec/dashboard.nix
 
     # parley federated IRC-speaking chat (parley.lassul.us)
-    ../../2configs/parley.nix
+    ../../configs/parley.nix
 
     # nixpkgs PR triage dashboard (review.lassul.us)
-    ../../2configs/nixpkgs-triage.nix
+    ../../configs/nixpkgs-triage.nix
   ];
 
   # lassul.us shouldn't be the default vhost here (nginx.nix already sets one)

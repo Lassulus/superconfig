@@ -7,21 +7,21 @@
   clan.core.vars.password-store.secretLocation = "/var/state/secret-vars";
 
   imports = [
-    ../../2configs
-    ../../2configs/retiolum.nix
+    ../../configs
+    ../../configs/retiolum.nix
 
-    ../../2configs/syncthing.nix
+    ../../configs/syncthing.nix
 
-    ../../2configs/weechat.nix
-    ../../2configs/bitlbee.nix
+    ../../configs/weechat.nix
+    ../../configs/bitlbee.nix
 
-    ../../2configs/pass.nix
+    ../../configs/pass.nix
 
-    ../../2configs/git-brain.nix
-    ../../2configs/et-server.nix
+    ../../configs/git-brain.nix
+    ../../configs/et-server.nix
 
-    ../../2configs/atuin-server.nix
-    ../../2configs/autoupdate.nix
+    ../../configs/atuin-server.nix
+    ../../configs/autoupdate.nix
   ];
 
   krebs.build.host = config.krebs.hosts.green;

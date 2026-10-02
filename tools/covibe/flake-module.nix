@@ -48,7 +48,7 @@
       # Note the TUI path runs on a spec omnigent materialises itself
       # (`pi-native-ui`), so the only terminal it declares is omp's own pane;
       # extra shells from the dashboard are a property of the *browser-started*
-      # omp agent, whose spec lives in 2configs/omnigent.nix.
+      # omp agent, whose spec lives in configs/omnigent.nix.
       packages.covibe =
         (pkgs.writeShellApplication {
           name = "covibe";

@@ -39,7 +39,7 @@
       repo = "https://github.com/Lassulus/wrappers";
       video = "https://www.youtube.com/watch?v=Zzvn9uYjQJY";
     };
-    thisWebsite = "https://github.com/Lassulus/superconfig/tree/master/2configs/websites/lassul.us";
+    thisWebsite = "https://github.com/Lassulus/superconfig/tree/master/configs/websites/lassul.us";
   };
   github = "https://github.com/lassulus";
   matrix = "@lassulus:lassul.us";

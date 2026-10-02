@@ -1,11 +1,11 @@
 { config, pkgs, ... }:
 {
   imports = [
-    ../../2configs
-    ../../2configs/retiolum.nix
-    ../../2configs/syncthing.nix
-    ../../2configs/services/radio
-    ../../2configs/autoupdate.nix
+    ../../configs
+    ../../configs/retiolum.nix
+    ../../configs/syncthing.nix
+    ../../configs/services/radio
+    ../../configs/autoupdate.nix
   ];
 
   clan.core.vars.password-store.secretLocation = "/var/state/secret-vars";

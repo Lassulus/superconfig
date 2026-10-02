@@ -4,7 +4,7 @@ in
 {
   # parley: federated chat that speaks plain IRC. Identities are
   # nick@lassul.us; peers find this instance via the _parley._tcp.lassul.us
-  # SRV record (2configs/dns/lassul.us.zone).
+  # SRV record (configs/dns/lassul.us.zone).
   lass.parley = {
     enable = true;
     settings = {

@@ -8,7 +8,7 @@
 
 # Retiolum node on nix-darwin. tincr's own darwin module does the launchd
 # plumbing; the daemon is the same pkgs/tincr the NixOS machines run (they
-# use nixpkgs' services.tinc, see 2configs/retiolum.nix). kartei is only the
+# use nixpkgs' services.tinc, see configs/retiolum.nix). kartei is only the
 # host database here, same as on NixOS — its darwin retiolum shim would
 # pull tincd from kartei's own tincr pin instead.
 let
@@ -33,7 +33,7 @@ in
     hosts = kartei.tincHosts // local.tincHosts;
     # eve/eva/ni/prism: the krebs hubs kartei's shim dialled. A laptop
     # behind NAT also needs relays we control; same list as the NixOS
-    # nodes in 2configs/retiolum.nix, plus starkstrom.
+    # nodes in configs/retiolum.nix, plus starkstrom.
     connectTo = [
       "eve"
       "eva"
@@ -72,7 +72,7 @@ in
       mv "$tmp" /private/etc/hosts
     '';
 
-  # Same generator as 2configs/retiolum.nix, minus the RSA half: tincr is
+  # Same generator as configs/retiolum.nix, minus the RSA half: tincr is
   # SPTPS/Ed25519-only and kartei no longer wants an rsa.key.
   #
   # neededFor = "activation" because clan's /run/secrets installer is

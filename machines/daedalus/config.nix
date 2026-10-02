@@ -7,10 +7,10 @@
 
 {
   imports = [
-    ../../2configs
-    ../../2configs/retiolum.nix
-    ../../2configs/pipewire.nix
-    ../../2configs/autoupdate.nix
+    ../../configs
+    ../../configs/retiolum.nix
+    ../../configs/pipewire.nix
+    ../../configs/autoupdate.nix
     {
       users.mutableUsers = lib.mkForce true;
       # bubsy config

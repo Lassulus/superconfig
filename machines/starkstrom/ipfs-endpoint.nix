@@ -11,7 +11,7 @@ let
   } ./ipfs_upload.py;
 in
 {
-  imports = [ ../../2configs/nginx.nix ];
+  imports = [ ../../configs/nginx.nix ];
 
   # scratch area for in-flight uploads (extracted, added, then deleted)
   systemd.tmpfiles.rules = [

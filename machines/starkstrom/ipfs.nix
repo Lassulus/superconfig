@@ -18,7 +18,7 @@
       Datastore.StorageMax = "500GB";
 
       # Make the pins reachable through the public gateways, the way the
-      # old node (2configs/services/flix/ipfs.nix) was. Measured before
+      # old node (configs/services/flix/ipfs.nix) was. Measured before
       # this block with ipfs-check against a pinned CID: DHT provider
       # record present, bitswap answering, IPNI record ABSENT -- and every
       # public gateway 504ing on anything larger than a single block,

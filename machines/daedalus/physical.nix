@@ -2,7 +2,7 @@
 {
   imports = [
     ./config.nix
-    ../../2configs/boot/coreboot.nix
+    ../../configs/boot/coreboot.nix
   ];
 
   fileSystems = {

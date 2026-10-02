@@ -7,7 +7,7 @@
 }:
 let
   # Pinned Piper voice for the bot's spoken replies. Single-speaker on purpose:
-  # the radio's libritts-high (2configs/services/radio/tts.nix) is multi-speaker
+  # the radio's libritts-high (configs/services/radio/tts.nix) is multi-speaker
   # and needs an -s speaker id per call.
   piperVoice = pkgs.runCommand "piper-voice-en_US-lessac-medium" { } ''
     mkdir -p $out
@@ -392,7 +392,7 @@ in
     ''}"
   ];
 
-  # The packet filter drops INPUT by default here (2configs/default.nix sets
+  # The packet filter drops INPUT by default here (configs/default.nix sets
   # filter.INPUT.policy = "DROP"), so the API server's port has to be opened
   # for the interface it binds. Without this neoprism's proxy_pass times out
   # and hermes.lassul.us answers 504, while a local curl to the same

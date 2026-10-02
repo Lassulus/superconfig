@@ -3,7 +3,7 @@
 # Retiolum nodes that deliberately have no card in the shared kartei registry:
 # they exist only inside superconfig, so every superconfig machine has to be
 # told about them explicitly. Exposed as self.retiolum (see ./flake-module.nix)
-# and consumed by 2configs/retiolum.nix (NixOS, via nixpkgs services.tinc) and
+# and consumed by configs/retiolum.nix (NixOS, via nixpkgs services.tinc) and
 # machines/barnacle/retiolum.nix (darwin, via kartei's tincr module), so both
 # platforms agree on the peer set.
 #
@@ -62,7 +62,7 @@ rec {
   hosts = {
     starkstrom = {
       nets = {
-        # Hetzner KVM box; static address, and 2configs/retiolum.nix opens 655,
+        # Hetzner KVM box; static address, and configs/retiolum.nix opens 655,
         # so peers dial it directly instead of relaying through neoprism/prism.
         internet.addrs = [ "194.110.87.67" ];
         retiolum = {

@@ -29,7 +29,7 @@ let
     set -u
     # xpadneo owns the Xbox pad's hidraw node, so force SDL (pygame launcher and
     # the games) to read the pad through evdev instead of its HIDAPI backend -
-    # same fix as 2configs/steam.nix, without it SDL finds no controller.
+    # same fix as configs/steam.nix, without it SDL finds no controller.
     export SDL_JOYSTICK_HIDAPI_XBOX=0
     # SDL's udev-monitor hotplug does not deliver in this kiosk session, so a pad
     # powered on after the launcher starts is never seen. Force SDL to poll
@@ -166,7 +166,7 @@ in
   # mapping; the two bluez tweaks + disable_ertm are what make Xbox pads
   # actually bond (without disable_ertm they fail with AuthenticationFailed).
   # Bluetooth itself (adapter + powerOnBoot) already comes from
-  # 2configs/pipewire.nix. Pair pads with bluetuith (also from pipewire.nix).
+  # configs/pipewire.nix. Pair pads with bluetuith (also from pipewire.nix).
   hardware.xpadneo.enable = true;
   # Xbox One/Series controllers pair over Bluetooth only with L2CAP ERTM off.
   boot.extraModprobeConfig = "options bluetooth disable_ertm=1";
