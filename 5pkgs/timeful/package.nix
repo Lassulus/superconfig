@@ -16,6 +16,8 @@ let
   #   landing page's YouTube/Vimeo embeds and GitHub star button
   # - replaces the Google/Outlook/email-OTP sign-in page with GitHub OAuth
   #   (GET /api/auth/github, GITHUB_CLIENT_ID/GITHUB_CLIENT_SECRET)
+  # - "Schedule" offers a .ics download next to Google Calendar/Outlook, and
+  #   scheduled-event links point at this instance instead of timeful.app
   # - makes the listen address configurable via LISTEN_ADDR (upstream
   #   hardcodes ":3002" on all interfaces)
   src = applyPatches {

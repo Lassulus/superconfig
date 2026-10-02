@@ -99,10 +99,18 @@ index c56eebff..af75f247 100644
        return this.folders.sort((a, b) => {
          return a.name.localeCompare(b.name)
 diff --git a/frontend/src/components/schedule_overlap/ScheduleOverlap.vue b/frontend/src/components/schedule_overlap/ScheduleOverlap.vue
-index 1e028082..eb523062 100644
+index 1e028082..d7377fa3 100644
 --- a/frontend/src/components/schedule_overlap/ScheduleOverlap.vue
 +++ b/frontend/src/components/schedule_overlap/ScheduleOverlap.vue
-@@ -1250,11 +1250,7 @@ export default {
+@@ -1048,6 +1048,7 @@ import {
+   isPremiumUser,
+   prefersStartOnMonday,
+ } from "@/utils"
++import { buildIcs, downloadIcs } from "@/utils/ics_utils"
+ import {
+   availabilityTypes,
+   calendarOptionsDefaults,
+@@ -1250,11 +1251,7 @@ export default {
      ...mapState(["authUser", "overlayAvailabilitiesEnabled"]),
      ...mapGetters(["isPremiumUser"]),
      showAds() {
@@ -115,6 +123,126 @@ index 1e028082..eb523062 100644
      },
      /** Returns the width of the right side of the calendar */
      rightSideWidth() {
+@@ -2076,7 +2073,7 @@ export default {
+             }
+             return `Tap and drag to add your "available" ${daysOrTimes} in green.`
+           case this.states.SCHEDULE_EVENT:
+-            return "Tap and drag on the calendar to schedule a Google Calendar event during those times."
++            return "Tap and drag on the calendar to schedule an event during those times."
+           default:
+             return ""
+         }
+@@ -2092,7 +2089,7 @@ export default {
+           }
+           return `Click and drag to add your "available" ${daysOrTimes} in green.`
+         case this.states.SCHEDULE_EVENT:
+-          return "Click and drag on the calendar to schedule a Google Calendar event during those times."
++          return "Click and drag on the calendar to schedule an event during those times."
+         default:
+           return ""
+       }
+@@ -3563,8 +3560,11 @@ export default {
+       this.state = this.defaultState
+     },
+ 
+-    /** Redirect user to Google Calendar to finish the creation of the event */
+-    confirmScheduleEvent(googleCalendar = true) {
++    /**
++     * Finish scheduling the dragged-out slot: open Google Calendar / Outlook
++     * prefilled, or download an .ics file. target: "google" | "outlook" | "ics"
++     */
++    confirmScheduleEvent(target = "google") {
+       if (!this.curScheduledEvent) return
+       // if (!isPremiumUser(this.authUser)) {
+       //   this.showUpgradeDialog({
+@@ -3615,9 +3615,27 @@ export default {
+       const emailsString = encodeURIComponent(emails.filter(Boolean).join(","))
+ 
+       const eventId = this.event.shortId ?? this.event._id
++      const eventUrl = `${window.location.origin}/e/${eventId}`
++      const description = `\n\nThis event was scheduled with Timeful: ${eventUrl}`
++
++      if (target === "ics") {
++        const ics = buildIcs({
++          uid: `${this.event._id}-${startDate.getTime()}@${window.location.host}`,
++          start: startDate,
++          end: endDate,
++          summary: this.event.name,
++          description: description.trim(),
++          location: this.event.location,
++          url: eventUrl,
++        })
++        const filename = `${this.event.name.replace(/[^\w-]+/g, "_") || "event"}.ics`
++        downloadIcs(filename, ics)
++        this.state = this.defaultState
++        return
++      }
+ 
+       let url = ""
+-      if (googleCalendar) {
++      if (target === "google") {
+         // Format start and end date to be in the format required by gcal (remove -, :, and .000)
+         const start = startDate.toISOString().replace(/([-:]|\.000)/g, "")
+         const end = endDate.toISOString().replace(/([-:]|\.000)/g, "")
+@@ -3626,14 +3644,13 @@ export default {
+         url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
+           this.event.name
+         )}&dates=${start}/${end}&details=${encodeURIComponent(
+-          "\n\nThis event was scheduled with Timeful: https://timeful.app/e/"
+-        )}${eventId}&ctz=${this.curTimezone.value}&add=${emailsString}`
++          description
++        )}&ctz=${this.curTimezone.value}&add=${emailsString}`
+       } else {
+         url = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(
+           this.event.name
+         )}&body=${encodeURIComponent(
+-          "\n\nThis event was scheduled with Timeful: https://timeful.app/e/" +
+-            eventId
++          description
+         )}&startdt=${startDate.toISOString()}&enddt=${endDate.toISOString()}&location=${encodeURIComponent(
+           this.event.location || ""
+         )}&path=/calendar/action/compose&timezone=${this.curTimezone.value}`
+diff --git a/frontend/src/components/schedule_overlap/ToolRow.vue b/frontend/src/components/schedule_overlap/ToolRow.vue
+index d8aaaddd..5822dd28 100644
+--- a/frontend/src/components/schedule_overlap/ToolRow.vue
++++ b/frontend/src/components/schedule_overlap/ToolRow.vue
+@@ -118,7 +118,9 @@
+               </v-btn>
+             </template>
+             <v-list dense>
+-              <v-list-item @click="(e) => $emit('confirmScheduleEvent', true)">
++              <v-list-item
++                @click="(e) => $emit('confirmScheduleEvent', 'google')"
++              >
+                 <v-img
+                   src="@/assets/gcal_logo.png"
+                   class="tw-mr-2 tw-flex-none"
+@@ -129,7 +131,9 @@
+                   <v-list-item-title>Google Calendar</v-list-item-title>
+                 </v-list-item-content>
+               </v-list-item>
+-              <v-list-item @click="(e) => $emit('confirmScheduleEvent', false)">
++              <v-list-item
++                @click="(e) => $emit('confirmScheduleEvent', 'outlook')"
++              >
+                 <v-img
+                   src="@/assets/outlook_logo.svg"
+                   class="tw-mr-2 tw-flex-none"
+@@ -140,6 +144,14 @@
+                   <v-list-item-title>Outlook</v-list-item-title>
+                 </v-list-item-content>
+               </v-list-item>
++              <v-list-item @click="(e) => $emit('confirmScheduleEvent', 'ics')">
++                <v-icon class="tw-mr-2 tw-flex-none" size="20"
++                  >mdi-calendar-export</v-icon
++                >
++                <v-list-item-content>
++                  <v-list-item-title>Download .ics</v-list-item-title>
++                </v-list-item-content>
++              </v-list-item>
+             </v-list>
+           </v-menu>
+         </template>
 diff --git a/frontend/src/main.js b/frontend/src/main.js
 index 2d370f7a..9dfa971a 100644
 --- a/frontend/src/main.js
@@ -152,11 +280,123 @@ index a0770841..b9460a8f 100644
  
      // Experiments
      pricingPageConversion: "control",
+diff --git a/frontend/src/utils/ics_utils.js b/frontend/src/utils/ics_utils.js
+new file mode 100644
+index 00000000..c285bd1b
+--- /dev/null
++++ b/frontend/src/utils/ics_utils.js
+@@ -0,0 +1,69 @@
++/** Builds and downloads a single-event iCalendar (RFC 5545) file. */
++
++const utf8 = new TextEncoder()
++
++/** Escapes a TEXT property value (RFC 5545 §3.3.11) */
++const escapeText = (text) =>
++  text
++    .replace(/\\/g, "\\\\")
++    .replace(/;/g, "\\;")
++    .replace(/,/g, "\\,")
++    .replace(/\r?\n/g, "\\n")
++
++/** Formats a Date as a UTC DATE-TIME, e.g. 20261020T070000Z */
++const formatDateTime = (date) =>
++  date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "")
++
++/** Folds a content line so no physical line exceeds 75 octets (RFC 5545 §3.1) */
++const foldLine = (line) => {
++  const parts = []
++  let current = ""
++  let currentBytes = 0
++  for (const char of line) {
++    const charBytes = utf8.encode(char).length
++    // continuation lines start with a space, which counts toward the limit
++    const limit = parts.length === 0 ? 75 : 74
++    if (currentBytes + charBytes > limit) {
++      parts.push(current)
++      current = ""
++      currentBytes = 0
++    }
++    current += char
++    currentBytes += charBytes
++  }
++  parts.push(current)
++  return parts.join("\r\n ")
++}
++
++export const buildIcs = ({ uid, start, end, summary, description, location, url }) => {
++  const lines = [
++    "BEGIN:VCALENDAR",
++    "VERSION:2.0",
++    "PRODID:-//timeful//self-hosted//EN",
++    "CALSCALE:GREGORIAN",
++    "METHOD:PUBLISH",
++    "BEGIN:VEVENT",
++    `UID:${uid}`,
++    `DTSTAMP:${formatDateTime(new Date())}`,
++    `DTSTART:${formatDateTime(start)}`,
++    `DTEND:${formatDateTime(end)}`,
++    `SUMMARY:${escapeText(summary)}`,
++  ]
++  if (description) lines.push(`DESCRIPTION:${escapeText(description)}`)
++  if (location) lines.push(`LOCATION:${escapeText(location)}`)
++  if (url) lines.push(`URL:${url}`)
++  lines.push("END:VEVENT", "END:VCALENDAR")
++  return lines.map(foldLine).join("\r\n") + "\r\n"
++}
++
++export const downloadIcs = (filename, icsText) => {
++  const blob = new Blob([icsText], { type: "text/calendar;charset=utf-8" })
++  const href = URL.createObjectURL(blob)
++  const a = document.createElement("a")
++  a.href = href
++  a.download = filename
++  document.body.appendChild(a)
++  a.click()
++  a.remove()
++  URL.revokeObjectURL(href)
++}
 diff --git a/frontend/src/views/Event.vue b/frontend/src/views/Event.vue
-index 81887280..79786ce3 100644
+index 81887280..87dba8d1 100644
 --- a/frontend/src/views/Event.vue
 +++ b/frontend/src/views/Event.vue
-@@ -638,11 +638,7 @@ export default {
+@@ -463,13 +463,29 @@
+               Cancel
+             </v-btn>
+             <v-spacer />
+-            <v-btn
+-              :disabled="!allowScheduleEvent"
+-              class="tw-bg-white tw-text-blue"
+-              @click="confirmScheduleEvent"
+-            >
+-              Schedule
+-            </v-btn>
++            <v-menu top offset-y>
++              <template v-slot:activator="{ on, attrs }">
++                <v-btn
++                  :disabled="!allowScheduleEvent"
++                  class="tw-bg-white tw-text-blue"
++                  v-bind="attrs"
++                  v-on="on"
++                >
++                  Schedule
++                </v-btn>
++              </template>
++              <v-list dense>
++                <v-list-item @click="confirmScheduleEvent('google')">
++                  <v-list-item-title>Google Calendar</v-list-item-title>
++                </v-list-item>
++                <v-list-item @click="confirmScheduleEvent('outlook')">
++                  <v-list-item-title>Outlook</v-list-item-title>
++                </v-list-item>
++                <v-list-item @click="confirmScheduleEvent('ics')">
++                  <v-list-item-title>Download .ics</v-list-item-title>
++                </v-list-item>
++              </v-list>
++            </v-menu>
+           </template>
+         </div>
+         <PubliftAd
+@@ -638,11 +654,7 @@ export default {
      ...mapState(["authUser", "events"]),
      ...mapGetters(["isPremiumUser"]),
      showAds() {
@@ -169,6 +409,17 @@ index 81887280..79786ce3 100644
      },
      allowScheduleEvent() {
        return this.scheduleOverlapComponent?.allowScheduleEvent
+@@ -998,8 +1010,8 @@ export default {
+     cancelScheduleEvent() {
+       this.scheduleOverlapComponent?.cancelScheduleEvent()
+     },
+-    confirmScheduleEvent() {
+-      this.scheduleOverlapComponent?.confirmScheduleEvent()
++    confirmScheduleEvent(target) {
++      this.scheduleOverlapComponent?.confirmScheduleEvent(target)
+     },
+ 
+     highlightAvailabilityBtn() {
 diff --git a/frontend/src/views/Landing.vue b/frontend/src/views/Landing.vue
 index b8a50d8f..41d7521c 100644
 --- a/frontend/src/views/Landing.vue
