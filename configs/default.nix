@@ -24,7 +24,6 @@
 
     # Import individual configurations
     ./security-workarounds.nix
-    # ./binary-cache/client.nix
     ./gc.nix
     ./mc.nix
     ./zsh.nix

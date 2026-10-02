@@ -30,7 +30,6 @@
     ../../configs/mail.nix
     ../../configs/printing
     ../../configs/auto-timezone.nix
-    # ../../configs/bitcoin.nix
     ../../configs/review.nix
     ../../configs/dunst.nix
     ../../configs/yggdrasil.nix
@@ -39,7 +38,6 @@
     ../../configs/herdr.nix
     ../../configs/tablet-screen.nix
     # ../../configs/br.nix
-    # ../../configs/c-base.nix
   ];
 
   system.stateVersion = "23.11";

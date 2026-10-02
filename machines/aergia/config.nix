@@ -10,11 +10,9 @@
     ../../configs/yellow-mounts/samba.nix
     ../../configs/pass.nix
     ../../configs/mail.nix
-    # ../../configs/bitcoin.nix
     # ../../configs/review.nix
     # ../../configs/dunst.nix
     ../../configs/br.nix
-    # ../../configs/c-base.nix
   ];
 
   system.stateVersion = "22.11";

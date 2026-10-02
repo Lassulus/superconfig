@@ -86,9 +86,6 @@
     # realwallpaper generator
     ../../configs/realwallpaper.nix
 
-    # binaergewitter announce bot
-    # ../../configs/bgt-bot
-
     # paste + cyberlocker
     ../../configs/paste.nix
 

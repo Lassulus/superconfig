@@ -1,7 +1,0 @@
-{ ... }:
-
-{
-  services.privoxy = {
-    enable = true;
-  };
-}
