@@ -140,6 +140,9 @@
 
     # parley federated IRC-speaking chat (parley.lassul.us)
     ../../2configs/parley.nix
+
+    # nixpkgs PR triage dashboard (review.lassul.us)
+    ../../2configs/nixpkgs-triage.nix
   ];
 
   # lassul.us shouldn't be the default vhost here (nginx.nix already sets one)

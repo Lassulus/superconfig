@@ -84,6 +84,9 @@
     hermes-agent.url = "github:nousresearch/hermes-agent";
     hermes-agent.inputs.nixpkgs.follows = "nixpkgs";
 
+    nixpkgs-triage.url = "github:Lassulus/nixpkgs-triage";
+    nixpkgs-triage.inputs.nixpkgs.follows = "nixpkgs";
+
     rogue-talk.url = "github:rogue-talk/rogue-talk";
     rogue-talk.inputs.nixpkgs.follows = "nixpkgs";
 

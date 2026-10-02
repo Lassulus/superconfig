@@ -60,6 +60,7 @@ covibe IN CNAME neoprism
 omni IN CNAME neoprism
 where.is IN CNAME neoprism
 parley IN CNAME neoprism
+review IN CNAME neoprism
 when IN CNAME neoprism
 
 ;; Mail
