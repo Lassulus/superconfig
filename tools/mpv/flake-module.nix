@@ -1,7 +1,7 @@
-{ self, inputs, ... }:
+{ inputs, ... }:
 {
   perSystem =
-    { pkgs, ... }:
+    { pkgs, self', ... }:
     {
       packages.mpv =
         let
@@ -20,9 +20,12 @@
                 log('Searching subtitles ...', 10)
                 path = mp.get_property('path')
 
-                -- Build dl_subs lazily when needed
+                -- Build dl_subs lazily when needed. Realise the pinned .drv
+                -- rather than a flake ref so the script doesn't embed the repo;
+                -- unsafeDiscardOutputDependency keeps only the .drv files as
+                -- references instead of the whole build-time closure.
                 log('Building subtitle downloader...', 5)
-                result = utils.subprocess({ args = {"nix", "build", "--no-link", "--print-out-paths", "${self}#mpv-dl-subs"} })
+                result = utils.subprocess({ args = {"nix", "build", "--no-link", "--print-out-paths", "${builtins.unsafeDiscardOutputDependency self'.packages.mpv-dl-subs.drvPath}^out"} })
                 if result.error ~= nil then
                     log('Failed to build subtitle downloader')
                     return
