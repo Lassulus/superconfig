@@ -59,7 +59,7 @@
             elif [[ -d "$HOME/sync/superconfig" ]]; then
               flake="$HOME/sync/superconfig"
             else
-              flake="${self}"
+              flake="github:Lassulus/superconfig"
             fi
 
             # Cache directory
@@ -100,13 +100,13 @@
           name = "s";
           runtimeInputs = [ pkgs.nix ];
           text = ''
-            # Use local checkout if it exists, otherwise fall back to self
+            # Use local checkout if it exists, otherwise fall back to GitHub
             if [ -d "$HOME/src/superconfig" ]; then
               flake="$HOME/src/superconfig"
             elif [ -d "$HOME/sync/superconfig" ]; then
               flake="$HOME/sync/superconfig"
             else
-              flake="${self}"
+              flake="github:Lassulus/superconfig"
             fi
 
             if [ $# -eq 0 ]; then
