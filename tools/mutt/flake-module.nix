@@ -13,7 +13,7 @@
           notmuchConfig = self.packages.${system}.notmuch.passthru.configuration.configFile.path;
 
           # nixpkgs's autotools elinks is broken against gettext 0.23.1.
-          # Use our local meson build (5pkgs/elinks) until upstream PR
+          # Use our local meson build (pkgs/elinks) until upstream PR
           # #515347 lands.
           elinks = self.packages.${system}.elinks;
 

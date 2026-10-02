@@ -30,7 +30,7 @@
     stockholm.inputs.buildbot-nix.follows = "";
 
     # Host database only (modules/retiolum/hosts.nix), on every platform.
-    # The daemon is 5pkgs/tincr everywhere; barnacle imports tincr's own
+    # The daemon is pkgs/tincr everywhere; barnacle imports tincr's own
     # darwin module below, not kartei's retiolum shim.
     kartei.url = "github:krebs/kartei";
     kartei.inputs.nixpkgs.follows = "nixpkgs";
@@ -39,7 +39,7 @@
     kartei.inputs.fenix.follows = "tincr/fenix";
 
     # Only for darwinModules.tincr (launchd plumbing); the package comes
-    # from 5pkgs/tincr, which pins the same fork branch.
+    # from pkgs/tincr, which pins the same fork branch.
     tincr.url = "github:Lassulus/tincr/lassulus/fixes";
     tincr.inputs.nixpkgs.follows = "nixpkgs";
     tincr.inputs.treefmt-nix.follows = "treefmt-nix";
@@ -227,7 +227,7 @@
       ];
       imports = [
         ./formatter.nix
-        ./5pkgs/flake-module.nix
+        ./pkgs/flake-module.nix
         ./keys/flake-module.nix
         ./retiolum/flake-module.nix
         ./skills/flake-module.nix

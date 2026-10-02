@@ -7,7 +7,7 @@
 }:
 
 # Retiolum node on nix-darwin. tincr's own darwin module does the launchd
-# plumbing; the daemon is the same 5pkgs/tincr the NixOS machines run (they
+# plumbing; the daemon is the same pkgs/tincr the NixOS machines run (they
 # use nixpkgs' services.tinc, see 2configs/retiolum.nix). kartei is only the
 # host database here, same as on NixOS — its darwin retiolum shim would
 # pull tincd from kartei's own tincr pin instead.

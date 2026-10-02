@@ -18,7 +18,7 @@ let
   # Peer keys and addresses come straight from kartei, not through
   # stockholm's krebs.hosts: stockholm pins an older kartei and its host type
   # still requires the legacy RSA pubkey. This is only the host database --
-  # the daemon stays on nixpkgs' services.tinc with 5pkgs/tincr swapped in
+  # the daemon stays on nixpkgs' services.tinc with pkgs/tincr swapped in
   # (barnacle does the same with tincr's darwin module, see
   # machines/barnacle/retiolum.nix).
   #

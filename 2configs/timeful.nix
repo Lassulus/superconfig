@@ -13,7 +13,7 @@ in
 {
   # timeful (formerly schej): crab.fit/when2meet-style availability polls.
   # Creating a poll and painting availability work without an account;
-  # signing in (GitHub OAuth, see 5pkgs/timeful/self-host.patch) keeps a
+  # signing in (GitHub OAuth, see pkgs/timeful/self-host.patch) keeps a
   # dashboard of your polls.
   services.mongodb = {
     enable = true;

@@ -58,7 +58,7 @@ index 176178b5..01469b17 100644
        } else {
          this.$router.push({ name: "sign-in" })
 diff --git a/frontend/src/components/Footer.vue b/frontend/src/components/Footer.vue
-index 35d9a6d5..7e8815d4 100644
+index 35d9a6d5..ed818994 100644
 --- a/frontend/src/components/Footer.vue
 +++ b/frontend/src/components/Footer.vue
 @@ -30,7 +30,7 @@
@@ -66,7 +66,7 @@ index 35d9a6d5..7e8815d4 100644
              </a>
              <a
 -              href="https://github.com/schej-it/timeful.app"
-+              href="https://github.com/Lassulus/superconfig/tree/master/5pkgs/timeful"
++              href="https://github.com/Lassulus/superconfig/tree/master/pkgs/timeful"
                aria-label="GitHub"
                target="_blank"
                ><v-icon class="tw-text-white/80 hover:tw-text-white"
@@ -421,7 +421,7 @@ index 81887280..87dba8d1 100644
  
      highlightAvailabilityBtn() {
 diff --git a/frontend/src/views/Landing.vue b/frontend/src/views/Landing.vue
-index b8a50d8f..41d7521c 100644
+index b8a50d8f..2c47ac54 100644
 --- a/frontend/src/views/Landing.vue
 +++ b/frontend/src/views/Landing.vue
 @@ -31,13 +31,10 @@
@@ -437,7 +437,7 @@ index b8a50d8f..41d7521c 100644
 -              >Star</github-button
 +            <a
 +              class="tw-ml-2 tw-text-blue"
-+              href="https://github.com/Lassulus/superconfig/tree/master/5pkgs/timeful"
++              href="https://github.com/Lassulus/superconfig/tree/master/pkgs/timeful"
 +              >Source</a
              >
            </div>
