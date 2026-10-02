@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is lassulus's personal NixOS/nix-darwin configuration repository, built on clan-core for managing multiple machines. It includes:
 - Multiple machine configurations in `machines/`
-- Configuration modules in `configs/` and `3modules/`
+- Configuration modules in `configs/` and `modules/`
 - Custom packages in `pkgs/`
 - packages which could in theory be upstreamed to nixkgs should go into the pkgs folder, in the tools folder we add tools we write ourself which are more complex or not upstreamable
 
@@ -23,7 +23,7 @@ The repository manages multiple overlay networks:
 ### Module System
 - `configs/`: Main configuration modules
 - `configs/default.nix`: imported by all machines
-- `3modules/`: Custom NixOS module definitions
+- `modules/`: Custom NixOS module definitions
 - Stockholm modules are also imported for krebs infrastructure
 
 ## Common Development Commands

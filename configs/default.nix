@@ -16,8 +16,8 @@
   ];
 
   imports = [
-    # Import 3modules
-    ../3modules
+    # Import modules
+    ../modules
 
     # Import stockholm krebs module
     self.inputs.stockholm.nixosModules.krebs
