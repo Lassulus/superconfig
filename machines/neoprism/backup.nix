@@ -90,6 +90,10 @@
       for db in parley history; do
         ${pkgs.sqlite}/bin/sqlite3 "/var/lib/parley/$db.db" ".backup /var/backup/parley/$db.db"
       done
+
+      # Dump timeful polls (when.lassul.us) from MongoDB
+      ${pkgs.mongodb-tools}/bin/mongodump --uri=mongodb://127.0.0.1:27017 \
+        --db=schej-it --gzip --archive=/var/backup/timeful.archive.gz
     '';
 
     postHook = ''

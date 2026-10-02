@@ -101,6 +101,9 @@
     # kannix (kanban board)
     ../../2configs/kannix.nix
 
+    # timeful availability polls (when.lassul.us)
+    ../../2configs/timeful.nix
+
     # backups
     ./backup.nix
 

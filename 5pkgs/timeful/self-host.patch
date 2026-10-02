@@ -1,0 +1,647 @@
+diff --git a/frontend/public/index.html b/frontend/public/index.html
+index a300a8a4..48cb0e61 100644
+--- a/frontend/public/index.html
++++ b/frontend/public/index.html
+@@ -1,21 +1,6 @@
+ <!DOCTYPE html>
+ <html lang="en">
+   <head>
+-    <!-- Google Tag Manager -->
+-    <script>
+-      ;(function (w, d, s, l, i) {
+-        w[l] = w[l] || []
+-        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" })
+-        var f = d.getElementsByTagName(s)[0],
+-          j = d.createElement(s),
+-          dl = l != "dataLayer" ? "&l=" + l : ""
+-        j.async = true
+-        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl
+-        f.parentNode.insertBefore(j, f)
+-      })(window, document, "script", "dataLayer", "GTM-M677X6V")
+-    </script>
+-    <!-- End Google Tag Manager -->
+-    <script async src="https://cdn.fuseplatform.net/publift/tags/2/4241/fuse.js"></script>
+ 
+     <meta charset="utf-8" />
+     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+@@ -59,16 +44,6 @@
+     />
+   </head>
+   <body>
+-    <!-- Google Tag Manager (noscript) -->
+-    <noscript
+-      ><iframe
+-        src="https://www.googletagmanager.com/ns.html?id=GTM-M677X6V"
+-        height="0"
+-        width="0"
+-        style="display: none; visibility: hidden"
+-      ></iframe
+-    ></noscript>
+-    <!-- End Google Tag Manager (noscript) -->
+     <noscript>
+       <strong
+         >We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work
+diff --git a/frontend/src/App.vue b/frontend/src/App.vue
+index 176178b5..01469b17 100644
+--- a/frontend/src/App.vue
++++ b/frontend/src/App.vue
+@@ -357,7 +357,10 @@ export default {
+           this.webviewDialog = true
+           return
+         }
+-        this.$router.push({ name: "sign-in" })
++        this.$router.push({
++          name: "sign-in",
++          query: { next: this.$route.fullPath },
++        })
+         // this.signInDialog = true
+       } else {
+         this.$router.push({ name: "sign-in" })
+diff --git a/frontend/src/components/Footer.vue b/frontend/src/components/Footer.vue
+index 35d9a6d5..7e8815d4 100644
+--- a/frontend/src/components/Footer.vue
++++ b/frontend/src/components/Footer.vue
+@@ -30,7 +30,7 @@
+               </svg>
+             </a>
+             <a
+-              href="https://github.com/schej-it/timeful.app"
++              href="https://github.com/Lassulus/superconfig/tree/master/5pkgs/timeful"
+               aria-label="GitHub"
+               target="_blank"
+               ><v-icon class="tw-text-white/80 hover:tw-text-white"
+diff --git a/frontend/src/components/home/Dashboard.vue b/frontend/src/components/home/Dashboard.vue
+index c56eebff..af75f247 100644
+--- a/frontend/src/components/home/Dashboard.vue
++++ b/frontend/src/components/home/Dashboard.vue
+@@ -8,7 +8,7 @@
+           Dashboard
+         </div>
+         <div
+-          v-if="!isPremiumUser"
++          v-if="enablePaywall && !isPremiumUser"
+           class="tw-flex tw-items-baseline tw-gap-2 tw-text-sm tw-font-normal tw-text-very-dark-gray"
+         >
+           <div>
+@@ -240,7 +240,13 @@ export default {
+   },
+   computed: {
+     ...mapGetters(["isPremiumUser"]),
+-    ...mapState(["authUser", "events", "groupsEnabled", "folders"]),
++    ...mapState([
++      "authUser",
++      "events",
++      "groupsEnabled",
++      "folders",
++      "enablePaywall",
++    ]),
+     orderedFolders() {
+       return this.folders.sort((a, b) => {
+         return a.name.localeCompare(b.name)
+diff --git a/frontend/src/components/schedule_overlap/ScheduleOverlap.vue b/frontend/src/components/schedule_overlap/ScheduleOverlap.vue
+index 1e028082..eb523062 100644
+--- a/frontend/src/components/schedule_overlap/ScheduleOverlap.vue
++++ b/frontend/src/components/schedule_overlap/ScheduleOverlap.vue
+@@ -1250,11 +1250,7 @@ export default {
+     ...mapState(["authUser", "overlayAvailabilitiesEnabled"]),
+     ...mapGetters(["isPremiumUser"]),
+     showAds() {
+-      return (
+-        !this.ownerIsPremium &&
+-        !this.isPremiumUser &&
+-        this.state !== this.states.SET_SPECIFIC_TIMES
+-      )
++      return false
+     },
+     /** Returns the width of the right side of the calendar */
+     rightSideWidth() {
+diff --git a/frontend/src/main.js b/frontend/src/main.js
+index 2d370f7a..9dfa971a 100644
+--- a/frontend/src/main.js
++++ b/frontend/src/main.js
+@@ -5,19 +5,12 @@ import router from "./router"
+ import store from "./store"
+ import vuetify from "./plugins/vuetify"
+ import posthogPlugin from "./plugins/posthog"
+-import VueGtm from "@gtm-support/vue2-gtm"
+ import VueMeta from "vue-meta"
+ import "./index.css"
+ 
+ // Posthog
+ Vue.use(posthogPlugin)
+ 
+-// Google Analytics
+-Vue.use(VueGtm, {
+-  id: "GTM-M677X6V",
+-  vueRouter: router,
+-})
+-
+ // Site Metadata
+ Vue.use(VueMeta)
+ 
+diff --git a/frontend/src/store/index.js b/frontend/src/store/index.js
+index a0770841..b9460a8f 100644
+--- a/frontend/src/store/index.js
++++ b/frontend/src/store/index.js
+@@ -29,7 +29,7 @@ export default new Vuex.Store({
+     signUpFormEnabled: false,
+     daysOnlyEnabled: true,
+     overlayAvailabilitiesEnabled: true,
+-    enablePaywall: true,
++    enablePaywall: false,
+ 
+     // Experiments
+     pricingPageConversion: "control",
+diff --git a/frontend/src/views/Event.vue b/frontend/src/views/Event.vue
+index 81887280..79786ce3 100644
+--- a/frontend/src/views/Event.vue
++++ b/frontend/src/views/Event.vue
+@@ -638,11 +638,7 @@ export default {
+     ...mapState(["authUser", "events"]),
+     ...mapGetters(["isPremiumUser"]),
+     showAds() {
+-      return (
+-        !this.ownerIsPremium &&
+-        !this.isPremiumUser &&
+-        !this.isSettingSpecificTimes
+-      )
++      return false
+     },
+     allowScheduleEvent() {
+       return this.scheduleOverlapComponent?.allowScheduleEvent
+diff --git a/frontend/src/views/Landing.vue b/frontend/src/views/Landing.vue
+index b8a50d8f..41d7521c 100644
+--- a/frontend/src/views/Landing.vue
++++ b/frontend/src/views/Landing.vue
+@@ -31,13 +31,10 @@
+             class="tw-mb-4 tw-flex tw-select-none tw-items-center tw-rounded-full tw-border tw-border-light-gray-stroke tw-bg-white/70 tw-px-2.5 tw-py-1.5 tw-text-sm tw-text-dark-gray"
+           >
+             We're open source!
+-            <github-button
+-              v-once
+-              class="-tw-mb-1 tw-ml-2"
+-              href="https://github.com/schej-it/timeful.app"
+-              data-show-count="true"
+-              aria-label="Star timeful.app on GitHub"
+-              >Star</github-button
++            <a
++              class="tw-ml-2 tw-text-blue"
++              href="https://github.com/Lassulus/superconfig/tree/master/5pkgs/timeful"
++              >Source</a
+             >
+           </div>
+           <div
+@@ -111,20 +108,6 @@
+                 transition="fade-transition"
+                 contain
+               />
+-              <vue-vimeo-player
+-                video-url="https://player.vimeo.com/video/1083205305?h=d58bef862a"
+-                :player-width="800"
+-                :player-height="800"
+-                :options="{
+-                  muted: true,
+-                  playsinline: true,
+-                  responsive: true,
+-                }"
+-                :controls="false"
+-                :autoplay="true"
+-                :loop="true"
+-                @play="onPlay"
+-              />
+             </div>
+           </div>
+         </div>
+@@ -168,25 +151,6 @@
+       />
+     </div>
+ 
+-    <!-- Video -->
+-    <div
+-      class="tw-flex tw-justify-center tw-bg-green tw-px-4 tw-pb-12 tw-pt-24 md:tw-pb-16"
+-    >
+-      <div
+-        class="tw-h-[300px] tw-max-w-3xl tw-flex-1 sm:tw-h-[400px] md:tw-h-[450px]"
+-      >
+-        <iframe
+-          class="tw-h-full tw-w-full"
+-          src="https://www.youtube.com/embed/vFkBC8BrkOk?si=pF64JAIyDhom_1do"
+-          title="Timeful demo"
+-          frameborder="0"
+-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+-          referrerpolicy="strict-origin-when-cross-origin"
+-          allowfullscreen
+-        ></iframe>
+-      </div>
+-    </div>
+-
+     <!-- Reddit Testimonials -->
+     <div class="tw-flex tw-justify-center tw-bg-light-gray tw-py-12">
+       <div class="tw-mx-4 tw-max-w-3xl tw-flex-1 sm:tw-mx-16">
+@@ -299,11 +263,9 @@ import NewEvent from "@/components/NewEvent.vue"
+ import NewDialog from "@/components/NewDialog.vue"
+ import LandingPageHeader from "@/components/landing/LandingPageHeader.vue"
+ import Logo from "@/components/Logo.vue"
+-import GithubButton from "vue-github-button"
+ import SignInDialog from "@/components/SignInDialog.vue"
+ import { calendarTypes } from "@/constants"
+ import HowItWorksDialog from "@/components/HowItWorksDialog.vue"
+-import { vueVimeoPlayer } from "vue-vimeo-player"
+ import Footer from "@/components/Footer.vue"
+ import PronunciationMenu from "@/components/PronunciationMenu.vue"
+ import { mapState, mapMutations } from "vuex"
+@@ -325,11 +287,9 @@ export default {
+     NewEvent,
+     NewDialog,
+     LandingPageHeader,
+-    GithubButton,
+     Logo,
+     SignInDialog,
+     HowItWorksDialog,
+-    vueVimeoPlayer,
+     Footer,
+     PronunciationMenu,
+     AuthUserMenu,
+diff --git a/frontend/src/views/SignIn.vue b/frontend/src/views/SignIn.vue
+index d667be55..6be32f29 100644
+--- a/frontend/src/views/SignIn.vue
++++ b/frontend/src/views/SignIn.vue
+@@ -32,70 +32,20 @@
+           </v-card-title>
+           <v-card-text class="tw-flex tw-flex-col tw-items-center tw-pt-6">
+             <div class="tw-mb-4 tw-flex tw-w-full tw-flex-col tw-gap-y-2">
+-              <v-btn
+-                block
+-                @click="signIn(calendarTypes.GOOGLE)"
+-                class="tw-bg-white"
+-              >
++              <v-btn block @click="signInGithub" class="tw-bg-white">
+                 <div class="tw-flex tw-w-full tw-items-center tw-gap-2">
+-                  <v-img
+-                    class="tw-flex-initial"
+-                    width="20"
+-                    height="20"
+-                    src="@/assets/google_logo.svg"
+-                  />
++                  <v-icon class="tw-flex-initial" size="20">mdi-github</v-icon>
+                   <v-spacer />
+-                  {{ isSignUp ? "Sign up with" : "Continue with" }} Google
++                  {{ isSignUp ? "Sign up with" : "Continue with" }} GitHub
+                   <v-spacer />
+                 </div>
+               </v-btn>
+-              <v-btn
+-                block
+-                @click="signIn(calendarTypes.OUTLOOK)"
+-                class="tw-bg-white"
++              <div
++                v-if="$route.query.error === 'github'"
++                class="tw-text-center tw-text-sm tw-text-red"
+               >
+-                <div class="tw-flex tw-w-full tw-items-center tw-gap-2">
+-                  <v-img
+-                    class="tw-flex-initial"
+-                    width="20"
+-                    height="20"
+-                    src="@/assets/outlook_logo.svg"
+-                  />
+-                  <v-spacer />
+-                  {{ isSignUp ? "Sign up with" : "Continue with" }} Outlook
+-                  <v-spacer />
+-                </div>
+-              </v-btn>
+-
+-              <div class="tw-my-2 tw-flex tw-items-center tw-gap-3">
+-                <v-divider />
+-                <span class="tw-text-xs tw-text-gray">or</span>
+-                <v-divider />
+-              </div>
+-
+-              <div>
+-                <div class="tw-mb-1 tw-text-sm tw-font-medium">
+-                  Email address
+-                </div>
+-                <v-text-field
+-                  v-model="email"
+-                  class="tw-mb-2"
+-                  placeholder="Enter your email..."
+-                  type="email"
+-                  solo
+-                  hide-details="auto"
+-                  :error-messages="emailError"
+-                  @keydown.enter="submitEmail"
+-                />
+-                <v-btn
+-                  block
+-                  color="primary"
+-                  :loading="sending"
+-                  :disabled="sending"
+-                  @click="submitEmail"
+-                >
+-                  {{ isSignUp ? "Sign up with" : "Continue with" }} Email
+-                </v-btn>
++                GitHub sign-in failed. Make sure your GitHub account has a
++                verified email address and try again.
+               </div>
+             </div>
+             <div class="tw-text-center tw-text-xs">
+@@ -251,7 +201,7 @@
+ 
+ <script>
+ import { authTypes, calendarTypes } from "@/constants"
+-import { post, signInGoogle, signInOutlook } from "@/utils"
++import { getEventsCreated, post, signInGoogle, signInOutlook } from "@/utils"
+ import { mapMutations } from "vuex"
+ import Logo from "@/components/Logo.vue"
+ 
+@@ -299,6 +249,15 @@ export default {
+ 
+   methods: {
+     ...mapMutations(["setAuthUser"]),
++    signInGithub() {
++      const params = new URLSearchParams({
++        timezoneOffset: new Date().getTimezoneOffset(),
++        eventsToLink: getEventsCreated().join(","),
++      })
++      const next = this.$route.query.next
++      if (typeof next === "string") params.set("redirect", next)
++      window.location.href = `/api/auth/github?${params}`
++    },
+     signIn(provider) {
+       const state = this.upgradeRedirect
+         ? { type: authTypes.UPGRADE, upgradeParams: this.$route.query.upgradeParams }
+diff --git a/server/main.go b/server/main.go
+index b038861e..1678b7df 100644
+--- a/server/main.go
++++ b/server/main.go
+@@ -175,7 +175,9 @@ func main() {
+ 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+ 
+ 	// Run server
+-	if os.Getenv("NODE_ENV") == "staging" {
++	if listenAddr := os.Getenv("LISTEN_ADDR"); listenAddr != "" {
++		router.Run(listenAddr)
++	} else if os.Getenv("NODE_ENV") == "staging" {
+ 		router.Run(":3003")
+ 	} else {
+ 		router.Run(":3002")
+diff --git a/server/routes/auth.go b/server/routes/auth.go
+index 6444e714..2869116d 100644
+--- a/server/routes/auth.go
++++ b/server/routes/auth.go
+@@ -41,6 +41,8 @@ func InitAuth(router *gin.RouterGroup) {
+ 	authRouter.POST("/otp/check-email", checkEmail)
+ 	authRouter.POST("/otp/send", sendOtp)
+ 	authRouter.POST("/otp/verify", verifyOtp)
++
++	initGithubAuth(authRouter)
+ }
+ 
+ // @Summary Signs user in
+diff --git a/server/routes/github_auth.go b/server/routes/github_auth.go
+new file mode 100644
+index 00000000..40ef9206
+--- /dev/null
++++ b/server/routes/github_auth.go
+@@ -0,0 +1,241 @@
++/* GitHub OAuth sign-in (self-host patch). Accounts are keyed by the GitHub
++ * account's primary verified email, like the email OTP flow, and carry no
++ * calendar access. */
++package routes
++
++import (
++	"context"
++	"crypto/rand"
++	"encoding/hex"
++	"encoding/json"
++	"fmt"
++	"net/http"
++	"net/url"
++	"os"
++	"strconv"
++	"strings"
++	"time"
++
++	"github.com/gin-contrib/sessions"
++	"github.com/gin-gonic/gin"
++	"go.mongodb.org/mongo-driver/bson"
++	"go.mongodb.org/mongo-driver/bson/primitive"
++	"schej.it/server/db"
++	"schej.it/server/logger"
++	"schej.it/server/models"
++	"schej.it/server/utils"
++)
++
++var githubHttpClient = &http.Client{Timeout: 10 * time.Second}
++
++// Session keys holding the in-flight sign-in between the redirect to GitHub
++// and the callback.
++const (
++	githubStateKey    = "githubState"
++	githubRedirectKey = "githubRedirect"
++	githubTzKey       = "githubTimezoneOffset"
++	githubLinkKey     = "githubEventsToLink"
++)
++
++func initGithubAuth(authRouter *gin.RouterGroup) {
++	authRouter.GET("/github", githubSignIn)
++	authRouter.GET("/github/callback", githubCallback)
++}
++
++// @Summary Starts GitHub sign-in
++// @Description Redirects to GitHub's OAuth consent page. Query: redirect (relative path to return to), timezoneOffset, eventsToLink (comma-separated event ids created while signed out)
++// @Tags auth
++// @Router /auth/github [get]
++func githubSignIn(c *gin.Context) {
++	clientId := os.Getenv("GITHUB_CLIENT_ID")
++	if clientId == "" {
++		c.String(http.StatusNotFound, "GitHub sign-in is not configured")
++		return
++	}
++
++	stateBytes := make([]byte, 32)
++	if _, err := rand.Read(stateBytes); err != nil {
++		logger.StdErr.Panicln(err)
++	}
++	state := hex.EncodeToString(stateBytes)
++
++	session := sessions.Default(c)
++	session.Set(githubStateKey, state)
++	session.Set(githubRedirectKey, safeRedirectPath(c.Query("redirect")))
++	session.Set(githubTzKey, c.Query("timezoneOffset"))
++	session.Set(githubLinkKey, c.Query("eventsToLink"))
++	session.Save()
++
++	params := url.Values{}
++	params.Set("client_id", clientId)
++	params.Set("scope", "read:user user:email")
++	params.Set("state", state)
++	c.Redirect(http.StatusFound, "https://github.com/login/oauth/authorize?"+params.Encode())
++}
++
++// @Summary GitHub OAuth callback
++// @Description Exchanges the code, finds or creates the user by primary verified email, sets the session and redirects back into the app
++// @Tags auth
++// @Router /auth/github/callback [get]
++func githubCallback(c *gin.Context) {
++	session := sessions.Default(c)
++	expectedState, _ := session.Get(githubStateKey).(string)
++	redirect, _ := session.Get(githubRedirectKey).(string)
++	tzString, _ := session.Get(githubTzKey).(string)
++	eventsToLink, _ := session.Get(githubLinkKey).(string)
++	// The state is single-use: every exit path below saves the session with
++	// these keys removed. Each Save emits a Set-Cookie, so save exactly once.
++	session.Delete(githubStateKey)
++	session.Delete(githubRedirectKey)
++	session.Delete(githubTzKey)
++	session.Delete(githubLinkKey)
++
++	fail := func(reason string, err error) {
++		logger.StdErr.Printf("GitHub sign-in failed: %s: %v", reason, err)
++		session.Save()
++		c.Redirect(http.StatusFound, "/sign-in?error=github")
++	}
++
++	if expectedState == "" || c.Query("state") != expectedState {
++		fail("state mismatch", nil)
++		return
++	}
++	if c.Query("error") != "" {
++		fail("denied", fmt.Errorf("%s", c.Query("error")))
++		return
++	}
++
++	accessToken, err := githubExchangeCode(c.Query("code"))
++	if err != nil {
++		fail("code exchange", err)
++		return
++	}
++
++	var ghUser struct {
++		Login     string `json:"login"`
++		Name      string `json:"name"`
++		AvatarUrl string `json:"avatar_url"`
++	}
++	if err := githubGet(accessToken, "/user", &ghUser); err != nil {
++		fail("fetch user", err)
++		return
++	}
++
++	var ghEmails []struct {
++		Email    string `json:"email"`
++		Primary  bool   `json:"primary"`
++		Verified bool   `json:"verified"`
++	}
++	if err := githubGet(accessToken, "/user/emails", &ghEmails); err != nil {
++		fail("fetch emails", err)
++		return
++	}
++	email := ""
++	for _, e := range ghEmails {
++		if e.Verified && (e.Primary || email == "") {
++			email = e.Email
++		}
++	}
++	if email == "" {
++		fail("no verified email", nil)
++		return
++	}
++	email = utils.NormalizeEmail(email)
++
++	var userId primitive.ObjectID
++	if existing := db.GetUserByEmail(email); existing != nil {
++		userId = existing.Id
++	} else {
++		firstName, lastName := ghUser.Login, ""
++		if name := strings.TrimSpace(ghUser.Name); name != "" {
++			firstName, lastName, _ = strings.Cut(name, " ")
++		}
++		timezoneOffset, _ := strconv.Atoi(tzString)
++
++		res, err := db.UsersCollection.InsertOne(context.Background(), models.User{
++			Email:          email,
++			FirstName:      firstName,
++			LastName:       strings.TrimSpace(lastName),
++			Picture:        ghUser.AvatarUrl,
++			TimezoneOffset: timezoneOffset,
++			TokenOrigin:    models.WEB,
++		})
++		if err != nil {
++			logger.StdErr.Panicln(err)
++		}
++		userId = res.InsertedID.(primitive.ObjectID)
++	}
++
++	// Claim events this browser created while signed out (same as /auth/sign-in)
++	for _, eventIdString := range strings.Split(eventsToLink, ",") {
++		eventId, err := primitive.ObjectIDFromHex(eventIdString)
++		if err == nil {
++			db.EventsCollection.UpdateOne(context.Background(), bson.M{"_id": eventId, "ownerId": nil}, bson.M{"$set": bson.M{"ownerId": userId}})
++		}
++	}
++
++	session.Set("userId", userId.Hex())
++	session.Save()
++
++	c.Redirect(http.StatusFound, redirect)
++}
++
++// safeRedirectPath only allows same-origin absolute paths, so the callback
++// cannot be turned into an open redirect.
++func safeRedirectPath(path string) string {
++	if !strings.HasPrefix(path, "/") || strings.HasPrefix(path, "//") || strings.HasPrefix(path, "/\\") {
++		return "/home"
++	}
++	return path
++}
++
++func githubExchangeCode(code string) (string, error) {
++	form := url.Values{}
++	form.Set("client_id", os.Getenv("GITHUB_CLIENT_ID"))
++	form.Set("client_secret", os.Getenv("GITHUB_CLIENT_SECRET"))
++	form.Set("code", code)
++
++	req, err := http.NewRequest(http.MethodPost, "https://github.com/login/oauth/access_token", strings.NewReader(form.Encode()))
++	if err != nil {
++		return "", err
++	}
++	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
++	req.Header.Set("Accept", "application/json")
++
++	resp, err := githubHttpClient.Do(req)
++	if err != nil {
++		return "", err
++	}
++	defer resp.Body.Close()
++
++	var body struct {
++		AccessToken string `json:"access_token"`
++		Error       string `json:"error"`
++	}
++	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
++		return "", err
++	}
++	if body.AccessToken == "" {
++		return "", fmt.Errorf("no access token (status %d, error %q)", resp.StatusCode, body.Error)
++	}
++	return body.AccessToken, nil
++}
++
++func githubGet(accessToken string, path string, out interface{}) error {
++	req, err := http.NewRequest(http.MethodGet, "https://api.github.com"+path, nil)
++	if err != nil {
++		return err
++	}
++	req.Header.Set("Authorization", "Bearer "+accessToken)
++	req.Header.Set("Accept", "application/vnd.github+json")
++
++	resp, err := githubHttpClient.Do(req)
++	if err != nil {
++		return err
++	}
++	defer resp.Body.Close()
++	if resp.StatusCode != http.StatusOK {
++		return fmt.Errorf("GET %s: status %d", path, resp.StatusCode)
++	}
++	return json.NewDecoder(resp.Body).Decode(out)
++}
