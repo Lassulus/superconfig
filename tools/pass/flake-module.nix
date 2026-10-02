@@ -76,7 +76,12 @@
 
                         setup_identities() {
                           # Always detect available age keys first
-                          export AGE_DETECT_KEYS_DIR="${self}/keys"
+                          export AGE_DETECT_KEYS_DIR="${
+                            builtins.path {
+                              path = self + "/keys";
+                              name = "keys";
+                            }
+                          }"
                           eval "$(age-detect)"
 
                           # Set up identity file if detected
