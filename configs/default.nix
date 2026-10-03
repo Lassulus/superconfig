@@ -217,7 +217,6 @@
     cyberlocker-tools
     pciutils
     pop
-    q
     untilport
     (pkgs.writeDashBin "urgent" ''
       printf '\a'
