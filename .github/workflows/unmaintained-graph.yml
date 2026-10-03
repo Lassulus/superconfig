@@ -1,0 +1,50 @@
+name: unmaintained-graph
+
+# Renders the graph of packages without maintainers in all machines' closures
+# (tools/unmaintained-graph) and publishes it on GitHub Pages:
+# https://lassulus.github.io/superconfig/
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# only the newest run needs to land
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: cachix/install-nix-action@v31
+
+      # 4 parallel evaluations peak around 5.5 GB, well within the 16 GB runner
+      - run: |
+          mkdir -p _site
+          nix run .#unmaintained-graph -- \
+            --title "Unmaintained packages in superconfig @ ${GITHUB_SHA::8}" \
+            -o _site/index.html
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+      - run: echo "Graph at ${{ steps.deployment.outputs.page_url }}" >> "$GITHUB_STEP_SUMMARY"
