@@ -1,0 +1,497 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Unmaintained packages</title>
+    <style>
+      :root {
+        --bg: #0d1117;
+        --panel: #161b22;
+        --fg: #c9d1d9;
+        --dim: #8b949e;
+        --line: #30363d;
+        --red: #f85149;
+        --blue: #58a6ff;
+        --green: #3fb950;
+        --yellow: #d29922;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font:
+          13px/1.4 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          monospace;
+        background: var(--bg);
+        color: var(--fg);
+        display: grid;
+        grid-template-columns: 340px 1fr 380px;
+        grid-template-rows: auto 1fr;
+        height: 100vh;
+      }
+      header {
+        grid-column: 1 / -1;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        padding: 8px 12px;
+        background: var(--panel);
+        border-bottom: 1px solid var(--line);
+      }
+      header h1 {
+        font-size: 14px;
+        margin: 0 12px 0 0;
+      }
+      input,
+      select,
+      button {
+        font: inherit;
+        background: var(--bg);
+        color: var(--fg);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 3px 6px;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:hover {
+        border-color: var(--blue);
+      }
+      #list {
+        overflow: auto;
+        border-right: 1px solid var(--line);
+      }
+      #list .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 3px 10px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      #list .row:hover,
+      #list .row.sel {
+        background: #1f2630;
+      }
+      #list .row .n {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      #list .row .c {
+        color: var(--dim);
+      }
+      #list .meta {
+        padding: 6px 10px;
+        color: var(--dim);
+        border-bottom: 1px solid var(--line);
+      }
+      .inst {
+        color: var(--yellow);
+      }
+      #graph {
+        position: relative;
+        overflow: hidden;
+      }
+      #graph svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      #toolbar {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      #legend {
+        position: absolute;
+        bottom: 8px;
+        left: 8px;
+        color: var(--dim);
+        background: #161b22cc;
+        padding: 6px 8px;
+        border-radius: 4px;
+      }
+      #legend span {
+        margin-right: 10px;
+      }
+      .dot {
+        display: inline-block;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        margin-right: 4px;
+        vertical-align: middle;
+      }
+      #details {
+        overflow: auto;
+        border-left: 1px solid var(--line);
+        padding: 10px 12px;
+      }
+      #details h2 {
+        font-size: 14px;
+        margin: 0 0 6px;
+        word-break: break-all;
+      }
+      #details .k {
+        color: var(--dim);
+      }
+      #details ul {
+        margin: 4px 0 10px;
+        padding-left: 16px;
+      }
+      #details li {
+        cursor: pointer;
+        word-break: break-all;
+      }
+      #details li:hover {
+        color: var(--blue);
+      }
+      a {
+        color: var(--blue);
+      }
+      .u {
+        color: var(--red);
+      }
+      text {
+        fill: var(--fg);
+        font-size: 10px;
+        pointer-events: none;
+        paint-order: stroke;
+        stroke: var(--bg);
+        stroke-width: 3px;
+      }
+      .link {
+        stroke: #3d444d;
+        stroke-width: 1.2;
+      }
+      .link.via {
+        stroke: var(--red);
+        stroke-dasharray: 4 3;
+        opacity: 0.7;
+      }
+      .node circle {
+        stroke: var(--bg);
+        stroke-width: 1.5;
+        cursor: pointer;
+      }
+      .node.focus circle {
+        stroke: #fff;
+        stroke-width: 2.5;
+      }
+      .node.inst circle {
+        stroke: var(--yellow);
+        stroke-width: 2.5;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1 id="title">Unmaintained packages</h1>
+      <label
+        >machine
+        <select id="machine"></select
+      ></label>
+      <input id="search" placeholder="filter list…" size="24" />
+      <label
+        ><input type="checkbox" id="onlyInst" /> directly installed only</label
+      >
+      <span id="summary" class="k"></span>
+    </header>
+    <div id="list"></div>
+    <div id="graph">
+      <div id="toolbar">
+        <button
+          id="bExpand"
+          title="add packages that use the selected node (or double-click a node)"
+        >
+          expand users
+        </button>
+        <button
+          id="bPath"
+          title="all shortest chains from the system toplevel down to the selected node"
+        >
+          chains to system
+        </button>
+        <button
+          id="bUnm"
+          title="nearest unmaintained packages that (transitively) use the selected node; adds the 30 biggest, the side panel lists all"
+        >
+          unmaintained users
+        </button>
+        <button id="bReset">reset</button>
+      </div>
+      <div id="legend">
+        <span
+          ><i class="dot" style="background: var(--red)"></i>unmaintained</span
+        >
+        <span><i class="dot" style="background: var(--dim)"></i>other</span>
+        <span
+          ><i class="dot" style="background: var(--green)"></i>system-path</span
+        >
+        <span
+          ><i class="dot" style="background: var(--blue)"></i>system
+          toplevel</span
+        >
+        <span
+          ><i class="dot" style="border: 2px solid var(--yellow)"></i>directly
+          installed</span
+        >
+        <span
+          >arrow: user → used · dashed: via maintained packages · node size:
+          #dependents</span
+        >
+      </div>
+      <svg></svg>
+    </div>
+    <div id="details">
+      <p class="k">
+        Pick a package on the left. The graph shows every shortest chain through
+        which the system (blue, top) pulls it in. Click nodes to inspect,
+        double-click to expand who uses them.
+      </p>
+    </div>
+
+    <script>
+      /*D3*/
+    </script>
+    <script>
+      const D = /*DATA*/;
+      const N = D.names.length, M = D.machines.length;
+      const isU = new Uint8Array(N); for (const k in D.udep) isU[+k] = 1;
+      const rootSet = new Set(D.roots);
+      const children = Array.from({ length: N }, () => []);
+      D.parents.forEach((ps, c) => { for (const p of ps) children[p].push(c); });
+      const direct = new Map(Object.entries(D.direct).map(([k, v]) => [+k, v]));
+      const nameCount = new Map(); for (const n of D.names) nameCount.set(n, (nameCount.get(n) || 0) + 1);
+      const label = i => nameCount.get(D.names[i]) > 1 ? `${D.names[i]} (${D.hash[i]})` : D.names[i];
+
+      const $ = s => document.querySelector(s);
+      const msel = $("#machine");
+      msel.innerHTML = `<option value="-1">all (${M})</option>` + D.machines.map((m, i) => `<option value="${i}">${m}</option>`).join("");
+      let mi = -1;
+      const bitOf = i => 1 << i;
+      const inMachine = i => mi < 0 || (D.mask[i] & bitOf(mi));
+      const depOf = i => mi < 0 ? D.dep[i] : (isU[i] ? D.udep[i][mi] : D.dep[i]);
+      const instOn = i => direct.get(i) || 0;
+      const isInst = i => mi < 0 ? instOn(i) !== 0 : (instOn(i) & bitOf(mi)) !== 0;
+      const machinesOf = bits => D.machines.filter((_, k) => bits & bitOf(k));
+      const parentsOf = i => D.parents[i].filter(inMachine);
+      // D.file[i] = [path shown, link or null]; the generator links nixpkgs files to GitHub when it knows the revision
+      const fileLink = i => {
+        const f = D.file[i]; if (!f) return "";
+        return f[1] ? `<a target="_blank" href="${f[1]}">${f[0]}</a>` : f[0];
+      };
+      document.title = $("#title").textContent = D.title;
+
+      // ---------- list ----------
+      let selected = -1;
+      $("#list").addEventListener("click", e => { const r = e.target.closest(".row"); if (r) focusNode(+r.dataset.i); });
+      $("#search").addEventListener("input", renderList);
+      $("#onlyInst").addEventListener("change", renderList);
+      msel.addEventListener("change", () => { mi = +msel.value; renderList(); if (selected >= 0) focusNode(selected); });
+
+      // one list row per package name; variants = all drvs with that name (different deps/stages)
+      const variants = new Map();
+      for (const k in D.udep) { const i = +k, n = D.names[i]; if (!variants.has(n)) variants.set(n, []); variants.get(n).push(i); }
+      function renderList() {
+        const q = $("#search").value.toLowerCase(), oi = $("#onlyInst").checked;
+        const rows = [];
+        for (const [n, vs] of variants) {
+          if (q && !n.toLowerCase().includes(q)) continue;
+          const v = vs.filter(inMachine); if (!v.length) continue;
+          if (oi && !v.some(isInst)) continue;
+          v.sort((a, b) => depOf(b) - depOf(a));
+          rows.push({ n, best: v[0], count: v.length, dep: depOf(v[0]), inst: v.some(isInst) });
+        }
+        rows.sort((a, b) => b.dep - a.dep);
+        $("#summary").textContent = `${rows.length} unmaintained packages` + (mi < 0 ? " across all machines" : ` on ${D.machines[mi]}`);
+        const shown = rows.slice(0, 800);
+        const sel = selected >= 0 ? D.names[selected] : null;
+        $("#list").innerHTML = `<div class="meta">sorted by #dependents (best variant)${rows.length > shown.length ? ` · showing ${shown.length} of ${rows.length}, filter to narrow` : ""}</div>` +
+          shown.map(r => `<div class="row${r.n === sel ? " sel" : ""}" data-i="${r.best}"><span class="n">${r.inst ? '<span class="inst">●</span> ' : ""}${r.n}${r.count > 1 ? ` <span class="k">×${r.count}</span>` : ""}</span><span class="c">${r.dep}</span></div>`).join("");
+      }
+      const svg = d3.select("#graph svg"), g = svg.append("g");
+      svg.append("defs").append("marker").attr("id", "arrow").attr("viewBox", "0 -4 8 8").attr("refX", 8).attr("refY", 0)
+        .attr("markerWidth", 7).attr("markerHeight", 7).attr("orient", "auto").append("path").attr("d", "M0,-4L8,0L0,4").attr("fill", "#3d444d");
+      const zoom = d3.zoom().scaleExtent([0.05, 4]).on("zoom", e => g.attr("transform", e.transform));
+      svg.call(zoom).on("dblclick.zoom", null);
+      const gl = g.append("g"), gn = g.append("g");
+      let vis = new Map();      // node id -> {id, level, x, y}
+      let via = [];             // [{source, target, steps}] dashed shortcuts
+      let focusId = -1;
+      const sim = d3.forceSimulation()
+        .force("link", d3.forceLink().id(d => d.id).distance(90).strength(0.3))
+        .force("charge", d3.forceManyBody().strength(-450))
+        .force("collide", d3.forceCollide(d => radius(d.id) + 10))
+        .force("y", d3.forceY(d => -d.level * 140).strength(0.6))
+        .force("x", d3.forceX(0).strength(0.01))
+        .on("tick", tick);
+
+      const radius = i => 4 + 2.2 * Math.log10(Math.max(0, depOf(i)) + 1);
+      const color = i => rootSet.has(i) ? "var(--blue)" : D.names[i] === "system-path" ? "var(--green)" : isU[i] ? "var(--red)" : "var(--dim)";
+
+      function add(i, level) {
+        if (!vis.has(i)) { const near = [...vis.values()].find(n => n.level === level - 1); vis.set(i, { id: i, level, x: (near?.x || 0) + (Math.random() - .5) * 80, y: -level * 110 }); }
+      }
+      function expand(i, limit = 40) {
+        const lv = vis.get(i).level;
+        const ps = parentsOf(i).sort((a, b) => (isU[b] - isU[a]) || (depOf(b) - depOf(a)));
+        ps.slice(0, limit).forEach(p => add(p, lv + 1));
+        return ps.length;
+      }
+      function bfsUp(start, stop) { // breadth-first over users until stop(i) holds on each branch
+        const prev = new Map([[start, -1]]), q = [start], hits = [];
+        for (let h = 0; h < q.length; h++) {
+          const i = q[h];
+          if (i !== start && stop(i)) { hits.push(i); continue; }
+          for (const p of parentsOf(i)) if (!prev.has(p)) { prev.set(p, i); q.push(p); }
+        }
+        return { prev, hits };
+      }
+      // distance (in "uses" steps) from i up to every node that transitively uses it
+      function distUp(i) {
+        const d = new Map([[i, 0]]), q = [i];
+        for (let h = 0; h < q.length; h++) { const v = q[h]; for (const p of parentsOf(v)) if (!d.has(p)) { d.set(p, d.get(v) + 1); q.push(p); } }
+        return d;
+      }
+      // how far the selected machine's system (or the nearest one, for "all") is above i
+      function systemDistance(i, d = distUp(i)) {
+        const reach = (mi < 0 ? D.roots : [D.roots[mi]]).filter(r => d.has(r));
+        if (!reach.length) return null;
+        const L = Math.min(...reach.map(r => d.get(r)));
+        return { L, roots: reach.filter(r => d.get(r) === L) };
+      }
+      // add every node on a shortest chain system -> ... -> i (walk down from the roots along edges that get one step closer to i)
+      function chainsToSystem(i, cap = 150) {
+        const d = distUp(i), s = systemDistance(i, d);
+        if (!s) return null;
+        const on = new Set(s.roots), q = [...s.roots];
+        for (let h = 0; h < q.length && on.size < cap; h++) {
+          const v = q[h];
+          for (const c of children[v]) if (inMachine(c) && d.get(c) === d.get(v) - 1 && !on.has(c)) { on.add(c); q.push(c); }
+        }
+        const base = vis.get(i)?.level ?? 0;
+        for (const v of on) add(v, base + d.get(v));
+        return { ...s, nodes: on.size, capped: on.size >= cap };
+      }
+      function unmaintainedUsers(i, limit = 30) { // adds the `limit` biggest; the details panel lists all
+        const { prev, hits } = bfsUp(i, j => isU[j]);
+        const lv = vis.get(i).level;
+        hits.sort((a, b) => depOf(b) - depOf(a));
+        for (const h of hits.slice(0, limit)) {
+          let steps = 0; for (let j = h; j !== i; j = prev.get(j)) steps++;
+          add(h, lv + 1);
+          if (steps > 1) via.push({ source: h, target: i, steps });
+        }
+        return hits;
+      }
+
+      function draw() {
+        const nodes = [...vis.values()];
+        const links = [];
+        for (const n of nodes) for (const p of D.parents[n.id]) if (vis.has(p) && inMachine(p)) links.push({ source: p, target: n.id });
+        const vlinks = via.filter(v => vis.has(v.source) && vis.has(v.target)).map(v => ({ ...v, via: true }));
+        const all = links.concat(vlinks);
+        const ls = gl.selectAll("line").data(all, d => `${d.source.id ?? d.source}-${d.target.id ?? d.target}-${!!d.via}`);
+        ls.exit().remove();
+        ls.enter().append("line").attr("class", d => d.via ? "link via" : "link").attr("marker-end", "url(#arrow)")
+          .append("title").text(d => d.via ? `uses via ${d.steps - 1} maintained package(s)` : "uses");
+        const ns = gn.selectAll("g.node").data(nodes, d => d.id);
+        ns.exit().remove();
+        const ne = ns.enter().append("g").attr("class", "node")
+          .call(d3.drag().on("start", (e, d) => { if (!e.active) sim.alphaTarget(.3).restart(); d.fx = d.x; d.fy = d.y; })
+            .on("drag", (e, d) => { d.fx = e.x; d.fy = e.y; })
+            .on("end", (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = d.fy = null; }))
+          .on("click", (e, d) => { e.stopPropagation(); showDetails(d.id); })
+          .on("dblclick", (e, d) => { e.stopPropagation(); expand(d.id); draw(); showDetails(d.id); });
+        ne.append("circle");
+        ne.append("text").attr("dy", -9).attr("text-anchor", "middle");
+        ne.append("title");
+        const nm = ne.merge(ns);
+        nm.attr("class", d => `node${d.id === focusId ? " focus" : ""}${isInst(d.id) ? " inst" : ""}`);
+        nm.select("circle").attr("r", d => radius(d.id)).attr("fill", d => color(d.id));
+        nm.select("text").text(d => label(d.id));
+        nm.select("title").text(d => `${label(d.id)}\n${depOf(d.id)} dependents · ${parentsOf(d.id).length} direct users`);
+        sim.nodes(nodes);
+        sim.force("link").links(all);
+        sim.alpha(0.8).restart();
+        fitSoon();
+      }
+      function tick() {
+        gl.selectAll("line").each(function (d) {
+          const dx = d.target.x - d.source.x, dy = d.target.y - d.source.y, len = Math.hypot(dx, dy) || 1, r = radius(d.target.id) + 2;
+          this.setAttribute("x1", d.source.x); this.setAttribute("y1", d.source.y);
+          this.setAttribute("x2", d.target.x - dx / len * r); this.setAttribute("y2", d.target.y - dy / len * r);
+        });
+        gn.selectAll("g.node").attr("transform", d => `translate(${d.x},${d.y})`);
+      }
+      function fit() {
+        const ns = sim.nodes().filter(n => isFinite(n.x)); if (!ns.length) return;
+        const { width, height } = svg.node().getBoundingClientRect(), pad = 60;
+        const [x0, x1] = d3.extent(ns, n => n.x), [y0, y1] = d3.extent(ns, n => n.y);
+        const k = Math.min(1.5, (width - 2 * pad) / Math.max(1, x1 - x0), (height - 2 * pad) / Math.max(1, y1 - y0));
+        svg.transition().duration(400).call(zoom.transform, d3.zoomIdentity.translate(width / 2 - k * (x0 + x1) / 2, height / 2 - k * (y0 + y1) / 2).scale(k));
+      }
+      let fitTimer; const fitSoon = () => { clearTimeout(fitTimer); fitTimer = setTimeout(fit, 700); };
+
+      function focusNode(i) {
+        selected = focusId = i;
+        vis = new Map(); via = [];
+        gl.selectAll("*").remove(); gn.selectAll("*").remove();
+        add(i, 0);
+        if (!chainsToSystem(i)) expand(i);
+        draw(); showDetails(i); renderList();
+        history.replaceState(null, "", "#" + D.hash[i]);
+      }
+
+      let detailId = -1;
+      function showDetails(i) {
+        detailId = i;
+        const ps = parentsOf(i).sort((a, b) => (isU[b] - isU[a]) || (depOf(b) - depOf(a)));
+        const ms = machinesOf(D.mask[i]), inst = machinesOf(instOn(i));
+        const li = j => `<li data-i="${j}" class="${isU[j] ? "u" : ""}">${label(j)} <span class="k">(${depOf(j)})</span></li>`;
+        $("#details").innerHTML = `
+          <h2 class="${isU[i] ? "u" : ""}">${label(i)}</h2>
+          <div>${isU[i] ? '<span class="u">no maintainer</span>' : '<span class="k">not flagged</span>'}</div>
+          ${D.file[i] ? `<div><span class="k">file</span> ${fileLink(i)}</div>` : ""}
+          <div><span class="k">drv</span> ${D.hash[i]}…-${D.names[i]}.drv</div>
+          <div><span class="k">dependents</span> ${depOf(i)} ${mi < 0 ? "(max over machines)" : "on " + D.machines[mi]}</div>
+          <div><span class="k">distance to system</span> ${(s => s ? `${s.L} step(s)${mi < 0 ? ` (nearest: ${s.roots.map(r => D.machines[D.roots.indexOf(r)]).join(" ")})` : ""}` : "not reachable")(systemDistance(i))}</div>
+          ${isU[i] ? `<div><span class="k">per machine</span> ${D.machines.map((m, k) => D.udep[i][k] >= 0 ? `${m}:${D.udep[i][k]}` : "").filter(Boolean).join(" ")}</div>` : ""}
+          <div><span class="k">in ${ms.length} machine(s)</span> ${ms.join(" ")}</div>
+          <div><span class="k">directly installed on</span> ${inst.length ? `<span class="inst">${inst.join(" ")}</span>` : "—"}</div>
+          <p><button id="dFocus">focus here</button> <button id="dExpand">expand users</button></p>
+          <div class="k">used directly by ${ps.length} (click to add to graph, red = unmaintained):</div>
+          <ul id="dParents">${ps.slice(0, 300).map(li).join("")}${ps.length > 300 ? `<li class="k">… ${ps.length - 300} more</li>` : ""}</ul>
+          ${(variants.get(D.names[i]) || []).length > 1 ? `<div class="k">other variants of ${D.names[i]} (separate derivations, e.g. bootstrap stages):</div><ul id="dVar">${variants.get(D.names[i]).filter(j => j !== i && inMachine(j)).sort((a, b) => depOf(b) - depOf(a)).map(li).join("")}</ul>` : ""}
+          <div id="dUnm"></div>`;
+        $("#dFocus").onclick = () => focusNode(i);
+        $("#dExpand").onclick = () => { if (!vis.has(i)) add(i, 0); expand(i, 1e9); draw(); };
+        $("#dParents").onclick = e => { const l = e.target.closest("li[data-i]"); if (!l) return; const j = +l.dataset.i; if (!vis.has(i)) add(i, 0); add(j, vis.get(i).level + 1); draw(); };
+        if ($("#dVar")) $("#dVar").onclick = e => { const l = e.target.closest("li[data-i]"); if (l) focusNode(+l.dataset.i); };
+        if (isU[i]) {
+          const { hits } = bfsUp(i, j => isU[j]);
+          hits.sort((a, b) => depOf(b) - depOf(a));
+          $("#dUnm").innerHTML = `<div class="k">nearest unmaintained users (${hits.length}):</div><ul>${hits.slice(0, 200).map(li).join("")}</ul>`;
+          $("#dUnm").onclick = e => { const l = e.target.closest("li[data-i]"); if (l) focusNode(+l.dataset.i); };
+        }
+      }
+      const needSel = f => () => { if (detailId < 0) return; if (!vis.has(detailId)) add(detailId, 0); f(detailId); draw(); };
+      $("#bExpand").onclick = needSel(i => expand(i));
+      $("#bPath").onclick = needSel(i => chainsToSystem(i));
+      $("#bUnm").onclick = needSel(unmaintainedUsers);
+      $("#bReset").onclick = () => { if (focusId >= 0) focusNode(focusId); };
+
+      renderList();
+      const h = location.hash.slice(1); const hi = h ? D.hash.indexOf(h) : -1;
+      if (hi >= 0) focusNode(hi);
+    </script>
+  </body>
+</html>

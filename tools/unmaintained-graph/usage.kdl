@@ -1,0 +1,18 @@
+bin "unmaintained-graph"
+about "Render an interactive HTML graph of the packages without maintainers in the system closures (build dependencies included) of a flake's NixOS/nix-darwin machines"
+
+flag "--flake" help="Flake to inspect (default: .)" {
+  arg "<flakeref>"
+}
+flag "-m --machine" help="Only this machine; repeatable (default: all nixosConfigurations and darwinConfigurations)" var=#true {
+  arg "<name>"
+}
+flag "-o --output" help="Output HTML file (default: unmaintained-graph.html)" {
+  arg "<file>"
+}
+flag "-j --jobs" help="Parallel evaluations (default: 4)" {
+  arg "<n>"
+}
+flag "--title" help="Page title (default: derived from the flake)" {
+  arg "<title>"
+}
