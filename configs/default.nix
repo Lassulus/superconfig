@@ -36,7 +36,7 @@
     # Import stockholm modules
     self.inputs.stockholm.nixosModules.users
     self.inputs.stockholm.nixosModules.hosts
-    self.inputs.stockholm.nixosModules.kartei
+    ./kartei.nix
     self.inputs.stockholm.nixosModules.build
     self.inputs.stockholm.nixosModules.dns
     self.inputs.stockholm.nixosModules.iptables

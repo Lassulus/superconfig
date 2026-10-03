@@ -1,4 +1,9 @@
-{ self, pkgs, ... }:
+{
+  self,
+  config,
+  pkgs,
+  ...
+}:
 {
   imports = [
     ../../configs
@@ -31,7 +36,7 @@
 
   boot.tmp.cleanOnBoot = true;
 
-  krebs.build.host = self.inputs.stockholm.kartei.hosts.xerxes;
+  krebs.build.host = config.krebs.hosts.xerxes;
 
   environment.systemPackages = [
     pkgs.bitwarden-desktop
