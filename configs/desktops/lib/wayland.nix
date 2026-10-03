@@ -89,12 +89,6 @@
   programs.wshowkeys.enable = true;
 
   environment.systemPackages = with pkgs; [
-    # (gamescope.overrideAttrs (old: {
-    #   patches = old.patches ++ [
-    #     ./gamescope_libinput.patch
-    #   ];
-    #
-    # }))
     swaylock-effects # lockscreen
     pavucontrol
     swayidle
