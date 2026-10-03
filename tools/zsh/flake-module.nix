@@ -193,6 +193,10 @@
         alias -- nb='nix build --no-link --print-out-paths -L'
         alias -- ne='nix eval --json'
         alias -- nloc='nix-locate --top-level --whole-name'
+        # a child process cannot change this shell's env, so eval its export line
+        alias -- ssh-agent-pick='eval "$(${
+          self.packages.${pkgs.system}.ssh-agent-pick
+        }/bin/ssh-agent-pick)"'
 
         # Setup prompt.
         autoload -U promptinit
