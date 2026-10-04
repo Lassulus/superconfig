@@ -134,6 +134,10 @@
         border-left: 1px solid var(--line);
         padding: 10px 12px;
       }
+      #details .desc {
+        margin: 4px 0 8px;
+        font-size: 13px;
+      }
       #details h2 {
         font-size: 14px;
         margin: 0 0 6px;
@@ -198,7 +202,7 @@
         >machine
         <select id="machine"></select
       ></label>
-      <input id="search" placeholder="filter list…" size="24" />
+      <input id="search" placeholder="filter name or description…" size="28" />
       <label
         ><input type="checkbox" id="onlyInst" /> directly installed only</label
       >
@@ -290,6 +294,22 @@
       };
       document.title = $("#title").textContent = D.title;
 
+      // package meta (description, homepage, ...) by package name; strings come from nixpkgs, so escape them
+      const metaOf = n => (D.meta || {})[n];
+      const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+      const urlHtml = s => /^https?:\/\//.test(s) ? `<a target="_blank" rel="noreferrer" href="${esc(s)}">${esc(s)}</a>` : esc(s);
+      function metaHtml(n) {
+        const m = metaOf(n); if (!m) return "";
+        return [
+          m.description && `<div class="desc">${esc(m.description)}</div>`,
+          m.homepage && `<div><span class="k">homepage</span> ${urlHtml(m.homepage)}</div>`,
+          m.license?.length && `<div><span class="k">license</span> ${esc(m.license.join(", "))}</div>`,
+          m.changelog && `<div><span class="k">changelog</span> ${urlHtml(m.changelog)}</div>`,
+          m.attr && `<div><span class="k">attribute</span> pkgs.${esc(m.attr)}</div>`,
+          m.vulnerabilities?.length && `<div class="u">known vulnerabilities:<ul>${m.vulnerabilities.map(v => `<li>${esc(v)}</li>`).join("")}</ul></div>`,
+        ].filter(Boolean).join("");
+      }
+
       // ---------- list ----------
       let selected = -1;
       $("#list").addEventListener("click", e => { const r = e.target.closest(".row"); if (r) focusNode(+r.dataset.i); });
@@ -304,7 +324,7 @@
         const q = $("#search").value.toLowerCase(), oi = $("#onlyInst").checked;
         const rows = [];
         for (const [n, vs] of variants) {
-          if (q && !n.toLowerCase().includes(q)) continue;
+          if (q && !n.toLowerCase().includes(q) && !(metaOf(n)?.description || "").toLowerCase().includes(q)) continue;
           const v = vs.filter(inMachine); if (!v.length) continue;
           if (oi && !v.some(isInst)) continue;
           v.sort((a, b) => depOf(b) - depOf(a));
@@ -315,7 +335,7 @@
         const shown = rows.slice(0, 800);
         const sel = selected >= 0 ? D.names[selected] : null;
         $("#list").innerHTML = `<div class="meta">sorted by #dependents (best variant)${rows.length > shown.length ? ` · showing ${shown.length} of ${rows.length}, filter to narrow` : ""}</div>` +
-          shown.map(r => `<div class="row${r.n === sel ? " sel" : ""}" data-i="${r.best}"><span class="n">${r.inst ? '<span class="inst">●</span> ' : ""}${r.n}${r.count > 1 ? ` <span class="k">×${r.count}</span>` : ""}</span><span class="c">${r.dep}</span></div>`).join("");
+          shown.map(r => `<div class="row${r.n === sel ? " sel" : ""}" data-i="${r.best}" title="${esc(metaOf(r.n)?.description || "")}"><span class="n">${r.inst ? '<span class="inst">●</span> ' : ""}${metaOf(r.n)?.vulnerabilities?.length ? '<span class="u" title="known vulnerabilities">⚠</span> ' : ""}${r.n}${r.count > 1 ? ` <span class="k">×${r.count}</span>` : ""}</span><span class="c">${r.dep}</span></div>`).join("");
       }
       const svg = d3.select("#graph svg"), g = svg.append("g");
       svg.append("defs").append("marker").attr("id", "arrow").attr("viewBox", "0 -4 8 8").attr("refX", 8).attr("refY", 0)
@@ -418,7 +438,7 @@
         nm.attr("class", d => `node${d.id === focusId ? " focus" : ""}${isInst(d.id) ? " inst" : ""}`);
         nm.select("circle").attr("r", d => radius(d.id)).attr("fill", d => color(d.id));
         nm.select("text").text(d => label(d.id));
-        nm.select("title").text(d => `${label(d.id)}\n${depOf(d.id)} dependents · ${parentsOf(d.id).length} direct users`);
+        nm.select("title").text(d => `${label(d.id)}${metaOf(D.names[d.id])?.description ? "\n" + metaOf(D.names[d.id]).description : ""}\n${depOf(d.id)} dependents · ${parentsOf(d.id).length} direct users`);
         sim.nodes(nodes);
         sim.force("link").links(all);
         sim.alpha(0.8).restart();
@@ -460,6 +480,7 @@
         $("#details").innerHTML = `
           <h2 class="${isU[i] ? "u" : ""}">${label(i)}</h2>
           <div>${isU[i] ? '<span class="u">no maintainer</span>' : '<span class="k">not flagged</span>'}</div>
+          ${metaHtml(D.names[i])}
           ${D.file[i] ? `<div><span class="k">file</span> ${fileLink(i)}</div>` : ""}
           <div><span class="k">drv</span> ${D.hash[i]}…-${D.names[i]}.drv</div>
           <div><span class="k">dependents</span> ${depOf(i)} ${mi < 0 ? "(max over machines)" : "on " + D.machines[mi]}</div>

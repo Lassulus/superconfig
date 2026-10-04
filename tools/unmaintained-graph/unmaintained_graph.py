@@ -6,6 +6,11 @@ Each machine is evaluated with nixpkgs' `maintainerless` problem switched to
 derivation changes). The warnings name the unmaintained packages; the graph
 comes from `nix derivation show -r` on the system derivation, so build
 dependencies are included.
+
+Package meta (description, homepage, ...) is collected in the same evaluation
+by walking the derivation values the system is built from. Packages only
+referenced through strings (e.g. "${pkg}/bin/foo") are not reachable that way;
+for those the tool looks up the attribute by name in one extra evaluation.
 """
 
 import argparse
@@ -18,11 +23,31 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
+# second group is "<file>:<line>", the package's meta.position
 WARNING = re.compile(
-    r"evaluation warning: Package '([^']+)' in (/nix/store/[^:\s]+):\d+ "
+    r"evaluation warning: Package '([^']+)' in (/nix/store/[^:\s]+:\d+) "
     r"has the following problem: maintainerless"
 )
 MAX_MACHINES = 31  # the page stores machine membership in 32-bit masks
+
+# Nix function: the cheap, JSON-safe subset of a derivation's meta
+META_FN = """
+  metaOf = d:
+    let
+      m = d.meta or { };
+      str = v: if builtins.isString v then v else null;
+      first = v: if builtins.isList v then (if v == [ ] then null else builtins.head v) else v;
+      lic = x: if builtins.isAttrs x then x.spdxId or x.shortName or x.fullName or null else str x;
+      licenses = let l = m.license or [ ]; in if builtins.isList l then l else [ l ];
+    in
+    {
+      description = str (m.description or null);
+      homepage = str (first (m.homepage or null));
+      changelog = str (first (m.changelog or null));
+      license = builtins.filter (x: x != null) (map lic licenses);
+      vulnerabilities = builtins.filter builtins.isString (m.knownVulnerabilities or [ ]);
+    };
+"""
 
 EVAL_EXPR = """
 let
@@ -34,13 +59,59 @@ let
     ];
   };
   top = if %(kind_str)s == "nixos" then sys.config.system.build.toplevel else sys.system;
+  %(meta_fn)s
+  isDrv = v: builtins.isAttrs v && (v.type or null) == "derivation";
+  # derivation values a derivation was given as attributes: directly, in lists, or one attrset deep.
+  # All of these were already forced to compute drvPath, so walking them is nearly free.
+  depsOf = d:
+    let
+      pick = v:
+        if isDrv v then [ v ]
+        else if builtins.isList v then builtins.concatMap pick v
+        else if builtins.isAttrs v then builtins.filter isDrv (builtins.attrValues v)
+        else [ ];
+    in
+    builtins.concatMap pick (builtins.attrValues (d.drvAttrs or { }));
+  closure = builtins.genericClosure {
+    startSet = [ { key = top.drvPath; d = top; } ];
+    operator = n: map (d: { key = d.drvPath; inherit d; }) (depsOf n.d);
+  };
+  unmaintained = builtins.filter
+    (n: (n.d.meta.maintainers or [ ]) == [ ] && (n.d.meta.teams or [ ]) == [ ]) closure;
 in
 {
   drv = top.drvPath;
   # warnings point into the source nixpkgs was evaluated from, which pkgs.path may only be a copy of
   nixpkgs = sys.pkgs.hello.meta.position;
   rev = sys.config.system.nixos.revision or sys.config.system.nixpkgsRevision or "";
+  meta = builtins.listToAttrs (map (n: { name = n.d.name; value = metaOf n.d; }) unmaintained);
 }
+"""
+
+# For packages the walk could not reach: try likely attribute paths, accept one whose name matches.
+LOOKUP_EXPR = """
+let
+  flake = builtins.getFlake %(flake)s;
+  pkgs = flake.%(kind)sConfigurations.${%(machine)s}.pkgs;
+  lib = pkgs.lib;
+  %(meta_fn)s
+  wanted = builtins.fromJSON %(wanted)s;
+  get = path: let r = builtins.tryEval (lib.attrByPath path null pkgs); in if r.success then r.value else null;
+  nameOf = v: let r = builtins.tryEval (v.name or null); in if r.success then r.value else null;
+  find = it:
+    let
+      p = builtins.parseDrvName it.name;
+      py = builtins.match "python3[.0-9]*-(.*)" p.name;
+      candidates =
+        lib.optional (it.byname != null) [ it.byname ]
+        ++ [ [ p.name ] [ "haskellPackages" p.name ] ]
+        ++ lib.optional (py != null) [ "python3Packages" (builtins.head py) ];
+      hits = builtins.filter (c: let v = get c; in lib.isDerivation v && nameOf v == it.name) candidates;
+    in
+    if hits == [ ] then null
+    else metaOf (get (builtins.head hits)) // { attr = lib.concatStringsSep "." (builtins.head hits); };
+in
+lib.filterAttrs (_: v: v != null) (builtins.listToAttrs (map (it: { name = it.name; value = find it; }) wanted))
 """
 
 
@@ -79,6 +150,7 @@ def evaluate(flake, machine, kind):
         "kind": kind,
         "kind_str": nix_str(kind),
         "machine": nix_str(machine),
+        "meta_fn": META_FN,
     }
     proc = nix_eval_json(expr)
     if proc.returncode != 0:
@@ -87,6 +159,27 @@ def evaluate(flake, machine, kind):
     result = json.loads(proc.stdout)
     result["warned"] = sorted(set(WARNING.findall(proc.stderr)))
     return result
+
+
+def lookup_meta(flake, machine, kind, warned):
+    """Meta for the packages the closure walk missed, via attribute lookup on one machine's pkgs."""
+    wanted = []
+    for name, path in warned.items():
+        m = re.search(r"/pkgs/by-name/[^/]+/([^/]+)/package\.nix:\d+$", path)
+        wanted.append({"name": name, "byname": m.group(1) if m else None})
+    expr = LOOKUP_EXPR % {
+        "flake": nix_str(flake),
+        "kind": kind,
+        "machine": nix_str(machine),
+        "meta_fn": META_FN,
+        "wanted": nix_str(json.dumps(wanted)),
+    }
+    proc = nix_eval_json(expr)
+    if proc.returncode != 0:
+        lines = proc.stderr.strip().splitlines()
+        log(f"[meta] lookup failed, continuing without: {lines[-1] if lines else '?'}")
+        return {}
+    return json.loads(proc.stdout)
 
 
 def derivation_graph(drv):
@@ -124,18 +217,20 @@ def dependents_counts(children):
     return [bin(a).count("1") for a in anc]
 
 
-def file_entry(path, sources):
-    """[path to show, GitHub link or None] for the file a warning points at."""
+def file_entry(position, sources):
+    """[file:line to show, GitHub link to that line or None] for a warning's meta.position."""
+    path, _, line = position.rpartition(":")
     for src, rev in sources.items():
         if path.startswith(src + "/"):
             rel = path[len(src) + 1 :]
             link = re.fullmatch(r"[0-9a-f]{7,40}", rev or "")
-            return [rel, f"https://github.com/NixOS/nixpkgs/blob/{rev}/{rel}" if link else None]
+            url = f"https://github.com/NixOS/nixpkgs/blob/{rev}/{rel}#L{line}" if link else None
+            return [f"{rel}:{line}", url]
     m = re.match(r"/nix/store/[^/]+/(.*)", path)
-    return [(m.group(1) if m else path) + " (not nixpkgs)", None]
+    return [f"{m.group(1) if m else path}:{line} (not nixpkgs)", None]
 
 
-def build_data(title, results, graphs):
+def build_data(title, results, graphs, meta):
     mach = sorted(results)
     # "<nixpkgs>/pkgs/by-name/he/hello/package.nix:42" -> "<nixpkgs>"
     sources = {r["nixpkgs"].rsplit("/pkgs/", 1)[0]: r["rev"] for r in results.values()}
@@ -186,6 +281,7 @@ def build_data(title, results, graphs):
         "udep": {str(i): [dep[i].get(k, -1) for k in range(len(mach))] for i in unmaintained},
         "file": {str(i): file_entry(warned[names[i]], sources) for i in unmaintained},
         "parents": [sorted(p) for p in parents],
+        "meta": {n: meta[n] for n in {names[i] for i in unmaintained} if n in meta},
     }
     return data, len({names[i] for i in unmaintained})
 
@@ -234,11 +330,21 @@ def main():
     if not results:
         sys.exit("every evaluation failed")
 
+    warned = {name: path for r in results.values() for name, path in r["warned"]}
+    meta = {}
+    for r in results.values():
+        meta.update((n, v) for n, v in r.pop("meta").items() if n in warned)
+    missing = {n: p for n, p in warned.items() if n not in meta}
+    if missing:
+        first = next(m for m, _ in machines if m in results)
+        meta.update(lookup_meta(flake, first, dict(machines)[first], missing))
+    log(f"[meta] {len(meta)}/{len(warned)} packages with meta")
+
     with concurrent.futures.ThreadPoolExecutor(args.jobs) as pool:
         graphs = dict(zip(results, pool.map(lambda m: derivation_graph(results[m]["drv"]), results)))
 
     title = args.title or f"Unmaintained packages in {Path(flake).name if os.path.isabs(flake) else flake}"
-    data, count = build_data(title, results, graphs)
+    data, count = build_data(title, results, graphs, meta)
 
     template = Path(os.environ["UNMAINTAINED_GRAPH_TEMPLATE"]).read_text()
     d3 = Path(os.environ["UNMAINTAINED_GRAPH_D3"]).read_text()
