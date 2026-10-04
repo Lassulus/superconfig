@@ -19,6 +19,7 @@ import json
 import os
 import re
 import subprocess
+import tempfile
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -46,6 +47,11 @@ META_FN = """
       changelog = str (first (m.changelog or null));
       license = builtins.filter (x: x != null) (map lic licenses);
       vulnerabilities = builtins.filter builtins.isString (m.knownVulnerabilities or [ ]);
+      maintainers = builtins.filter builtins.isString
+        (map (x: if builtins.isAttrs x then x.github or x.name or null else null) (m.maintainers or [ ]));
+      teams = builtins.filter builtins.isString
+        (map (t: if builtins.isAttrs t then t.shortName or t.name or null else null) (m.teams or [ ]));
+      position = str (m.position or null);
     };
 """
 
@@ -76,19 +82,20 @@ let
     startSet = [ { key = top.drvPath; d = top; } ];
     operator = n: map (d: { key = d.drvPath; inherit d; }) (depsOf n.d);
   };
-  unmaintained = builtins.filter
-    (n: (n.d.meta.maintainers or [ ]) == [ ] && (n.d.meta.teams or [ ]) == [ ]) closure;
+  # generated files (units, etc entries, ...) carry no package meta; leave them out
+  packages = builtins.filter (n: n.d ? meta.description || (n.d.meta.maintainers or [ ]) != [ ]) closure;
 in
 {
   drv = top.drvPath;
   # warnings point into the source nixpkgs was evaluated from, which pkgs.path may only be a copy of
   nixpkgs = sys.pkgs.hello.meta.position;
   rev = sys.config.system.nixos.revision or sys.config.system.nixpkgsRevision or "";
-  meta = builtins.listToAttrs (map (n: { name = n.d.name; value = metaOf n.d; }) unmaintained);
+  meta = builtins.listToAttrs (map (n: { name = n.d.name; value = metaOf n.d; }) packages);
 }
 """
 
-# For packages the walk could not reach: try likely attribute paths, accept one whose name matches.
+# For packages the walk could not reach: try likely attribute paths. Prefer an attribute with exactly
+# this name; otherwise accept the same package in another version (meta is per package, not version).
 LOOKUP_EXPR = """
 let
   flake = builtins.getFlake %(flake)s;
@@ -101,15 +108,26 @@ let
   find = it:
     let
       p = builtins.parseDrvName it.name;
-      py = builtins.match "python3[.0-9]*-(.*)" p.name;
+      py = builtins.match "python3[.]?([0-9]*)-(.*)" p.name;
+      perl = builtins.match "perl[.0-9]*-(.*)" p.name;
       candidates =
         lib.optional (it.byname != null) [ it.byname ]
-        ++ [ [ p.name ] [ "haskellPackages" p.name ] ]
-        ++ lib.optional (py != null) [ "python3Packages" (builtins.head py) ];
-      hits = builtins.filter (c: let v = get c; in lib.isDerivation v && nameOf v == it.name) candidates;
+        ++ [ [ p.name ] [ "${p.name}-unwrapped" ] [ "haskellPackages" p.name ] ]
+        ++ lib.optionals (py != null) [
+          [ "python3${builtins.head py}Packages" (lib.last py) ]
+          [ "python3Packages" (lib.last py) ]
+        ]
+        ++ lib.optional (perl != null) [ "perlPackages" (builtins.replaceStrings [ "-" ] [ "" ] (builtins.head perl)) ];
+      found = map (c: { path = c; name = let v = get c; in if lib.isDerivation v then nameOf v else null; }) candidates;
+      exact = builtins.filter (c: c.name == it.name) found;
+      samePackage = builtins.filter (c: c.name != null && (builtins.parseDrvName c.name).name == p.name) found;
+      hit = if exact != [ ] then builtins.head exact else if samePackage != [ ] then builtins.head samePackage else null;
     in
-    if hits == [ ] then null
-    else metaOf (get (builtins.head hits)) // { attr = lib.concatStringsSep "." (builtins.head hits); };
+    if hit == null then null
+    else metaOf (get hit.path) // {
+      attr = lib.concatStringsSep "." hit.path;
+      otherVersion = if hit.name == it.name then null else hit.name;
+    };
 in
 lib.filterAttrs (_: v: v != null) (builtins.listToAttrs (map (it: { name = it.name; value = find it; }) wanted))
 """
@@ -161,20 +179,27 @@ def evaluate(flake, machine, kind):
     return result
 
 
-def lookup_meta(flake, machine, kind, warned):
-    """Meta for the packages the closure walk missed, via attribute lookup on one machine's pkgs."""
+def lookup_meta(flake, machine, kind, names):
+    """Meta for packages the closure walk missed, via attribute lookup on one machine's pkgs.
+
+    `names` maps package name -> warning position ("" if none), used to find by-name attributes.
+    """
     wanted = []
-    for name, path in warned.items():
-        m = re.search(r"/pkgs/by-name/[^/]+/([^/]+)/package\.nix:\d+$", path)
+    for name, position in names.items():
+        m = re.search(r"/pkgs/by-name/[^/]+/([^/]+)/package\.nix:\d+$", position)
         wanted.append({"name": name, "byname": m.group(1) if m else None})
-    expr = LOOKUP_EXPR % {
-        "flake": nix_str(flake),
-        "kind": kind,
-        "machine": nix_str(machine),
-        "meta_fn": META_FN,
-        "wanted": nix_str(json.dumps(wanted)),
-    }
-    proc = nix_eval_json(expr)
+    # tens of thousands of names do not fit on a command line
+    with tempfile.NamedTemporaryFile("w", suffix=".json") as f:
+        json.dump(wanted, f)
+        f.flush()
+        expr = LOOKUP_EXPR % {
+            "flake": nix_str(flake),
+            "kind": kind,
+            "machine": nix_str(machine),
+            "meta_fn": META_FN,
+            "wanted": f"(builtins.readFile {nix_str(f.name)})",
+        }
+        proc = nix_eval_json(expr)
     if proc.returncode != 0:
         lines = proc.stderr.strip().splitlines()
         log(f"[meta] lookup failed, continuing without: {lines[-1] if lines else '?'}")
@@ -281,9 +306,25 @@ def build_data(title, results, graphs, meta):
         "udep": {str(i): [dep[i].get(k, -1) for k in range(len(mach))] for i in unmaintained},
         "file": {str(i): file_entry(warned[names[i]], sources) for i in unmaintained},
         "parents": [sorted(p) for p in parents],
-        "meta": {n: meta[n] for n in {names[i] for i in unmaintained} if n in meta},
+        "meta": {},
     }
-    return data, len({names[i] for i in unmaintained})
+    # meta for every package in the graph, with its definition linked like the unmaintained ones
+    for n in set(names):
+        m = meta.get(n)
+        if m is None:
+            continue
+        m = dict(m)
+        position = m.pop("position", None)
+        if position:
+            m["file"] = file_entry(position, sources)
+        data["meta"][n] = m
+    unmaintained_names = {names[i] for i in unmaintained}
+    with_meta = sum(1 for n in unmaintained_names if n in data["meta"])
+    log(
+        f"[meta] {with_meta}/{len(unmaintained_names)} unmaintained and "
+        f"{len(data['meta']) - with_meta} other packages with meta"
+    )
+    return data, len(unmaintained_names)
 
 
 def main():
@@ -333,15 +374,17 @@ def main():
     warned = {name: path for r in results.values() for name, path in r["warned"]}
     meta = {}
     for r in results.values():
-        meta.update((n, v) for n, v in r.pop("meta").items() if n in warned)
-    missing = {n: p for n, p in warned.items() if n not in meta}
-    if missing:
-        first = next(m for m, _ in machines if m in results)
-        meta.update(lookup_meta(flake, first, dict(machines)[first], missing))
-    log(f"[meta] {len(meta)}/{len(warned)} packages with meta")
+        for n, v in r.pop("meta").items():
+            meta.setdefault(n, v)
 
     with concurrent.futures.ThreadPoolExecutor(args.jobs) as pool:
         graphs = dict(zip(results, pool.map(lambda m: derivation_graph(results[m]["drv"]), results)))
+
+    # everything in the graph the walk did not reach; names that are no attribute just miss cheaply
+    missing = {n: warned.get(n, "") for g in graphs.values() for n, _ in g.values() if n not in meta}
+    if missing:
+        first = next(m for m, _ in machines if m in results)
+        meta.update(lookup_meta(flake, first, dict(machines)[first], missing))
 
     title = args.title or f"Unmaintained packages in {Path(flake).name if os.path.isabs(flake) else flake}"
     data, count = build_data(title, results, graphs, meta)

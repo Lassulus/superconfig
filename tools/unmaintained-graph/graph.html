@@ -287,10 +287,14 @@
       const isInst = i => mi < 0 ? instOn(i) !== 0 : (instOn(i) & bitOf(mi)) !== 0;
       const machinesOf = bits => D.machines.filter((_, k) => bits & bitOf(k));
       const parentsOf = i => D.parents[i].filter(inMachine);
-      // D.file[i] = [path shown, link or null]; the generator links nixpkgs files to GitHub when it knows the revision
+      // [path shown, link or null]: from the warning for unmaintained packages, else from the package's meta.position
       const fileLink = i => {
-        const f = D.file[i]; if (!f) return "";
+        const f = D.file[i] || metaOf(D.names[i])?.file; if (!f) return "";
         return f[1] ? `<a target="_blank" href="${f[1]}">${f[0]}</a>` : f[0];
+      };
+      const maintainedBy = n => {
+        const m = metaOf(n); if (!m) return "";
+        return [...(m.maintainers || []), ...(m.teams || []).map(t => `team ${t}`)].map(esc).join(", ");
       };
       document.title = $("#title").textContent = D.title;
 
@@ -305,7 +309,7 @@
           m.homepage && `<div><span class="k">homepage</span> ${urlHtml(m.homepage)}</div>`,
           m.license?.length && `<div><span class="k">license</span> ${esc(m.license.join(", "))}</div>`,
           m.changelog && `<div><span class="k">changelog</span> ${urlHtml(m.changelog)}</div>`,
-          m.attr && `<div><span class="k">attribute</span> pkgs.${esc(m.attr)}</div>`,
+          m.attr && `<div><span class="k">attribute</span> pkgs.${esc(m.attr)}${m.otherVersion ? ` <span class="k">(meta taken from ${esc(m.otherVersion)})</span>` : ""}</div>`,
           m.vulnerabilities?.length && `<div class="u">known vulnerabilities:<ul>${m.vulnerabilities.map(v => `<li>${esc(v)}</li>`).join("")}</ul></div>`,
         ].filter(Boolean).join("");
       }
@@ -479,9 +483,9 @@
         const li = j => `<li data-i="${j}" class="${isU[j] ? "u" : ""}">${label(j)} <span class="k">(${depOf(j)})</span></li>`;
         $("#details").innerHTML = `
           <h2 class="${isU[i] ? "u" : ""}">${label(i)}</h2>
-          <div>${isU[i] ? '<span class="u">no maintainer</span>' : '<span class="k">not flagged</span>'}</div>
+          <div>${isU[i] ? '<span class="u">no maintainer</span>' : maintainedBy(D.names[i]) ? `<span class="k">maintainers</span> ${maintainedBy(D.names[i])}` : metaOf(D.names[i]) ? '<span class="k">no maintainer listed (not checked, e.g. fixed-output)</span>' : '<span class="k">no package meta (generated file, source, …)</span>'}</div>
           ${metaHtml(D.names[i])}
-          ${D.file[i] ? `<div><span class="k">file</span> ${fileLink(i)}</div>` : ""}
+          ${fileLink(i) ? `<div><span class="k">file</span> ${fileLink(i)}</div>` : ""}
           <div><span class="k">drv</span> ${D.hash[i]}…-${D.names[i]}.drv</div>
           <div><span class="k">dependents</span> ${depOf(i)} ${mi < 0 ? "(max over machines)" : "on " + D.machines[mi]}</div>
           <div><span class="k">distance to system</span> ${(s => s ? `${s.L} step(s)${mi < 0 ? ` (nearest: ${s.roots.map(r => D.machines[D.roots.indexOf(r)]).join(" ")})` : ""}` : "not reachable")(systemDistance(i))}</div>
