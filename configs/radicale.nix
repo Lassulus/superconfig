@@ -5,7 +5,12 @@
   ...
 }:
 let
-  users = [ "opencrow" ];
+  # lass: personal calendars; tools/book reads free/busy from them and writes
+  # booking requests into lass/bookings.
+  users = [
+    "opencrow"
+    "lass"
+  ];
 
   # Generate one var per user with random password
   userGenerators = lib.listToAttrs (
