@@ -101,6 +101,9 @@
     # timeful availability polls (when.lassul.us)
     ../../configs/timeful.nix
 
+    # request-and-approve booking page (book.lassul.us)
+    ../../configs/book.nix
+
     # backups
     ./backup.nix
 

@@ -1,0 +1,113 @@
+let
+  domain = "book.lassul.us";
+  port = 8772;
+in
+{
+  config,
+  lib,
+  pkgs,
+  self,
+  ...
+}:
+let
+  settings = {
+    listen = "127.0.0.1:${toString port}";
+    baseUrl = "https://${domain}";
+    owner = "lassulus";
+    intro = "Pick a time for a call: nix, nixos, infrastructure, or anything else.";
+    timezone = "Europe/Berlin";
+    eventTypes = [
+      {
+        slug = "30min";
+        title = "30 minute call";
+        minutes = 30;
+      }
+      {
+        slug = "60min";
+        title = "1 hour call";
+        minutes = 60;
+      }
+    ];
+    hours = lib.genAttrs [ "mon" "tue" "wed" "thu" "fri" ] (_: [ "10:00-18:00" ]);
+    slotStep = 30;
+    bufferMinutes = 15;
+    minNoticeHours = 24;
+    horizonDays = 28;
+    # Free/busy is read from every calendar of this radicale user; requests
+    # and bookings are written to its `calendar` collection (created on demand).
+    caldav = {
+      url = "http://127.0.0.1:5232";
+      user = "lass";
+      calendar = "bookings";
+    };
+    # Local postfix (configs/mailserver.nix) accepts from localhost and DKIM-signs.
+    smtp = {
+      host = "127.0.0.1";
+      port = 25;
+      from = "book@lassul.us";
+      notify = "lass@lassul.us";
+    };
+    database = "/var/lib/book/book.db";
+  };
+in
+{
+  # book: request-and-approve booking page (tools/book). Requests land in
+  # radicale (configs/radicale.nix) as TENTATIVE events and in lass's inbox
+  # with an approve link.
+  systemd.services.book = {
+    description = "book.lassul.us booking page";
+    wantedBy = [ "multi-user.target" ];
+    wants = [ "radicale.service" ];
+    after = [
+      "network.target"
+      "radicale.service"
+    ];
+    serviceConfig = {
+      ExecStart = lib.escapeShellArgs [
+        (lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.book)
+        "--config"
+        (pkgs.writeText "book.json" (builtins.toJSON settings))
+        "--caldav-password-file"
+        "%d/caldav-password"
+      ];
+      LoadCredential = "caldav-password:${
+        config.clan.core.vars.generators.radicale-lass.files."password".path
+      }";
+      DynamicUser = true;
+      StateDirectory = "book";
+      Restart = "on-failure";
+      CapabilityBoundingSet = "";
+      NoNewPrivileges = true;
+      PrivateDevices = true;
+      PrivateTmp = true;
+      ProtectHome = true;
+      ProtectSystem = "strict";
+      ProtectKernelTunables = true;
+      ProtectKernelModules = true;
+      ProtectControlGroups = true;
+      RestrictAddressFamilies = [
+        "AF_INET"
+        "AF_INET6"
+        "AF_UNIX"
+      ];
+      RestrictNamespaces = true;
+      LockPersonality = true;
+      SystemCallArchitectures = "native";
+    };
+  };
+
+  services.nginx.virtualHosts.${domain} = {
+    enableACME = true;
+    forceSSL = true;
+    locations."/" = {
+      proxyPass = "http://127.0.0.1:${toString port}";
+      # book rate-limits per X-Real-IP; set it from the socket, never from
+      # a client-supplied header.
+      extraConfig = ''
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        client_max_body_size 16k;
+      '';
+    };
+  };
+}
