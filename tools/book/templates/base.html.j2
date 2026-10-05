@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {% if noindex is defined %}
+    <meta name="robots" content="noindex" />
+    {% endif %}
+    <title>{% block title %}book{% endblock %} · {{ cfg.owner }}</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/tz.js" defer></script>
+  </head>
+  <body{% if tzaware is defined %} data-tzaware="1"{% endif %}>
+    <main>
+      <header><a href="/">{{ cfg.owner }}</a> <span class="dim">/ book</span></header>
+      {% block body %}{% endblock %}
+    </main>
+  </body>
+</html>

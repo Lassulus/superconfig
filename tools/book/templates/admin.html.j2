@@ -1,0 +1,28 @@
+{% extends "base.html.j2" %}
+{% block title %}{{ b.name }}{% endblock %}
+{% block body %}
+<h1>{{ b.title }} <span class="dim">· {{ b.status }}</span></h1>
+<p>
+  {{ when }}<br />
+  <span class="dim">guest sees {{ guest_when }}</span>
+</p>
+<p>{{ b.name }} &lt;<a href="mailto:{{ b.email }}">{{ b.email }}</a>&gt;</p>
+{% if b.note %}
+<pre class="note">{{ b.note }}</pre>
+{% endif %}
+
+{% if future and b.status in ("pending", "approved") %}
+<form method="post">
+  <label for="message">message to {{ b.name }} (optional)</label>
+  <textarea id="message" name="message" rows="3" maxlength="2000"></textarea>
+  <p class="actions">
+    {% if b.status == "pending" %}
+    <button formaction="/a/{{ b.admin_token }}/approve">approve</button>
+    <button formaction="/a/{{ b.admin_token }}/decline">decline</button>
+    {% else %}
+    <button formaction="/a/{{ b.admin_token }}/cancel">cancel meeting</button>
+    {% endif %}
+  </p>
+</form>
+{% endif %}
+{% endblock %}

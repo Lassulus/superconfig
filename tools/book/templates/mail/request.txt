@@ -1,0 +1,9 @@
+{{ b.name }} <{{ b.email }}> asks for: {{ b.title }}
+{{ when }}
+
+{{ b.note or "(no note)" }}
+
+Approve or decline:
+{{ cfg.base_url }}/a/{{ b.admin_token }}
+
+Replying to this mail goes to {{ b.name }}.

@@ -1,0 +1,14 @@
+{% extends "base.html.j2" %}
+{% block body %}
+{% if cfg.intro %}
+<p>{{ cfg.intro }}</p>
+{% endif %}
+<ul class="types">
+  {% for et in cfg.event_types %}
+  <li>
+    <a href="/{{ et.slug }}?{{ tzq }}">{{ et.title }}</a> <span class="dim">{{ et.minutes }} min</span>
+    {% if et.description %}<br /><span class="dim">{{ et.description }}</span>{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

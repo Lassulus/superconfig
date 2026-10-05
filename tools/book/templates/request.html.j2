@@ -1,0 +1,24 @@
+{% extends "base.html.j2" %}
+{% block title %}{{ b.title }}{% endblock %}
+{% block body %}
+<h1>{{ b.title }}</h1>
+<p>{{ when }}</p>
+
+{% if b.status == "pending" %}
+<p>Request sent. You get a mail once I confirm or decline it. Keep this page's address to cancel.</p>
+{% elif b.status == "approved" %}
+<p class="ok">Confirmed. The invitation is in your mail; <a href="/r/{{ b.guest_token }}/invite.ics">download it again</a>.</p>
+{% elif b.status == "declined" %}
+<p>Declined. <a href="/">Pick another time</a>.</p>
+{% elif b.status == "cancelled" %}
+<p>Cancelled.</p>
+{% elif b.status == "expired" %}
+<p>This request was not answered in time. <a href="/">Pick another time</a>.</p>
+{% endif %}
+
+{% if b.status in ("pending", "approved") and future %}
+<form method="post" action="/r/{{ b.guest_token }}/cancel">
+  <button>cancel {{ "request" if b.status == "pending" else "meeting" }}</button>
+</form>
+{% endif %}
+{% endblock %}

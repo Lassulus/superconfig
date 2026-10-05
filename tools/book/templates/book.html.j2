@@ -1,0 +1,29 @@
+{% extends "base.html.j2" %}
+{% block title %}{{ et.title }}{% endblock %}
+{% block body %}
+<h1>{{ et.title }} <span class="dim">· {{ et.minutes }} min</span></h1>
+<p>
+  {{ start.strftime("%A %d %B %Y") }}<br />
+  {{ start.strftime("%H:%M") }}–{{ end.strftime("%H:%M") }} <span class="dim">{{ tz.key }}</span>
+</p>
+<p><a href="{{ back }}">‹ other time</a></p>
+
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %}
+
+<form method="post">
+  <input type="hidden" name="tz" value="{{ tz.key }}" />
+  <label for="name">name</label>
+  <input id="name" name="name" value="{{ values.name }}" maxlength="100" required autocomplete="name" />
+  <label for="email">email</label>
+  <input id="email" name="email" type="email" value="{{ values.email }}" maxlength="254" required autocomplete="email" />
+  <label for="note">what is it about? where do we meet?</label>
+  <textarea id="note" name="note" rows="5" maxlength="2000">{{ values.note }}</textarea>
+  <div class="hp" aria-hidden="true">
+    <label for="website">leave this empty</label>
+    <input id="website" name="website" tabindex="-1" autocomplete="off" />
+  </div>
+  <p><button>send request</button></p>
+</form>
+{% endblock %}

@@ -1,0 +1,6 @@
+{% extends "base.html.j2" %}
+{% block title %}{{ title }}{% endblock %}
+{% block body %}
+<p>{{ message }}</p>
+<p><a href="{{ back if back is defined else '/' }}">‹ back</a></p>
+{% endblock %}

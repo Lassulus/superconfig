@@ -1,0 +1,44 @@
+{% extends "base.html.j2" %}
+{% block title %}{{ et.title }}{% endblock %}
+{% block body %}
+<h1>{{ et.title }} <span class="dim">· {{ et.minutes }} min</span></h1>
+{% if et.description %}
+<p>{{ et.description }}</p>
+{% elif cfg.intro and cfg.event_types | length == 1 %}
+<p>{{ cfg.intro }}</p>
+{% endif %}
+<p class="dim">Pick a time. I confirm requests by mail.</p>
+
+<nav class="weeks">
+  {% if prev %}<a href="?{{ prev }}">‹ earlier</a>{% else %}<span></span>{% endif %}
+  {% if next %}<a href="?{{ next }}">later ›</a>{% endif %}
+</nav>
+
+<div class="days">
+  {% for day, slots in days.items() %}
+  <div class="day">
+    <span class="date">{{ day.strftime("%a %d %b") }}</span>
+    <span class="times">
+      {% for s in slots %}
+      <a href="/{{ et.slug }}/{{ s.astimezone(utc).strftime(fmt) }}?{{ tzq }}">{{ s.strftime("%H:%M") }}</a>
+      {% else %}
+      <span class="dim">-</span>
+      {% endfor %}
+    </span>
+  </div>
+  {% endfor %}
+</div>
+
+<details class="tz">
+  <summary>times in {{ tz.key }}</summary>
+  <form method="get">
+    <input name="tz" list="timezones" value="{{ tz.key }}" aria-label="time zone" />
+    <datalist id="timezones">
+      {% for name in timezones %}
+      <option value="{{ name }}"></option>
+      {% endfor %}
+    </datalist>
+    <button>set</button>
+  </form>
+</details>
+{% endblock %}

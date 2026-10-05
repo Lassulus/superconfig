@@ -1,0 +1,164 @@
+/* Same palette and VGA font as https://lassul.us */
+@font-face {
+  font-family: "Web437 IBM VGA 8x16";
+  src: url("/font.woff") format("woff");
+}
+:root {
+  color-scheme: dark light;
+  --bg: #000;
+  --fg: #ccc;
+  --hi: #7c7;
+  --warn: #c96;
+  --dim: #888;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f2efe6;
+    --fg: #333;
+    --hi: #171;
+    --warn: #941;
+    --dim: #777;
+  }
+}
+html {
+  background: var(--bg);
+}
+body {
+  margin: 0;
+  color: var(--fg);
+  font:
+    16px/1.25 "Web437 IBM VGA 8x16",
+    monospace;
+}
+main {
+  max-width: 40em;
+  margin: 0 auto;
+  padding: 1em 1em 3em;
+}
+header {
+  margin-bottom: 2em;
+}
+h1 {
+  font-size: inherit;
+  font-weight: normal;
+  color: var(--hi);
+  margin: 0 0 1em;
+}
+a {
+  color: var(--hi);
+  text-decoration: underline dotted;
+}
+a:hover,
+a:focus {
+  background: var(--hi);
+  color: var(--bg);
+  text-decoration: none;
+}
+header a {
+  color: inherit;
+}
+.dim {
+  color: var(--dim);
+}
+.error {
+  color: var(--warn);
+}
+.ok {
+  color: var(--hi);
+}
+ul.types {
+  list-style: none;
+  padding: 0;
+}
+ul.types li {
+  margin-bottom: 1em;
+}
+ul.types li::before {
+  content: "> ";
+  color: var(--dim);
+}
+nav.weeks {
+  display: flex;
+  justify-content: space-between;
+  margin: 1.5em 0 0.5em;
+}
+.day {
+  display: flex;
+  gap: 2ch;
+  padding: 0.25em 0;
+  border-top: 1px dotted var(--dim);
+}
+.day .date {
+  flex: none;
+  width: 10ch;
+}
+.day .times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25em 2ch;
+}
+details.tz {
+  margin-top: 1.5em;
+  color: var(--dim);
+}
+details.tz summary {
+  cursor: pointer;
+}
+details.tz form {
+  display: flex;
+  gap: 1ch;
+  margin-top: 0.5em;
+}
+label {
+  display: block;
+  margin: 1em 0 0.25em;
+  color: var(--dim);
+}
+input,
+textarea,
+button {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--dim);
+  border-radius: 0;
+  padding: 0.25em 0.5ch;
+}
+input,
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+details.tz input {
+  width: auto;
+  flex: 1;
+}
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--hi);
+}
+button {
+  color: var(--hi);
+  border-color: var(--hi);
+  cursor: pointer;
+}
+button:hover,
+button:focus {
+  background: var(--hi);
+  color: var(--bg);
+}
+.actions {
+  display: flex;
+  gap: 2ch;
+}
+pre.note {
+  font: inherit;
+  white-space: pre-wrap;
+  border-left: 1px solid var(--dim);
+  padding-left: 1ch;
+}
+.hp {
+  position: absolute;
+  left: -10000px;
+}

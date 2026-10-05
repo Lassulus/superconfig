@@ -1,0 +1,14 @@
+Hi {{ b.name }},
+
+sorry, I can't make this one:
+
+  {{ b.title }}
+  {{ when }}
+{% if message %}
+
+{{ message }}
+{% endif %}
+
+Feel free to pick another time: {{ cfg.base_url }}/
+
+{{ cfg.owner }}

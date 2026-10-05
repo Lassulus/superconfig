@@ -1,0 +1,4 @@
+{{ b.name }} <{{ b.email }}> cancelled: {{ b.title }}
+{{ when }}
+
+{{ cfg.base_url }}/a/{{ b.admin_token }}

@@ -1,0 +1,15 @@
+Hi {{ b.name }},
+
+your request is confirmed:
+
+  {{ b.title }} with {{ cfg.owner }}
+  {{ when }}
+{% if message %}
+
+{{ message }}
+{% endif %}
+
+The invitation is attached. To cancel:
+{{ cfg.base_url }}/r/{{ b.guest_token }}
+
+{{ cfg.owner }}

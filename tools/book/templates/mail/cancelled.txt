@@ -1,0 +1,14 @@
+Hi {{ b.name }},
+
+this meeting is cancelled:
+
+  {{ b.title }} with {{ cfg.owner }}
+  {{ when }}
+{% if message %}
+
+{{ message }}
+{% endif %}
+
+The attached cancellation removes it from your calendar.
+
+{{ cfg.owner }}
