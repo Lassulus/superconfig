@@ -11,7 +11,6 @@
     ../../configs/pass.nix
     ../../configs/mail.nix
     # ../../configs/review.nix
-    # ../../configs/dunst.nix
     ../../configs/br.nix
   ];
 

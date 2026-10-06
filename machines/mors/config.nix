@@ -19,7 +19,6 @@
     ../../configs/mail.nix
     ../../configs/syncthing.nix
     ../../configs/ableton.nix
-    ../../configs/dunst.nix
     ../../configs/rtl-sdr.nix
     ../../configs/printing
     ../../configs/network-manager.nix

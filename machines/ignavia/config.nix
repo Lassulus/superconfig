@@ -30,7 +30,6 @@
     ../../configs/printing
     ../../configs/auto-timezone.nix
     ../../configs/review.nix
-    ../../configs/dunst.nix
     ../../configs/yggdrasil.nix
     ../../configs/container-tests.nix
     ../../configs/rad.nix
