@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   imports = [
@@ -16,8 +16,6 @@
   ];
 
   system.stateVersion = "22.11";
-
-  krebs.build.host = config.krebs.hosts.aergia;
 
   environment.systemPackages = [
     pkgs.android-tools

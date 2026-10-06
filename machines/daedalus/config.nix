@@ -1,5 +1,4 @@
 {
-  config,
   lib,
   pkgs,
   ...
@@ -116,5 +115,4 @@
     "python3.13-ecdsa-0.19.1"
   ];
 
-  krebs.build.host = config.krebs.hosts.daedalus;
 }

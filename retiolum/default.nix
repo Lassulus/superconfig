@@ -9,7 +9,7 @@
 #
 # This is data, not a module -- same shape as keys/.
 #
-# Cards use the same nets.<net> layout as kartei and krebs.hosts, and the
+# Cards use the same nets.<net> layout as kartei, and the
 # renderer below mirrors kartei's modules/retiolum/hosts.nix, so an entry can
 # move into kartei/lass unchanged if it should become reachable by the rest of
 # krebs rather than just the fleet.

@@ -1,6 +1,5 @@
 {
   self,
-  config,
   pkgs,
   ...
 }:
@@ -35,8 +34,6 @@
   ];
 
   boot.tmp.cleanOnBoot = true;
-
-  krebs.build.host = config.krebs.hosts.xerxes;
 
   environment.systemPackages = [
     pkgs.bitwarden-desktop

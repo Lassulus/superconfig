@@ -6,12 +6,12 @@
   ...
 }:
 let
-  relayHosts = map (host: host.nets.retiolum.ip6.addr) [
-    config.krebs.hosts.aergia
-    config.krebs.hosts.ignavia
-    config.krebs.hosts.coaxmetal
-    config.krebs.hosts.green
-    config.krebs.hosts.mors
+  relayHosts = map (name: self.inputs.kartei.hosts.${name}.nets.retiolum.ip6.addr) [
+    "aergia"
+    "ignavia"
+    "coaxmetal"
+    "green"
+    "mors"
   ];
 
   mynetworks = map (ip: "[${ip}]") relayHosts;

@@ -1,15 +1,7 @@
-{
-  self,
-  config,
-  ...
-}:
-let
-  # starkstrom is deliberately not in the shared kartei registry; its retiolum
-  # identity lives in retiolum/ (self.retiolum), which every superconfig
-  # machine injects into its tinc host set. Move that entry into kartei/lass if
-  # the rest of krebs should be able to reach it too.
-  net = self.retiolum.hosts.starkstrom.nets.retiolum;
-in
+# starkstrom is deliberately not in the shared kartei registry; its retiolum
+# identity lives in retiolum/ (self.retiolum), which every superconfig machine
+# injects into its tinc host set and /etc/hosts. Move that entry into
+# kartei/lass if the rest of krebs should be able to reach it too.
 {
   imports = [
     ../../configs
@@ -20,25 +12,6 @@ in
     ./ipfs.nix
     ./ipfs-endpoint.nix
   ];
-
-  # krebs.build.host and the monitoring/dns bits still read this card, so build
-  # it from the same data rather than repeating the addresses and keys.
-  # stockholm's host type additionally insists on the legacy RSA pubkey, which
-  # tincr ignores; via is left out because stockholm resolves it to a net
-  # submodule, not a name.
-  krebs.hosts.starkstrom = {
-    owner = config.krebs.users.lass;
-    monitoring = true;
-    nets.retiolum = {
-      inherit (net) ip4 ip6 aliases;
-      tinc = {
-        pubkey = config.clan.core.vars.generators.retiolum.files."retiolum.rsa_key.pub".value;
-        inherit (net.tinc) pubkey_ed25519;
-      };
-    };
-  };
-
-  krebs.build.host = config.krebs.hosts.starkstrom;
 
   # The fleet has no retiolum route here (see kartei note above), so the
   # sigexec dashboard on neoprism reaches this executor over public TLS

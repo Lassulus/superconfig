@@ -14,7 +14,6 @@
     self.wrapperModules.workspace-manager
   ];
 
-  krebs.build.host.name = "atlas";
   system.stateVersion = "25.05";
 
   lass.workspace-manager.enable = true;

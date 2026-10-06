@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   imports = [
@@ -15,8 +15,6 @@
     ../../configs/sigexec/executor.nix
     ../../configs/rad.nix
   ];
-
-  krebs.build.host = config.krebs.hosts.icarus;
 
   # services.xrdp = {
   #   enable = true;

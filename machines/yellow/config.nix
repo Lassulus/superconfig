@@ -25,7 +25,6 @@ in
   ];
 
   services.transmission.settings.peer-port = torrentport;
-  krebs.build.host = config.krebs.hosts.yellow;
 
   krebs.sync-containers3.inContainer = {
     enable = true;

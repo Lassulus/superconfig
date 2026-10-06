@@ -2,6 +2,7 @@
   self,
   config,
   pkgs,
+  lib,
   ...
 }:
 
@@ -41,8 +42,6 @@
   ];
 
   system.stateVersion = "23.11";
-
-  krebs.build.host = config.krebs.hosts.ignavia;
 
   nix.settings.trusted-users = [
     "root"
@@ -88,7 +87,8 @@
     pkgs.rbw
   ];
 
-  krebs.hosts.styx.nets.retiolum.tinc.extraConfig = "Address = 10.42.0.3 655";
+  # styx on the gg23 LAN; appended to the kartei-built host file
+  services.tinc.networks.retiolum.hosts.styx = lib.mkAfter "Address = 10.42.0.3 655";
 
   virtualisation.podman.enable = true;
 

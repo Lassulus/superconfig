@@ -1,4 +1,4 @@
-{ config, ... }:
+{ ... }:
 
 {
   imports = [
@@ -13,8 +13,6 @@
     ../../configs/sigexec/executor.nix
     ../../configs/rad.nix
   ];
-
-  krebs.build.host = config.krebs.hosts.shodan;
 
   services.logind.lidSwitch = "ignore";
   services.logind.lidSwitchDocked = "ignore";

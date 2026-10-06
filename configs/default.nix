@@ -34,18 +34,13 @@
     ./nix.nix
 
     # Import stockholm modules
-    self.inputs.stockholm.nixosModules.users
-    self.inputs.stockholm.nixosModules.hosts
-    ./kartei.nix
-    self.inputs.stockholm.nixosModules.build
-    self.inputs.stockholm.nixosModules.dns
-    self.inputs.stockholm.nixosModules.iptables
     self.inputs.stockholm.nixosModules.secret
+    ./kartei.nix
+    self.inputs.stockholm.nixosModules.iptables
     self.inputs.stockholm.nixosModules.setuid
     self.inputs.stockholm.nixosModules.sitemap
     self.inputs.stockholm.nixosModules.ssl
     self.inputs.stockholm.nixosModules.systemd
-    self.inputs.stockholm.nixosModules.ssh
     {
       # nix-index
       imports = [
@@ -162,11 +157,10 @@
     }
   ];
 
-  networking.hostName = config.krebs.build.host.name;
+  networking.hostName = config.clan.core.settings.machine.name;
 
   krebs = {
     enable = true;
-    build.user = config.krebs.users.lass;
     ssl.trustIntermediate = true;
   };
 

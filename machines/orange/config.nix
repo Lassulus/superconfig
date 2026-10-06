@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 {
   clan.core.vars.password-store.secretLocation = "/var/state/secret-vars";
 
@@ -9,7 +9,6 @@
     ../../configs/nginx.nix
   ];
 
-  krebs.build.host = config.krebs.hosts.orange;
   system.stateVersion = "24.05";
 
   services.nginx.enable = true;

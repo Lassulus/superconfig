@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ self, pkgs, ... }:
 {
   # POST → ipfs-upload backend (writes file to /var/lib/ipfs/download/<path>
   # and returns the CID). Anything else → the kubo gateway.
@@ -32,7 +32,7 @@
       # jellyfin only listens on IPv4; yellow.r also resolves to its
       # retiolum AAAA, which nginx round-robins into -> intermittent
       # 502 "no live upstreams". Pin the v4 address.
-      proxyPass = "http://${config.krebs.hosts.yellow.nets.retiolum.ip4.addr}:8096";
+      proxyPass = "http://${self.inputs.kartei.hosts.yellow.nets.retiolum.ip4.addr}:8096";
       proxyWebsockets = true;
       recommendedProxySettings = true;
     };

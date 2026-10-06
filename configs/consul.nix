@@ -1,9 +1,35 @@
 {
+  self,
   config,
   lib,
   pkgs,
   ...
 }:
+let
+  inherit (self.inputs.kartei) hosts;
+
+  # consul server peers; stockholm policy (krebs/3modules/kartei/overlay.nix),
+  # not kartei data
+  consulHosts = [
+    "aergia"
+    "blue"
+    "coaxmetal"
+    "daedalus"
+    "green"
+    "icarus"
+    "ignavia"
+    "littleT"
+    "massulus"
+    "neoprism"
+    "orange"
+    "radio"
+    "shodan"
+    "skynet"
+    "styx"
+    "ubik"
+    "yellow"
+  ];
+in
 {
   services.consul = {
     enable = true;
@@ -11,13 +37,11 @@
     webUi = true;
     # interface.bind = "retiolum";
     extraConfig = {
-      bind_addr = config.krebs.build.host.nets.retiolum.ip4.addr;
+      bind_addr = hosts.${config.networking.hostName}.nets.retiolum.ip4.addr;
       bootstrap_expect = 3;
       server = true;
       # retry_join = config.services.consul.extraConfig.start_join;
-      retry_join = lib.mapAttrsToList (_n: h: lib.head h.nets.retiolum.aliases) (
-        lib.filterAttrs (_n: h: h.consul) config.krebs.hosts
-      );
+      retry_join = map (name: lib.head hosts.${name}.nets.retiolum.aliases) consulHosts;
       rejoin_after_leave = true;
 
       # try to fix random lock loss on leader reelection

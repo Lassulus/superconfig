@@ -1,5 +1,4 @@
 {
-  config,
   pkgs,
   ...
 }:
@@ -25,7 +24,6 @@
   ];
 
   system.stateVersion = "24.05";
-  krebs.build.host = config.krebs.hosts.coaxmetal;
 
   nix.settings.trusted-users = [
     "root"

@@ -7,7 +7,6 @@
     (modulesPath + "/image/images.nix")
   ];
 
-  krebs.build.host.name = "virtulus";
   services.getty.autologinUser = "demo";
 
   users.users.demo = {

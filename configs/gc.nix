@@ -3,7 +3,7 @@
   nix.gc = {
     automatic =
       !(
-        lib.elem config.krebs.build.host.name [
+        lib.elem config.networking.hostName [
           "aergia"
           "ignavia"
           "mors"

@@ -15,11 +15,9 @@ let
     ln -s bin $out/sbin
   '';
 
-  # Peer keys and addresses come straight from kartei, not through
-  # stockholm's krebs.hosts: stockholm pins an older kartei and its host type
-  # still requires the legacy RSA pubkey. This is only the host database --
-  # the daemon stays on nixpkgs' services.tinc with pkgs/tincr swapped in
-  # (barnacle does the same with tincr's darwin module, see
+  # Peer keys and addresses come straight from kartei. This is only the host
+  # database -- the daemon stays on nixpkgs' services.tinc with pkgs/tincr
+  # swapped in (barnacle does the same with tincr's darwin module, see
   # machines/barnacle/retiolum.nix).
   #
   # tincHosts is already filtered to SPTPS-capable nodes, so the RSA-only

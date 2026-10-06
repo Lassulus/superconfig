@@ -1,4 +1,9 @@
-{ config, pkgs, ... }:
+{
+  self,
+  config,
+  pkgs,
+  ...
+}:
 {
   services.matrix-synapse = {
     enable = true;
@@ -58,7 +63,7 @@
           port = 8008;
           bind_addresses = [
             "::1"
-            config.krebs.build.host.nets.retiolum.ip6.addr
+            self.inputs.kartei.hosts.${config.networking.hostName}.nets.retiolum.ip6.addr
           ];
           type = "http";
           tls = false;

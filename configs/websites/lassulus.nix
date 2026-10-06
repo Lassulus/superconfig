@@ -1,4 +1,9 @@
-{ config, pkgs, ... }:
+{
+  self,
+  config,
+  pkgs,
+  ...
+}:
 let
   # ANSI-terminal-style homepage, inline HTML with clickable links. The IBM
   # VGA webfont (CC BY-SA 4.0, int10h.org/oldschool-pc-fonts) is base64-inlined
@@ -39,14 +44,8 @@ in
       root ${webroot};
       default_type text/plain;
     '';
-    locations."= /hosts".extraConfig = ''
-      alias ${pkgs.krebs-hosts_combined};
-    '';
-    locations."= /retiolum.hosts".extraConfig = ''
-      alias ${pkgs.krebs-hosts-retiolum};
-    '';
     locations."= /wireguard-key".extraConfig = ''
-      alias ${pkgs.writeText "neoprism.wg" config.krebs.hosts.neoprism.nets.wiregrill.wireguard.pubkey};
+      alias ${pkgs.writeText "neoprism.wg" self.inputs.kartei.hosts.neoprism.nets.wiregrill.wireguard.pubkey};
     '';
     locations."= /ssh.pub".extraConfig = ''
       alias ${pkgs.writeText "pub" config.krebs.users.lass.pubkey};

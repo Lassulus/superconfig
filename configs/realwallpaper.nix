@@ -15,7 +15,9 @@
   '';
   services.nginx.virtualHosts.wallpaper = {
     extraConfig = ''
-      if ( $server_addr = "${config.krebs.build.host.nets.internet.ip4.addr}" ) {
+      if ( $server_addr = "${
+        self.inputs.kartei.hosts.${config.networking.hostName}.nets.internet.ip4.addr
+      }" ) {
         return 403;
       }
     '';

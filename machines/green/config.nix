@@ -24,8 +24,6 @@
     ../../configs/autoupdate.nix
   ];
 
-  krebs.build.host = config.krebs.hosts.green;
-
   krebs.sync-containers3.inContainer = {
     enable = true;
     pubkey = config.clan.core.vars.generators.green-container.files."green.sync.pub".path;

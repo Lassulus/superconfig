@@ -35,8 +35,8 @@
           default = true;
           serverAliases = [
             "localhost"
-            "${config.krebs.build.host.name}"
-            "${config.krebs.build.host.name}.r"
+            "${config.networking.hostName}"
+            "${config.networking.hostName}.r"
           ];
           locations."~ ^/~(.+?)(/.*)?\$".extraConfig = ''
             alias /home/$1/public_html$2;
@@ -60,8 +60,6 @@
       };
     }
   ];
-
-  krebs.build.host = config.krebs.hosts.mors;
 
   environment.systemPackages = with pkgs; [
     android-tools

@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 {
   imports = [
     ../../configs
@@ -6,8 +6,6 @@
     ../../configs/network-manager.nix
     ../../configs/syncthing.nix
   ];
-
-  krebs.build.host = config.krebs.hosts.hilum;
 
   boot.loader.grub = {
     extraEntries = ''

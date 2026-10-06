@@ -1,5 +1,4 @@
 {
-  config,
   pkgs,
   ...
 }:
@@ -19,8 +18,6 @@
     ../../configs/snapclient.nix
     ../../configs/consul.nix
   ];
-
-  krebs.build.host = config.krebs.hosts.styx;
 
   environment.systemPackages = with pkgs; [
     wol

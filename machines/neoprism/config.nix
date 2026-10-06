@@ -1,6 +1,5 @@
 {
   self,
-  config,
   lib,
   ...
 }:
@@ -205,6 +204,5 @@
   # just re-pull the same broken config on the next run (a rollback loop).
   systemd.enableEmergencyMode = false;
 
-  krebs.build.host = config.krebs.hosts.neoprism;
   system.stateVersion = "24.05";
 }
