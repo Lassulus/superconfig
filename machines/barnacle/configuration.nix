@@ -37,7 +37,6 @@
     pkgs.sshuttle
     pkgs.git
     pkgs.iterm2
-    (self.lib.halalify pkgs.firefox-bin-unwrapped)
     pkgs.ripgrep
     pkgs.alt-tab-macos
     pkgs.nixd
