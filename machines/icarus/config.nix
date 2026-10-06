@@ -1,11 +1,12 @@
-{ pkgs, ... }:
+{ self, pkgs, ... }:
 
 {
   imports = [
     ../../configs
     ../../configs/mouse.nix
     ../../configs/retiolum.nix
-    ../../configs/desktops/xmonad
+    ../../configs/desktops/sway/default.nix
+    self.wrapperModules.workspace-manager
     ../../configs/pipewire.nix
     ../../configs/network-manager.nix
     ../../configs/red-host.nix
@@ -16,11 +17,7 @@
     ../../configs/rad.nix
   ];
 
-  # services.xrdp = {
-  #   enable = true;
-  #   defaultWindowManager = "xmonad";
-  # };
-  # networking.firewall.allowedTCPPorts = [ 3389 ]; # xrdp
+  lass.workspace-manager.enable = true;
 
   environment.systemPackages = [ pkgs.chromium ];
 

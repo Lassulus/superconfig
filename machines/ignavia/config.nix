@@ -12,10 +12,8 @@
     ../../configs/retiolum.nix
     ../../configs/tpm2.nix
     ../../configs/phonetpm.nix
-    # ../../configs/baseX.nix
     ../../configs/desktops/sway/default.nix
     self.wrapperModules.workspace-manager
-    # ../../configs/desktops/xmonad
     ../../configs/power-action.nix
     ../../configs/yubikey.nix
     ../../configs/pipewire.nix
