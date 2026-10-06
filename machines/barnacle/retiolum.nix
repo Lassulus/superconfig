@@ -54,7 +54,11 @@ in
   # darwin-rebuild via BEGIN/END markers.
   system.activationScripts.postActivation.text =
     let
-      hostsFile = if own.ip4 == null then kartei.extraHosts.v6only else kartei.extraHosts.v4v6;
+      hostsFile =
+        if own.ip4 == null then
+          kartei.extraHosts.v6only + local.extraHosts.v6only
+        else
+          kartei.extraHosts.v4v6 + local.extraHosts.v4v6;
     in
     lib.mkAfter ''
       tmp=$(mktemp /private/etc/hosts.XXXXXX)

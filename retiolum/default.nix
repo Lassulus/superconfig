@@ -57,6 +57,21 @@ let
       ++ [ "Ed25519PublicKey = ${tinc.pubkey_ed25519}" ]
       ++ lib.optional (tinc.weight or 300 != null) "Weight = ${toString (tinc.weight or 300)}"
     );
+
+  # /etc/hosts lines, rendered like kartei's netHostsLines for retiolum.
+  hostsLines =
+    hosts: withV4:
+    lib.concatStrings (
+      lib.mapAttrsToList (
+        name: host:
+        let
+          net = retiolumOf host;
+          aliases = lib.concatStringsSep " " (lib.unique ([ "${name}.r" ] ++ net.aliases or [ ]));
+        in
+        lib.optionalString (withV4 && net.ip4 or null != null) "${net.ip4.addr} ${aliases}\n"
+        + lib.optionalString (net.ip6 or null != null) "${net.ip6.addr} ${aliases}\n"
+      ) hosts
+    );
 in
 rec {
   hosts = {
@@ -94,4 +109,9 @@ rec {
     ip4 = (retiolumOf host).ip4.addr or null;
     ip6 = (retiolumOf host).ip6.addr or null;
   }) hosts;
+
+  extraHosts = {
+    v4v6 = hostsLines hosts true;
+    v6only = hostsLines hosts false;
+  };
 }
