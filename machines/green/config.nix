@@ -12,8 +12,6 @@
 
     ../../configs/syncthing.nix
 
-    ../../configs/bitlbee.nix
-
     ../../configs/pass.nix
 
     ../../configs/et-server.nix
