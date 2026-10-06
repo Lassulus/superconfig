@@ -18,7 +18,7 @@
 
   # usage: scanimage -d "$(find-scanner bra)" --batch --format=tiff --resolution 150  -x 211 -y 298
   environment.systemPackages = [
-    (pkgs.writeDashBin "find-scanner" ''
+    (pkgs.writers.writeDashBin "find-scanner" ''
       set -efu
       name=$1
       ${pkgs.sane-backends}/bin/scanimage -f '%m %d

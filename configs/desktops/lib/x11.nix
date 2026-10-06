@@ -137,7 +137,7 @@
   };
 
   lass.klem = {
-    kpaste.script = pkgs.writeDash "kpaste-wrapper" ''
+    kpaste.script = pkgs.writers.writeDash "kpaste-wrapper" ''
       ${pkgs.kpaste}/bin/kpaste \
         | ${pkgs.coreutils}/bin/tail -1 \
         | ${pkgs.coreutils}/bin/tr -d '\r\n'
@@ -148,20 +148,20 @@
     };
     "go.lassul.us" = {
       target = "STRING";
-      script = pkgs.writeDash "go.lassul.us" ''
+      script = pkgs.writers.writeDash "go.lassul.us" ''
         export GO_HOST='go.lassul.us'
         ${pkgs.goify}/bin/goify
       '';
     };
     qrcode = {
       target = "image";
-      script = pkgs.writeDash "zbar" ''
+      script = pkgs.writers.writeDash "zbar" ''
         ${pkgs.zbar}/bin/zbarimg -q --raw -
       '';
     };
     ocr = {
       target = "image";
-      script = pkgs.writeDash "gocr" ''
+      script = pkgs.writers.writeDash "gocr" ''
         ${pkgs.netpbm}/bin/pngtopnm - \
           | ${pkgs.gocr}/bin/gocr -
       '';

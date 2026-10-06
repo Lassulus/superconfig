@@ -211,11 +211,11 @@ in
     (pkgs.symlinkJoin {
       name = "mc";
       paths = [
-        (pkgs.writeDashBin "mc" ''
+        (pkgs.writers.writeDashBin "mc" ''
           export MC_DATADIR=${
-            pkgs.write "mc-ext" {
-              "/mc.ext.ini".link = mcExt;
-              "/sfs.ini".text = "";
+            pkgs.linkFarm "mc-ext" {
+              "mc.ext.ini" = mcExt;
+              "sfs.ini" = pkgs.writeText "sfs.ini" "";
             }
           };
           export TERM=xterm-256color

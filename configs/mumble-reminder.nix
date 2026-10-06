@@ -7,7 +7,7 @@
 let
   write_to_irc =
     chan:
-    pkgs.writeDash "write_to_irc" ''
+    pkgs.writers.writeDash "write_to_irc" ''
       ${pkgs.curl}/bin/curl -fsSv --unix-socket '${lib.removePrefix "unix:" config.krebs.reaktor2.mumble-reminder.API.listen}' http://z/ \
         -H content-type:application/json \
         -d "$(${pkgs.jq}/bin/jq -n \
@@ -52,7 +52,7 @@ let
           pattern = "^erinner mich$";
           activate = "match";
           command = {
-            filename = pkgs.writeDash "add_remind" ''
+            filename = pkgs.writers.writeDash "add_remind" ''
               echo "$_from" >> /var/lib/reaktor2-mumble-reminder/users
               sort /var/lib/reaktor2-mumble-reminder/users | uniq > /var/lib/reaktor2-mumble-reminder/users.tmp
               mv /var/lib/reaktor2-mumble-reminder/users.tmp /var/lib/reaktor2-mumble-reminder/users
@@ -64,7 +64,7 @@ let
           pattern = "^nerv nicht$";
           activate = "match";
           command = {
-            filename = pkgs.writeDash "del_remind" ''
+            filename = pkgs.writers.writeDash "del_remind" ''
               ${pkgs.gnused}/bin/sed -i "/$_from/d" /var/lib/reaktor2-mumble-reminder/users
               echo "okok, Ich werde $_from nich mehr erinnern"
             '';

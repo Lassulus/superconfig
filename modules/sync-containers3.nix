@@ -275,7 +275,7 @@ in
           mkdir -p /var/lib/sync-containers3/${ctr.name}/state
           mountpoint /var/lib/sync-containers3/${ctr.name}/state || mount /dev/mapper/${ctr.name} /var/lib/sync-containers3/${ctr.name}/state
           /run/current-system/sw/bin/nixos-container start ${ctr.name}
-          /run/current-system/sw/bin/nixos-container run ${ctr.name} -- ${pkgs.writeDash "init" ''
+          /run/current-system/sw/bin/nixos-container run ${ctr.name} -- ${pkgs.writers.writeDash "init" ''
             mkdir -p /var/state
           ''}
         '')

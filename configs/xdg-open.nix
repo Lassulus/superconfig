@@ -1,7 +1,7 @@
 { pkgs, ... }:
 let
 
-  xdg-open = pkgs.writeBashBin "xdg-open" ''
+  xdg-open = pkgs.writers.writeBashBin "xdg-open" ''
     set -xe
     FILE="$1"
     PATH=/run/current-system/sw/bin

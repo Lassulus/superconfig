@@ -21,7 +21,7 @@
 
   environment.systemPackages = with pkgs; [
     wol
-    (writeDashBin "wake-alien" ''
+    (writers.writeDashBin "wake-alien" ''
       ${wol}/bin/wol -h 10.42.0.255 10:65:30:68:83:a3
     '')
     (writers.writeDashBin "iptv" ''

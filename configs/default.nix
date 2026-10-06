@@ -206,7 +206,7 @@
     pciutils
     pop
     untilport
-    (pkgs.writeDashBin "urgent" ''
+    (pkgs.writers.writeDashBin "urgent" ''
       printf '\a'
     '')
     usbutils
@@ -214,7 +214,7 @@
     #unpack stuff
     libarchive
 
-    (pkgs.writeDashBin "sshn" ''
+    (pkgs.writers.writeDashBin "sshn" ''
       ${pkgs.openssh}/bin/ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$@"
     '')
   ];

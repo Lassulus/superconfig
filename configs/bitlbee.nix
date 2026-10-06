@@ -17,7 +17,7 @@
 
   systemd.services.bitlbee.serviceConfig = {
     ExecStartPre = [
-      "+${pkgs.writeDash "setup-bitlbee" ''
+      "+${pkgs.writers.writeDash "setup-bitlbee" ''
         ${pkgs.coreutils}/bin/chown bitlbee:bitlbee /var/state/bitlbee || :
       ''}"
     ];

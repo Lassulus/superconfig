@@ -48,7 +48,7 @@ let
       ${pkgs.jq}/bin/jq -r '.filename'
   '';
 
-  good_track = pkgs.writeBashBin "good_track" ''
+  good_track = pkgs.writers.writeBashBin "good_track" ''
     set -eu
 
     current_track=$(${pkgs.curl}/bin/curl -fSs http://localhost:8002/current | ${pkgs.jq}/bin/jq -r .filename)
@@ -62,7 +62,7 @@ let
     echo good: "$track_infos"
   '';
 
-  print_current = pkgs.writeDashBin "print_current" ''
+  print_current = pkgs.writers.writeDashBin "print_current" ''
     file=$(${pkgs.curl}/bin/curl -fSs http://localhost:8002/current |
       ${pkgs.jq}/bin/jq -r '.filename' |
       ${pkgs.gnused}/bin/sed 's,^${music_dir},,'
@@ -205,7 +205,7 @@ in
     user = {
       name = "radio";
     };
-    scriptFile = pkgs.writeDash "radio" ''
+    scriptFile = pkgs.writers.writeDash "radio" ''
       set -x
       case "''${Method:-} ''${Request_URI:-}" in
         "POST /skip")

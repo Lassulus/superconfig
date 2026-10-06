@@ -53,7 +53,7 @@ let
   alacritty = pkgs.symlinkJoin {
     name = "alacritty";
     paths = [
-      (pkgs.writeDashBin "alacritty" ''
+      (pkgs.writers.writeDashBin "alacritty" ''
         # ${pkgs.alacritty}/bin/alacritty --config-file /var/theme/config/alacritty.toml msg create-window "$@" ||
         ${pkgs.alacritty}/bin/alacritty --config-file /var/theme/config/alacritty.toml "$@"
       '')
