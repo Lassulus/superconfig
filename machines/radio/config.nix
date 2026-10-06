@@ -17,7 +17,7 @@
     defaults.email = "acme@lassul.us";
   };
 
-  krebs.sync-containers3.inContainer = {
+  lass.sync-containers3.inContainer = {
     enable = true;
     pubkey = config.clan.core.vars.generators.radio-sync.files."radio.sync.pub".value;
   };

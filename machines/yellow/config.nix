@@ -26,7 +26,7 @@ in
 
   services.transmission.settings.peer-port = torrentport;
 
-  krebs.sync-containers3.inContainer = {
+  lass.sync-containers3.inContainer = {
     enable = true;
     pubkey = builtins.readFile ./facts/yellow.sync.pub;
   };

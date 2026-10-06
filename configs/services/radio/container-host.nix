@@ -4,7 +4,7 @@
   ...
 }:
 {
-  krebs.sync-containers3.containers.radio = {
+  lass.sync-containers3.containers.radio = {
     sshKey = config.clan.core.vars.generators.radio-container.files."radio.sync.key".path;
     startCommand = ''
       export PATH=$PATH:${pkgs.git}/bin

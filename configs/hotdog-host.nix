@@ -1,6 +1,6 @@
 { config, pkgs, ... }:
 {
-  krebs.sync-containers3.containers.hotdog = {
+  lass.sync-containers3.containers.hotdog = {
     sshKey = config.clan.core.vars.generators.hotdog-container.files."hotdog.sync.key".path;
     startCommand = ''
       export PATH=$PATH:${pkgs.git}/bin

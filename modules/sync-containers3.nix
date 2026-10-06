@@ -5,10 +5,10 @@
   ...
 }:
 let
-  cfg = config.krebs.sync-containers3;
+  cfg = config.lass.sync-containers3;
 in
 {
-  options.krebs.sync-containers3 = {
+  options.lass.sync-containers3 = {
     inContainer = {
       enable = lib.mkEnableOption "container config for syncing";
       pubkey = lib.mkOption {

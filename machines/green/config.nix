@@ -20,7 +20,7 @@
     ../../configs/autoupdate.nix
   ];
 
-  krebs.sync-containers3.inContainer = {
+  lass.sync-containers3.inContainer = {
     enable = true;
     pubkey = config.clan.core.vars.generators.green-container.files."green.sync.pub".path;
   };

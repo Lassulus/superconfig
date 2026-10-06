@@ -1,6 +1,6 @@
 { config, pkgs, ... }:
 {
-  krebs.sync-containers3.containers.yellow = {
+  lass.sync-containers3.containers.yellow = {
     sshKey = config.clan.core.vars.generators.yellow-container.files."yellow.sync.key".path;
     startCommand = ''
       export PATH=$PATH:${pkgs.git}/bin

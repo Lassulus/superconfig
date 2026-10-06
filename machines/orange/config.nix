@@ -21,7 +21,7 @@
     defaults.email = "acme@lassul.us";
   };
 
-  krebs.sync-containers3.inContainer = {
+  lass.sync-containers3.inContainer = {
     enable = true;
     pubkey = builtins.readFile ./facts/orange.sync.pub;
   };

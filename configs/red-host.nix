@@ -1,7 +1,7 @@
 { config, ... }:
 {
 
-  krebs.sync-containers3.containers.red = {
+  lass.sync-containers3.containers.red = {
     sshKey = "${config.clan.core.vars.password-store.secretLocation}/containers/red/sync.key";
     ephemeral = true;
   };
