@@ -59,6 +59,10 @@ in
       LinkLocalAddressing = "no";
       KeepConfiguration = "static";
     };
+    # The container start script adds this route, but networkd drops it as
+    # foreign the next time it reconfigures ve-riot (e.g. when networkd
+    # restarts), and container@riot is never restarted to re-add it.
+    routes = [ { Destination = "${config.containers.riot.localAddress}/32"; } ];
   };
 
   boot.kernel.sysctl."net.ipv4.ip_forward" = lib.mkDefault 1;
