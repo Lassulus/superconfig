@@ -1,5 +1,4 @@
 {
-  self,
   config,
   lib,
   pkgs,
@@ -77,9 +76,6 @@ let
 
 in
 {
-  imports = [
-    self.inputs.stockholm.nixosModules.reaktor2
-  ];
   krebs.reaktor2.mumble-reminder = {
     hostname = "irc.hackint.org";
     nick = "lassulus__";

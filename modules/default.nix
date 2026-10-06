@@ -7,5 +7,6 @@ _: {
     ./parley.nix
     # copied from stockholm, see the header of each
     ./htgen.nix
+    ./reaktor2.nix
   ];
 }

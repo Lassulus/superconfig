@@ -80,7 +80,6 @@ in
     ./news.nix
     ./weather.nix
     self.inputs.stockholm.nixosModules.acl
-    # self.inputs.stockholm.nixosModules.reaktor2
   ];
 
   users.users = {
