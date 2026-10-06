@@ -80,7 +80,6 @@ in
   imports = [
     ./news.nix
     ./weather.nix
-    self.inputs.stockholm.nixosModules.acl
   ];
 
   users.users = {
@@ -304,7 +303,18 @@ in
       "radio"
     ];
   };
-  krebs.acl."/var/music/the_playlist"."u:lass:X".parents = true;
-  krebs.acl."/var/music/the_playlist"."u:lass:rwX" = { };
-  krebs.acl."/var/music/the_playlist"."u:radio:rwX" = { };
+  # lass and radio manage the playlist. The default ACL hands rw on new
+  # files and rwx on new directories to both (files are created without x,
+  # so the mask drops it); existing content keeps the ACLs it already has.
+  # No X: tmpfiles applies it to existing files with an r-- mask.
+  systemd.tmpfiles.settings."10-the-playlist" = {
+    "/var/music/the_playlist" = {
+      d = { };
+      "a+".argument = "u:lass:rwx,u:radio:rwx";
+      "A+".argument = "d:u:lass:rwx,d:u:radio:rwx";
+    };
+    # traverse down to the playlist
+    "/var/music"."a+".argument = "u:lass:x";
+    "/var"."a+".argument = "u:lass:x";
+  };
 }

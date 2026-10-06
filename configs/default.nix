@@ -14,9 +14,6 @@ in
     # Import modules
     ../modules
 
-    # Import stockholm krebs module
-    self.inputs.stockholm.nixosModules.krebs
-
     # Import individual configurations
     ./security-workarounds.nix
     ./gc.nix
@@ -28,10 +25,7 @@ in
     ./pinned-registry.nix
     ./nix.nix
 
-    # Import stockholm modules
     ./kartei.nix
-    self.inputs.stockholm.nixosModules.sitemap
-    self.inputs.stockholm.nixosModules.ssl
     {
       # nix-index
       imports = [
@@ -149,11 +143,6 @@ in
   ];
 
   networking.hostName = config.clan.core.settings.machine.name;
-
-  krebs = {
-    enable = true;
-    ssl.trustIntermediate = true;
-  };
 
   users.mutableUsers = false;
 
