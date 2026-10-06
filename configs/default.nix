@@ -216,7 +216,6 @@
       printf '\a'
     '')
     usbutils
-    goify
 
     #unpack stuff
     libarchive
