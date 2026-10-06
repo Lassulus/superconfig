@@ -1,5 +1,4 @@
 {
-  self,
   lib,
   ...
 }:
@@ -46,8 +45,6 @@
     ../../configs/services/radio/proxy.nix
     ../../configs/services/flix/proxy.nix
     ../../configs/services/coms/jitsi.nix
-    # mastodon (social.krebsco.de) -> hotdog container, migrated from prism
-    (self.inputs.stockholm + "/krebs/2configs/mastodon-proxy.nix")
 
     # dns
     ../../configs/dns/knot.nix
