@@ -20,9 +20,7 @@
   #   enable = true;
   #   defaultWindowManager = "xmonad";
   # };
-  # krebs.iptables.tables.filter.INPUT.rules = [
-  #   { predicate = "-p tcp --dport 3389"; target = "ACCEPT"; } # xrdp
-  # ];
+  # networking.firewall.allowedTCPPorts = [ 3389 ]; # xrdp
 
   environment.systemPackages = [ pkgs.chromium ];
 

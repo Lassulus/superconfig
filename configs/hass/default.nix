@@ -4,40 +4,20 @@
     ./zigbee.nix
   ];
 
-  krebs.iptables.tables.filter.INPUT.rules = [
-    {
-      predicate = "-i et0 -p tcp --dport 1883";
-      target = "ACCEPT";
-    } # mosquitto
-    {
-      predicate = "-i docker0 -p tcp --dport 1883";
-      target = "ACCEPT";
-    } # mosquitto
-    {
-      predicate = "-i et0 -p tcp --dport 8123";
-      target = "ACCEPT";
-    } # hass
-    {
-      predicate = "-i et0 -p tcp --dport 1337";
-      target = "ACCEPT";
-    } # zigbee2mqtt frontend
-    {
-      predicate = "-i retiolum -p tcp --dport 8123";
-      target = "ACCEPT";
-    } # hass
-    {
-      predicate = "-i retiolum -p tcp --dport 1337";
-      target = "ACCEPT";
-    } # zigbee2mqtt frontend
-    {
-      predicate = "-i wiregrill -p tcp --dport 8123";
-      target = "ACCEPT";
-    } # hass
-    {
-      predicate = "-i zttzibeakb -p tcp --dport 8123";
-      target = "ACCEPT";
-    } # hass
-  ];
+  networking.firewall.interfaces = {
+    et0.allowedTCPPorts = [
+      1883 # mosquitto
+      8123 # hass
+      1337 # zigbee2mqtt frontend
+    ];
+    docker0.allowedTCPPorts = [ 1883 ]; # mosquitto
+    retiolum.allowedTCPPorts = [
+      8123 # hass
+      1337 # zigbee2mqtt frontend
+    ];
+    wiregrill.allowedTCPPorts = [ 8123 ]; # hass
+    zttzibeakb.allowedTCPPorts = [ 8123 ]; # hass
+  };
 
   systemd.services.hass-update = {
     startAt = "daily";

@@ -159,7 +159,7 @@
 
   # riot VM (HFOS): fresh libvirt guest on a dedicated bridged public IP.
   # Bridged onto ext-br with its own Hetzner MAC, so libvirt manages no
-  # iptables for it -> no nat-chain race, no restart-iptables hack (cf. hfos.nix).
+  # firewall rules for it -> no nat-chain race, no restart-iptables hack (cf. hfos.nix).
   virtualisation.libvirtd.enable = true;
   security.polkit.enable = true;
   users.users.riot = {
@@ -170,18 +170,10 @@
     ];
   };
   # the only forwarding the VM needs: accept traffic to/from its public IP.
-  krebs.iptables.tables.filter.FORWARD.rules = lib.mkBefore [
-    {
-      v6 = false;
-      predicate = "--destination 95.217.192.52";
-      target = "ACCEPT";
-    }
-    {
-      v6 = false;
-      predicate = "--source 95.217.192.52";
-      target = "ACCEPT";
-    }
-  ];
+  networking.firewall.extraForwardRules = ''
+    ip daddr 95.217.192.52 accept
+    ip saddr 95.217.192.52 accept
+  '';
 
   # tank/radicle (radicle seed storage) is created by disko at install; on an
   # already-provisioned host it must be created before deploying:

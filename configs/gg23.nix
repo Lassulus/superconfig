@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ pkgs, ... }:
 {
   # vodafone router drifts out of time
   services.timesyncd.servers = [
@@ -90,46 +90,22 @@
     ];
   };
   networking.networkmanager.unmanaged = [ "int0" ];
-  krebs.iptables.tables.filter.INPUT.rules = [
-    {
-      predicate = "-i int0";
-      target = "ACCEPT";
-    }
-  ];
-  krebs.iptables.tables.filter.FORWARD.rules = [
-    {
-      predicate = "-i int0";
-      target = "ACCEPT";
-    }
-    {
-      predicate = "-o int0";
-      target = "ACCEPT";
-    }
-    {
-      predicate = "-p ipv6-icmp";
-      target = "ACCEPT";
-      v4 = false;
-    }
-  ];
-  krebs.iptables.tables.nat.PREROUTING.rules = lib.mkBefore [
-    {
-      v6 = false;
-      predicate = "-s 10.42.0.0/24";
-      target = "ACCEPT";
-    }
-  ];
-  krebs.iptables.tables.nat.POSTROUTING.rules = [
-    {
-      v6 = false;
-      predicate = "-s 10.42.0.0/24";
-      target = "MASQUERADE";
-    }
-    {
-      v4 = false;
-      predicate = "-s fd42:7d6a::/64";
-      target = "MASQUERADE";
-    }
-  ];
+  networking.firewall.trustedInterfaces = [ "int0" ];
+  # ICMPv6 is forwarded by nixos-fw's forward chain already.
+  networking.firewall.extraForwardRules = ''
+    iifname "int0" accept
+    oifname "int0" accept
+  '';
+  networking.nftables.tables.gg23 = {
+    family = "inet";
+    content = ''
+      chain postrouting {
+        type nat hook postrouting priority srcnat; policy accept;
+        ip saddr 10.42.0.0/24 masquerade
+        ip6 saddr fd42:7d6a::/64 masquerade
+      }
+    '';
+  };
 
   networking.domain = "gg23";
 

@@ -189,10 +189,5 @@ in
         (. ${stockholmPkgs.htgen-cyberlocker}/bin/htgen-cyberlocker)
       '';
   };
-  krebs.iptables.tables.filter.INPUT.rules = [
-    {
-      predicate = "-i retiolum -p tcp --dport 80";
-      target = "ACCEPT";
-    }
-  ];
+  networking.firewall.interfaces.retiolum.allowedTCPPorts = [ 80 ];
 }

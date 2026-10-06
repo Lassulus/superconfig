@@ -30,7 +30,6 @@ in
 
     # Import stockholm modules
     ./kartei.nix
-    self.inputs.stockholm.nixosModules.iptables
     self.inputs.stockholm.nixosModules.sitemap
     self.inputs.stockholm.nixosModules.ssl
     {
@@ -263,33 +262,35 @@ in
     Storage = "persistent";
   };
 
-  krebs.iptables = {
+  # nftables based NixOS firewall. Input and forward drop by default, as
+  # krebs.iptables did; no reverse path filter either, the routers,
+  # container hosts and NAT64 boxes route asymmetrically.
+  networking.nftables = {
     enable = true;
-    tables = {
-      filter.INPUT.policy = "DROP";
-      filter.FORWARD.policy = lib.mkDefault "DROP";
-      filter.INPUT.rules = lib.mkMerge [
-        (lib.mkBefore [
-          {
-            predicate = "-m conntrack --ctstate RELATED,ESTABLISHED";
-            target = "ACCEPT";
-          }
-          {
-            predicate = "-p icmp";
-            target = "ACCEPT";
-          }
-          {
-            predicate = "-p ipv6-icmp";
-            target = "ACCEPT";
-            v4 = false;
-          }
-          {
-            predicate = "-i lo";
-            target = "ACCEPT";
-          }
-        ])
-      ];
-    };
+    # Defaults to true on machines older than 23.11, which would also wipe
+    # the tables libvirt, podman and jool keep on every reload.
+    flushRuleset = false;
+    # krebs.iptables loaded its rules through iptables-nft into these
+    # tables; nothing removes them when it goes away. Drop once every
+    # machine has switched to nftables.
+    extraDeletions = ''
+      table ip filter
+      delete table ip filter
+      table ip6 filter
+      delete table ip6 filter
+      table ip nat
+      delete table ip nat
+      table ip6 nat
+      delete table ip6 nat
+    '';
+  };
+  networking.firewall = {
+    filterForward = lib.mkDefault true;
+    checkReversePath = false;
+    # all of ICMP, not just echo-request, like krebs.iptables
+    extraInputRules = ''
+      meta l4proto icmp accept
+    '';
   };
 
   networking.firewall.allowedTCPPorts = [ 22 ]; # ssh

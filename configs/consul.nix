@@ -190,42 +190,19 @@ in
     };
   };
 
-  krebs.iptables.tables.filter.INPUT.rules = [
-    {
-      predicate = "-i retiolum -p tcp --dport 8300";
-      target = "ACCEPT";
-    }
-    {
-      predicate = "-i retiolum -p tcp --dport 8301";
-      target = "ACCEPT";
-    }
-    {
-      predicate = "-i retiolum -p udp --dport 8301";
-      target = "ACCEPT";
-    }
-    {
-      predicate = "-i retiolum -p tcp --dport 8302";
-      target = "ACCEPT";
-    }
-    {
-      predicate = "-i retiolum -p udp --dport 8302";
-      target = "ACCEPT";
-    }
-    {
-      predicate = "-i retiolum -p tcp --dport 8400";
-      target = "ACCEPT";
-    }
-    {
-      predicate = "-i retiolum -p tcp --dport 8500";
-      target = "ACCEPT";
-    }
-    {
-      predicate = "-i retiolum -p tcp --dport 8600";
-      target = "ACCEPT";
-    }
-    {
-      predicate = "-i retiolum -p udp --dport 8500";
-      target = "ACCEPT";
-    }
-  ];
+  networking.firewall.interfaces.retiolum = {
+    allowedTCPPorts = [
+      8300
+      8301
+      8302
+      8400
+      8500
+      8600
+    ];
+    allowedUDPPorts = [
+      8301
+      8302
+      8500
+    ];
+  };
 }

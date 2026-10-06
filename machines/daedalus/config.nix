@@ -91,12 +91,7 @@
         x11vnc
         # torbrowser
       ];
-      krebs.iptables.tables.filter.INPUT.rules = [
-        {
-          predicate = "-p tcp -i retiolum --dport 5900";
-          target = "ACCEPT";
-        }
-      ];
+      networking.firewall.interfaces.retiolum.allowedTCPPorts = [ 5900 ];
     }
   ];
 

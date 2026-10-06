@@ -63,32 +63,24 @@ in
 
   boot.kernel.sysctl."net.ipv4.ip_forward" = lib.mkDefault 1;
 
-  krebs.iptables.tables.nat.POSTROUTING.rules = [
-    {
-      v6 = false;
-      predicate = "-s ${config.containers.riot.localAddress}";
-      target = "MASQUERADE";
-    }
-  ];
-
-  # networking.nat can be used instead of this
-  krebs.iptables.tables.nat.PREROUTING.rules = [
-    {
-      predicate = "-p tcp --dport 45622";
-      target = "DNAT --to-destination ${config.containers.riot.localAddress}:22";
-      v6 = false;
-    }
-  ];
-  krebs.iptables.tables.filter.FORWARD.rules = [
-    {
-      predicate = "-i ve-riot";
-      target = "ACCEPT";
-    }
-    {
-      predicate = "-o ve-riot";
-      target = "ACCEPT";
-    }
-  ];
+  networking.firewall.extraForwardRules = ''
+    iifname "ve-riot" accept
+    oifname "ve-riot" accept
+  '';
+  # ssh into the container on 45622
+  networking.nftables.tables.riot = {
+    family = "ip";
+    content = ''
+      chain prerouting {
+        type nat hook prerouting priority dstnat; policy accept;
+        tcp dport 45622 dnat to ${config.containers.riot.localAddress}:22
+      }
+      chain postrouting {
+        type nat hook postrouting priority srcnat; policy accept;
+        ip saddr ${config.containers.riot.localAddress} masquerade
+      }
+    '';
+  };
 
   # non container stuff
 

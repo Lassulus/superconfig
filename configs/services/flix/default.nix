@@ -367,17 +367,17 @@
     4001 # smbd
     4002 # smbd
   ];
-  krebs.iptables = {
-    enable = true;
-    tables.nat.PREROUTING.rules = [
-      # transmission rpc port
-      {
-        predicate = "-i retiolum -p tcp --dport 9091";
-        target = "DNAT --to-destination fdb4:3310:947::2";
-        v4 = false;
+  # we need this so we can forward into the the transmission network namespace
+  networking.firewall.filterForward = false;
+  # transmission rpc port
+  networking.nftables.tables.flix = {
+    family = "ip6";
+    content = ''
+      chain prerouting {
+        type nat hook prerouting priority dstnat; policy accept;
+        iifname "retiolum" tcp dport 9091 dnat to fdb4:3310:947::2
       }
-    ];
-    tables.filter.FORWARD.policy = "ACCEPT"; # we need this so we can forward into the the transmission network namespace
+    '';
   };
 
   systemd.services.flix-index = {

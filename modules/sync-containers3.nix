@@ -303,29 +303,20 @@ in
         Name = "ctr0";
       };
       networking.networkmanager.unmanaged = [ "ctr0" ];
-      krebs.iptables.tables.filter.INPUT.rules = [
-        {
-          predicate = "-i ctr0";
-          target = "ACCEPT";
-        }
-      ];
-      krebs.iptables.tables.filter.FORWARD.rules = [
-        {
-          predicate = "-i ctr0";
-          target = "ACCEPT";
-        }
-        {
-          predicate = "-o ctr0";
-          target = "ACCEPT";
-        }
-      ];
-      krebs.iptables.tables.nat.POSTROUTING.rules = [
-        {
-          v6 = false;
-          predicate = "-s 10.233.0.0/24";
-          target = "MASQUERADE";
-        }
-      ];
+      networking.firewall.trustedInterfaces = [ "ctr0" ];
+      networking.firewall.extraForwardRules = ''
+        iifname "ctr0" accept
+        oifname "ctr0" accept
+      '';
+      networking.nftables.tables.sync-containers3 = {
+        family = "ip";
+        content = ''
+          chain postrouting {
+            type nat hook postrouting priority srcnat; policy accept;
+            ip saddr 10.233.0.0/24 masquerade
+          }
+        '';
+      };
     })
     (lib.mkIf cfg.inContainer.enable {
       users.groups.container_sync = { };

@@ -129,71 +129,53 @@
     '';
   };
 
-  # Firewall rules for container bridge
-  krebs.iptables.tables.filter.FORWARD.rules = [
-    # IPv6 forwarding for containers
-    {
-      v4 = false;
-      v6 = true;
-      predicate = "-i ctr0";
-      target = "ACCEPT";
-    }
-    {
-      v4 = false;
-      v6 = true;
-      predicate = "-o ctr0 -m conntrack --ctstate RELATED,ESTABLISHED";
-      target = "ACCEPT";
-    }
-    # IPv4 forwarding for NAT64 translated packets
-    {
-      v4 = true;
-      v6 = false;
-      predicate = "-m conntrack --ctstate RELATED,ESTABLISHED";
-      target = "ACCEPT";
-    }
-    {
-      v4 = true;
-      v6 = false;
-      predicate = "";
-      target = "ACCEPT";
-    }
-  ];
+  # Firewall rules for container bridge: IPv6 from the containers, and the
+  # IPv4 side of NAT64 (packets Jool translated).
+  networking.firewall.extraForwardRules = ''
+    iifname "ctr0" meta nfproto ipv6 accept
+    meta nfproto ipv4 accept
+  '';
+
+  # Allow containers to reach host's DNS64 resolver (IPv6 only)
+  networking.firewall.extraInputRules = ''
+    ip6 saddr fd00:c700::/64 meta l4proto { tcp, udp } th dport 53 accept
+  '';
 
   # NAT66 - masquerade container IPv6 to reach public IPv6 (when host has IPv6)
   # Note: No IPv4 MASQUERADE needed - jool does SNAT with pool4 address for NAT64 traffic
-  krebs.iptables.tables.nat.POSTROUTING.rules = [
-    {
-      v4 = false;
-      v6 = true;
-      predicate = "-s fd00:c700::/64 ! -d fd00:c700::/64";
-      target = "MASQUERADE";
-    }
-  ];
-
-  # Allow containers to reach host's DNS64 resolver (IPv6 only)
-  krebs.iptables.tables.filter.INPUT.rules = [
-    {
-      v4 = false;
-      v6 = true;
-      predicate = "-s fd00:c700::/64 -p udp --dport 53";
-      target = "ACCEPT";
-    }
-    {
-      v4 = false;
-      v6 = true;
-      predicate = "-s fd00:c700::/64 -p tcp --dport 53";
-      target = "ACCEPT";
-    }
-  ];
+  networking.nftables.tables.container-bridge = {
+    family = "ip6";
+    content = ''
+      chain postrouting {
+        type nat hook postrouting priority srcnat; policy accept;
+        ip6 saddr fd00:c700::/64 ip6 daddr != fd00:c700::/64 masquerade
+      }
+    '';
+  };
 
   # Send only container traffic to Jool NAT64 (--iptables mode)
   # Host traffic to 64:ff9b::/96 passes through to upstream NAT64 (e.g., Android hotspot)
-  krebs.iptables.tables.mangle.PREROUTING.rules = [
+  # JOOL is an xtables target, nftables has no equivalent; ip6tables (the
+  # nft backend) loads it through nft_compat into the ip6 mangle table.
+  systemd.services.jool-iptables =
+    let
+      rule = "PREROUTING -i ctr0 -d 64:ff9b::/96 -j JOOL";
+    in
     {
-      v4 = false;
-      v6 = true;
-      predicate = "-i ctr0 -d 64:ff9b::/96";
-      target = "JOOL";
-    }
-  ];
+      description = "Send container traffic to Jool NAT64";
+      after = [
+        "jool.service"
+        "nftables.service"
+      ];
+      requires = [ "jool.service" ];
+      wantedBy = [ "multi-user.target" ];
+      path = [ pkgs.iptables ];
+      environment.XTABLES_LIBDIR = "${pkgs.jool-cli}/lib/xtables";
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+      script = "ip6tables -t mangle -C ${rule} 2>/dev/null || ip6tables -t mangle -A ${rule}";
+      preStop = "ip6tables -t mangle -D ${rule} || true";
+    };
 }
