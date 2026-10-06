@@ -6,9 +6,6 @@
   ...
 }:
 {
-  # Stockholm configuration
-  krebs.secret.directory = config.clan.core.vars.password-store.secretLocation;
-
   # Nixpkgs overlays
   nixpkgs.overlays = [
     self.inputs.stockholm.overlays.default
@@ -34,13 +31,10 @@
     ./nix.nix
 
     # Import stockholm modules
-    self.inputs.stockholm.nixosModules.secret
     ./kartei.nix
     self.inputs.stockholm.nixosModules.iptables
-    self.inputs.stockholm.nixosModules.setuid
     self.inputs.stockholm.nixosModules.sitemap
     self.inputs.stockholm.nixosModules.ssl
-    self.inputs.stockholm.nixosModules.systemd
     {
       # nix-index
       imports = [
