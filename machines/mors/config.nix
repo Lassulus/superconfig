@@ -65,10 +65,6 @@
     android-tools
     dnsutils
     woeusb
-    (pkgs.writers.writeDashBin "play-on" ''
-      HOST=$(echo 'styx\nshodan' | fzfmenu)
-      ssh -t "$HOST" -- mpv "$@"
-    '')
   ];
 
   #TODO: fix this shit
