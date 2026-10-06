@@ -68,7 +68,7 @@
   #   enable = true;
   #   ssh = {
   #     enable = true;
-  #     authorizedKeys = [ config.krebs.users.lass.pubkey ];
+  #     authorizedKeys = [ self.keys.ssh.yubi_pgp.public ];
   #     port = 2222;
   #     hostKeys = [
   #       (<secrets/ssh.id_ed25519>)

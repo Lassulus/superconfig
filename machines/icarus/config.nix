@@ -24,6 +24,6 @@
 
   environment.systemPackages = [ pkgs.chromium ];
 
-  # users.users.lass.openssh.authorizedKeys = [ config.krebs.users.mic92.pubkey ];
+  # users.users.lass.openssh.authorizedKeys = [ self.inputs.kartei.users.mic92.pubkey ];
   system.stateVersion = "22.05";
 }

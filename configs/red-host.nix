@@ -83,7 +83,7 @@
   #   createHome = true;
   #   homeMode = "705";
   #   openssh.authorizedKeys.keys = [
-  #     config.krebs.users.lass.pubkey
+  #     self.keys.ssh.yubi_pgp.public
   #   ];
   # };
 

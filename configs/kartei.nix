@@ -1,7 +1,6 @@
-# Host and user data from the kartei flake input, rendered straight into
-# NixOS options; stockholm's krebs.hosts (and its hosts/ssh/build modules) is
-# not used. Hosts are kartei's plus the superconfig-only cards in ../retiolum.
-# Our own users are defined here from ../keys, not taken from kartei.
+# Host data from the kartei flake input, rendered straight into NixOS
+# options; stockholm's krebs.hosts (and its hosts/ssh/build modules) is not
+# used. Hosts are kartei's plus the superconfig-only cards in ../retiolum.
 {
   config,
   lib,
@@ -36,19 +35,8 @@ let
 
   allNets = lib.concatMap (host: lib.attrValues (host.nets or { })) (lib.attrValues hosts);
 
-  ownUsers = {
-    lass = {
-      mail = "lass@green.r";
-      pgp.pubkeys.default = builtins.readFile ../keys/pgp/yubi_pgp.pgp;
-      pubkey = lib.removeSuffix "\n" (builtins.readFile ../keys/ssh/yubi_pgp.pub);
-    };
-  };
 in
 {
-  options.krebs.users = lib.mkOption {
-    type = lib.types.attrsOf self.inputs.stockholm.lib.types.user;
-  };
-
   config = {
     networking.hosts = lib.filterAttrs (_: names: names != [ ]) (
       lib.zipAttrsWith (_: lib.concatLists) (
@@ -93,12 +81,5 @@ in
           Port ${toString (sshPort net)}
       '') (lib.filter (net: sshPort net != 22) allNets)
     );
-
-    # drop null fields so they keep the krebs.users type defaults
-    krebs.users =
-      lib.mapAttrs (_: lib.filterAttrs (_: v: v != null)) (
-        removeAttrs kartei.users (lib.attrNames ownUsers)
-      )
-      // ownUsers;
   };
 }

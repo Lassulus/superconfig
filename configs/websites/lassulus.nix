@@ -1,6 +1,7 @@
 {
   self,
   config,
+  lib,
   pkgs,
   ...
 }:
@@ -47,11 +48,12 @@ in
     locations."= /wireguard-key".extraConfig = ''
       alias ${pkgs.writeText "neoprism.wg" self.inputs.kartei.hosts.neoprism.nets.wiregrill.wireguard.pubkey};
     '';
+    # the keys lass logs in with, one per line
     locations."= /ssh.pub".extraConfig = ''
-      alias ${pkgs.writeText "pub" config.krebs.users.lass.pubkey};
+      alias ${pkgs.writeText "ssh.pub" (lib.concatLines config.users.users.mainUser.openssh.authorizedKeys.keys)};
     '';
     locations."= /gpg.pub".extraConfig = ''
-      alias ${pkgs.writeText "pub" config.krebs.users.lass.pgp.pubkeys.default};
+      alias ${self.keys.pgp.yubi_pgp.key};
     '';
     locations."= /ip".extraConfig = ''
       return 200 '$remote_addr';

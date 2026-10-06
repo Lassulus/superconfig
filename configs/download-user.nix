@@ -1,4 +1,4 @@
-{ self, config, ... }:
+{ self, ... }:
 {
   users.users.download = {
     isNormalUser = true;
@@ -16,7 +16,7 @@
       self.keys.ssh.xerxes.public
       self.keys.ssh.ignavia.public
       self.keys.ssh.massulus.public
-      config.krebs.users.makefu.pubkey
+      self.inputs.kartei.users.makefu.pubkey
     ];
   };
 
