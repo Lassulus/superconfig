@@ -157,7 +157,6 @@
             , ("M4-c", spawn "/run/current-system/sw/bin/emacsclient -c")
             -- , ("M4-c", unGrab)
             , ("M4-f", floatNext True)
-            , ("M4-b", spawn "/run/current-system/sw/bin/klem")
 
             , ("M4-c", defaultCommands >>= runCommand)
             , ("M4-v", withWorkspace autoXPConfig (windows . W.greedyView))

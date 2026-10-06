@@ -91,10 +91,7 @@ in
     zathura
     flameshot
     (pkgs.writers.writeDashBin "screenshot" ''
-      set -efu
-
-      ${pkgs.flameshot}/bin/flameshot gui &&
-      ${pkgs.klem}/bin/klem
+      ${pkgs.flameshot}/bin/flameshot gui
     '')
     (pkgs.writers.writeDashBin "IM" ''
       ${pkgs.mosh}/bin/mosh green.r -- tmux new-session -A -s IM -- weechat
@@ -137,38 +134,6 @@ in
     dmenu = pkgs.writers.writeDashBin "dmenu" ''
       ${stockholmPkgs.fzfmenu}/bin/fzfmenu "$@"
     '';
-  };
-
-  lass.klem = {
-    kpaste.script = pkgs.writers.writeDash "kpaste-wrapper" ''
-      ${stockholmPkgs.kpaste}/bin/kpaste \
-        | ${pkgs.coreutils}/bin/tail -1 \
-        | ${pkgs.coreutils}/bin/tr -d '\r\n'
-    '';
-    go = {
-      target = "STRING";
-      script = "${stockholmPkgs.goify}/bin/goify";
-    };
-    "go.lassul.us" = {
-      target = "STRING";
-      script = pkgs.writers.writeDash "go.lassul.us" ''
-        export GO_HOST='go.lassul.us'
-        ${stockholmPkgs.goify}/bin/goify
-      '';
-    };
-    qrcode = {
-      target = "image";
-      script = pkgs.writers.writeDash "zbar" ''
-        ${pkgs.zbar}/bin/zbarimg -q --raw -
-      '';
-    };
-    ocr = {
-      target = "image";
-      script = pkgs.writers.writeDash "gocr" ''
-        ${pkgs.netpbm}/bin/pngtopnm - \
-          | ${pkgs.gocr}/bin/gocr -
-      '';
-    };
   };
 
   services.clipmenu.enable = true;
