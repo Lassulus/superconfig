@@ -17,7 +17,6 @@
 
     ../../configs/pass.nix
 
-    ../../configs/git-brain.nix
     ../../configs/et-server.nix
 
     ../../configs/atuin-server.nix
