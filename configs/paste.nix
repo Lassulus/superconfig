@@ -22,12 +22,6 @@ let
   '';
 in
 {
-  imports = [
-    {
-      key = "stockholm-htgen";
-      imports = [ self.inputs.stockholm.nixosModules.htgen ];
-    }
-  ];
 
   services.nginx.virtualHosts.cyberlocker = {
     enableACME = true;

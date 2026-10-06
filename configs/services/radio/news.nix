@@ -79,7 +79,6 @@ in
     };
   };
   imports = [
-    self.inputs.stockholm.nixosModules.htgen
     ./tts.nix
   ];
   krebs.htgen.news = {

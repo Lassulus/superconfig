@@ -1,16 +1,9 @@
 {
-  self,
   config,
   pkgs,
   ...
 }:
 {
-  imports = [
-    {
-      key = "stockholm-htgen";
-      imports = [ self.inputs.stockholm.nixosModules.htgen ];
-    }
-  ];
   krebs.sync-containers3.containers.radio = {
     sshKey = config.clan.core.vars.generators.radio-container.files."radio.sync.key".path;
     startCommand = ''
