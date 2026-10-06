@@ -246,10 +246,6 @@
 
   security.acme.defaults.email = "spam@krebsco.de";
   security.acme.acceptTerms = true;
-  security.acme.certs."yellow.r".server = config.krebs.ssl.acmeURL;
-  security.acme.certs."radar.r".server = config.krebs.ssl.acmeURL;
-  security.acme.certs."sonar.r".server = config.krebs.ssl.acmeURL;
-  security.acme.certs."transmission.r".server = config.krebs.ssl.acmeURL;
   services.nginx = {
     enable = true;
     package = pkgs.nginx.override {
@@ -260,8 +256,6 @@
     virtualHosts."yellow.r" = {
       serverAliases = [ "flix.r" ];
       default = true;
-      enableACME = true;
-      addSSL = true;
       locations."/" = {
         root = "/var/download";
         extraConfig = ''
@@ -284,24 +278,18 @@
       '';
     };
     virtualHosts."transmission.r" = {
-      enableACME = true;
-      addSSL = true;
       locations."/" = {
         proxyWebsockets = true;
         proxyPass = "http://128.0.0.1:9091";
       };
     };
     virtualHosts."radar.r" = {
-      enableACME = true;
-      addSSL = true;
       locations."/" = {
         proxyWebsockets = true;
         proxyPass = "http://localhost:7878";
       };
     };
     virtualHosts."sonar.r" = {
-      enableACME = true;
-      addSSL = true;
       locations."/" = {
         proxyWebsockets = true;
         proxyPass = "http://localhost:8989";

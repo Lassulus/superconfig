@@ -26,8 +26,6 @@ in
 {
 
   services.nginx.virtualHosts.cyberlocker = {
-    enableACME = true;
-    addSSL = true;
     serverAliases = [ "c.r" ];
     locations."/".extraConfig = ''
       client_max_body_size 4G;
@@ -40,8 +38,6 @@ in
     '';
   };
   services.nginx.virtualHosts.paste = {
-    enableACME = true;
-    addSSL = true;
     serverAliases = [ "p.r" ];
     locations."/".extraConfig = ''
       client_max_body_size 4G;
