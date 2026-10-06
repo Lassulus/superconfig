@@ -112,5 +112,6 @@
 
   services.udev.packages = [ pkgs.libmtp.out ];
 
-  systemd.services.nix-daemon.environment.SSH_AUTH_SOCK = "/run/user/1000/ssh-tpm-agent.sock";
+  systemd.services.nix-daemon.environment.SSH_AUTH_SOCK =
+    "/run/user/${toString config.users.users.mainUser.uid}/ssh-tpm-agent.sock";
 }
