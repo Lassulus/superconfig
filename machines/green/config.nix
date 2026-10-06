@@ -12,7 +12,6 @@
 
     ../../configs/syncthing.nix
 
-    ../../configs/weechat.nix
     ../../configs/bitlbee.nix
 
     ../../configs/pass.nix

@@ -17,7 +17,6 @@ let
       "mors"
       "radio"
     ];
-    # "/home/lass/.weechat" = [ "green" "mors" ];
     "/home/lass/decsync" = [
       "mors"
       "green"

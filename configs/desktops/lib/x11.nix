@@ -93,9 +93,6 @@ in
     (pkgs.writers.writeDashBin "screenshot" ''
       ${pkgs.flameshot}/bin/flameshot gui
     '')
-    (pkgs.writers.writeDashBin "IM" ''
-      ${pkgs.mosh}/bin/mosh green.r -- tmux new-session -A -s IM -- weechat
-    '')
     (pkgs.writers.writeDashBin "deploy_hm" ''
       target=$1
       shift
