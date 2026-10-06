@@ -5,9 +5,6 @@
   ...
 }:
 {
-  imports = [
-    self.inputs.stockholm.nixosModules.realwallpaper
-  ];
   krebs.realwallpaper.enable = true;
 
   system.activationScripts.wallpaper-chmod = ''
