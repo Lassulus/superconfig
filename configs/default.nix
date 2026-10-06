@@ -6,7 +6,7 @@
   ...
 }:
 let
-  stockholmPkgs = self.inputs.stockholm.packages.${pkgs.stdenv.hostPlatform.system};
+  selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
 in
 {
 
@@ -187,11 +187,11 @@ in
     #neat utils
     file
     xkcdpass
-    stockholmPkgs.kpaste
-    stockholmPkgs.cyberlocker-tools
+    selfPkgs.kpaste
+    selfPkgs.cyberlocker-tools
     pciutils
     pop
-    stockholmPkgs.untilport
+    selfPkgs.untilport
     (pkgs.writers.writeDashBin "urgent" ''
       printf '\a'
     '')
