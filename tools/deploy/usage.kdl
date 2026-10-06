@@ -5,4 +5,4 @@ flag "--flake" help="Path to the flake (default: .)" {
   arg "<path>"
 }
 arg "<machine>" help="Machine configuration to deploy"
-arg "<target_host>" help="SSH destination to deploy to, [user@]host (user defaults to root)"
+arg "[target_host]" help="SSH destination to deploy to, [user@]host (default: <machine>.r, user defaults to root)"

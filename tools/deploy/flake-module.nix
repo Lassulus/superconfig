@@ -7,7 +7,7 @@
       ...
     }:
     {
-      # deploy [--flake PATH] <machine> <[user@]host>
+      # deploy [--flake PATH] <machine> [[user@]host]   (host defaults to <machine>.r)
       #
       # Generates vars, copies the flake source to /var/lib/deploy/incoming
       # on the target, builds it there in the systemd unit deploy-build
@@ -28,7 +28,7 @@
           ];
           text = ''
             usage() {
-              echo "usage: deploy [--flake PATH] <machine> <[user@]host>" >&2
+              echo "usage: deploy [--flake PATH] <machine> [[user@]host]  (host defaults to <machine>.r)" >&2
               exit 1
             }
 
@@ -44,9 +44,9 @@
               *) break ;;
               esac
             done
-            [ $# -eq 2 ] || usage
+            [ $# -eq 1 ] || [ $# -eq 2 ] || usage
             machine=$1
-            target=$2
+            target=''${2:-$machine.r}
             [[ $target == *@* ]] || target=root@$target
 
             state=/var/lib/deploy
@@ -149,6 +149,7 @@
             }
 
             step "connecting to $target"
+            remote true || { echo "deploy: cannot reach $target" >&2; exit 1; }
             # shellcheck disable=SC2016 # expanded on the target
             remote 'test -e /etc/NIXOS && command -v systemd-run >/dev/null' ||
               { echo "deploy: $target is not a NixOS system with systemd" >&2; exit 1; }
