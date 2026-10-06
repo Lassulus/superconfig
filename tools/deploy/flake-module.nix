@@ -117,6 +117,37 @@
             EOF
             }
 
+            # source_diff: per-file +/- summary, then the full diff, of the
+            # running system's source against the incoming one.
+            source_diff() {
+              ssh "''${ssh_opts[@]}" "$target" bash -s -- "$state" <<'EOF'
+            old=$1/src new=$1/incoming
+            if [ ! -d "$old" ]; then
+              echo "no source recorded for the running system"
+              exit 0
+            fi
+            # diff exits 1 when the trees differ, 2 on trouble.
+            d() { diff -ruN "$@" "$old" "$new" || [ $? -eq 1 ]; }
+            d | awk -v pre="$new/" '
+              /^diff -ruN / {
+                f = substr($0, index($0, " " pre) + 1 + length(pre))
+                files[++n] = f; hdr = 2; next
+              }
+              hdr > 0 { hdr--; next }
+              /^\+/ { add[f]++ }
+              /^-/ { del[f]++ }
+              END {
+                if (n == 0) { print "no source changes"; exit }
+                for (i = 1; i <= n; i++) {
+                  f = files[i]
+                  printf " %-60s \033[32m+%d\033[0m \033[31m-%d\033[0m\n", f, add[f], del[f]
+                }
+                printf "%d files changed\n\n", n
+              }'
+            d --color=always
+            EOF
+            }
+
             step "connecting to $target"
             # shellcheck disable=SC2016 # expanded on the target
             remote 'test -e /etc/NIXOS && command -v systemd-run >/dev/null' ||
@@ -153,15 +184,17 @@
                   "rm -rf $state/incoming && mv $state/incoming.new $state/incoming"
 
               step "source changes"
-              # shellcheck disable=SC2016 # expanded on the target
-              remote "if [ -d $state/src ]; then diff -ruN --color=always $state/src $state/incoming" \
-                '|| [ $? -eq 1 ]; else echo "no source recorded for the running system"; fi' | page
+              source_diff | page
 
               step "building $machine on $target"
+              # nvd comes from the machine's own nixpkgs, so it is built for
+              # the target and usually substituted; out-links are result
+              # (system) and result-1 (nvd), in installable order.
               start deploy-build \
                 /run/current-system/sw/bin/nix --extra-experimental-features "nix-command flakes" \
                 --log-format internal-json -v build --out-link "$state/result" \
-                "$state/incoming#nixosConfigurations.$machine.config.system.build.toplevel"
+                "$state/incoming#nixosConfigurations.$machine.config.system.build.toplevel" \
+                "$state/incoming#nixosConfigurations.$machine.pkgs.nvd"
             fi
             follow deploy-build | nom --json
             system=$(remote readlink -f "$state/result")
@@ -170,7 +203,7 @@
             if [ "$(remote readlink -f /run/current-system)" = "$system" ]; then
               echo "$system is already running"
             else
-              remote "$nix store diff-closures /run/current-system $system"
+              remote "$state/result-1/bin/nvd diff /run/current-system $system"
             fi
 
             read -r -p "switch $target to $system? [y/N] " answer </dev/tty
