@@ -2,11 +2,22 @@
 # pkgs/reaktor2, stockholm's packages output does not include it.
 {
   config,
+  lib,
   pkgs,
   self,
   ...
 }:
-with self.inputs.stockholm.lib;
+with lib;
+let
+  # drop null and empty attributes until nothing changes, like stockholm's
+  # converge (filterAttrsRecursive …)
+  stripAttr =
+    x:
+    let
+      y = filterAttrsRecursive (_: v: v != { } && v != null) x;
+    in
+    if y == x then x else stripAttr y;
+in
 {
 
   options.krebs.reaktor2 = mkOption {
@@ -26,7 +37,7 @@ with self.inputs.stockholm.lib;
             };
             hostname = mkOption {
               default = "irc.r";
-              type = types.hostname;
+              type = types.str;
             };
             port = mkOption {
               default = "6667";
@@ -40,12 +51,12 @@ with self.inputs.stockholm.lib;
               default = "/var/lib/${self.config.username}";
               defaultText = "/var/lib/‹username›";
               readOnly = true;
-              type = types.absolute-pathname;
+              type = types.path;
             };
             systemd-service-name = mkOption {
               default = "reaktor2${optionalString (name != "default") "-${name}"}";
               defaultText = "reaktor2-‹name› or just reaktor2 if ‹name› is \"default\"";
-              type = types.filename;
+              type = types.strMatching "[0-9A-Za-z._][0-9A-Za-z._-]*";
             };
             sendDelaySec = mkOption {
               default = 0.7;
@@ -54,7 +65,7 @@ with self.inputs.stockholm.lib;
             username = mkOption {
               default = self.config.systemd-service-name;
               defaultText = "‹systemd-service-name›";
-              type = types.username;
+              type = types.strMatching "[0-9A-Za-z._][0-9A-Za-z._-]*";
             };
             useTLS = mkOption {
               default = self.config.port == "6697";

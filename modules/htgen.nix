@@ -1,13 +1,15 @@
 # Copied from stockholm krebs/3modules/htgen.nix (cc283503); htgen now comes
-# from stockholm's packages output instead of its overlay.
+# from stockholm's packages output instead of its overlay. Users and groups
+# get their ids from NixOS instead of stockholm's genid.
 {
   config,
+  lib,
   pkgs,
   self,
   ...
 }:
 
-with self.inputs.stockholm.lib;
+with lib;
 let
   optionalAttr = name: value: if name != null then { ${name} = value; } else { };
 
@@ -27,7 +29,8 @@ let
             enable = mkEnableOption "krebs.htgen-${config._module.args.name}";
 
             name = mkOption {
-              type = types.username;
+              # POSIX portable filename, like stockholm's types.username
+              type = types.strMatching "[0-9A-Za-z._][0-9A-Za-z._-]*";
               default = config._module.args.name;
             };
 
@@ -37,7 +40,7 @@ let
             };
 
             port = mkOption {
-              type = types.uint;
+              type = types.port;
             };
 
             script = mkOption {
@@ -46,12 +49,26 @@ let
             };
 
             scriptFile = mkOption {
-              type = types.nullOr (types.either types.package types.pathname);
+              type = types.nullOr (types.either types.package types.path);
               default = null;
             };
 
             user = mkOption {
-              type = types.user;
+              type = types.submodule (
+                { config, ... }:
+                {
+                  options = {
+                    name = mkOption {
+                      type = types.strMatching "[0-9A-Za-z._][0-9A-Za-z._-]*";
+                    };
+                    home = mkOption {
+                      type = types.path;
+                      # as stockholm's types.user
+                      default = "/home/${config.name}";
+                    };
+                  };
+                }
+              );
               default = {
                 name = "htgen-${config.name}";
                 home = "/var/lib/htgen-${config.name}";
@@ -91,7 +108,7 @@ let
     users.users = mapAttrs' (
       name: htgen:
       nameValuePair htgen.user.name {
-        inherit (htgen.user) home name uid;
+        inherit (htgen.user) home name;
         group = htgen.user.name;
         createHome = true;
         isSystemUser = true;
@@ -102,7 +119,6 @@ let
       _name: htgen:
       nameValuePair htgen.user.name {
         name = htgen.user.name;
-        gid = htgen.user.uid;
       }
     ) cfg;
 

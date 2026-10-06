@@ -5,7 +5,6 @@
 }:
 {
   users.users.pairprogramming = {
-    uid = self.inputs.stockholm.lib.genid_uint31 "pairprogramming";
     createHome = true;
     isNormalUser = true;
     openssh.authorizedKeys.keys = [

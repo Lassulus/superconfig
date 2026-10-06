@@ -87,7 +87,6 @@ in
       inherit name;
       createHome = true;
       group = name;
-      uid = self.inputs.stockholm.lib.genid_uint31 name;
       description = "radio manager";
       home = "/home/${name}";
       useDefaultShell = true;

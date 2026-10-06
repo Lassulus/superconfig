@@ -9,7 +9,7 @@
   ...
 }:
 
-with self.inputs.stockholm.lib;
+with lib;
 let
   cfg = config.krebs.realwallpaper;
 
@@ -69,7 +69,6 @@ let
     };
 
     users.extraUsers.realwallpaper = {
-      uid = genid "realwallpaper";
       group = "realwallpaper";
       home = cfg.workingDir;
       createHome = true;
