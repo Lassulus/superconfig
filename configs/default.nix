@@ -5,12 +5,10 @@
   pkgs,
   ...
 }:
+let
+  stockholmPkgs = self.inputs.stockholm.packages.${pkgs.stdenv.hostPlatform.system};
+in
 {
-  # Nixpkgs overlays
-  nixpkgs.overlays = [
-    self.inputs.stockholm.overlays.default
-    (import (self.inputs.stockholm.inputs.nix-writers + "/pkgs")) # TODO get rid of that overlay
-  ];
 
   imports = [
     # Import modules
@@ -201,11 +199,11 @@
     #neat utils
     file
     xkcdpass
-    kpaste
-    cyberlocker-tools
+    stockholmPkgs.kpaste
+    stockholmPkgs.cyberlocker-tools
     pciutils
     pop
-    untilport
+    stockholmPkgs.untilport
     (pkgs.writers.writeDashBin "urgent" ''
       printf '\a'
     '')

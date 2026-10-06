@@ -9,6 +9,8 @@
 let
   name = "radio";
 
+  stockholmPkgs = self.inputs.stockholm.packages.${pkgs.stdenv.hostPlatform.system};
+
   music_dir = "/var/music";
 
   # dash 0.5.13 has a regression where `read` builtin discards input when stdin is a socket
@@ -22,7 +24,7 @@ let
     };
   });
 
-  htgen-fixed = pkgs.htgen.override {
+  htgen-fixed = stockholmPkgs.htgen.override {
     pkgs = pkgs // {
       dash = dash-0_5_12;
     };
@@ -87,7 +89,7 @@ in
       inherit name;
       createHome = true;
       group = name;
-      uid = pkgs.stockholm.lib.genid_uint31 name;
+      uid = self.inputs.stockholm.lib.genid_uint31 name;
       description = "radio manager";
       home = "/home/${name}";
       useDefaultShell = true;

@@ -5,6 +5,9 @@
   pkgs,
   ...
 }:
+let
+  stockholmPkgs = self.inputs.stockholm.packages.${pkgs.stdenv.hostPlatform.system};
+in
 {
   imports = [
     ../../alacritty.nix
@@ -68,7 +71,7 @@
     acpilight
     ripgrep
     dmenu
-    fzfmenu
+    stockholmPkgs.fzfmenu
     dconf
     libarchive
     ncdu
@@ -132,25 +135,25 @@
 
   nixpkgs.config.packageOverrides = _super: {
     dmenu = pkgs.writers.writeDashBin "dmenu" ''
-      ${pkgs.fzfmenu}/bin/fzfmenu "$@"
+      ${stockholmPkgs.fzfmenu}/bin/fzfmenu "$@"
     '';
   };
 
   lass.klem = {
     kpaste.script = pkgs.writers.writeDash "kpaste-wrapper" ''
-      ${pkgs.kpaste}/bin/kpaste \
+      ${stockholmPkgs.kpaste}/bin/kpaste \
         | ${pkgs.coreutils}/bin/tail -1 \
         | ${pkgs.coreutils}/bin/tr -d '\r\n'
     '';
     go = {
       target = "STRING";
-      script = "${pkgs.goify}/bin/goify";
+      script = "${stockholmPkgs.goify}/bin/goify";
     };
     "go.lassul.us" = {
       target = "STRING";
       script = pkgs.writers.writeDash "go.lassul.us" ''
         export GO_HOST='go.lassul.us'
-        ${pkgs.goify}/bin/goify
+        ${stockholmPkgs.goify}/bin/goify
       '';
     };
     qrcode = {

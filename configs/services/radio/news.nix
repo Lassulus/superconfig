@@ -7,7 +7,9 @@
 let
   send_to_radio = pkgs.writers.writeDashBin "send_to_radio" ''
     ${pkgs.vorbis-tools}/bin/oggenc - |
-      ${pkgs.cyberlocker-tools}/bin/cput news.ogg
+      ${
+        self.inputs.stockholm.packages.${pkgs.stdenv.hostPlatform.system}.cyberlocker-tools
+      }/bin/cput news.ogg
     ${pkgs.curl}/bin/curl -fSs -X POST http://localhost:8002/newsshow
   '';
 

@@ -7,6 +7,8 @@
 }:
 
 let
+  stockholmPkgs = self.inputs.stockholm.packages.${pkgs.stdenv.hostPlatform.system};
+
   uploadPage = pkgs.writeText "paste-upload.html" ''
     <!doctype html>
     <title>p.krebsco.de</title>
@@ -123,7 +125,7 @@ in
     port = 9081;
     script = # sh
       ''
-        (. ${pkgs.htgen-paste}/bin/htgen-paste)
+        (. ${stockholmPkgs.htgen-paste}/bin/htgen-paste)
       '';
   };
 
@@ -177,14 +179,14 @@ in
     port = 7771;
     script = # sh
       ''
-        (. ${pkgs.htgen-imgur}/bin/htgen-imgur)
+        (. ${stockholmPkgs.htgen-imgur}/bin/htgen-imgur)
       '';
   };
   krebs.htgen.cyberlocker = {
     port = 7772;
     script = # sh
       ''
-        (. ${pkgs.htgen-cyberlocker}/bin/htgen-cyberlocker)
+        (. ${stockholmPkgs.htgen-cyberlocker}/bin/htgen-cyberlocker)
       '';
   };
   krebs.iptables.tables.filter.INPUT.rules = [
