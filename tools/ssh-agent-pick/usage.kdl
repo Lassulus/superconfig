@@ -1,2 +1,2 @@
 bin "ssh-agent-pick"
-about "Choose one of your live forwarded SSH agents (newest first) and print an `export SSH_AUTH_SOCK=...` line; use as eval \"$(ssh-agent-pick)\""
+about "Choose one of your live SSH agents (forwarded or local, e.g. ssh-tpm-agent; newest first) and print an `export SSH_AUTH_SOCK=...` line; use as eval \"$(ssh-agent-pick)\""
