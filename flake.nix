@@ -373,7 +373,10 @@
               })
             ];
           };
-          legacyPackages.llm = inputs.llm-agents.packages.${system};
+          # orca: see pkgs/orca (darwin launcher fix).
+          legacyPackages.llm =
+            inputs.llm-agents.packages.${system}
+            // lib.optionalAttrs (self.packages.${system} ? orca) { inherit (self.packages.${system}) orca; };
           checks =
             let
               # Check NixOS configurations can be evaluated (without building)
