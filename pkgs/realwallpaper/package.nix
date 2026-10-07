@@ -1,7 +1,8 @@
 # Copied from stockholm krebs/5pkgs/simple/realwallpaper (cc283503).
+# nomads-cloud and grib2json are its stockholm dependencies, used only here.
 { pkgs, callPackage }:
 let
-  nomads-cloud = callPackage ../nomads-cloud/package.nix { };
+  nomads-cloud = callPackage ./nomads-cloud.nix { };
 in
 pkgs.writers.writeDashBin "generate-wallpaper" ''
   set -euf

@@ -9,7 +9,7 @@
   imagemagick,
 }:
 let
-  grib2json = callPackage ../grib2json/package.nix { };
+  grib2json = callPackage ./grib2json.nix { };
 in
 writers.writeDashBin "nomads-cloud" ''
   prefix=$(mktemp -d)
