@@ -26,6 +26,7 @@
     self.packages.${pkgs.system}.s
 
     self.packages.${pkgs.system}.secretive
+    pkgs.omp
 
     # zsh dependencies
     pkgs.fzf
