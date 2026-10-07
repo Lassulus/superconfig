@@ -178,7 +178,6 @@ in
     iftop
     tcpdump
     mosh
-    eternal-terminal
     self.packages.${pkgs.system}.sshify
 
     #stuff for dl
