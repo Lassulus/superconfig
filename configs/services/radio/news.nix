@@ -1,9 +1,33 @@
 {
   self,
+  config,
   pkgs,
   ...
 }:
 let
+  news = "/home/radio-news/news";
+
+  # GET / lists the news, POST / adds a JSON object { from, to, text, priority }
+  newsCgi = pkgs.writers.writeDash "radio-news-cgi" ''
+    case "$REQUEST_METHOD $DOCUMENT_URI" in
+      "GET /")
+        printf 'Content-Type: application/json\r\n\r\n'
+        cat ${news} 2>/dev/null | ${pkgs.jq}/bin/jq -sc .
+        ;;
+      "POST /")
+        if entries=$(${pkgs.jq}/bin/jq -c '{ from, to, text, priority: (.priority // 0) }'); then
+          printf '%s\n' "$entries" >> ${news}
+          printf 'Status: 200 OK\r\n\r\n'
+        else
+          printf 'Status: 400 Bad Request\r\n\r\n'
+        fi
+        ;;
+      *)
+        printf 'Status: 404 Not Found\r\n\r\n'
+        ;;
+    esac
+  '';
+
   send_to_radio = pkgs.writers.writeDashBin "send_to_radio" ''
     ${pkgs.vorbis-tools}/bin/oggenc - |
       ${self.packages.${pkgs.stdenv.hostPlatform.system}.cyberlocker-tools}/bin/cput news.ogg
@@ -64,45 +88,30 @@ in
   };
 
   services.nginx.virtualHosts."radio-news.r" = {
-    locations."/" = {
-      proxyPass = "http://localhost:7999";
-      proxyWebsockets = true;
-      extraConfig = ''
-        add_header 'Access-Control-Allow-Origin' '*';
-        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
-      '';
-    };
+    locations."/".extraConfig = ''
+      add_header 'Access-Control-Allow-Origin' '*';
+      add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+      include ${config.services.nginx.package}/conf/fastcgi_params;
+      fastcgi_param SCRIPT_FILENAME ${newsCgi};
+      fastcgi_pass unix:${config.services.fcgiwrap.instances.radio-news.socket.address};
+    '';
   };
   imports = [
     ./tts.nix
   ];
-  krebs.htgen.news = {
-    port = 7999;
-    user = {
-      name = "radio-news";
-    };
-    script = ". ${pkgs.writers.writeDash "htgen-news" ''
-      set -xefu
-      case "''${Method:-GET} $Request_URI" in
-        "GET /")
-          printf 'HTTP/1.1 200 OK\r\n'
-          printf 'Connection: close\r\n'
-          printf '\r\n'
-          cat "$HOME"/news | jq -sc .
-          exit
-        ;;
-        "POST /")
-          payload=$(head -c "$req_content_length")
-          printf '%s' "$payload" | jq 'has("from") and has("to") and has("text")' >&2
-          printf '%s' "$payload" | jq -c '{ from: .from, to: .to, text: .text, priority: (.priority // 0)}' >> "$HOME"/news
-          printf 'HTTP/1.1 200 OK\r\n'
-          printf 'Connection: close\r\n'
-          printf '\r\n'
-          exit
-        ;;
-      esac
-    ''}";
+  services.fcgiwrap.instances.radio-news = {
+    process.user = "radio-news";
+    process.group = "radio-news";
+    socket.user = config.services.nginx.user;
+    socket.group = config.services.nginx.group;
   };
+  users.users.radio-news = {
+    isSystemUser = true;
+    group = "radio-news";
+    home = "/home/radio-news";
+    createHome = true;
+  };
+  users.groups.radio-news = { };
 
   # debug
   environment.systemPackages = [

@@ -1,5 +1,6 @@
 {
   self,
+  config,
   pkgs,
   lib,
   ...
@@ -8,26 +9,7 @@
 let
   name = "radio";
 
-  stockholmPkgs = self.inputs.stockholm.packages.${pkgs.stdenv.hostPlatform.system};
-
   music_dir = "/var/music";
-
-  # dash 0.5.13 has a regression where `read` builtin discards input when stdin is a socket
-  # This breaks htgen which uses tcpserver. Pin htgen's dash to 0.5.12 until upstream fixes it.
-  # See: https://git.kernel.org/pub/scm/utils/dash/dash.git/commit/?id=1d072e9c3292281a7eee54c41fec117ff22723e5
-  dash-0_5_12 = pkgs.dash.overrideAttrs (_old: rec {
-    version = "0.5.12";
-    src = pkgs.fetchurl {
-      url = "http://gondor.apana.org.au/~herbert/dash/files/dash-${version}.tar.gz";
-      hash = "sha256-akdKxG6LCzKRbExg32lMggWNMpfYs4W3RQgDDKSo8oo=";
-    };
-  });
-
-  htgen-fixed = stockholmPkgs.htgen.override {
-    pkgs = pkgs // {
-      dash = dash-0_5_12;
-    };
-  };
 
   skip_track = pkgs.writers.writeBashBin "skip_track" ''
     set -eu
@@ -75,6 +57,17 @@ let
     echo "$file": "$link"
   '';
 
+  # nginx location running a track script through fcgiwrap
+  trackAction = script: ''
+    limit_except POST { deny all; }
+    include ${config.services.nginx.package}/conf/fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME ${pkgs.writers.writeDash "${script.name}-cgi" ''
+      printf 'Content-Type: text/plain; charset=UTF-8\r\n\r\n'
+      ${script}/bin/${script.name}
+    ''};
+    fastcgi_pass unix:${config.services.fcgiwrap.instances.radio.socket.address};
+  '';
+
 in
 {
   imports = [
@@ -85,6 +78,7 @@ in
   users.users = {
     "${name}" = rec {
       inherit name;
+      isSystemUser = true;
       createHome = true;
       group = name;
       description = "radio manager";
@@ -194,37 +188,15 @@ in
   };
 
   networking.firewall.interfaces.retiolum.allowedTCPPorts = [
-    8001
     8002
   ];
 
-  krebs.htgen.radio = {
-    package = htgen-fixed;
-    port = 8001;
-    user = {
-      name = "radio";
-    };
-    scriptFile = pkgs.writers.writeDash "radio" ''
-      set -x
-      case "''${Method:-} ''${Request_URI:-}" in
-        "POST /skip")
-          printf 'HTTP/1.1 200 OK\r\n'
-          printf 'Connection: close\r\n'
-          printf '\r\n'
-          msg=$(${skip_track}/bin/skip_track)
-          echo "$msg"
-          exit
-        ;;
-        "POST /good")
-          printf 'HTTP/1.1 200 OK\r\n'
-          printf 'Connection: close\r\n'
-          printf '\r\n'
-          msg=$(${good_track}/bin/good_track)
-          echo "$msg"
-          exit
-        ;;
-      esac
-    '';
+  # POST /skip and /good, run as radio by fcgiwrap
+  services.fcgiwrap.instances.radio = {
+    process.user = name;
+    process.group = name;
+    socket.user = config.services.nginx.user;
+    socket.group = config.services.nginx.group;
   };
 
   networking.firewall.allowedTCPPorts = [
@@ -270,12 +242,8 @@ in
       locations."= /current".extraConfig = ''
         proxy_pass http://localhost:8002;
       '';
-      locations."= /skip".extraConfig = ''
-        proxy_pass http://localhost:8001;
-      '';
-      locations."= /good".extraConfig = ''
-        proxy_pass http://localhost:8001;
-      '';
+      locations."= /skip".extraConfig = trackAction skip_track;
+      locations."= /good".extraConfig = trackAction good_track;
       locations."= /radio.sh".alias = pkgs.writeScript "radio.sh" ''
         #!/bin/sh
         trap 'exit 0' EXIT

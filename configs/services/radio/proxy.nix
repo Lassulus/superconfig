@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+_: {
   services.nginx.virtualHosts."radio.lassul.us" = {
     enableACME = true;
     addSSL = true;
@@ -34,13 +33,18 @@
       '';
     };
   };
-  krebs.htgen.radio-redirect = {
-    port = 8000;
-    scriptFile = pkgs.writers.writeDash "redir" ''
-      printf 'HTTP/1.1 301 Moved Permanently\r\n'
-      printf "Location: http://radio.lassul.us''${Request_URI}\r\n"
-      printf '\r\n'
-    '';
+  services.nginx.virtualHosts.radio-redirect = {
+    listen = [
+      {
+        addr = "0.0.0.0";
+        port = 8000;
+      }
+      {
+        addr = "[::]";
+        port = 8000;
+      }
+    ];
+    locations."/".return = "301 http://radio.lassul.us$request_uri";
   };
   networking.firewall.allowedTCPPorts = [ 8000 ];
 }
