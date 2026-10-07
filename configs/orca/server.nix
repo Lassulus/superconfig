@@ -34,6 +34,8 @@ in
     packages = [
       llm.orca
       pkgs.omp
+      # GitHub issues/PRs in the work item lists.
+      pkgs.gh
     ];
   };
 

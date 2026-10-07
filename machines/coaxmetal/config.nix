@@ -19,7 +19,8 @@
     ../../configs/sigexec/executor.nix
     ../../configs/rad.nix
     ../../configs/herdr.nix
-    ../../configs/orca-server.nix
+    ../../configs/orca/ide.nix
+    ../../configs/orca/server.nix
     ./strom.nix
     ./hermes.nix
   ];
