@@ -80,7 +80,7 @@
     ../../configs/realwallpaper.nix
 
     # paste + cyberlocker
-    ../../configs/paste.nix
+    ../../configs/paste
 
     # opencrow matrix bot
     ../../configs/opencrow.nix
