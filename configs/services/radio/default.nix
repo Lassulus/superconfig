@@ -186,6 +186,8 @@ in
       </mount>
     '';
   };
+  # the 2.5 beta has segfaulted before; the module sets no Restart=
+  systemd.services.icecast.serviceConfig.Restart = "on-failure";
 
   networking.firewall.interfaces.retiolum.allowedTCPPorts = [
     8002
