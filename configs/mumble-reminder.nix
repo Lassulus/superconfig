@@ -40,7 +40,7 @@ let
     Buschochsen
     Kurzschwanzaffen
     Vicuñas
-    Goldwandsänger
+    Goldwaldsänger
     Nachtechsen
     Halbmond-Lanzenotter
   '';
