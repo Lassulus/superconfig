@@ -39,7 +39,7 @@
               created=$(herdr workspace create --cwd "$PWD" --label "$(basename "$PWD")" "$focus")
             fi
             pane=$(printf '%s' "$created" | jq -er .result.root_pane.pane_id)
-            herdr pane run "$pane" "s llm.omp$(printf ' %q' "$@")" >/dev/null
+            herdr pane run "$pane" "${pkgs.omp}/bin/omp$(printf ' %q' "$@")" >/dev/null
             echo "$pane"
           '';
         }).overrideAttrs
