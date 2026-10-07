@@ -1,6 +1,5 @@
 # Copied from stockholm krebs/3modules/realwallpaper.nix (cc283503);
-# realwallpaper now comes from stockholm's packages output instead of its
-# overlay.
+# realwallpaper itself is pkgs/realwallpaper.
 {
   config,
   lib,
@@ -62,7 +61,7 @@ let
         Type = "simple";
         Restart = "on-failure";
         ExecStart = "${
-          self.inputs.stockholm.packages.${pkgs.stdenv.hostPlatform.system}.realwallpaper
+          self.packages.${pkgs.stdenv.hostPlatform.system}.realwallpaper
         }/bin/generate-wallpaper";
         User = "realwallpaper";
       };
