@@ -98,19 +98,20 @@
             }
 
             # follow <unit>: stream its log until it finishes, fail if it did.
+            # tail can lag far behind the log when the reader (nom) is slow, so
+            # it must not be killed on a timer: --pid makes it read the log to
+            # the end once the waiter (unit finished) is gone, then exit, so
+            # no line is cut off.
             follow() {
               ssh "''${ssh_opts[@]}" "$target" bash -s -- "$1" "$state" <<'EOF'
             unit=$1 log=$2/$1.log
-            tail -n +1 -F "$log" 2>/dev/null &
-            tailpid=$!
             while case $(systemctl show -p ActiveState -p SubState "$unit") in
               *ActiveState=activating* | *SubState=running*) true ;;
               *) false ;;
               esac; do
               sleep 1
-            done
-            sleep 1
-            kill "$tailpid"
+            done &
+            tail -n +1 -F --pid=$! "$log" 2>/dev/null
             [ "$(systemctl show -p Result --value "$unit")" = success ] && exit 0
             echo "deploy: $unit failed (exit status $(systemctl show -p ExecMainStatus --value "$unit")), log: $log" >&2
             exit 1
