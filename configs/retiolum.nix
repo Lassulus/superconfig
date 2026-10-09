@@ -60,6 +60,12 @@ in
     };
   };
 
+  # A changed tinc unit is restarted in switch-to-configuration's start phase
+  # instead of stopped up front: otherwise retiolum stays down for the whole
+  # stop phase (minutes when a unit like ipfs waits out its stop timeout) and
+  # takes the deploying ssh session over <machine>.r with it.
+  systemd.services."tinc.retiolum".stopIfChanged = false;
+
   # Copy keys into the tinc config directory before tinc starts.
   # Running before nixpkgs' preStart ensures key generation is skipped.
   systemd.services."tinc.retiolum".preStart = lib.mkBefore ''
