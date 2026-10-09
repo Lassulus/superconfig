@@ -7,12 +7,13 @@
       ...
     }:
     {
-      # deploy [--flake PATH] <machine> [[user@]host]   (host defaults to <machine>.r)
+      # deploy [--flake PATH] [--yes] <machine> [[user@]host]   (host defaults to <machine>.r)
       #
       # Generates vars, copies the flake source to /var/lib/deploy/incoming
       # on the target, builds it there in the systemd unit deploy-build
       # (progress via nom), shows the source diff against the running system
-      # (/var/lib/deploy/src) and the closure diff, asks, then uploads
+      # (/var/lib/deploy/src) and the closure diff, asks (--yes: does not
+      # ask and prints the diffs without a pager), then uploads
       # secrets and switches in the unit deploy-switch. Both units survive
       # the ssh connection dying; rerunning deploy attaches to a running one.
       packages.deploy =
@@ -28,17 +29,22 @@
           ];
           text = ''
             usage() {
-              echo "usage: deploy [--flake PATH] <machine> [[user@]host]  (host defaults to <machine>.r)" >&2
+              echo "usage: deploy [--flake PATH] [--yes] <machine> [[user@]host]  (host defaults to <machine>.r)" >&2
               exit 1
             }
 
             flake=.
+            yes=0
             while [ $# -gt 0 ]; do
               case $1 in
               --flake)
                 [ $# -ge 2 ] || usage
                 flake=$2
                 shift 2
+                ;;
+              --yes | -y)
+                yes=1
+                shift
                 ;;
               -*) usage ;;
               *) break ;;
@@ -70,7 +76,7 @@
               printf '\n\033[1m== %s\033[0m\n' "$*" >&2
             }
             page() {
-              if [ -t 1 ]; then ''${PAGER:-less -RFX}; else cat; fi
+              if [ -t 1 ] && [ "$yes" = 0 ]; then ''${PAGER:-less -RFX}; else cat; fi
             }
 
             # True while the unit's ExecStartPre or ExecStart is running.
@@ -213,10 +219,12 @@
               remote "$state/result-1/bin/nvd diff /run/current-system $system"
             fi
 
-            read -r -p "switch $target to $system? [y/N] " answer </dev/tty
-            if [[ $answer != [yY]* ]]; then
-              echo "aborted, $target is unchanged" >&2
-              exit 1
+            if [ "$yes" = 0 ]; then
+              read -r -p "switch $target to $system? [y/N] " answer </dev/tty
+              if [[ $answer != [yY]* ]]; then
+                echo "aborted, $target is unchanged" >&2
+                exit 1
+              fi
             fi
 
             step "uploading secrets"

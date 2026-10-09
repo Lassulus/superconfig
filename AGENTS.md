@@ -39,6 +39,12 @@ nix develop
 # decrypts each secret separately and fails on the Secure Enclave prompt.
 s deploy --flake . <MACHINE_NAME>
 
+# Agents: deploy only when the user asked for it, and then always with
+# --yes. Without it the run stops at the [y/N] switch prompt (and the source
+# diff can wait in a pager) and looks hung. --yes skips both; the diffs are
+# still printed, so read them in the output afterwards.
+s deploy --flake . --yes <MACHINE_NAME>
+
 # Format code
 nix fmt
 
@@ -91,7 +97,7 @@ Secrets are managed via password-store and uploaded to `/run/secrets` on deploym
 2. Add `config.nix`, `physical.nix`, and optionally `disk.nix`
 3. Generate facts using clan-cli
 4. Add to inventory in `flake.nix`
-5. Deploy using `s deploy --flake . <name>`
+5. Deploy using `s deploy --flake . <name>` (agents add `--yes`)
 
 ## Pre-Commit
 

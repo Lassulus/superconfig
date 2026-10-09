@@ -4,5 +4,6 @@ about "Build a machine on its target host in a systemd unit, review source and c
 flag "--flake" help="Path to the flake (default: .)" {
   arg "<path>"
 }
+flag "-y --yes" help="Switch without asking; diffs are printed without a pager"
 arg "<machine>" help="Machine configuration to deploy"
 arg "[target_host]" help="SSH destination to deploy to, [user@]host (default: <machine>.r, user defaults to root)"
