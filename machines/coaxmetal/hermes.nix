@@ -9,18 +9,18 @@ let
   # Pinned Piper voice for the bot's spoken replies. Single-speaker on purpose:
   # the radio's libritts-high (configs/services/radio/tts.nix) is multi-speaker
   # and needs an -s speaker id per call.
-  piperVoice = pkgs.runCommand "piper-voice-en_US-lessac-medium" { } ''
+  piperVoice = pkgs.runCommand "piper-voice-en_US-amy-medium" { } ''
     mkdir -p $out
     ln -s ${
       pkgs.fetchurl {
-        url = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx?download=true";
-        hash = "sha256-Xv4J5pkCGHgnr2RuGm6dJp3udp+Yd9F7FrG0buqvAZ8=";
+        url = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/medium/en_US-amy-medium.onnx?download=true";
+        hash = "sha256-s6bke1e4x/vmoM4lGBYaUPWanN2KUINcAssCvdYgbBg=";
       }
     } $out/model.onnx
     ln -s ${
       pkgs.fetchurl {
-        url = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json?download=true";
-        hash = "sha256-7+GcQXvtBV8taZCCSMa6ZQ+hNbyGiw5quz2hgdq2kKA=";
+        url = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/amy/medium/en_US-amy-medium.onnx.json?download=true";
+        hash = "sha256-laI+tNQpCdON9zu5rH9F9Zfb/N4tG/lSb96vVGaXfXc=";
       }
     } $out/model.onnx.json
   '';
