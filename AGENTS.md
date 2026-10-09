@@ -32,8 +32,12 @@ The repository manages multiple overlay networks:
 # Enter development shell
 nix develop
 
-# Deploy to a specific machine
-clan machines update <MACHINE_NAME>
+# Deploy a NixOS machine (tools/deploy): one Secure Enclave unlock for all
+# secrets, builds on the target, shows source/closure diff, asks before
+# switching. `s` runs apps from ~/src/superconfig, so pass --flake to deploy
+# a different checkout/worktree. NEVER use `clan machines update`: it
+# decrypts each secret separately and fails on the Secure Enclave prompt.
+s deploy --flake . <MACHINE_NAME>
 
 # Format code
 nix fmt
@@ -80,7 +84,7 @@ Secrets are managed via password-store and uploaded to `/run/secrets` on deploym
 2. Add `config.nix`, `physical.nix`, and optionally `disk.nix`
 3. Generate facts using clan-cli
 4. Add to inventory in `flake.nix`
-5. Deploy using `clan machines update <name>`
+5. Deploy using `s deploy --flake . <name>`
 
 ## Pre-Commit
 
