@@ -21,6 +21,7 @@
     ../../configs/herdr.nix
     ../../configs/orca/ide.nix
     ../../configs/orca/server.nix
+    ../../configs/crit.nix
     ./strom.nix
     ./hermes.nix
   ];
