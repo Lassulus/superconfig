@@ -109,6 +109,9 @@ in
       # Drive the herd from a voice note: "read me what the agent on herdr is
       # stuck on" -> herdr agent list / read / prompt, as lass.
       herdr
+      # CalDAV (calendar skill below) is plain HTTP; curl is not otherwise on
+      # the gateway PATH.
+      pkgs.curl
     ];
 
     settings.model = {
@@ -263,6 +266,109 @@ in
       Never close panes or kill agents on your own.
     '';
 
+    # The one shared calendar (configs/radicale.nix): lass's own events, the
+    # book.lassul.us requests and bookings, and anything Hermes adds. Hermes
+    # authenticates as its own radicale user, which may only touch this
+    # collection. Bookings are mirrored from book's database, so they are
+    # managed through book's admin links rather than edited in CalDAV.
+    hermesHomeFiles."skills/calendar/SKILL.md" = ''
+      ---
+      name: calendar
+      description: Read and manage lass's calendar (CalDAV) and approve, decline or cancel book.lassul.us booking requests.
+      version: 1.0.0
+      license: MIT
+      platforms: [linux]
+      required_environment_variables:
+        - name: CALDAV_PASSWORD
+          prompt: Radicale password of the hermes user
+          help: Provisioned by clan vars (radicale-hermes) on coaxmetal.
+          required_for: any calendar access
+      prerequisites:
+        commands: [curl]
+      metadata:
+        hermes:
+          tags: [calendar, caldav, schedule, booking, appointments]
+          requires_toolsets: [terminal]
+      ---
+
+      # calendar
+
+      lass has exactly one calendar, at `$CALDAV_CALENDAR_URL`
+      (CalDAV on radicale). It holds his own events, booking requests and
+      bookings from https://book.lassul.us, and events you add. The booking
+      page treats every event in it as busy time.
+
+      Use it when the user asks what is on his schedule, whether he is free,
+      to add, move or remove an appointment, or about booking requests.
+
+      Authenticate every request with
+      `curl -sS -u "$CALDAV_USER:$CALDAV_PASSWORD"`. Never print, echo or
+      repeat the password. Times are Europe/Berlin unless the user says
+      otherwise; write DTSTART/DTEND with `;TZID=Europe/Berlin` or in UTC (`Z`).
+
+      ## Reading
+
+      Events overlapping a range (UTC, `YYYYMMDDTHHMMSSZ`):
+
+      ```sh
+      curl -sS -u "$CALDAV_USER:$CALDAV_PASSWORD" -X REPORT -H 'Depth: 1' \
+        -H 'Content-Type: application/xml; charset=utf-8' "$CALDAV_CALENDAR_URL" --data '
+      <C:calendar-query xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
+        <D:prop><D:getetag/><C:calendar-data/></D:prop>
+        <C:filter><C:comp-filter name="VCALENDAR"><C:comp-filter name="VEVENT">
+          <C:time-range start="20261010T000000Z" end="20261017T000000Z"/>
+        </C:comp-filter></C:comp-filter></C:filter>
+      </C:calendar-query>'
+      ```
+
+      Each `<D:response>` has the event's `href` (its URL path), `getetag` and
+      the iCalendar text. Recurring events (RRULE) come back once with their
+      rule; expand them yourself when answering "what is on Tuesday".
+
+      ## Adding, changing, removing your own events
+
+      - Add: pick a UID (`uuidgen`-style, suffix `@hermes`), then
+        `PUT "$CALDAV_CALENDAR_URL<uid>.ics"` with
+        `-H 'Content-Type: text/calendar; charset=utf-8' -H 'If-None-Match: *'`
+        and a body of one `VCALENDAR` (VERSION:2.0, PRODID) holding one
+        `VEVENT` with UID, DTSTAMP, DTSTART, DTEND (or DURATION) and SUMMARY.
+        Add a `VALARM` (ACTION:DISPLAY, TRIGGER:-PT15M) when the user wants a
+        reminder.
+      - Change: GET the event, edit it, PUT it back to the same href with
+        `-H 'If-Match: <etag>'` so you never overwrite a concurrent edit.
+      - Remove: `DELETE` the href with `-H 'If-Match: <etag>'`.
+      - Success is HTTP 201/204. 412 means it changed meanwhile: re-read and
+        retry. Confirm by reading the range again.
+
+      Before adding, check the range for overlaps and tell the user about
+      any. Do not change or delete events the user did not ask about.
+
+      ## Booking requests and bookings (book.lassul.us)
+
+      Events whose UID ends in `@book.lassul.us` belong to the booking page.
+      Never PUT or DELETE them: the booking page owns them, rewrites them on
+      every change, and only it mails the guest.
+
+      - Pending request: `STATUS:TENTATIVE`, SUMMARY starts with `? `.
+      - Booked: `STATUS:CONFIRMED`.
+      - The DESCRIPTION holds the guest (`Name <email>`), their note, and as
+        its last line the admin link `https://book.lassul.us/a/<token>`.
+
+      Act on a booking only when the user decided to, by POSTing to its
+      admin link (an optional `message` is mailed to the guest):
+
+      ```sh
+      curl -sS -o /dev/null -w '%{http_code}\n' -X POST \
+        --data-urlencode 'message=Looking forward to it' \
+        'https://book.lassul.us/a/<token>/approve'   # or /decline, /cancel
+      ```
+
+      A 303 means it worked: approve turns the event CONFIRMED, decline and
+      cancel remove it from the calendar. `GET` on the admin link shows the
+      request's current state. Treat admin links as secrets: never paste one
+      into a chat unless the user asks for it.
+    '';
+
     # Non-secret connection + SECURITY gate. Invites are auto-accepted and that
     # cannot be disabled, so the agent may join any room it's invited to. Joining
     # is harmless on its own — what matters is who can *trigger* the agent, which
@@ -273,6 +379,12 @@ in
       MATRIX_HOMESERVER = "https://matrix.lassul.us";
       MATRIX_USER_ID = "@hermes:lassul.us";
       MATRIX_ALLOWED_USERS = "@lassulus:lassul.us";
+
+      # The shared calendar (calendar skill above); CALDAV_PASSWORD comes from
+      # hermes-env.
+      CALDAV_USER = "hermes";
+      CALDAV_CALENDAR_URL = "https://cal.lassul.us/lass/calendar/";
+
       # Element makes DMs end-to-end encrypted by default, so the bot must do
       # E2EE or it can't read messages. The `matrix` dep group already bundles
       # mautrix[encryption] (python-olm); "optional" initializes E2EE when those
@@ -438,12 +550,22 @@ in
     '';
   };
 
+  # Hermes's radicale login (configs/radicale.nix). Shared with neoprism, where
+  # radicale runs; a shared generator has to be declared identically on every
+  # machine that uses it, hence the common definition.
+  clan.core.vars.generators.radicale-hermes =
+    import ../../configs/radicale-user-generator.nix pkgs "hermes"
+    // {
+      share = true;
+    };
+
   # Assemble the .env Hermes reads (mirrors the opencrow-env pattern).
   clan.core.vars.generators.hermes-env = {
     dependencies = [
       "hermes-matrix"
       "hermes-llama"
       "hermes-api"
+      "radicale-hermes"
     ];
     files."hermes.env" = { };
     runtimeInputs = [ pkgs.coreutils ];
@@ -452,6 +574,7 @@ in
       MATRIX_ACCESS_TOKEN=$(cat "$in"/hermes-matrix/matrix-access-token)
       LLAMA_API_TOKEN=$(cat "$in"/hermes-llama/llama-api-token)
       API_SERVER_KEY=$(cat "$in"/hermes-api/api_key)
+      CALDAV_PASSWORD=$(cat "$in"/radicale-hermes/password)
       EOF
     '';
   };
