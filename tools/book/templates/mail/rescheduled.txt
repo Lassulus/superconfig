@@ -1,0 +1,12 @@
+Hi {{ b.name }},
+
+the time of this meeting changed:
+
+  {{ b.title }} with {{ cfg.owner }}
+  {{ when }}
+  (was: {{ before }})
+
+The updated invitation is attached. To cancel:
+{{ cfg.base_url }}/r/{{ b.guest_token }}
+
+{{ cfg.owner }}

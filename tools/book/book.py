@@ -10,6 +10,13 @@ Free/busy comes from every calendar in the CalDAV user's home collection plus
 the held requests themselves. If the calendar cannot be read, no slots are
 offered: an unreachable calendar must never look like an empty one.
 
+The calendar is also a control surface: every minute the events of bookings
+that have not started yet are read back. Deleting (or cancelling) one cancels
+an approved booking or declines a request, moving one reschedules it, and
+confirming a tentative request approves it -- each with the same mail to the
+guest as the admin page would send. A calendar that cannot be read changes
+nothing.
+
 The only mail a stranger can trigger goes to the owner. Guests receive mail
 only after the owner acted on their request, so the form cannot be abused to
 send mail to arbitrary addresses.
@@ -189,6 +196,18 @@ def overlaps(a0: datetime, a1: datetime, intervals: list[tuple[datetime, datetim
     return any(a0 < b1 and b0 < a1 for b0, b1 in intervals)
 
 
+def booking_event(data: bytes, uid: str) -> icalendar.Event:
+    """The booking's VEVENT (not an overridden occurrence) from its calendar object.
+
+    ValueError when the object cannot be read as one: that is never a deletion.
+    """
+    cal = icalendar.Calendar.from_ical(data)
+    for ev in cal.walk("VEVENT"):
+        if str(ev.get("UID", "")) == uid and "RECURRENCE-ID" not in ev:
+            return ev
+    raise ValueError(f"no VEVENT with UID {uid}")
+
+
 # --- CalDAV ------------------------------------------------------------------
 
 
@@ -197,7 +216,7 @@ class CalDAVError(Exception):
 
 
 class CalDAV:
-    """Just enough CalDAV for one user's home: list, query, put, delete."""
+    """Just enough CalDAV for one user's home: list, query, get, put, delete."""
 
     def __init__(self, cfg: Config):
         self.base = cfg.caldav_url
@@ -332,6 +351,11 @@ class CalDAV:
     def delete(self, uid: str) -> None:
         self._request("DELETE", f"{self.calendar}{quote(uid)}.ics", accept=(404,))
 
+    def get(self, uid: str) -> bytes | None:
+        """The booking's calendar object, None once it is gone from the calendar."""
+        status, data = self._request("GET", f"{self.calendar}{quote(uid)}.ics", accept=(404,))
+        return None if status == 404 else data
+
 
 # --- storage -----------------------------------------------------------------
 
@@ -411,6 +435,24 @@ class Store:
             return self.db.execute(
                 "SELECT * FROM bookings WHERE status = 'pending' AND start <= ?", (epoch(now),)
             ).fetchall()
+
+    def upcoming(self, now: datetime) -> list[sqlite3.Row]:
+        """Active bookings that have not started yet: the ones the calendar can still change.
+
+        Started ones are left alone, so tidying up a running or past meeting in
+        the calendar never mails the guest.
+        """
+        with self.lock:
+            return self.db.execute(
+                "SELECT * FROM bookings WHERE status IN (?, ?) AND start > ?", (*ACTIVE, epoch(now))
+            ).fetchall()
+
+    def reschedule(self, booking_id: int, start: datetime, end: datetime) -> None:
+        with self.lock:
+            self.db.execute(
+                "UPDATE bookings SET start = ?, end = ?, sequence = sequence + 1, updated = ? WHERE id = ?",
+                (epoch(start), epoch(end), epoch(now_utc()), booking_id),
+            )
 
 
 # --- the application ---------------------------------------------------------
@@ -655,6 +697,65 @@ class App:
         for b in self.store.overdue(now_utc()):
             log.info("expiring unanswered request %s", b["uid"])
             self.transition(b, "expired")
+
+    def reschedule(self, b: sqlite3.Row, start: datetime, end: datetime) -> sqlite3.Row:
+        """Move a booking, mirror it and send an approved guest the updated invitation."""
+        cfg = self.cfg
+        with self.store.lock:
+            current = self.store.get(b["id"])
+            if current["status"] not in ACTIVE:
+                return current
+            before = self.when(current, ZoneInfo(current["guest_tz"]))
+            self.store.reschedule(b["id"], start, end)
+            b = self.store.get(b["id"])
+        self.mirror(b)
+        if b["status"] == "approved":
+            guest_when = self.when(b, ZoneInfo(b["guest_tz"]))
+            self.send(
+                b["email"],
+                f"Rescheduled: {b['title']} with {cfg.owner}, {guest_when}",
+                self.render_text("mail/rescheduled.txt", b=b, when=guest_when, before=before),
+                reply_to=cfg.notify,
+                ics=self.ics(b, owner_copy=False, method="REQUEST"),
+                method="REQUEST",
+            )
+        return b
+
+    def reconcile(self) -> None:
+        """Apply what the owner changed on booking events in the calendar.
+
+        CalDAVError propagates: an unreadable calendar must never be taken for
+        deleted events.
+        """
+        for b in self.store.upcoming(now_utc()):
+            data = self.cal.get(b["uid"])
+            if data is None:
+                ev, status = None, "CANCELLED"
+            else:
+                try:
+                    ev = booking_event(data, b["uid"])
+                except ValueError:
+                    log.exception("booking %s is unreadable in the calendar; left as is", b["uid"])
+                    continue
+                status = str(ev.get("STATUS", "")).upper()
+            if status == "CANCELLED":
+                log.info("booking %s removed from the calendar", b["uid"])
+                self.transition(b, "cancelled" if b["status"] == "approved" else "declined")
+                continue
+            try:
+                start, end = to_utc(ev.start, self.cfg.tz), to_utc(ev.end, self.cfg.tz)
+            except Exception:
+                log.exception("booking %s has no usable start/end in the calendar", b["uid"])
+                continue
+            if end <= start:
+                log.error("booking %s ends before it starts in the calendar; ignored", b["uid"])
+                continue
+            if (epoch(start), epoch(end)) != (b["start"], b["end"]):
+                log.info("booking %s moved in the calendar", b["uid"])
+                b = self.reschedule(b, start, end)
+            if b["status"] == "pending" and status == "CONFIRMED":
+                log.info("request %s confirmed in the calendar", b["uid"])
+                self.transition(b, "approved")
 
     def rate_limited(self, ip: str, limit: int = 5, window: float = 3600) -> bool:
         with self.store.lock:
@@ -977,7 +1078,13 @@ def main() -> None:
                 app.sweep()
             except Exception:
                 log.exception("sweep failed")
-            time.sleep(300)
+            try:
+                app.reconcile()
+            except CalDAVError as e:
+                log.error("cannot read bookings back from the calendar: %s", e)
+            except Exception:
+                log.exception("reconcile failed")
+            time.sleep(60)
 
     threading.Thread(target=sweeper, daemon=True).start()
     Handler.app = app
