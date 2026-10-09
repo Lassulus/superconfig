@@ -245,6 +245,12 @@ in
     };
   };
 
+  # kubo takes 70s+ to shut down gracefully (longer the longer it ran). A
+  # changed ipfs unit is restarted in switch-to-configuration's start phase
+  # instead of stopped up front, so the other changed units don't stay down
+  # for the whole stop phase waiting on it.
+  systemd.services.ipfs.stopIfChanged = false;
+
   boot.kernel.sysctl."fs.inotify.max_user_watches" = 1048576;
 
   systemd.services.ipfs-pin-watcher = {
