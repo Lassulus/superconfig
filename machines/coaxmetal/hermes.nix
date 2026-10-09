@@ -193,11 +193,10 @@ in
       };
     };
 
-    # Speak every gateway reply, not just ones requested with /voice tts. The
-    # toggle also takes a lease on the engine, so the first spoken reply after
-    # startup does not pay model load as silence. Turn it off per chat with
-    # /voice off.
-    settings.voice.auto_tts = true;
+    # Text replies only: live voice moved to hermes-voice (voice.lassul.us,
+    # hermes-voice.nix). Voice notes still reach the agent through STT, and
+    # `/voice tts` in a chat still turns spoken replies on there.
+    settings.voice.auto_tts = false;
 
     # In rooms Hermes requires an @mention by default; DMs always respond.
     settings.matrix.session_scope = "room";
