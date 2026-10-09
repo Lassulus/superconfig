@@ -19,6 +19,7 @@ in
 {
   imports = [
     self.inputs.nixos-mailserver.nixosModules.default
+    ./hermes-mail-vars.nix
   ];
 
   mailserver = {
@@ -55,6 +56,10 @@ in
       "bot@lassul.us" = {
         hashedPasswordFile =
           config.clan.core.vars.generators.mailserver-bot.files."bot-mail-password-hash".path;
+      };
+      # Hermes agent on coaxmetal; shared password var, see hermes-mail-vars.nix.
+      "hermes@lassul.us" = {
+        hashedPasswordFile = config.clan.core.vars.generators.hermes-mail.files."password-hash".path;
       };
     };
 

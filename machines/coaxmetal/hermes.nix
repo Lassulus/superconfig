@@ -75,6 +75,7 @@ in
 {
   imports = [
     self.inputs.hermes-agent.nixosModules.default
+    ../../configs/hermes-mail-vars.nix
   ];
 
   # Hermes Agent (Nous Research) — autonomous agent run as a native systemd
@@ -208,6 +209,12 @@ in
     # one-liner. Trade-off: verbose also prints full JSON args for every other
     # tool call, so the channel is chattier.
     settings.display.platforms.matrix.tool_progress = "verbose";
+
+    # The EMAIL_* credentials below are for mail-sending skills only. Hermes
+    # turns the email gateway on by itself once all four of EMAIL_ADDRESS,
+    # EMAIL_PASSWORD, EMAIL_IMAP_HOST and EMAIL_SMTP_HOST are set
+    # (gateway/config_env.py); only an explicit `enabled: false` stops that.
+    settings.platforms.email.enabled = false;
 
     # Teach the agent the herd. Without this the `herdr` wrapper is just an
     # unadvertised binary on PATH: nothing in the model's context would make it
@@ -402,9 +409,19 @@ in
       # per-user allowlist here — the bearer token is the whole gate.
       API_SERVER_ENABLED = "true";
       API_SERVER_PORT = "8642";
+
+      # Mailbox hermes@lassul.us on neoprism (configs/mailserver.nix).
+      # EMAIL_PASSWORD comes from the shared hermes-mail var via hermes-env.
+      # 993 is implicit-TLS IMAP, 587 is submission with STARTTLS.
+      EMAIL_ADDRESS = "hermes@lassul.us";
+      EMAIL_IMAP_HOST = "mail.lassul.us";
+      EMAIL_IMAP_PORT = "993";
+      EMAIL_SMTP_HOST = "mail.lassul.us";
+      EMAIL_SMTP_PORT = "587";
     };
 
-    # Secrets (MATRIX_ACCESS_TOKEN + LLAMA_API_TOKEN) come from clan vars below,
+    # Secrets (MATRIX_ACCESS_TOKEN, LLAMA_API_TOKEN, API_SERVER_KEY,
+    # EMAIL_PASSWORD) come from clan vars below,
     # merged into $HERMES_HOME/.env at activation.
     environmentFiles = [
       config.clan.core.vars.generators.hermes-env.files."hermes.env".path
@@ -576,6 +593,7 @@ in
       "hermes-api"
       "radicale-hermes"
       "hermes-anthropic"
+      "hermes-mail"
     ];
     files."hermes.env" = { };
     runtimeInputs = [ pkgs.coreutils ];
@@ -586,6 +604,7 @@ in
       API_SERVER_KEY=$(cat "$in"/hermes-api/api_key)
       CALDAV_PASSWORD=$(cat "$in"/radicale-hermes/password)
       ANTHROPIC_TOKEN=$(cat "$in"/hermes-anthropic/oauth-token)
+      EMAIL_PASSWORD=$(cat "$in"/hermes-mail/password)
       EOF
     '';
   };
