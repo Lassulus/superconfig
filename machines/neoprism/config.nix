@@ -112,8 +112,8 @@
     # pocket-id SSO IdP (id.lassul.us)
     ../../configs/pocket-id.nix
 
-    # covibe co-vibing dashboard (covibe.lassul.us)
-    ../../configs/covibe.nix
+    # covibe co-vibing dashboard (covibe.lassul.us); disabled, not needed now
+    # ../../configs/covibe.nix
 
     # omnigent agent meta-harness (omni.lassul.us)
     ../../configs/omnigent.nix
