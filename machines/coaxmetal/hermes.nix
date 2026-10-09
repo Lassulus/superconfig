@@ -258,8 +258,8 @@ in
     # The one shared calendar (configs/radicale.nix): lass's own events, the
     # book.lassul.us requests and bookings, and anything Hermes adds. Hermes
     # authenticates as its own radicale user, which may only touch this
-    # collection. Bookings are mirrored from book's database, so they are
-    # managed through book's admin links rather than edited in CalDAV.
+    # collection. Booking events are read back by book, so deleting, moving
+    # or confirming them in CalDAV manages the booking (tools/book).
     hermesHomeFiles."skills/calendar/SKILL.md" = ''
       ---
       name: calendar
@@ -334,17 +334,29 @@ in
 
       ## Booking requests and bookings (book.lassul.us)
 
-      Events whose UID ends in `@book.lassul.us` belong to the booking page.
-      Never PUT or DELETE them: the booking page owns them, rewrites them on
-      every change, and only it mails the guest.
+      Events whose UID ends in `@book.lassul.us` come from the booking page.
+      It reads them back every minute (for bookings that have not started
+      yet) and mails the guest about what changed, so editing them is how
+      bookings are managed:
 
       - Pending request: `STATUS:TENTATIVE`, SUMMARY starts with `? `.
       - Booked: `STATUS:CONFIRMED`.
       - The DESCRIPTION holds the guest (`Name <email>`), their note, and as
         its last line the admin link `https://book.lassul.us/a/<token>`.
 
-      Act on a booking only when the user decided to, by POSTing to its
-      admin link (an optional `message` is mailed to the guest):
+      | Calendar edit | Effect, guest mail |
+      | --- | --- |
+      | DELETE a booked event (or set `STATUS:CANCELLED`) | cancelled, guest gets a cancellation |
+      | DELETE a pending request | declined, guest gets a decline |
+      | Change DTSTART/DTEND | rescheduled; a booked guest gets the updated invitation |
+      | Set a pending request to `STATUS:CONFIRMED` | approved, guest gets the invitation |
+
+      Use If-Match as for your own events. The booking page rewrites SUMMARY
+      and DESCRIPTION itself; edits to them are not kept. Act on a booking
+      only when the user decided to.
+
+      To send the guest a personal message with the decision, use the admin
+      link instead (an optional `message` is mailed along):
 
       ```sh
       curl -sS -o /dev/null -w '%{http_code}\n' -X POST \
@@ -352,10 +364,9 @@ in
         'https://book.lassul.us/a/<token>/approve'   # or /decline, /cancel
       ```
 
-      A 303 means it worked: approve turns the event CONFIRMED, decline and
-      cancel remove it from the calendar. `GET` on the admin link shows the
-      request's current state. Treat admin links as secrets: never paste one
-      into a chat unless the user asks for it.
+      A 303 means it worked. `GET` on the admin link shows the request's
+      current state. Treat admin links as secrets: never paste one into a
+      chat unless the user asks for it.
     '';
 
     # Non-secret connection + SECURITY gate. Invites are auto-accepted and that
