@@ -4,7 +4,7 @@
   perSystem =
     { pkgs, ... }:
     {
-      treefmt.projectRootFile = ".git/config";
+      treefmt.projectRootFile = "flake.nix";
       treefmt.programs.shellcheck.enable = true;
 
       treefmt.programs.nixfmt.enable = true;
