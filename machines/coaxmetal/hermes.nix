@@ -386,6 +386,11 @@ in
       MATRIX_HOMESERVER = "https://matrix.lassul.us";
       MATRIX_USER_ID = "@hermes:lassul.us";
       MATRIX_ALLOWED_USERS = "@lassulus:lassul.us";
+      # The DM with lassulus: default target for deliver=matrix (cron jobs, and
+      # sessions without a Matrix origin such as the voice agent on the API
+      # server). Without it cron delivery fails with "no delivery target
+      # resolved for deliver=matrix".
+      MATRIX_HOME_ROOM = "!QSmQTYGdeExThpCqNh:lassul.us";
 
       # The shared calendar (calendar skill above); CALDAV_PASSWORD comes from
       # hermes-env.
