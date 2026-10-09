@@ -412,12 +412,12 @@ in
 
       # Mailbox hermes@lassul.us on neoprism (configs/mailserver.nix).
       # EMAIL_PASSWORD comes from the shared hermes-mail var via hermes-env.
-      # 993 is implicit-TLS IMAP, 587 is submission with STARTTLS.
+      # 993 is implicit-TLS IMAP, 465 is implicit-TLS submission (smtps).
       EMAIL_ADDRESS = "hermes@lassul.us";
       EMAIL_IMAP_HOST = "mail.lassul.us";
       EMAIL_IMAP_PORT = "993";
       EMAIL_SMTP_HOST = "mail.lassul.us";
-      EMAIL_SMTP_PORT = "587";
+      EMAIL_SMTP_PORT = "465";
     };
 
     # Secrets (MATRIX_ACCESS_TOKEN, LLAMA_API_TOKEN, API_SERVER_KEY,
