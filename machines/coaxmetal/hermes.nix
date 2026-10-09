@@ -90,9 +90,13 @@ in
     # which is what `stt.provider = "local"` below runs — that group exists
     # precisely because local STT pulls wheel-only transitive deps
     # (ctranslate2, onnxruntime) that uv2nix has to resolve at build time.
+    # "anthropic" is the SDK the anthropic model provider imports; the venv is
+    # sealed (lazy installs disabled), so without it every turn fails with
+    # "The 'anthropic' package is required for the Anthropic provider".
     extraDependencyGroups = [
       "matrix"
       "voice"
+      "anthropic"
     ];
 
     # Put the Claude Code CLI on the agent's PATH so its bundled "claude-code"
