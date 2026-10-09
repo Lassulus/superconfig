@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#111" />
+    <title>Hermes voice</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Hermes voice</h1>
+        <select id="voice-select" aria-label="Voice"></select>
+        <button id="new" type="button" class="link">New conversation</button>
+      </header>
+      <form id="login" class="login" hidden>
+        <input
+          id="token"
+          type="password"
+          autocomplete="current-password"
+          placeholder="Access token"
+          required
+        />
+        <button type="submit">Sign in</button>
+      </form>
+      <button id="talk" type="button" class="talk">Talk</button>
+      <p id="status" class="status">Idle</p>
+      <p id="cost" class="cost"></p>
+      <section id="approval" class="approval" hidden>
+        <p id="approval-text"></p>
+        <button id="approve" type="button">Approve once</button>
+        <button id="deny" type="button">Deny</button>
+      </section>
+      <ol id="log" class="log"></ol>
+    </main>
+    <audio id="voice" autoplay playsinline></audio>
+    <script src="/app.js"></script>
+  </body>
+</html>

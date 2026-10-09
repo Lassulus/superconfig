@@ -1,0 +1,18 @@
+{
+  "voice": "willow",
+  "idle_seconds": 90,
+  "glossary": [
+    { "term": "nixos-rebuild switch", "spoken": "nix O S rebuild switch" },
+    { "term": "NixOS", "spoken": "nix O S" },
+    "nix",
+    "clan",
+    { "term": "herdr", "spoken": "herder" },
+    "omp",
+    "retiolum",
+    "coaxmetal",
+    "neoprism",
+    "ignavia",
+    "lassulus",
+    "Hermes"
+  ]
+}

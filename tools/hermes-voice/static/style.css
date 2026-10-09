@@ -1,0 +1,183 @@
+:root {
+  color-scheme: dark;
+  --fg: #e8e8e8;
+  --dim: #8a8a8a;
+  --accent: #4fb477;
+  --live: #d9534f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #111;
+  color: var(--fg);
+  font:
+    16px/1.4 system-ui,
+    sans-serif;
+}
+
+main {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: max(1rem, env(safe-area-inset-top)) 1rem 2rem;
+}
+
+header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+h1 {
+  font-size: 1.2rem;
+  margin: 0 0 1rem;
+}
+
+#voice-select {
+  background: #222;
+  color: var(--fg);
+  border: 1px solid #444;
+  border-radius: 0.3rem;
+  font: inherit;
+  padding: 0.2rem;
+}
+
+.link {
+  background: none;
+  border: none;
+  color: var(--dim);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.talk {
+  display: block;
+  width: 9rem;
+  height: 9rem;
+  margin: 1rem auto;
+  border: none;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font:
+    600 1.3rem system-ui,
+    sans-serif;
+  cursor: pointer;
+}
+
+.talk.live {
+  background: var(--live);
+}
+.talk.speaking {
+  box-shadow: 0 0 0 0.6rem rgba(217, 83, 79, 0.35);
+}
+.talk:disabled {
+  opacity: 0.5;
+}
+
+.status,
+.cost {
+  text-align: center;
+  margin: 0.3rem 0;
+}
+.cost {
+  color: var(--dim);
+  font-size: 0.9rem;
+}
+
+.log {
+  list-style: none;
+  padding: 0;
+  margin-top: 1.5rem;
+}
+
+.log li {
+  margin: 0.4rem 0;
+  white-space: pre-wrap;
+}
+
+.log .user::before {
+  content: "you: ";
+  color: var(--accent);
+}
+.log .assistant::before {
+  content: "voice: ";
+  color: var(--dim);
+}
+.log .hermes {
+  color: var(--dim);
+  font-size: 0.9rem;
+  border-left: 2px solid var(--accent);
+  padding-left: 0.5rem;
+}
+.log .hermes::before {
+  content: "hermes: ";
+}
+.log .error {
+  color: var(--live);
+}
+
+/* .login sets display:flex, which would override the hidden attribute. */
+[hidden] {
+  display: none !important;
+}
+
+.login {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.login input {
+  flex: 1;
+  padding: 0.5rem;
+  background: #222;
+  color: var(--fg);
+  border: 1px solid #444;
+  border-radius: 0.3rem;
+  font: inherit;
+}
+
+.login button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.3rem;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+}
+
+.approval {
+  margin: 1rem 0;
+  padding: 0.8rem;
+  border: 2px solid #e0a030;
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+.approval p {
+  margin: 0 0 0.6rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.approval button {
+  margin: 0 0.3rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.3rem;
+  font: inherit;
+  color: #fff;
+  cursor: pointer;
+}
+
+#approve {
+  background: var(--accent);
+}
+#deny {
+  background: var(--live);
+}
