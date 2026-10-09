@@ -51,12 +51,19 @@ nix build .#darwinConfigurations.barnacle.system
 # Deploy/rebuild Darwin configuration (for barnacle)
 sudo darwin-rebuild switch --flake .#barnacle
 
-# Access machines via SSH
-ssh <machine-name>.r  # via retiolum
-ssh <machine-name>.s  # via spora
-ssh <machine-name>.n  # via nether
-torify ssh $(pass show machines/<machine-name>/tor-hostname)  # via tor
+# Access machines via SSH (as root, see below)
+ssh root@<machine-name>.r  # via retiolum
+ssh root@<machine-name>.s  # via spora
+ssh root@<machine-name>.n  # via nether
+torify ssh root@$(pass show machines/<machine-name>/tor-hostname)  # via tor
 ```
+
+## Remote Machine Access
+
+**CRITICAL**: For privileged work on a remote machine (firewall rules,
+journals of system services, systemctl, reading /run/secrets, ...), ssh in as
+root (`ssh root@<machine>.r`). NEVER use `sudo` on remote systems. Ssh as the
+normal user (`lass@`) only to act as that user, e.g. to run user tools.
 
 ## Important: Git Staging for Flake Evaluation
 
