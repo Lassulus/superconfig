@@ -52,7 +52,7 @@
     },
     "clan-core": {
       "inputs": {
-        "data-mesher": "data-mesher",
+        "data-mesher": [],
         "disko": [
           "disko"
         ],
@@ -69,15 +69,15 @@
       "locked": {
         "lastModified": 1791246059,
         "narHash": "sha256-9hpm3NQgacOhHVGgPPxa4mx+HjPhHBOTF4PobxJOmA4=",
-        "ref": "refs/heads/main",
+        "owner": "clan-lol",
+        "repo": "clan-core",
         "rev": "557b482403fa81a6448fb67c8dfaf771afd9ec04",
-        "revCount": 15345,
-        "type": "git",
-        "url": "https://git.clan.lol/clan/clan-core"
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "https://git.clan.lol/clan/clan-core"
+        "owner": "clan-lol",
+        "repo": "clan-core",
+        "type": "github"
       }
     },
     "covibe": {
@@ -117,33 +117,6 @@
         "owner": "ipetkov",
         "repo": "crane",
         "type": "github"
-      }
-    },
-    "data-mesher": {
-      "inputs": {
-        "flake-parts": [
-          "clan-core",
-          "flake-parts"
-        ],
-        "nixpkgs": [
-          "clan-core",
-          "nixpkgs"
-        ],
-        "treefmt-nix": [
-          "clan-core",
-          "treefmt-nix"
-        ]
-      },
-      "locked": {
-        "lastModified": 1790900385,
-        "narHash": "sha256-9OA/YV/4bUmgnd81j7Jjjr0LBzV67bgYno3jOx16jLM=",
-        "rev": "67de2882582eb636670512fbc15922e33c55ef77",
-        "type": "tarball",
-        "url": "https://git.clan.lol/api/v1/repos/clan/data-mesher/archive/67de2882582eb636670512fbc15922e33c55ef77.tar.gz"
-      },
-      "original": {
-        "type": "tarball",
-        "url": "https://git.clan.lol/clan/data-mesher/archive/main.tar.gz"
       }
     },
     "disko": {
@@ -663,13 +636,15 @@
       "locked": {
         "lastModified": 1763303120,
         "narHash": "sha256-yxcNOha7Cfv2nhVpz9ZXSNKk0R7wt4AiBklJ8D24rVg=",
+        "owner": "clan-lol",
+        "repo": "nix-select",
         "rev": "3d1e3860bef36857a01a2ddecba7cdb0a14c35a9",
-        "type": "tarball",
-        "url": "https://git.clan.lol/api/v1/repos/clan/nix-select/archive/3d1e3860bef36857a01a2ddecba7cdb0a14c35a9.tar.gz"
+        "type": "github"
       },
       "original": {
-        "type": "tarball",
-        "url": "https://git.clan.lol/clan/nix-select/archive/main.tar.gz"
+        "owner": "clan-lol",
+        "repo": "nix-select",
+        "type": "github"
       }
     },
     "nix-writers": {

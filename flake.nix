@@ -17,11 +17,16 @@
     nixvim.url = "github:nix-community/nixvim";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
 
-    clan-core.url = "git+https://git.clan.lol/clan/clan-core";
+    # git.clan.lol is unreachable; use the GitHub mirrors.
+    clan-core.url = "github:clan-lol/clan-core";
     # clan-core.url = "path:/Users/lassulus/src/clan/clan-core";
     # clan-core.url = "path:/home/lass/src/clan/clan-core";
     clan-core.inputs.nixpkgs.follows = "nixpkgs";
     clan-core.inputs.disko.follows = "disko";
+    clan-core.inputs.nix-select.url = "github:clan-lol/nix-select";
+    # data-mesher has no GitHub mirror. "" makes clan-core use this flake as
+    # data-mesher; see the empty flake.nixosModules.data-mesher below.
+    clan-core.inputs.data-mesher.follows = "";
 
     stockholm.url = "git+https://github.com/krebs/stockholm?submodules=1";
     # stockholm.url = "git+https://cgit.lassul.us/stockholm";
@@ -256,6 +261,9 @@
       flake.clanInternals = clan.config.clanInternals;
       flake.darwinConfigurations = clan.config.darwinConfigurations;
       flake.clan = clan.config;
+      # clan-core imports data-mesher's module unconditionally; we don't run
+      # data-mesher or dm-dns, so an empty module stands in for it.
+      flake.nixosModules.data-mesher = { };
 
       # Container configurations for use with extra-container
       # Auto-discovers machines with container.nix
