@@ -115,44 +115,29 @@ in
     ];
 
     settings.model = {
-      # The cluster serves Qwen3.6-27B-FP8 (also aliased as "default" in
-      # /v1/models — both resolve to the same weights); pin the explicit id so
-      # logs and 400s name the actual model. Verified against the live endpoint
-      # that it emits native tool_calls, which Hermes Agent requires.
-      default = "Qwen3.6-27B-FP8";
-      # hermes's built-in "nous" provider is OAuth-only and hardcodes the dead
-      # host inference.nousresearch.com (NXDOMAIN) — true on both 0.17.0 and
-      # main, so we drive the cluster's OpenAI-compatible endpoint instead.
+      # Claude Opus 5.5 on lass's Claude subscription: the anthropic provider
+      # takes the `claude setup-token` OAuth token (sk-ant-oat…) from
+      # ANTHROPIC_TOKEN (hermes-anthropic generator below) and sends it as a
+      # Bearer token. Anthropic bills third-party apps on subscription tokens
+      # as extra usage; hermes renames some tools on the OAuth wire to avoid
+      # that classification (agent/anthropic_adapter.py), which goes against
+      # Anthropic's usage policies and risks the account. Chosen knowingly.
       #
-      # It MUST be a *named* custom provider ("custom:<name>" + a
-      # custom_providers entry), not bare "custom". Bare custom resolves its
-      # credential from a host-gated candidate list
-      # (hermes_cli/runtime_provider.py:1244) that only forwards
-      # OPENAI_API_KEY when base_url's host is openai.com — a deliberate
-      # anti-credential-leak measure (upstream #28660 / GHSA-76xc-57q6-vm5m).
-      # For any other host it silently substitutes the literal placeholder
-      # "no-key-required" and the endpoint 401s. A named entry instead reads
-      # the key from its declared key_env (runtime_provider.py:692), which is
-      # not host-gated. Named entries also ignore config.yaml's model.api_key,
-      # so a stray `hermes model` run can no longer shadow this with a stale
-      # key (that is exactly how the Nous→cluster switch broke).
-      provider = "custom:llama";
-      base_url = "https://inference.p0.contact/v1";
-      # The custom provider can't auto-detect limits, so unset it leaves
-      # context uncompressed and defaults max_tokens to 65536 — once history
-      # outgrows the window, input + max_tokens exceeds it and the endpoint
-      # 400s ("check the model name and other parameters"). vLLM reports
-      # max_model_len 262144 for this model: pin that as the window so hermes
-      # compresses in time, and keep a sane output cap (covers thinking +
-      # reply) so input + max_tokens always stays under it.
-      context_length = 262144;
-      max_tokens = 16384;
+      # Context (1M) and output (128k) limits come from hermes's own model
+      # tables, so nothing is pinned here.
+      provider = "anthropic";
+      default = "claude-opus-5-5";
     };
 
-    # The endpoint hermes actually authenticates against. key_env names the
-    # env var carrying the token; it comes from the hermes-env generator below
-    # via environmentFiles, so the secret never enters the nix store.
-    # api_mode is pinned because auto-detection only runs as a fallback.
+    # The shared llama cluster stays configured as a named provider, so
+    # `/model Qwen3.6-27B-FP8 --provider custom:llama` switches back. Its key
+    # comes from hermes-env (key_env), never the nix store. It MUST be a
+    # *named* custom provider ("custom:<name>" + this entry), not bare
+    # "custom": bare custom resolves its credential from a host-gated list
+    # (hermes_cli/runtime_provider.py:1244) that only forwards OPENAI_API_KEY
+    # to openai.com and otherwise sends "no-key-required" (upstream #28660 /
+    # GHSA-76xc-57q6-vm5m). api_mode is pinned because auto-detection only
+    # runs as a fallback.
     settings.custom_providers = [
       {
         name = "llama";
@@ -559,6 +544,15 @@ in
       share = true;
     };
 
+  # Claude subscription OAuth token for the anthropic provider: run
+  # `claude setup-token` (long-lived, sk-ant-oat…) and paste it at the
+  # prompt. persist=true so it is asked once.
+  clan.core.vars.generators.hermes-anthropic.prompts.oauth-token = {
+    description = "Claude subscription OAuth token from `claude setup-token` (sk-ant-oat…)";
+    type = "hidden";
+    persist = true;
+  };
+
   # Assemble the .env Hermes reads (mirrors the opencrow-env pattern).
   clan.core.vars.generators.hermes-env = {
     dependencies = [
@@ -566,6 +560,7 @@ in
       "hermes-llama"
       "hermes-api"
       "radicale-hermes"
+      "hermes-anthropic"
     ];
     files."hermes.env" = { };
     runtimeInputs = [ pkgs.coreutils ];
@@ -575,6 +570,7 @@ in
       LLAMA_API_TOKEN=$(cat "$in"/hermes-llama/llama-api-token)
       API_SERVER_KEY=$(cat "$in"/hermes-api/api_key)
       CALDAV_PASSWORD=$(cat "$in"/radicale-hermes/password)
+      ANTHROPIC_TOKEN=$(cat "$in"/hermes-anthropic/oauth-token)
       EOF
     '';
   };
