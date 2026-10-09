@@ -24,6 +24,7 @@
     ../../configs/crit.nix
     ./strom.nix
     ./hermes.nix
+    ./hermes-voice.nix
   ];
 
   system.stateVersion = "24.05";
