@@ -33,12 +33,13 @@ let
     bufferMinutes = 15;
     minNoticeHours = 24;
     horizonDays = 28;
-    # Free/busy is read from every calendar of this radicale user; requests
-    # and bookings are written to its `calendar` collection (created on demand).
+    # lass/calendar is the only calendar (configs/radicale.nix): free/busy is
+    # read from it, and requests and bookings are mirrored into it, next to
+    # lass's own events and whatever Hermes adds.
     caldav = {
       url = "http://127.0.0.1:5232";
       user = "lass";
-      calendar = "bookings";
+      calendar = "calendar";
     };
     # Local postfix (configs/mailserver.nix) accepts from localhost and DKIM-signs.
     smtp = {

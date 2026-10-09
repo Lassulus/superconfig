@@ -6,29 +6,28 @@
   ...
 }:
 let
-  # lass: personal calendars; tools/book reads free/busy from them and writes
-  # booking requests into lass/bookings.
-  users = [
-    "opencrow"
-    "lass"
-  ];
+  # The one and only calendar, lass/calendar: own events (phone via DAVx⁵,
+  # calendar.lassul.us), booking requests and bookings mirrored by tools/book
+  # (configs/book.nix), and whatever Hermes adds. The rights below make it the
+  # only writable collection: nobody can create, delete or replace calendars.
+  calendar = "lass/calendar";
 
-  # Generate one var per user with random password
+  # lass: phone, web client and tools/book.
+  # hermes: the agent on coaxmetal (machines/coaxmetal/hermes.nix). Its var is
+  # shared (and declared there too) so coaxmetal's hermes-env can read the
+  # password without radicale running there.
+  users = [
+    "lass"
+    "hermes"
+  ];
+  sharedUsers = [ "hermes" ];
+
+  # One var per user with a random password.
   userGenerators = lib.listToAttrs (
     map (user: {
       name = "radicale-${user}";
-      value = {
-        files."htpasswd-line" = { };
-        files."password" = { };
-        runtimeInputs = with pkgs; [
-          apacheHttpd
-          coreutils
-        ];
-        script = ''
-          password=$(head -c 32 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | head -c 24)
-          echo "$password" > "$out/password"
-          htpasswd -nbB ${user} "$password" > "$out/htpasswd-line"
-        '';
+      value = import ./radicale-user-generator.nix pkgs user // {
+        share = lib.elem user sharedUsers;
       };
     }) users
   );
@@ -88,6 +87,33 @@ in
         type = "internal";
       };
     };
+    # Whitelist, first match wins (sections are emitted sorted by name, hence
+    # the numeric prefixes); anything unmatched is denied. Every user reads and
+    # writes the events of the one calendar (d/o: but may not delete or
+    # overwrite the collection itself) and may only read the root and lass's
+    # home, which is enough for CalDAV discovery. No W/w anywhere else, so no
+    # MKCALENDAR and no auto-created principals.
+    rights =
+      let
+        anyUser = lib.concatStringsSep "|" users;
+      in
+      {
+        "10-calendar" = {
+          user = anyUser;
+          collection = calendar;
+          permissions = "rwdo";
+        };
+        "20-root" = {
+          user = anyUser;
+          collection = "";
+          permissions = "R";
+        };
+        "21-home" = {
+          user = anyUser;
+          collection = lib.head (lib.splitString "/" calendar);
+          permissions = "R";
+        };
+      };
   };
 
   systemd.services.radicale.serviceConfig = {
