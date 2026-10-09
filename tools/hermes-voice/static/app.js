@@ -308,7 +308,7 @@ class Call {
 
   async delegate(id) {
     // One Hermes turn at a time: a newer delegation (usually a correction)
-    // supersedes the running one, and abandoning the request interrupts it.
+    // supersedes the running one, and the server stops the old run.
     // While Hermes waits for an approval, the next delegation is the user's
     // answer, not a new request: the turn must keep running.
     if (this.approval) {
@@ -536,6 +536,7 @@ class Call {
     clearTimeout(this.closeTimer);
     clearInterval(this.idleTimer);
     clearInterval(this.probe);
+    // Only the stream is dropped; the Hermes run keeps going on the server.
     if (this.delegation) this.delegation.controller.abort();
     this.audioContext?.close().catch(() => {});
     this.mic?.getTracks().forEach((track) => track.stop());

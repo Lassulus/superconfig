@@ -3,10 +3,15 @@
 The browser holds a WebRTC session with gpt-live-1, which listens and speaks at
 the same time and chats on its own. Whenever the user asks for real work, the
 voice model emits a client delegation; the page hands the recent transcript to
-this server, which runs it as an ordinary Hermes turn on the API server
-(/v1/chat/completions, one X-Hermes-Session-Id per conversation) and streams
-the reply back. The page then gives the answer to the voice model, which says
-it aloud.
+this server, which starts it as a Hermes run on the API server (POST /v1/runs,
+one Hermes session id per conversation), follows the run's event stream and
+streams the reply back. The page then gives the answer to the voice model,
+which says it aloud.
+
+A run lives independently of any HTTP connection, so a turn survives the page
+going away. A newer delegation for the same conversation stops the previous
+run (the user corrected or replaced the request); hanging up just ends the
+call, and the run finishes whatever the user asked for.
 
 This server exists so neither secret reaches the browser: it exchanges the
 page's SDP offer for a Live session with the OpenAI key, and it calls Hermes
@@ -25,6 +30,7 @@ import logging
 import os
 import re
 import socket
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -47,11 +53,11 @@ BUILT_IN_VOICES = (
 # closes the session after this much inactivity.
 DEFAULT_IDLE_SECONDS = 90
 MAX_BODY = 256 * 1024
-# Hermes turns run tools for minutes; the API server streams tool progress, but
-# a single long tool call can be silent for a while.
-HERMES_TIMEOUT = 900
+# The run event stream sends a keepalive every 10s, so a read that stalls this
+# long means the API server is gone.
+EVENTS_READ_TIMEOUT = 60
 SESSION_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
-# Hermes run ids are "chatcmpl-<hex>", approval request ids hex.
+# Hermes run ids are "run_<hex>", approval request ids hex.
 RUN_ID_RE = re.compile(r"^[A-Za-z0-9_.:-]{1,256}$")
 
 # Frontend persona, adapted from Hermes's own (tools/voice_live.py): role,
@@ -226,79 +232,104 @@ def iter_sse(response):
         yield event, "\n".join(data)
 
 
-def hermes_turn(config, hermes_session, lines):
-    """Run one Hermes turn; yield NDJSON-ready dicts (tool, delta, done)."""
-    body = json.dumps(
-        {
-            "messages": [
-                {"role": "system", "content": config.backend_note()},
-                {"role": "user", "content": transcript_message(lines)},
-            ],
-            "stream": True,
-        }
-    ).encode()
+def hermes_request(config, method, path, payload=None, timeout=30):
+    """Open a request to the Hermes API server (the caller closes it)."""
     request = urllib.request.Request(
-        f"{config.hermes_url}/v1/chat/completions",
-        data=body,
-        method="POST",
+        f"{config.hermes_url}{path}",
+        data=None if payload is None else json.dumps(payload).encode(),
+        method=method,
         headers={
             "Authorization": f"Bearer {config.hermes_key}",
             "Content-Type": "application/json",
-            "X-Hermes-Session-Id": hermes_session,
         },
     )
-    with urllib.request.urlopen(request, timeout=HERMES_TIMEOUT) as response:
-        for event, data in iter_sse(response):
-            if data == "[DONE]":
-                return
+    return urllib.request.urlopen(request, timeout=timeout)
+
+
+def hermes_call(config, method, path, payload=None):
+    with hermes_request(config, method, path, payload) as response:
+        return json.load(response)
+
+
+def hermes_start_run(config, hermes_session, lines):
+    """Start one Hermes turn as a run; return its run id."""
+    # A plain string input: Hermes then loads the history of session_id itself.
+    return hermes_call(
+        config,
+        "POST",
+        "/v1/runs",
+        {
+            "input": transcript_message(lines),
+            "instructions": config.backend_note(),
+            "session_id": hermes_session,
+        },
+    )["run_id"]
+
+
+def hermes_follow_run(config, run_id):
+    """Follow a run's events; yield NDJSON-ready dicts (tool, delta, approval,
+    done, error). Leaving early only detaches: the run keeps going."""
+    with hermes_request(
+        config, "GET", f"/v1/runs/{run_id}/events", timeout=EVENTS_READ_TIMEOUT
+    ) as response:
+        for _, data in iter_sse(response):
             payload = json.loads(data)
-            if event == "hermes.tool.progress":
-                yield {
-                    "type": "tool",
-                    "status": payload.get("status"),
-                    "label": payload.get("label") or payload.get("tool"),
-                }
-                continue
-            if event == "approval.request":
-                # Hermes blocks the turn until POST /v1/runs/{run_id}/approval
-                # answers (or its own approval timeout denies).
+            event = payload.get("event", "")
+            if event in ("tool.started", "tool.completed"):
+                status = "running" if event == "tool.started" else "completed"
+                if payload.get("error"):
+                    status = "error"
+                yield {"type": "tool", "status": status, "label": payload.get("tool")}
+            elif event == "approval.request":
+                # The run blocks until POST /v1/runs/{run_id}/approval answers.
                 yield {
                     "type": "approval",
-                    "run_id": payload.get("run_id"),
+                    "run_id": run_id,
                     "request_id": payload.get("request_id"),
                     "command": payload.get("command"),
                     "description": payload.get("description"),
                 }
-                continue
-            if event:
-                continue
-            for choice in payload.get("choices", []):
-                text = choice.get("delta", {}).get("content")
-                if text:
-                    yield {"type": "delta", "text": text}
-                if choice.get("finish_reason"):
-                    done = {"type": "done", "finish_reason": choice["finish_reason"]}
-                    if "error" in payload:
-                        done["error"] = payload["error"].get("message")
-                    yield done
+            elif event == "run.completed":
+                # Only the final answer: message.delta also streams commentary.
+                yield {"type": "delta", "text": payload.get("output") or ""}
+                yield {"type": "done", "finish_reason": "stop"}
+                return
+            elif event in ("run.failed", "run.cancelled", "run.interrupted"):
+                status = event.removeprefix("run.")
+                error = payload.get("error") or f"Hermes run {status}"
+                yield {"type": "done", "finish_reason": status, "error": error}
+                return
+    yield {"type": "error", "message": "Hermes event stream ended early"}
 
 
 def hermes_approve(config, run_id, request_id, choice):
-    """Answer a pending approval of a streaming Hermes turn."""
+    """Answer a pending approval of a Hermes run."""
     answer = {"choice": choice}
     if request_id:
         answer["request_id"] = request_id
-    request = urllib.request.Request(
-        f"{config.hermes_url}/v1/runs/{run_id}/approval",
-        data=json.dumps(answer).encode(),
-        method="POST",
-        headers={
-            "Authorization": f"Bearer {config.hermes_key}",
-            "Content-Type": "application/json",
-        },
-    )
-    with urllib.request.urlopen(request, timeout=30) as response:
-        return json.load(response)
+    return hermes_call(config, "POST", f"/v1/runs/{run_id}/approval", answer)
+
+
+# The active run per Hermes session, so a newer delegation can stop it.
+RUNS = {}
+RUNS_LOCK = threading.Lock()
+
+
+def take_run(hermes_session, run_id=None):
+    """Remove and return the session's run (only if it is run_id, when given)."""
+    with RUNS_LOCK:
+        if run_id is None or RUNS.get(hermes_session) == run_id:
+            return RUNS.pop(hermes_session, None)
+        return None
+
+
+def stop_run(config, run_id):
+    """POST /v1/runs/{run_id}/stop; failures are only logged."""
+    try:
+        hermes_call(config, "POST", f"/v1/runs/{run_id}/stop")
+        log.info("stopped run %s", run_id)
+    except (urllib.error.URLError, OSError, ValueError) as error:
+        log.warning("stopping run %s failed: %s", run_id, error)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -423,6 +454,22 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(lines, list) or not lines:
             self.send_json(HTTPStatus.BAD_REQUEST, {"error": "lines required"})
             return
+        # One run per conversation: a newer delegation (usually a correction)
+        # supersedes and stops the previous run.
+        previous = take_run(hermes_session)
+        if previous:
+            stop_run(self.config, previous)
+        try:
+            run_id = hermes_start_run(self.config, hermes_session, lines)
+        except urllib.error.HTTPError as error:
+            detail = error.read().decode("utf-8", "replace")[:400]
+            self.send_json(HTTPStatus.BAD_GATEWAY, {"error": f"Hermes {error.code}: {detail}"})
+            return
+        except (urllib.error.URLError, OSError, ValueError, KeyError) as error:
+            self.send_json(HTTPStatus.BAD_GATEWAY, {"error": f"Hermes unreachable: {error}"})
+            return
+        with RUNS_LOCK:
+            RUNS[hermes_session] = run_id
         self.send_response(HTTPStatus.OK)
         self.send_header("Content-Type", "application/x-ndjson")
         self.send_header("Cache-Control", "no-store")
@@ -432,7 +479,7 @@ class Handler(BaseHTTPRequestHandler):
             try:
                 started = time.monotonic()
                 tools = 0
-                for item in hermes_turn(self.config, hermes_session, lines):
+                for item in hermes_follow_run(self.config, run_id):
                     if item["type"] == "tool" and item["status"] == "running":
                         tools += 1
                     self.write_line(item)
@@ -444,10 +491,10 @@ class Handler(BaseHTTPRequestHandler):
                 self.write_line({"type": "error", "message": f"Hermes {error.code}: {detail}"})
             except (urllib.error.URLError, OSError, ValueError) as error:
                 self.write_line({"type": "error", "message": f"Hermes unreachable: {error}"})
+            take_run(hermes_session, run_id)
         except (BrokenPipeError, ConnectionResetError):
-            # The page abandoned this delegation (a newer one superseded it).
-            # Leaving the with-block closed the upstream stream, which makes
-            # Hermes interrupt the turn.
+            # The page went away; the run keeps going and stays registered, so
+            # a later delegation still supersedes it.
             log.info("delegation for %s abandoned by the page", hermes_session)
 
     def handle_approve(self, request):
